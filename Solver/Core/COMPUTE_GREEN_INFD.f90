@@ -24,6 +24,7 @@
 MODULE COMPUTE_GREEN_INFD
 
   USE COM_VAR
+  USE FIC_COM
   USE ELEMENTARY_FNS
 
   IMPLICIT NONE
@@ -31,10 +32,7 @@ MODULE COMPUTE_GREEN_INFD
   CONTAINS   
 !-------------------------------------------------------------------------------!
       SUBROUTINE VAVINFD(KKK,XGI,YGI,ZGI,ISP,IFP)
-      ! This subroutine calculate first term of influence coefficients Snm and Knm 
-      ! Snm=int_sm 1/OnM'dS=sum_k+1^4 J_k  see eq 37 
-      ! output variables are FSP and FSM
-      ! Knm= int grad Snm . vect_n dS, output variabels are grad Snm, (VSXP,VSYP,VSZP)      
+                                                  
       INTEGER:: ISP,IFP
       INTEGER:: KKK,I,J,IMXX,MK,NJJ,JJ,L,MH,MY,MZ,MJJ
       INTEGER:: KK(5)
@@ -49,38 +47,21 @@ MODULE COMPUTE_GREEN_INFD
 
       PI4=ATAN(1.)
       PI=4.*PI4                                                             
-      DPI=2.*PI                                                                 
+      DPI=2.*PI
       QPI=4.*PI
-      NJJ=2*(NSYMY+1)                                                           
+      NJJ=NSYMY+1
       DH=0.
       MK=(-1)**(KKK+1)
       IF(KKK.EQ.1)IMXX=IMX
       IF(KKK.EQ.2)IMXX=IXX
 
-       I=ISP       !source point index
-       J=IFP       !field point index                                           
-       XOI=XGI     ! x centre of the source point                                                        
+       I=ISP
+       J=IFP                                                  
+       XOI=XGI
        YOI=YGI
        ZOI=ZGI
-       IF(KKK.EQ.1)THEN 
-	 IF(I.LE.IMX)THEN
-	   IF(ZGI.GT.ZER)THEN
-	     ZOI=ZER
-	   ELSE
-	     ZOI=ZGI
-	   ENDIF
-	 ENDIF
-       ELSE
-	 IF(I.LE.IMX)THEN
-	   IF(ZGI.GT.ZER)THEN
-	     ZOI=20*ZER
-	   ELSE
-	     ZOI=ZGI
-	   ENDIF
-	 ENDIF
-       ENDIF
-                                                         
-	DO 25 JJ=1,NJJ
+       if(zgi.gt.zer)zoi=2*ZER
+	DO 25 JJ=1,2*NJJ
 	MJJ=(-1)**(JJ+1)                                                          
 	MY=(-1)**(JJ/3+2)
 	MZ=(-1)**(JJ/2+2)
@@ -91,13 +72,13 @@ MODULE COMPUTE_GREEN_INFD
 	A3J=XN(J)                                                               
 	A6J=YN(J)*MY                                                            
 	A9J=ZN(J)*MZ                                                           
-	RO=SQRT((XOI-XOJ)**2+(YOI-YOJ)**2+(ZOI-ZOJ)**2)  ! ||OnOm||
-	IF(RO.GT.7.*TDIS(J))THEN                        ! TDIS= max_k ||P_k O_m||                       
-	  AIJS(JJ)=AIRE(J)/RO                           ! See Eq. 39 paper NEMOH                                              
-	  ASRO=AIJS(JJ)/RO**2                                                       
+	RO=SQRT((XOI-XOJ)**2+(YOI-YOJ)**2+(ZOI-ZOJ)**2)
+	IF(RO.GT.7.*TDIS(J))THEN                                               
+	  AIJS(JJ)=AIRE(J)/RO                                                     
+	  ASRO=AIJS(JJ)/RO**2
 	  VXS(JJ)=-(XOI-XOJ)*ASRO                                              
 	  VYS(JJ)=-(YOI-YOJ)*ASRO                                              
-	  VZS(JJ)=-(ZOI-ZOJ)*ASRO                                              
+	  VZS(JJ)=-(ZOI-ZOJ)*ASRO
 	ELSE
 	  AIJS(JJ)=0.                                                               
 	  VXS(JJ)=0.                                                                
@@ -126,32 +107,32 @@ MODULE COMPUTE_GREEN_INFD
 	  DRX(5)=DRX(1)                                                           
 	  DRY(5)=DRY(1)                                                           
 	  DRZ(5)=DRZ(1)                                                           
-	  GZ=(XOI-XOJ)*A3J+(YOI-YOJ)*A6J+(ZOI-ZOJ)*A9J                          !vect_n . vect(Om.On)
+	  GZ=(XOI-XOJ)*A3J+(YOI-YOJ)*A6J+(ZOI-ZOJ)*A9J
 	  DO 29 L=1,4                                                               
-	  DK=SQRT((TXN(L+1)-TXN(L))**2+(TYN(L+1)-TYN(L))**2+(TZN(L+1)-TZN(L))**2) ! ||P_k P_k+1||
+	  DK=SQRT((TXN(L+1)-TXN(L))**2+(TYN(L+1)-TYN(L))**2+(TZN(L+1)-TZN(L))**2)
 	    IF(DK.GE.1.E-3*TDIS(J))THEN                                             
 	    PJ=(TXN(L+1)-TXN(L))/DK                                                     
 	    QJ=(TYN(L+1)-TYN(L))/DK                                                     
-	    RJ=(TZN(L+1)-TZN(L))/DK                                                     
+	    RJ=(TZN(L+1)-TZN(L))/DK
 	    GYX=A6J*RJ-A9J*QJ                                                     
 	    GYY=A9J*PJ-A3J*RJ                                                     
 	    GYZ=A3J*QJ-A6J*PJ                                                     
-	    GY=(XOI-TXN(L))*GYX+(YOI-TYN(L))*GYY+(ZOI-TZN(L))*GYZ               !Yk=||P_k On||.(n_vect cross product vector(P_k P_k+1)/||P_k P_k+1||)
+	    GY=(XOI-TXN(L))*GYX+(YOI-TYN(L))*GYY+(ZOI-TZN(L))*GYZ
 	    SGN=SIGN(1.,GZ)                                                           
 	    DDK=2.*DK                                                                 
-	    ANT=GY*DDK                                                          !2Y_k ||P_k P_k+1||                                                     
-	    DNT=(RR(L+1)+RR(L))**2-DK*DK+2.*ABS(GZ)*(RR(L+1)+RR(L))             !D_k^t=(||P_k+1 On||+||P_k On||)^2-||P_kP_k+1||^2+2|Z|(||P_k+1 Om||+||P_k On||)
+	    ANT=GY*DDK                                                                
+	    DNT=(RR(L+1)+RR(L))**2-DK*DK+2.*ABS(GZ)*(RR(L+1)+RR(L))          
 	    ARG=ANT/DNT                                                               
-	    ANL=RR(L+1)+RR(L)+DK                                                !N_k^l      
-	    DNL=RR(L+1)+RR(L)-DK                                                !D_k^l      
-	    DEN=ANL/DNL                                                         !N_k^l/D_k^l                
+	    ANL=RR(L+1)+RR(L)+DK                                                      
+	    DNL=RR(L+1)+RR(L)-DK                                                      
+	    DEN=ANL/DNL                                                               
 	    ALDEN=ALOG(DEN)                                                           
 	      IF(ABS(GZ).GE.1.E-4*TDIS(J))THEN                                       
 	      AT=ATAN(ARG)
 	      ELSE
 	      AT=0.                                                                     
 	      ENDIF                                                                  
-	    AIJS(JJ)=AIJS(JJ)+GY*ALDEN-2.*ABS(GZ)*AT       !Jk=Yk log (N_k^l/D_k^l)-2|Z|atan(N_k^t/D_k^t)     see eq 38                      
+	    AIJS(JJ)=AIJS(JJ)+GY*ALDEN-2.*ABS(GZ)*AT                                  
 	    DAT=2.*AT*SGN                                                             
 	    ANTX=GYX*DDK                                                              
 	    ANTY=GYY*DDK                                                              
@@ -178,8 +159,12 @@ MODULE COMPUTE_GREEN_INFD
 	  IF(I.EQ.J.AND.JJ.EQ.1)THEN                                               
 	  VXS(1)=VXS(1)-DPI*A3J                                                   
 	  VYS(1)=VYS(1)-DPI*A6J                                                   
-	  VZS(1)=VZS(1)-DPI*A9J                                                   
-	  ELSE                                             
+      IF(ZGI.GT.ZER)THEN
+      VZS(1)=VZS(1)+DPI*A9J
+      ELSE
+      VZS(1)=VZS(1)-DPI*A9J
+      ENDIF
+	  ELSE
 	  AIJS(JJ)=AIJS(JJ)*MJJ                                                     
 	  VXS(JJ)=VXS(JJ)*MJJ                                                       
 	  VYS(JJ)=VYS(JJ)*MJJ                                                       
@@ -188,8 +173,8 @@ MODULE COMPUTE_GREEN_INFD
 	ENDIF
     25 CONTINUE                                                                  
 	  IF(NSYMY.EQ.1)THEN                                                       
-	    W=AIJS(1)-MK*(AIJS(2)+AIJS(3))+AIJS(4)       ! this is sum_(k=1)^4 of Jk see Eq (37) paper NEMOH 2015                           
-	    FSP=-W/QPI                                   ! FSM and FSP is first part of the influence coef S                        
+	    W=AIJS(1)-MK*(AIJS(2)+AIJS(3))+AIJS(4)                                   
+	    FSP=-W/QPI                                                            
 	    W=AIJS(1)-MK*(AIJS(2)-AIJS(3))-AIJS(4)                                  
 	    FSM=-W/QPI                                                            
 	    W=VXS(1)-MK*(VXS(2)+VXS(3))+VXS(4)                                 
@@ -201,7 +186,7 @@ MODULE COMPUTE_GREEN_INFD
 	    W=VXS(1)-MK*(VXS(2)-VXS(3))-VXS(4)                               
 	    VSXM=-W/QPI                                                            
 	    W=VYS(1)-MK*(VYS(2)-VYS(3))-VYS(4)                             
-	    VSYM=-W/QPI                                                            
+	    VSYM=-W/QPI
 	    W=VZS(1)-MK*(VZS(2)-VZS(3))-VZS(4)                             
 	    VSZM=-W/QPI                                                          
 	  ELSE                                                                      
@@ -219,199 +204,241 @@ MODULE COMPUTE_GREEN_INFD
 	    VSZM=VSZP                                                                                                                           
 	  ENDIF                                                                     
 
-       RETURN                                                                    
+       RETURN
       END SUBROUTINE 
 !--------------------------------------------------------------------------!
 
   SUBROUTINE VNSINFD(KKK,ISP,IFP,XGI,YGI,ZGI)  
 
       INTEGER:: ISP,IFP
-      INTEGER:: I,J,L,JJ,KK(5),NJJ,IJUMP,BX,KI,KJ,IT,KKK,IMXX
-      REAL:: XGI,YGI,ZGI                                                    
-      REAL:: FS1(NFA,2),FS2(NFA,2)                        
+      INTEGER:: I,J,L,JJ,KK(5),NJJ,BX,KI,KJ,IT,KKK,IMXX,LLL
+      REAL:: XGI,YGI,ZGI,ZGAJ,PL5
+      REAL:: FS1(NFA,2),FS2(NFA,2)
       REAL:: VSX1(NFA,2),VSY1(NFA,2),VSZ1(NFA,2)                                
       REAL:: VSX2(NFA,2),VSY2(NFA,2),VSZ2(NFA,2)                                        
       REAL:: PI4,PI,DPI,QPI,DPI2
-      REAL:: WH,WR,AK0
+      REAL:: WH,WR,AK0,ZERG
       REAL:: EPS,ADPI,ADPI2,AKAIR,AKDPI,AKDPI2,AKP4
       REAL:: AKR,AKZ,DD,PSURR,QJJJ,RRR,ZZZ,YMJJJ,ZMIII,CVX,CVY,VR1,VR2
-      REAL:: CSK,DSK,EPZ,F1,F2,F3,CT,ST,TETA
-      REAL:: PD1X,PD2X,PD1Z,PD2Z,SIK,SQ,VZ1,VZ2,XL1,XL2,XL3,ZL1,ZL2,ZL3                   
+      REAL:: CSK,DSK,EPZ,CT,ST,TETA,pcos,psin
+      REAL:: PD1X,PD2X,PD1Z,PD2Z,SIK,SQ,VZ1,VZ2
+      REAL:: XL1,XL2,XL3,XL4,XL5,ZL1,ZL2,ZL3,ZL4,ZL5
       COMPLEX*8 ZIJ(5),CEX(5),GZ(5)
       COMPLEX*8 ZI,C1,C2,ASD,BSD,CSD,ZA,ZB,ZVS
+      REAL:: ASA
+      REAL:: U1,U2,U3,U4,U5,XU,F1,F2,F3,F4,F5
 
+      PL5(U1,U2,U3,U4,U5,XU)=((XU-U1)*(XU-U2)*(XU-U3)*(XU-U4))/&
+      ((U5-U1)*(U5-U2)*(U5-U3)*(U5-U4))
       PI4=ATAN(1.)
       PI=4.*PI4                                                             
-      DPI=2.*PI                                                                 
+      DPI=2.*PI
       QPI=4.*PI
       ZI=(0.,1.)
       DPI2=2.*PI**2                                                             
       EPS=0.0001
-                                                             
-      IF(KKK.EQ.1)IMXX=IMX
-      IF(KKK.EQ.2)IMXX=IXX
-      WH=DPI/T                                          !angular freq [rad/s] 
-      WR=WH                                           
+      ZERG=-1.E-8
+
+      WH=DPI/T
+      WR=WH
       IF(ABS(WR).LT.1.E-4)THEN
-       WRITE(*,*)'ABS(WR)  = ',ABS(WR),' < 1.E-4'
-       STOP
+		WRITE(*,*)'ABS(WR)  = ',ABS(WR),' < 1.E-4'
+        STOP
       ENDIF
 
-      AK0=WR**2/9.81                                    ! deep water wave number
-      NJJ=NSYMY+1                                       ! NJJ=1 for not symmetric, 2 for symmetric      
-      IJUMP=0                                                           
+      AK0=WR**2/G
+      NJJ=NSYMY+1                                     
 
-      I=ISP  !source point
-      J=IFP  !field point
+      I=ISP  !source point  !Plutot field point
+      J=IFP  !field point   !Plutot source point 
                                                
-      IF(I.LE.IMX)THEN !1B  
-	ZMIII=ZGI
-	IF(ZGI.GT.ZER)ZMIII=ZER
-      ENDIF!1F
-
- 	DO 22 JJ=1,NJJ                                                            
- 	 BX=(-1)**(JJ+1)                                                           
- 	    IF(ZGI.LT.ZER.AND.ZG(J).LT.ZER)THEN !2B
-	      YMJJJ=YG(J)*BX                                                           
-	      QJJJ=YN(J)*BX                                                              
-	      RRR=SQRT((XGI-XG(J))**2+(YGI-YMJJJ)**2)
-	      AKR=AK0*RRR               
-	      ZZZ=ZMIII+ZG(J)
+      ZMIII=ZGI
+      ZMIII=min(ZGI,0.999*ZERG/AK0)
+      njj=nsymy+1
+ 	DO 22 JJ=1,NJJ
+ 	  BX=(-1)**(JJ+1)
+      FS1(J,JJ)=0.
+      FS2(J,JJ)=0.
+      VSX1(J,JJ)=0.
+      VSX2(J,JJ)=0.
+      VSY1(J,JJ)=0.
+      VSY2(J,JJ)=0.
+      VSZ1(J,JJ)=0.
+      VSZ2(J,JJ)=0.
+      asa=0
+      if(asa.eq.0)then
+        DO 211 LLL=1,NG
+          YMJJJ=YGA(LLL,J)*BX
+          QJJJ=YN(J)*BX
+          RRR=SQRT((XGI-XGA(LLL,J))**2+(YGI-YMJJJ)**2)
+	      YMJJJ=YGA(LLL,J)*BX
+	      QJJJ=YN(J)*BX
+	      RRR=SQRT((XGI-XGA(LLL,J))**2+(YGI-YMJJJ)**2)
+	      AKR=AK0*RRR
+          ZGAJ=MIN(ZGA(LLL,J),ZER)
+          ZZZ=ZMIII+ZGAJ
 	      AKZ=AK0*ZZZ
 	      DD=SQRT(RRR**2+ZZZ**2)
 	      IF(DD.GT.EPS)THEN
-		PSURR=PI/(AK0*DD)**3
+		    PSURR=PI/(AK0*DD)**3
 	      ELSE
-		PSURR=0.
+		    PSURR=0.
 	      ENDIF
-	      IF(AKZ.GT.-1.5E-6)THEN !3B
-		IF(IJUMP.NE.1)THEN
-		  WRITE(*,*)'AKZ < -1.5 E-6'
-		  IJUMP=1
-		ENDIF
-	      ELSE !3E
-		IF(AKZ.GT.-16.)THEN !4B
-		  IF(AKR.LT.99.7)THEN !5B
-		    IF(AKZ.LT.-1.E-2)THEN
-		      KJ=8*(ALOG10(-AKZ)+4.5)
-		    ELSE
-		      KJ=5*(ALOG10(-AKZ)+6)
-		    ENDIF
-		    KJ=MAX(KJ,2)
-		    KJ=MIN(KJ,45)
-		    IF(AKR.LT.1.)THEN
-		      KI=5*(ALOG10(AKR+1.E-20)+6)+1
-		    ELSE
-		      KI=3*AKR+28
-		    ENDIF        
-		    KI=MAX(KI,2)
-		    KI=MIN(KI,327)
-		    XL1=PL2(XR(KI),XR(KI+1),XR(KI-1),AKR)
-		    XL2=PL2(XR(KI+1),XR(KI-1),XR(KI),AKR)
-		    XL3=PL2(XR(KI-1),XR(KI),XR(KI+1),AKR)
-		    ZL1=PL2(XZ(KJ),XZ(KJ+1),XZ(KJ-1),AKZ)
-		    ZL2=PL2(XZ(KJ+1),XZ(KJ-1),XZ(KJ),AKZ)
-		    ZL3=PL2(XZ(KJ-1),XZ(KJ),XZ(KJ+1),AKZ)
-		    F1=XL1*APD1Z(KI-1,KJ-1)+XL2*APD1Z(KI,KJ-1)+XL3*APD1Z(KI+1,KJ-1)
-		    F2=XL1*APD1Z(KI-1,KJ)+XL2*APD1Z(KI,KJ)+XL3*APD1Z(KI+1,KJ)
-		    F3=XL1*APD1Z(KI-1,KJ+1)+XL2*APD1Z(KI,KJ+1)+XL3*APD1Z(KI+1,KJ+1) 
-		    PD1Z=ZL1*F1+ZL2*F2+ZL3*F3
-		    F1=XL1*APD2Z(KI-1,KJ-1)+XL2*APD2Z(KI,KJ-1)+XL3*APD2Z(KI+1,KJ-1)
-		    F2=XL1*APD2Z(KI-1,KJ)+XL2*APD2Z(KI,KJ)+XL3*APD2Z(KI+1,KJ)
-		    F3=XL1*APD2Z(KI-1,KJ+1)+XL2*APD2Z(KI,KJ+1)+XL3*APD2Z(KI+1,KJ+1) 
-		    PD2Z=ZL1*F1+ZL2*F2+ZL3*F3
-		  ELSE !5E
-		    EPZ=EXP(AKZ)
-		    AKP4=AKR-PI4                                        
-		    SQ=SQRT(DPI/AKR)
-		    CSK=COS(AKP4)
-		    SIK=SIN(AKP4)
-		    PD1Z=PSURR*AKZ-PI*EPZ*SQ*SIK
-		    PD2Z=EPZ*SQ*CSK
-		  ENDIF !5F
-		    VZ1=PD1Z-PSURR*AKZ
-		    VZ2=PD2Z
-		ELSE !4E
-		  PD1Z=PSURR*AKZ
-		  PD2Z=0.
-		  VZ1=0.
-		  VZ2=0.           
-		ENDIF !4F
+          IF(AKZ.LT.-1.5E-10)THEN !3B
+            IF(AKZ.GT.-251.)THEN !4B
+              IF(AKR.LT.100)THEN !5B
+                KJ=10*(ALOG10(-AKZ)+10.)
+                KJ=MAX(KJ,3)
+                KJ=MIN(KJ,122)
+                IF(AKR.LT.1.)THEN
+                  KI=10*(ALOG10(AKR+1.E-10)+8)+1
+                ELSE
+                  KI=6*AKR+75
+                ENDIF
+                KI=MAX(KI,3)
+                KI=MIN(KI,674)
+                
+                XL1=PL5(XR(KI+2),XR(KI-1),XR(KI  ),XR(KI+1),XR(KI-2),AKR)
+                XL2=PL5(XR(KI-2),XR(KI  ),XR(KI+1),XR(KI+2),XR(KI-1),AKR)
+                XL3=PL5(XR(KI-1),XR(KI+1),XR(KI+2),XR(KI-2),XR(KI  ),AKR)
+                XL4=PL5(XR(KI  ),XR(KI+2),XR(KI-2),XR(KI-1),XR(KI+1),AKR)
+                XL5=PL5(XR(KI+1),XR(KI-2),XR(KI-1),XR(KI  ),XR(KI+2),AKR)
+                ZL1=PL5(XZ(KJ+2),XZ(KJ-1),XZ(KJ  ),XZ(KJ+1),XZ(KJ-2),AKZ)
+                ZL2=PL5(XZ(KJ-2),XZ(KJ  ),XZ(KJ+1),XZ(KJ+2),XZ(KJ-1),AKZ)
+                ZL3=PL5(XZ(KJ-1),XZ(KJ+1),XZ(KJ+2),XZ(KJ-2),XZ(KJ  ),AKZ)
+                ZL4=PL5(XZ(KJ  ),XZ(KJ+2),XZ(KJ-2),XZ(KJ-1),XZ(KJ+1),AKZ)
+                ZL5=PL5(XZ(KJ+1),XZ(KJ-2),XZ(KJ-1),XZ(KJ  ),XZ(KJ+2),AKZ)
+                F1=XL1*APD1Z(KI-2,KJ-2)+XL2*APD1Z(KI-1,KJ-2)+XL3*APD1Z(KI  ,KJ-2)+&
+                    XL4*APD1Z(KI+1,KJ-2)+XL5*APD1Z(KI+2,KJ-2)
+                F2=XL1*APD1Z(KI-2,KJ-1)+XL2*APD1Z(KI-1,KJ-1)+XL3*APD1Z(KI  ,KJ-1)+&
+                    XL4*APD1Z(KI+1,KJ-1)+XL5*APD1Z(KI+2,KJ-1)
+                F3=XL1*APD1Z(KI-2,KJ  )+XL2*APD1Z(KI-1,KJ  )+XL3*APD1Z(KI  ,KJ  )+&
+                    XL4*APD1Z(KI+1,KJ  )+XL5*APD1Z(KI+2,KJ  )
+                F4=XL1*APD1Z(KI-2,KJ+1)+XL2*APD1Z(KI-1,KJ+1)+XL3*APD1Z(KI  ,KJ+1)+&
+                    XL4*APD1Z(KI+1,KJ+1)+XL5*APD1Z(KI+2,KJ+1)
+                F5=XL1*APD1Z(KI-2,KJ+2)+XL2*APD1Z(KI-1,KJ+2)+XL3*APD1Z(KI  ,KJ+2)+&
+                    XL4*APD1Z(KI+1,KJ+2)+XL5*APD1Z(KI+2,KJ+2)
+                PD1Z=ZL1*F1+ZL2*F2+ZL3*F3+ZL4*F4+ZL5*F5
+                F1=XL1*APD2Z(KI-2,KJ-2)+XL2*APD2Z(KI-1,KJ-2)+XL3*APD2Z(KI  ,KJ-2)+&
+                    XL4*APD2Z(KI+1,KJ-2)+XL5*APD2Z(KI+2,KJ-2)
+                F2=XL1*APD2Z(KI-2,KJ-1)+XL2*APD2Z(KI-1,KJ-1)+XL3*APD2Z(KI  ,KJ-1)+&
+                    XL4*APD2Z(KI+1,KJ-1)+XL5*APD2Z(KI+2,KJ-1)
+                F3=XL1*APD2Z(KI-2,KJ  )+XL2*APD2Z(KI-1,KJ  )+XL3*APD2Z(KI  ,KJ  )+&
+                    XL4*APD2Z(KI+1,KJ  )+XL5*APD2Z(KI+2,KJ  )
+                F4=XL1*APD2Z(KI-2,KJ+1)+XL2*APD2Z(KI-1,KJ+1)+XL3*APD2Z(KI  ,KJ+1)+&
+                    XL4*APD2Z(KI+1,KJ+1)+XL5*APD2Z(KI+2,KJ+1)
+                F5=XL1*APD2Z(KI-2,KJ+2)+XL2*APD2Z(KI-1,KJ+2)+XL3*APD2Z(KI  ,KJ+2)+&
+                    XL4*APD2Z(KI+1,KJ+2)+XL5*APD2Z(KI+2,KJ+2)
+                PD2Z=ZL1*F1+ZL2*F2+ZL3*F3+ZL4*F4+ZL5*F5
+		      ELSE !5E
+		        EPZ=EXP(AKZ)
+		        AKP4=AKR-PI4
+		        SQ=SQRT(DPI/AKR)
+		        CSK=COS(AKP4)
+		        SIK=SIN(AKP4)
+		        PD1Z=PSURR*AKZ-PI*EPZ*SQ*SIK
+		        PD2Z=EPZ*SQ*CSK
+		      ENDIF !5F
+		      VZ1=PD1Z-PSURR*AKZ
+		      VZ2=PD2Z
+		    ELSE !4E
+		      PD1Z=PSURR*AKZ
+		      PD2Z=0.
+		      VZ1=0.
+		      VZ2=0.
+		    ENDIF !4F
  	      ENDIF !3F
- 	      FS1(J,JJ)=PD1Z                                        
- 	      FS2(J,JJ)=PD2Z                                    
-! 	      IF(I.LE.IMX)THEN !6B
-		IF(RRR.GT.EPS)THEN !7B
-		  IF(AKZ.LE.-1.5E-6)THEN !8B
-		    IF(AKZ.GT.-16.)THEN !9B
-		      IF(AKR.LT.99.7)THEN !10B
-			F1=XL1*APD1X(KI-1,KJ-1)+XL2*APD1X(KI,KJ-1)+XL3*APD1X(KI+1,KJ-1)
-			F2=XL1*APD1X(KI-1,KJ)+XL2*APD1X(KI,KJ)+XL3*APD1X(KI+1,KJ)
-			F3=XL1*APD1X(KI-1,KJ+1)+XL2*APD1X(KI,KJ+1)+XL3*APD1X(KI+1,KJ+1) 
-			PD1X=ZL1*F1+ZL2*F2+ZL3*F3
-			F1=XL1*APD2X(KI-1,KJ-1)+XL2*APD2X(KI,KJ-1)+XL3*APD2X(KI+1,KJ-1)
-			F2=XL1*APD2X(KI-1,KJ)+XL2*APD2X(KI,KJ)+XL3*APD2X(KI+1,KJ)
-			F3=XL1*APD2X(KI-1,KJ+1)+XL2*APD2X(KI,KJ+1)+XL3*APD2X(KI+1,KJ+1) 
-			PD2X=ZL1*F1+ZL2*F2+ZL3*F3
-		      ELSE !10E
-			DSK=0.5/AKR
-!                       PD1X=-PSURR*AKR-PI*EPZ*SQ*(CSK-DSK*SIK) !coorection par GD le 17/09/2010
-                        PD1X=-PSURR*AKR+PI*EPZ*SQ*(CSK-DSK*SIK)
-			PD2X=EPZ*SQ*(SIK+DSK*CSK)
-		      ENDIF !10F
-		      VR1=-PD1X-PSURR*AKR
-		      VR2=-PD2X
-		    ELSE !9E
-		      PD1X=-PSURR*AKR
-		      PD2X=0.
-		      VR1=0.
-		      VR2=0.
-		    ENDIF !9F
-		  ENDIF !8F
-		    CVX=(XGI-XG(J))/RRR
-		    CVY=(YGI-YMJJJ)/RRR
-		    VSX1(J,JJ)=VR1*CVX                                   
-		    VSX2(J,JJ)=VR2*CVX                                    
-		    VSY1(J,JJ)=VR1*CVY                                 
-		    VSY2(J,JJ)=VR2*CVY                                    
-		    VSZ1(J,JJ)=VZ1                                        
-		    VSZ2(J,JJ)=VZ2
-		ELSE !7E  
-		    VSX1(J,JJ)=0.
-		    VSX2(J,JJ)=0.                                         
-		    VSY1(J,JJ)=0.                                      
-		    VSY2(J,JJ)=0.                                         
-		    VSZ1(J,JJ)=VZ1                                        
-		    VSZ2(J,JJ)=VZ2
-		ENDIF !7F
-! 	      ENDIF !6F	  
-	   ELSE !2E            
-	      FS1(J,JJ)=0.                                        
-	      FS2(J,JJ)=0.                                    
-	      VSX1(J,JJ)=0.
-	      VSX2(J,JJ)=0.                                         
-	      VSY1(J,JJ)=0.                                      
-	      VSY2(J,JJ)=0.                                         
-	      VSZ1(J,JJ)=0.                                       
-	      VSZ2(J,JJ)=0.
-	      KK(1)=M1(J)
-	      KK(2)=M2(J)
-	      KK(3)=M3(J)
-	      KK(4)=M4(J)
-	      KK(5)=KK(1)
-	   DO 30 IT=1,NQ
+
+          FS1(J,JJ)=FS1(J,JJ)+XJAC(LLL,J)*PD1Z
+          FS2(J,JJ)=FS2(J,JJ)+XJAC(LLL,J)*PD2Z
+          IF(I.LE.IMX)THEN !6B
+		    IF(RRR.GT.EPS)THEN !7B
+		      IF(AKZ.LE.-1.5E-10)THEN !8B
+		        IF(AKZ.GT.-251)THEN !9B
+		          IF(AKR.LT.100)THEN !10B
+                    F1=XL1*APD1X(KI-2,KJ-2)+XL2*APD1X(KI-1,KJ-2)+XL3*APD1X(KI  ,KJ-2)+&
+                        XL4*APD1X(KI+1,KJ-2)+XL5*APD1X(KI+2,KJ-2)
+                    F2=XL1*APD1X(KI-2,KJ-1)+XL2*APD1X(KI-1,KJ-1)+XL3*APD1X(KI  ,KJ-1)+&
+                        XL4*APD1X(KI+1,KJ-1)+XL5*APD1X(KI+2,KJ-1)
+                    F3=XL1*APD1X(KI-2,KJ  )+XL2*APD1X(KI-1,KJ  )+XL3*APD1X(KI  ,KJ  )+&
+                        XL4*APD1X(KI+1,KJ  )+XL5*APD1X(KI+2,KJ  )
+                    F4=XL1*APD1X(KI-2,KJ+1)+XL2*APD1X(KI-1,KJ+1)+XL3*APD1X(KI  ,KJ+1)+&
+                        XL4*APD1X(KI+1,KJ+1)+XL5*APD1X(KI+2,KJ+1)
+                    F5=XL1*APD1X(KI-2,KJ+2)+XL2*APD1X(KI-1,KJ+2)+XL3*APD1X(KI  ,KJ+2)+&
+                        XL4*APD1X(KI+1,KJ+2)+XL5*APD1X(KI+2,KJ+2)
+                    PD1X=ZL1*F1+ZL2*F2+ZL3*F3+ZL4*F4+ZL5*F5
+                    F1=XL1*APD2X(KI-2,KJ-2)+XL2*APD2X(KI-1,KJ-2)+XL3*APD2X(KI  ,KJ-2)+&
+                        XL4*APD2X(KI+1,KJ-2)+XL5*APD2X(KI+2,KJ-2)
+                    F2=XL1*APD2X(KI-2,KJ-1)+XL2*APD2X(KI-1,KJ-1)+XL3*APD2X(KI  ,KJ-1)+&
+                        XL4*APD2X(KI+1,KJ-1)+XL5*APD2X(KI+2,KJ-1)
+                    F3=XL1*APD2X(KI-2,KJ  )+XL2*APD2X(KI-1,KJ  )+XL3*APD2X(KI  ,KJ  )+&
+                        XL4*APD2X(KI+1,KJ  )+XL5*APD2X(KI+2,KJ  )
+                    F4=XL1*APD2X(KI-2,KJ+1)+XL2*APD2X(KI-1,KJ+1)+XL3*APD2X(KI  ,KJ+1)+&
+                        XL4*APD2X(KI+1,KJ+1)+XL5*APD2X(KI+2,KJ+1)
+                    F5=XL1*APD2X(KI-2,KJ+2)+XL2*APD2X(KI-1,KJ+2)+XL3*APD2X(KI  ,KJ+2)+&
+                        XL4*APD2X(KI+1,KJ+2)+XL5*APD2X(KI+2,KJ+2)
+                    PD2X=ZL1*F1+ZL2*F2+ZL3*F3+ZL4*F4+ZL5*F5
+		          ELSE !10E
+			        DSK=0.5/AKR
+                    PD1X=-PSURR*AKR+PI*EPZ*SQ*(CSK-DSK*SIK)
+			        PD2X=EPZ*SQ*(SIK+DSK*CSK)
+		          ENDIF !10F
+
+		          VR1=-PD1X-PSURR*AKR
+		          VR2=-PD2X
+		        ELSE !9E
+		          PD1X=-PSURR*AKR
+		          PD2X=0.
+		          VR1=0.
+		          VR2=0.
+		        ENDIF !9F
+		      ENDIF !8F
+
+		      CVX=(XGI-XGA(LLL,J))/RRR
+		      CVY=(YGI-YMJJJ)/RRR
+              VSX1(J,JJ)=VSX1(J,JJ)+XJAC(LLL,J)*VR1*CVX
+              VSX2(J,JJ)=VSX2(J,JJ)+XJAC(LLL,J)*VR2*CVX
+              VSY1(J,JJ)=VSY1(J,JJ)+XJAC(LLL,J)*VR1*CVY
+              VSY2(J,JJ)=VSY2(J,JJ)+XJAC(LLL,J)*VR2*CVY
+              VSZ1(J,JJ)=VSZ1(J,JJ)+XJAC(LLL,J)*VZ1
+              VSZ2(J,JJ)=VSZ2(J,JJ)+XJAC(LLL,J)*VZ2
+		    ELSE !7E
+		      VSX1(J,JJ)=0.
+		      VSX2(J,JJ)=0.
+		      VSY1(J,JJ)=0.
+		      VSY2(J,JJ)=0.
+              VSZ1(J,JJ)=VSZ1(J,JJ)+XJAC(LLL,J)*VZ1
+              VSZ2(J,JJ)=VSZ2(J,JJ)+XJAC(LLL,J)*VZ2
+		    ENDIF !7F
+ 	      ENDIF !6F
+  211   CONTINUE
+	  ELSE !2E
+	    FS1(J,JJ)=0.                                        
+	    FS2(J,JJ)=0.                                    
+	    VSX1(J,JJ)=0.
+	    VSX2(J,JJ)=0.                                         
+	    VSY1(J,JJ)=0.                                      
+	    VSY2(J,JJ)=0.                                         
+	    VSZ1(J,JJ)=0.                                       
+	    VSZ2(J,JJ)=0.
+	    KK(1)=M1(J)
+	    KK(2)=M2(J)
+	    KK(3)=M3(J)
+	    KK(4)=M4(J)
+	    KK(5)=KK(1)
+	    DO 30 IT=1,NQ
 	      TETA=QQ(IT)
 	      CT=COS(TETA)
 	      ST=SIN(TETA)
 	      DO 20 L=1,4
-		ZIJ(L)=AK0*(ZMIII+Z(KK(L))+ZI*((XGI-X(KK(L)))*CT+(YGI-Y(KK(L))*BX)*ST))
-		IF(REAL(ZIJ(L)).GT.-25.)THEN
-		  CEX(L)=CEXP(ZIJ(L))
-		ELSE
-		  CEX(L)=(0.,0.)
-		ENDIF
-		GZ(L)=GG(ZIJ(L),CEX(L))
-	    20 CONTINUE
+		    ZIJ(L)=AK0*(ZMIII+Z(KK(L))+ZI*((XGI-X(KK(L)))*CT+(YGI-Y(KK(L))*BX)*ST))
+		    IF(REAL(ZIJ(L)).GT.-25.)THEN
+		      CEX(L)=CEXP(ZIJ(L))
+		    ELSE
+		      CEX(L)=(0.,0.)
+		    ENDIF
+		    GZ(L)=GG(ZIJ(L),CEX(L))
+	   20 CONTINUE
 	      ZIJ(5)=ZIJ(1)
 	      CEX(5)=CEX(1)
 	      GZ(5)=GZ(1)
@@ -419,22 +446,22 @@ MODULE COMPUTE_GREEN_INFD
 	      ZB=(0.,0.)
 	      ZVS=(0.,0.)
 	      DO 37 L=1,4
-		C1=ZIJ(L+1)-ZIJ(L)
-		IF(ABS(AIMAG(C1)).LT.EPS.AND.ABS(REAL(C1)).LT.EPS)THEN
-		  ASD=(GZ(L+1)+GZ(L))*0.5
-		  BSD=(CEX(L+1)+CEX(L))*0.5
-		  CSD=ASD-(0.5/ZIJ(L+1)+0.5/ZIJ(L))
-		ELSE
-		  CSD=(GZ(L+1)-GZ(L))/C1
-		  ASD=(GZ(L+1)-GZ(L)+CLOG(ZIJ(L+1)/ZIJ(L)))/C1
-		  BSD=(CEX(L+1)-CEX(L))/C1
-		ENDIF
-		C2=(YN(J)*BX-ZI*ZN(J)*ST)*(X(KK(L+1))-X(KK(L)))-&
-	      & (XN(J)-ZI*ZN(J)*CT)*(Y(KK(L+1))-Y(KK(L)))*BX
-		ZA=ZA+ASD*C2
-		ZB=ZB+BSD*C2
-		ZVS=ZVS+CSD*C2
- 	  37 CONTINUE
+		    C1=ZIJ(L+1)-ZIJ(L)
+		    IF(ABS(AIMAG(C1)).LT.EPS.AND.ABS(REAL(C1)).LT.EPS)THEN
+		      ASD=(GZ(L+1)+GZ(L))*0.5
+		      BSD=(CEX(L+1)+CEX(L))*0.5
+		      CSD=ASD-(0.5/ZIJ(L+1)+0.5/ZIJ(L))
+		    ELSE
+		      CSD=(GZ(L+1)-GZ(L))/C1
+		      ASD=(GZ(L+1)-GZ(L)+CLOG(ZIJ(L+1)/ZIJ(L)))/C1
+		      BSD=(CEX(L+1)-CEX(L))/C1
+		    ENDIF
+		    C2=(YN(J)*BX-ZI*ZN(J)*ST)*(X(KK(L+1))-X(KK(L)))-&
+	          & (XN(J)-ZI*ZN(J)*CT)*(Y(KK(L+1))-Y(KK(L)))*BX
+		    ZA=ZA+ASD*C2
+		    ZB=ZB+BSD*C2
+		    ZVS=ZVS+CSD*C2
+ 	  37  CONTINUE
 	      FS1(J,JJ)=FS1(J,JJ)+CQ(IT)*REAL(ZA)
 	      FS2(J,JJ)=FS2(J,JJ)+CQ(IT)*REAL(ZB)
 	      VSX1(J,JJ)=VSX1(J,JJ)-CQ(IT)*CT*AIMAG(ZVS)
@@ -443,7 +470,7 @@ MODULE COMPUTE_GREEN_INFD
 	      VSY2(J,JJ)=VSY2(J,JJ)-CQ(IT)*ST*AIMAG(ZB)
 	      VSZ1(J,JJ)=VSZ1(J,JJ)+CQ(IT)*REAL(ZVS)
 	      VSZ2(J,JJ)=VSZ2(J,JJ)+CQ(IT)*REAL(ZB)
- 	30 CONTINUE                 
+ 	30  CONTINUE                 
 	      AKAIR=AK0*AIRE(J)            
 	      FS1(J,JJ)=FS1(J,JJ)*BX/AKAIR
 	      FS2(J,JJ)=FS2(J,JJ)*BX/AKAIR
@@ -453,16 +480,16 @@ MODULE COMPUTE_GREEN_INFD
 	      VSY2(J,JJ)=VSY2(J,JJ)*BX/AKAIR
 	      VSZ1(J,JJ)=VSZ1(J,JJ)*BX/AKAIR
 	      VSZ2(J,JJ)=VSZ2(J,JJ)*BX/AKAIR
- 	   ENDIF !2F                                                             
-    22 CONTINUE    
+ 	    ENDIF !2F                                                             
+ 22 CONTINUE    
                                                               
-      IF(NSYMY.EQ.1)THEN !11B        
-	  AKAIR=AK0*AIRE(J)                  
+    IF(NSYMY.EQ.1)THEN !11B        
+	  AKAIR=AK0*AIRE(J)
 	  ADPI2=AKAIR/DPI2
 	  ADPI=AKAIR/DPI
-	  SM1=FSM-(FS1(J,1)-FS1(J,2))*ADPI2            ! SM and SP are in the influence coef S               
-	  SP1=FSP-(FS1(J,1)+FS1(J,2))*ADPI2            ! FSM and FSP is first part of the influence coef S, S1 =int_sj 1/OnM'dS=sum_(k=1)^4 J_k, the FSM and FSP is calculated in VNSINFD()          
-          SM2=-(FS2(J,1)-FS2(J,2))*ADPI                                 
+	  SM1=FSM-(FS1(J,1)-FS1(J,2))*ADPI2                             
+	  SP1=FSP-(FS1(J,1)+FS1(J,2))*ADPI2
+	  SM2=-(FS2(J,1)-FS2(J,2))*ADPI                                   
 	  SP2=-(FS2(J,1)+FS2(J,2))*ADPI
 	  AKDPI2=ADPI2*AK0
 	  AKDPI=ADPI*AK0
@@ -478,32 +505,31 @@ MODULE COMPUTE_GREEN_INFD
 	  VSYM2=-(VSY2(J,1)-VSY2(J,2))*AKDPI                                    
 	  VSZP2=-(VSZ2(J,1)+VSZ2(J,2))*AKDPI                                    
 	  VSZM2=-(VSZ2(J,1)-VSZ2(J,2))*AKDPI                                 
-      ELSE   !11E
-	  AKAIR=AK0*AIRE(J)                  
+    ELSE   !11E
+	  AKAIR=AK0*AIRE(J)
 	  ADPI2=AKAIR/DPI2
 	  ADPI=AKAIR/DPI
-	  SP1=FSP-FS1(J,1)*ADPI2                                              
-	  SM1=SP1                                                             
-	  SP2=-FS2(J,1)*ADPI                                                    
+	  SP1=FSP-FS1(J,1)*ADPI2
+	  SM1=SP1
+	  SP2=-FS2(J,1)*ADPI
 	  SM2=SP2
 	  AKDPI2=ADPI2*AK0
 	  AKDPI=ADPI*AK0
 	  VSXP1=VSXP-VSX1(J,1)*AKDPI2                                        
 	  VSXM1=VSXP1                                                        
-	  VSYP1=VSYP-VSY1(J,1)*AKDPI2                                        
+	  VSYP1=VSYP-VSY1(J,1)*AKDPI2
 	  VSYM1=VSYP1                                                        
-	  VSZP1=VSZP-VSZ1(J,1)*AKDPI2                                       
+	  VSZP1=VSZP-VSZ1(J,1)*AKDPI2
 	  VSZM1=VSZP1                                                        
 	  VSXP2=-VSX2(J,1)*AKDPI                                            
 	  VSXM2=VSXP2                                                        
 	  VSYP2=-VSY2(J,1)*AKDPI                                             
-	  VSYM2=VSYP2                                                      
-	  VSZP2=-VSZ2(J,1)*AKDPI                                             
+	  VSYM2=VSYP2
+	  VSZP2=-VSZ2(J,1)*AKDPI
 	  VSZM2=VSZP2                                                         
-      ENDIF !11F
-                            
-      RETURN                                                                    
-      END SUBROUTINE
+    ENDIF !11F
+    RETURN
+  END SUBROUTINE
 !-------------------------------------------------------------------------------!
       SUBROUTINE CINT_INFD(AKK,N)
 
@@ -646,5 +672,6 @@ MODULE COMPUTE_GREEN_INFD
 	PL2=((XU-U1)*(XU-U2))/((U3-U1)*(U3-U2))
 	RETURN
       END FUNCTION
+
 
 END MODULE

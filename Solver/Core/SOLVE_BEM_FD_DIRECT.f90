@@ -146,11 +146,15 @@ MODULE SOLVE_BEM_FD_DIRECT
     DO ISYM=1,NJJ
         BX=(-1)**(ISYM+1)
         DO I=1,IMX
-    	    IF (NSYMY.EQ.1) THEN
-    	        B(I)=(NVEL(I)+BX*NVEL(I+NFA))*0.5
-    	    ELSE
-    	        B(I)=NVEL(I)
-    	    END IF
+            IF(ZG(I).NE.0.)THEN
+    	        IF (NSYMY.EQ.1) THEN
+    	                B(I)=(NVEL(I)+BX*NVEL(I+NFA))*0.5
+    	        ELSE
+    	                B(I)=NVEL(I)
+    	        END IF
+            ELSE
+                        B(I)=0
+            END IF
     	END DO
     	DO I=1,IMX
     	    ZOL(I,(ISYM-1)+1)=(0.,0.)
@@ -185,7 +189,8 @@ MODULE SOLVE_BEM_FD_DIRECT
  !   OPEN(99,FILE=ID%ID(1:ID%lID)//'/QTF/QTFper'//strProblemNumber//'_Nemoh1.dat') ! for checking the coef in NEMOH2
 
     DO I=1,IMX
-	    DO J=1,IMX
+     IF(ZG(I).LT.0.)THEN
+	DO J=1,IMX
 		call VAVFD(2,XG(I),YG(I),ZG(I),I,J)
 		call VNSFD(AM0,AMH,NEXP,I,J,XG(I),YG(I),ZG(I))  
 	        ZPB(I)=ZPB(I)+0.5*(ZIGB(J)*CMPLX(SP1+SM1,SP2+SM2)+ZIGS(J)*CMPLX(SP1-SM1,SP2-SM2))
@@ -193,7 +198,8 @@ MODULE SOLVE_BEM_FD_DIRECT
           !      SP1J(J)=SP1
         END DO
           !       WRITE(99,*)(SP1J(J),J=1,IMX)
-    END DO
+      END IF
+   END DO
    ! CLOSE(99)
 END SUBROUTINE
 !-------------------------------------------------

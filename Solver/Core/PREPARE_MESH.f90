@@ -22,6 +22,7 @@
 MODULE PREPARE_MESH
 
 USE COM_VAR
+USE FIC_COM
 
 IMPLICIT NONE
 
@@ -80,19 +81,85 @@ CONTAINS
     SUBROUTINE GOMG
     
     USE COM_VAR
+    USE FIC_COM
     
     IMPLICIT NONE
 
-    INTEGER :: I,K,L,M,N,IJJ,NJJ
+    INTEGER :: I,J,K,L,M,N,IJJ,NJJ,IMETH
     REAL :: XAVER,YAVER,ZAVER
-    REAL:: EPPM,D1,T1,T1X,T1Y,T1Z,T2X,T2Y,T2Z,XNQ,XNX,XNY,XNZ
+    REAL:: EPPM,D1,T1,T2,T1X,T1Y,T1Z,T2X,T2Y,T2Z,XNQ,XNX,XNY,XNZ
     REAL:: ETA1,ETA2,ETA3,ETA4,ETAN1,ETAN2,ETAN3,ETAN4,ETAO
     REAL:: T1UNX,T1UNY,T1UNZ,T2UNX,T2UNY,T2UNZ
     REAL:: PSCA,XI1,XI2,XI3,XI4,XIN1,XIN2,XIN3,XIN4,XIO
-    REAL:: DPOINT,T2,TI1,TT1,TT2,TT3,TT4,BA,BB,BC,BD,DNUL,DST,U
-    INTEGER :: NSYM                                             
-       
-    NSYM=NSYMY+1                                                              
+    REAL:: DPOINT,TI1,TT1,TT2,TT3,TT4
+    REAL:: XL1,XL2,XL3,XL4,X41,X32,X34,X21,Y41,Y32,Y34,Y21
+    REAL:: A,B,C,D,AA,BB,CC,DD,XG1,YG1
+    REAL:: YL1,YL2,YL3,YL4
+    Real:: at1,at2,at3,at4,at5,at6,at7,at8,at9
+    INTEGER :: NSYM
+    LOGICAL FICHEX
+!~ C
+!~ C     PREPARATION DU CALCUL DES COEFFICIENTS D'INFLUENCE:
+!~ C     DETERMINATION DE LA POSITION DES POINTS DE GAUSS
+!~ C---------------------GAUSS 1 4 9 OU 16--------------------------------
+!~ C     ET DU JACOBIEN POUR CHAQUE FACETTE
+!~ C      NG =1,4,9 OU 16
+      REAL :: XX(16,4),YY(16,4),WG(16,4)
+
+      DATA((XX(I,L),I=1,16),L=1,4) /&
+       16*0., &
+!     1  -0.5,15*0.,
+       .57735027, .57735027,-.57735027,-.57735027,12*0.,&
+       .77459667, .77459667, .77459667,3*0.,-.77459667,&
+      -.77459667,-.77459667,7*0.,&
+       .86113631, .86113631, .86113631, .86113631,&
+       .33998104, .33998104, .33998104, .33998104,&
+      -.33998104,-.33998104,-.33998104,-.33998104,&
+      -.86113631,-.86113631,-.86113631,-.86113631/
+      DATA((YY(I,L),I=1,16),L=1,4)/ &
+       16*0., &
+!     1  -0.5,15*0.,
+      -.57735027,.57735027,-.57735027,.57735027,12*0.,&
+      -.77459667,0.,.77459667,-.77459667,0.,.77459667,&
+      -.77459667,0.,.77459667,7*0.,&
+!     3 -.75459667,0.2,.79459667,-.75459667,0.2,.79459667,
+!     3 -.75459667,0.2,.79459667,7*0.,
+      -.86113363,-.33998104,.33998104,.86113363,&
+      -.86113363,-.33998104,.33998104,.86113363,&
+      -.86113363,-.33998104,.33998104,.86113363,&
+      -.86113363,-.33998104,.33998104,.86113363/
+      DATA((WG(I,L),I=1,16),L=1,4)/ &
+       1,15*0., &
+      .25,.25,.25,.25,12*0.,&
+      .07716049,.12345679,.07716049,.12345679,.19753086,&
+      .12345679,.07716049,.12345679,.07716049,7*0.,&
+      .30250748E-1,.56712963E-1,.56712963E-1,.30250748E-1,&
+      .56712963E-1,.10632333,.10632333,.56712963E-1,&
+      .56712963E-1,.10632333,.10632333,.56712963E-1,&
+      .30250748E-1,.56712963E-1,.56712963E-1,.30250748E-1/
+
+      NG=4
+
+      IF(NG.EQ.1)THEN
+		IMETH=1
+      ELSE
+      IF(NG.EQ.4)THEN
+		IMETH=2
+      ELSE
+      IF(NG.EQ.9) THEN
+		IMETH=3
+      ELSE
+      IF(NG.EQ.16) THEN
+		IMETH=4
+      ELSE
+		WRITE(*,*)'ARGUMENT INCORRECT DANS SOMGO'
+      STOP
+      ENDIF
+      ENDIF
+      ENDIF
+      ENDIF
+
+    NSYM=NSYMY+1                                                          
     EPPM=1.E-25
     DO I=1,IMX                                                         
 	    K=M1(I)                                                                   
@@ -118,38 +185,47 @@ CONTAINS
             WRITE(*,'(A,E14.7)') '       - ZG   = ',0.25*(Z(M1(I))+Z(M2(I))+Z(M3(I))+Z(M4(I)))
             STOP          
         ENDIF
-        XN(I)=XNX/XNQ                                                             
-        YN(I)=XNY/XNQ                                                             
-        ZN(I)=XNZ/XNQ                                                             
-        XAVER=(X(K)+X(M)+X(L)+X(N))*0.25                                          
-        YAVER=(Y(K)+Y(M)+Y(N)+Y(L))*0.25                                          
-        ZAVER=(Z(K)+Z(M)+Z(N)+Z(L))*0.25                                          
-        D1=ABS(XN(I)*(XAVER-X(K))+YN(I)*(YAVER-Y(K))+ZN(I)*(ZAVER-Z(K)))         
-        T1=SQRT(T1X**2+T1Y**2+T1Z**2)                                              
-        T1UNX=T1X/T1                                                              
-        T1UNY=T1Y/T1                                                              
-        T1UNZ=T1Z/T1                                                              
-        T2UNX=YN(I)*T1UNZ-ZN(I)*T1UNY                                             
+        XN(I)=XNX/XNQ
+        YN(I)=XNY/XNQ
+        ZN(I)=XNZ/XNQ
+        XAVER=(X(K)+X(M)+X(L)+X(N))*0.25
+        YAVER=(Y(K)+Y(M)+Y(N)+Y(L))*0.25
+        ZAVER=(Z(K)+Z(M)+Z(N)+Z(L))*0.25
+        D1=ABS(XN(I)*(XAVER-X(K))+YN(I)*(YAVER-Y(K))+ZN(I)*(ZAVER-Z(K)))
+        T1=SQRT(T1X**2+T1Y**2+T1Z**2)
+        T1UNX=T1X/T1
+        T1UNY=T1Y/T1
+        T1UNZ=T1Z/T1
+        T2UNX=YN(I)*T1UNZ-ZN(I)*T1UNY
         T2UNY=ZN(I)*T1UNX-XN(I)*T1UNZ                                             
-        T2UNZ=XN(I)*T1UNY-YN(I)*T1UNX   
-        PSCA=-YN(I)*YAVER                                                         
+        T2UNZ=XN(I)*T1UNY-YN(I)*T1UNX
+        AT3=-XN(I)
+        AT6=-YN(I)
+        AT9=-ZN(I)
+        AT1=T1UNX
+        AT4=T1UNY
+        AT7=T1UNZ
+        AT2=-T2UNX
+        AT5=-T2UNY
+        AT8=-T2UNZ
+        PSCA=-YN(I)*YAVER                                        
         IF(PSCA.GT.0.)THEN  
 !~             WRITE(*,*) 
             WRITE(*,'(A,I7,A)') 'Warning: normal vector of panel ',i,' points towards the x axis'                                                     
         ENDIF                                                                                         
-        XI1=T1UNX*(X(K)-XAVER)+T1UNY*(Y(K)-YAVER)+T1UNZ*(Z(K)-ZAVER)              
-        XI2=T1UNX*(X(L)-XAVER)+T1UNY*(Y(L)-YAVER)+T1UNZ*(Z(L)-ZAVER)              
-        XI3=T1UNX*(X(M)-XAVER)+T1UNY*(Y(M)-YAVER)+T1UNZ*(Z(M)-ZAVER)              
-        XI4=T1UNX*(X(N)-XAVER)+T1UNY*(Y(N)-YAVER)+T1UNZ*(Z(N)-ZAVER)            
-        ETA1=T2UNX*(X(K)-XAVER)+T2UNY*(Y(K)-YAVER)+T2UNZ*(Z(K)-ZAVER)             
-        ETA2=T2UNX*(X(L)-XAVER)+T2UNY*(Y(L)-YAVER)+T2UNZ*(Z(L)-ZAVER)             
+        XI1=T1UNX*(X(K)-XAVER)+T1UNY*(Y(K)-YAVER)+T1UNZ*(Z(K)-ZAVER)
+        XI2=T1UNX*(X(L)-XAVER)+T1UNY*(Y(L)-YAVER)+T1UNZ*(Z(L)-ZAVER)
+        XI3=T1UNX*(X(M)-XAVER)+T1UNY*(Y(M)-YAVER)+T1UNZ*(Z(M)-ZAVER)
+        XI4=T1UNX*(X(N)-XAVER)+T1UNY*(Y(N)-YAVER)+T1UNZ*(Z(N)-ZAVER)
+        ETA1=T2UNX*(X(K)-XAVER)+T2UNY*(Y(K)-YAVER)+T2UNZ*(Z(K)-ZAVER)
+        ETA2=T2UNX*(X(L)-XAVER)+T2UNY*(Y(L)-YAVER)+T2UNZ*(Z(L)-ZAVER)
         ETA3=T2UNX*(X(M)-XAVER)+T2UNY*(Y(M)-YAVER)+T2UNZ*(Z(M)-ZAVER)             
         ETA4=T2UNX*(X(N)-XAVER)+T2UNY*(Y(N)-YAVER)+T2UNZ*(Z(N)-ZAVER)             
         XIO=(XI4*(ETA1-ETA2)+XI2*(ETA4-ETA1))/(3.*(ETA2-ETA4))
-        ETAO=-ETA1/3.                                                
-        ETAN1=ETA1-ETAO                                                           
-        ETAN2=ETA2-ETAO                                                           
-        ETAN3=ETA3-ETAO                                                           
+        ETAO=-ETA1*0.33333333                                                  
+        ETAN1=ETA1-ETAO
+        ETAN2=ETA2-ETAO
+        ETAN3=ETA3-ETAO                                                      
         ETAN4=ETA4-ETAO                                                           
         XIN1=XI1-XIO                                                              
         XIN2=XI2-XIO                                                              
@@ -174,9 +250,187 @@ CONTAINS
        TT2=SQRT(XIN2*XIN2+ETAN2*ETAN2)                                         
        TT3=SQRT(XIN3*XIN3+ETAN3*ETAN3)                                         
        TT4=SQRT(XIN4*XIN4+ETAN4*ETAN4)                                         
-       TDIS(I)=MAX(TT1,TT2,TT3,TT4)                                         
+       TDIS(I)=MAX(TT1,TT2,TT3,TT4)
+       XL1=AT1*(X(M1(I))-XG(I))+AT4*(Y(M1(I))-YG(I))+AT7*(Z(M1(I))-ZG(I))
+       YL1=AT2*(X(M1(I))-XG(I))+AT5*(Y(M1(I))-YG(I))+AT8*(Z(M1(I))-ZG(I))
+       XL2=AT1*(X(M2(I))-XG(I))+AT4*(Y(M2(I))-YG(I))+AT7*(Z(M2(I))-ZG(I))
+       YL2=AT2*(X(M2(I))-XG(I))+AT5*(Y(M2(I))-YG(I))+AT8*(Z(M2(I))-ZG(I))
+       XL3=AT1*(X(M3(I))-XG(I))+AT4*(Y(M3(I))-YG(I))+AT7*(Z(M3(I))-ZG(I))
+       YL3=AT2*(X(M3(I))-XG(I))+AT5*(Y(M3(I))-YG(I))+AT8*(Z(M3(I))-ZG(I))
+       XL4=AT1*(X(M4(I))-XG(I))+AT4*(Y(M4(I))-YG(I))+AT7*(Z(M4(I))-ZG(I))
+       YL4=AT2*(X(M4(I))-XG(I))+AT5*(Y(M4(I))-YG(I))+AT8*(Z(M4(I))-ZG(I))
+       X41=XL4-XL1
+       X32=XL3-XL2
+       Y34=YL3-YL4
+       Y21=YL2-YL1
+       Y41=YL4-YL1
+       Y32=YL3-YL2
+       X34=XL3-XL4
+       X21=XL2-XL1
+       DO L=1,NG
+       A=(1.-YY(L,IMETH))*X41+(1+YY(L,IMETH))*X32
+       B=(1.-XX(L,IMETH))*Y21+(1+XX(L,IMETH))*Y34
+       C=(1.-XX(L,IMETH))*X21+(1+XX(L,IMETH))*X34
+       D=(1.-YY(L,IMETH))*Y41+(1+YY(L,IMETH))*Y32
+       XJAC(L,I)=(ABS(A*B-C*D)*WG(L,IMETH)*.25)/AIRE(I)
+       ENDDO
+!~ C
+!~ C    COORDONNES ABSOLUES DES POINTS DE GAUSS
+!~ C
+      DO L=1,NG
+      AA=.25*(1-XX(L,IMETH))*(1-YY(L,IMETH))
+      BB=.25*(1-XX(L,IMETH))*(1+YY(L,IMETH))
+      CC=.25*(1+XX(L,IMETH))*(1+YY(L,IMETH))
+      DD=.25*(1+XX(L,IMETH))*(1-YY(L,IMETH))
+      XG1=AA*XL1+BB*XL2+CC*XL3+DD*XL4
+      YG1=AA*YL1+BB*YL2+CC*YL3+DD*YL4
+      XGA(L,I)=XG(I)+AT1*XG1+AT2*YG1 
+      YGA(L,I)=YG(I)+AT4*XG1+AT5*YG1 
+      ZGA(L,I)=ZG(I)+AT7*XG1+AT8*YG1
+      ENDDO
+!      IF(NG.EQ.1)THEN
+!		  XGA(1,I)=XG(I)
+!		  YGA(1,I)=YG(I)
+!		  ZGA(1,I)=ZG(I)
+!      ENDIF
     END DO
+      PRINT *,'NG = ',NG
+!~ C
+!~ C    CREATION OU LECTURE DU FICHIER DES FONCTIONs DE GREEN
+!~ C
+    INQUIRE(FILE='GRIN.QAT',EXIST=FICHEX)
+       print *,'grin.qat ',fichex
+    IF(.NOT.FICHEX)THEN
+    CALL CREK
+     OPEN(UNIT=44,FILE='GRIN.QAT',FORM='UNFORMATTED',STATUS='NEW')
+      WRITE(44)IIR,JJZ,(Xr(I),I=1,IIR),(xZ(J),J=1,JJZ)
+      DO J=1,JJZ
+      WRITE(44)(APD1X(I,J),I=1,IIR),(APD1Z(I,J),I=1,IIR),&
+     (APD2X(I,J),I=1,IIR),(APD2Z(I,J),I=1,IIR)
+
+      ENDDO
+      ELSE
+     OPEN(UNIT=44,FILE='GRIN.QAT',FORM='UNFORMATTED',STATUS='OLD')
+      READ(44)IIR,JJZ,(Xr(I),I=1,IIR),(xZ(J),J=1,JJZ)
+      DO J=1,JJZ
+      READ(44)(APD1X(I,J),I=1,IIR),(APD1Z(I,J),I=1,IIR),&
+     (APD2X(I,J),I=1,IIR),(APD2Z(I,J),I=1,IIR)
+      ENDDO
+      ENDIF 
+
+   RETURN
+   END SUBROUTINE
+
+
+ SUBROUTINE CREK
+    USE COM_VAR
+    USE FIC_COM
+    IMPLICIT NONE
+    INTEGER:: I,J,KJ,KI
+    REAL:: AKZ,AKR,ZKJ
+      JJZ=124
+      IIR=676
+    DO 8006 J=1,JJZ
+      AKZ=10**(J/10.-10)
+     XZ(J)=-AKZ
+      KJ=10*(ALOG10(-XZ(J))+10.)
+      ZKJ=10*(ALOG10(-XZ(J))+10.)
+      KJ=MAX(KJ,2)
+      KJ=MIN(KJ,123)
+8006 CONTINUE
+      XR(1)=1.e-8
+    DO 8007 I=2,IIR
+      IF(I.LT.81)THEN
+      AKR=AMIN1(10**((I-1.)/5-6),4./3.+ABS((I-32.)/3.))
+      AKR=10**((I-1.)/10-8)
+      ELSE
+      AKR=1+ABS((I-81.)/6.)
+      ENDIF
+      XR(I)=AKR
+      IF(AKR.LT.1.)THEN
+      KI=10*(ALOG10(AKR+1.E-10)+8)+1
+      ELSE
+      KI=6*AKR+75
+      ENDIF
+      KI=MAX(KI,2)
+      KI=MIN(KI,674)
+8007 CONTINUE
+
+    DO 8009 J=1,JJZ
+      DO 8008 I=1,IIR
+	CALL VNS(XZ(J),XR(I),I,J)
+8008 CONTINUE
+8009 CONTINUE
+
     RETURN
+
     END SUBROUTINE
+!---------------------------------------------------------                                                                    
+
+      SUBROUTINE VNS(AKZ,AKR,I,J) 
+      USE COM_VAR
+      USE ELEMENTARY_FNS
+    IMPLICIT NONE         
+      INTEGER:: I,J,IT
+      REAL:: AKZ,AKR,PI,CT,ST,CQIT,TETA
+      REAL:: QQT(NPINTE),CQT(NPINTE)
+      REAL:: FD1JX,FD1JZ,FD2JX,FD2JZ
+      COMPLEX:: IM,C1,C2,ZIK,GZ,CEX            
+      IM=(0.,1.)                                                                
+      PI=4.*ATAN(1.)
+      CALL COFINT(CQT,QQT)         
+      FD1JX=0.                                                              
+      FD1JZ=0.                                                              
+      FD2JX=0.                                                              
+      FD2JZ=0.                                                              
+      DO 30 IT=1,NPINTE                                           
+	TETA=QQT(IT)                                                           
+	CQIT=CQT(IT)                                                   
+	CT=COS(TETA)                                                              
+	ST=SIN(TETA)                                                              
+	ZIK=AKZ+IM*AKR*CT    
+	IF(REAL(ZIK)+30.)2,2,1
+      2 CEX=(0.,0.)
+	GOTO 3 
+      1 CEX=CEXP(ZIK)                                               
+      3 GZ=GG(ZIK,CEX)                      
+	C1=CQIT*(GZ-1./ZIK)
+	C2=CQIT*CEX
+	FD1JX=FD1JX+CT*AIMAG(C1)                                 
+	FD1JZ=FD1JZ+REAL(C1)                                     
+	FD2JX=FD2JX+CT*AIMAG(C2)                                 
+	FD2JZ=FD2JZ+REAL(C2)                                     
+   30 CONTINUE                                                                
+      APD1X(I,J)=FD1JX                                               
+      APD1Z(I,J)=FD1JZ                                               
+      APD2X(I,J)=FD2JX                                               
+      APD2Z(I,J)=FD2JZ                                              
+      RETURN 
+
+      END SUBROUTINE  
+!-------------------------------------------------------------------
+
+      SUBROUTINE COFINT(CQT,QQT)  
+      USE COM_VAR
+    IMPLICIT NONE 
+      INTEGER :: J
+      REAL:: PI,QQT(NPINTE),CQT(NPINTE)
+
+      PI=4.*ATAN(1.)
+      DO 160 J=1,NPINTE   
+      QQT(J)=-PI/2.+(J-1.)/(NPINTE-1.)*PI
+      IF(J-1)161,161,162
+  161 CQT(J)=PI/(3.*(NPINTE-1.))
+      GOTO 160
+  162 IF(J-NPINTE)163,161,161
+  163 IF(MOD(J,2))164,165,164
+  164 CQT(J)=2./(3.*(NPINTE-1.))*PI
+      GOTO 160
+  165 CQT(J)=4./(3.*(NPINTE-1.))*PI
+  160 CONTINUE
+
+      RETURN                                                                    
+      END SUBROUTINE  
+
 
 END MODULE

@@ -39,15 +39,16 @@ SRCP=./Common/Identification.f90\
 OBJP=$(SRCP:.f90=.o)
 
 #SOURCES FORTRAN Solver(modules de preprocessing)
-SRCS=./Solver/Core/COM_VAR.f90\
+SRCS=./Solver/Core/FIC_COM.f90\
+./Solver/Core/COM_VAR.f90\
 ./Common/Environment.f90\
 ./Common/Identification.f90\
 ./Common/Mesh.f90\
 ./Solver/Core/Bodyconditions.f90\
+./Solver/Core/ELEMENTARY_FNS.f90\
 ./Solver/Core/PREPARE_MESH.f90\
 ./Solver/Core/INITIALIZATION.f90\
 ./Solver/Core/OUTPUT.f90\
-./Solver/Core/ELEMENTARY_FNS.f90\
 ./Solver/Core/M_SOLVER.f90\
 ./Solver/Core/ALLOCATE_DATA.f90\
 ./Solver/Core/COMPUTE_GREEN_INFD.f90\
@@ -93,25 +94,25 @@ bin:
 msh:	mesh.exe
 #Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
 mesh.exe:	$(OBJM) 
-		$(FC) -o mesh.exe $(OBJM)
+		$(FC) -o meshExe $(OBJM)
 #
 #Build preProc executable
 pre:	preProc
 #Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
 preProc:	$(OBJP) 
-		$(FC) -o preProc $(OBJP)
+		$(FC) -o preProcExe $(OBJP)
 
 #
 #Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
 solver:	$(OBJS) 
-		$(FC) -o solverN $(OBJS)
+		$(FC) -o solverExe $(OBJS)
 
 #
 #Build postProc executable
 post:	postProc
 #Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
 postProc:	$(OBJO) 
-		$(FC) -o postProc $(OBJO)
+		$(FC) -o postProcExe $(OBJO)
 
 		
 # Rules for .f compilation
@@ -122,7 +123,7 @@ postProc:	$(OBJO)
 
 # # #Copy to local bin directory
 install: build
-	mv mesh.exe preProc solverN postProc ./bin/
+	mv meshExe preProcExe solverExe postProcExe ./bin/
 
 # Remove *.o and *.mod
 clean:

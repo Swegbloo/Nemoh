@@ -41,8 +41,25 @@ MODULE SOLVE_BEM_INFD_DIRECT
     REAL:: W,tdepth,BETA,BJ,GM,DIJ,AKK
     REAL:: CB,SB,CP,CR,COEFB,COEFS,PCOS,PSIN
     REAL:: AKAD,AM0,SD1B,SD1S,SD2B,SD2S,PI,DPI,ZERO
+    REAL:: TIRAN,ZMAX,ZMIN
     COMPLEX:: ZOL(IMX,2),B(IMX)
 
+      ZMAX=0.
+      DO 7333 I=1,IMX
+        ZMAX=MIN(ZMAX,ZG(I))
+      7333 CONTINUE
+      ZMAX=ABS(ZMAX)
+      ZMIN=-ZMAX
+      ZMIN=ABS(ZMIN)
+      TIRAN=0.
+      DO 7300 I=1,IMX
+        IF(ZG(I).NE.0)THEN
+        TIRAN=MAX(TIRAN,ABS(ZG(I)))
+        ENDIF
+      7300 CONTINUE
+!      PRINT *,'TIRAN = ',TIRAN
+      ZER=-0.001*TIRAN
+!      PRINT *,'ZER = ',ZER
 
       NJJ=NSYMY+1               !NSYMY=0, NJJ=1 for not symmetric structure; NSYMY= 1 NJJ=2 for symmetric
       PI=4.*ATAN(1.)
@@ -123,11 +140,15 @@ MODULE SOLVE_BEM_INFD_DIRECT
     DO ISYM=1,NJJ           ! if symmetric ISYM=1:2 else ISYM=1:1
         BX=(-1)**(ISYM+1)   ! if BX(ISYM=1)=1 else BX(ISYM=2)=-1
         DO I=1,IMX
-    	    IF (NSYMY.EQ.1) THEN    ! if symmetric
-    	        B(I)=(NVEL(I)+BX*NVEL(I+NFA))*0.5      
-    	    ELSE
-    	        B(I)=NVEL(I)
-    	    END IF
+            IF(ZG(I).NE.0.)THEN
+    	        IF (NSYMY.EQ.1) THEN    ! if symmetric
+    	                B(I)=(NVEL(I)+BX*NVEL(I+NFA))*0.5      
+    	        ELSE
+    	                B(I)=NVEL(I)
+    	        END IF
+            ELSE
+                        B(I)=0
+            END IF
     	END DO
     	DO I=1,IMX
     	    ZOL(I,(ISYM-1)+1)=(0.,0.)
@@ -154,12 +175,14 @@ MODULE SOLVE_BEM_INFD_DIRECT
     ZPB=(0.,0.)
     ZPS=(0.,0.)
     DO I=1,IMX
+       IF(ZG(I).LT.0.)THEN
 	    DO J=1,IMX
 	        call VAVINFD(1,XG(I),YG(I),ZG(I),I,J)
             call VNSINFD(1,I,J,XG(I),YG(I),ZG(I)) 
 	        ZPB(I)=ZPB(I)+0.5*(ZIGB(J)*CMPLX(SP1+SM1,SP2+SM2)+ZIGS(J)*CMPLX(SP1-SM1,SP2-SM2))
 	        ZPS(I)=ZPS(I)+0.5*(ZIGS(J)*CMPLX(SP1+SM1,SP2+SM2)+ZIGB(J)*CMPLX(SP1-SM1,SP2-SM2))
-        END DO
+            END DO
+       END IF
     END DO
 
 END SUBROUTINE

@@ -89,10 +89,15 @@ CONTAINS
         END IF
 !       Assemble pressure
         DO i=1,NFA
-            PRESSURE(i)=RHO*II*W*ZPB(i) !*AIRE(i)
-            IF (NSYMY.EQ.1) THEN
-                PRESSURE(i+NFA)=RHO*II*W*ZPS(i) !*AIRE(i)    
-            END IF
+           IF (ZG(i).lt.0) THEN
+                PRESSURE(i)=RHO*II*W*ZPB(i) !*AIRE(i)
+                IF (NSYMY.EQ.1) THEN
+                        PRESSURE(i+NFA)=RHO*II*W*ZPS(i) !*AIRE(i)    
+                END IF
+           ELSE
+                PRESSURE(i)=0
+                PRESSURE(i+NFA)=0
+           ENDIF
         END DO
         
         
