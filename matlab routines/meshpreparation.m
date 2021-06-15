@@ -2,10 +2,73 @@ clc
 clear all
 close all
 
-testcase=12; % 1: Rectangular, 2: Cylinder, 3: half submerge-sphere, 4: HELOFOW monopile
+testcase=2; % 1: Rectangular, 2: Cylinder, 3: half submerge-sphere, 4: HELOFOW monopile
             % 5: Hemisphere KIm Yue QTF 6: Cylinder KIm Yue QTF D/R=4 7:Cylinder KIm Yue QTF D/R=1
             % 8: Softwind nang50 npt 800 9:  Softwindnang 50 npt 1200
 switch testcase 
+       case 1
+        %  Don't Forget z(i)> z(i+1) !!
+        clc
+        clear all
+        close all
+        
+        dirname='hemisphereR10InfD';
+        nang=50;
+        npanelt=600;
+        
+        
+        n1=10; % number of points for the description of the
+        n=n1+1; %
+        Rayon=10;
+        for i=1:n+1
+            r(i)=Rayon*cos((n1-i+1)*pi/2/n1-pi/2);
+            z(i)=Rayon*sin((n1-i+1)*pi/2/n1-pi/2);
+        end
+            
+        %------------Define calculation options-------------
+        nbfreq=20; % number of calculations = (number of BVP per frequency*number of frequencies)
+        g=9.811;
+        w= linspace(sqrt(g)/nbfreq,sqrt(g),nbfreq)'; % Periods from 3s to 20s for waves for instance
+        dir=0;% angle of the incident waves
+        depth=600; % water depth (m)
+        zCoG=0;
+        QTFInput=[0]; %[Flag, LQTFP, Contrib, Loutduok,Louthasbo,louthasfs]
+        
+        axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
+    case 2
+        %  Don't Forget z(i)> z(i+1) !!
+        clc
+        clear all
+        close all
+        
+        dirname='hemisphereR10InfDLid';
+        nang=50;
+        npanelt=600;
+        
+        
+        n1=10; % number of points for the description of the
+        n=n1+1;
+        Rayon=10;
+        for i=1:n+1
+            r(i)=Rayon*cos((n1-i+1)*pi/2/n1-pi/2);
+            z(i)=Rayon*sin((n1-i+1)*pi/2/n1-pi/2);
+        end
+            rtemp=zeros(1,length(r)+3);ztemp=rtemp;
+            rtemp(5:end)=r(1:end-1);ztemp(5:end)=z(1:end-1);
+            rtemp(1)=0; rtemp(2)=Rayon/4;rtemp(3)=Rayon/2;rtemp(4)=3*Rayon/4;
+            ztemp(1:4)=-1e-20;ztemp(1)=0;
+            r=rtemp;z=ztemp;n=length(r);
+        %------------Define calculation options-------------
+        nbfreq=20; % number of calculations = (number of BVP per frequency*number of frequencies)
+        g=9.811;
+        w= linspace(sqrt(g)/nbfreq,sqrt(g),nbfreq)'; % Periods from 3s to 20s for waves for instance
+        dir=0;% angle of the incident waves
+        depth=600; % water depth (m)
+        zCoG=0;
+        QTFInput=[1 1 2 1 1 0]; %[Flag, LQTFP, Contrib, Loutduok,Louthasbo,louthasfs]
+        
+        axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
+      
 %     case 1
 %         %============ MESH WITH Mesh.m==================%
 %         % RECTANGULAR BOX
