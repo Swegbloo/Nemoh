@@ -224,8 +224,10 @@ fprintf(fid,'%g         ! Louthasbo \n',QTFInput(5));
 fprintf(fid,'%g         ! Louthasfs \n',QTFInput(6));
 fprintf(fid,'! specify Nw1,Nw2,NDOF    if Louthasfs==1\n');
 else
-fprintf(fid,'---')
+fprintf(fid,'---QTF---\n')
+fprintf(fid,'0         ! QTF flag, 1 is calculated \n');
 end
+fprintf(fid,'------\n')
 status=fclose(fid);
 fclose('all');
 
