@@ -120,8 +120,12 @@ CONTAINS
 !            PRESSURE(i)=Environment%g/w*CEXP(II*kwave*wbar)
 !            NVEL(i)=PRESSURE(i)*(kwave*(COS(Beta)*Mesh%N(1,i)+SIN(Beta)*Mesh%N(2,i))*CIH(kwave,Mesh%XM(3,i),Environment%Depth)-II*kwave*Mesh%N(3,i)*SIH(kwave,Mesh%XM(3,i),Environment%Depth))            
 !            PRESSURE(i)=PRESSURE(i)*CIH(kwave,Mesh%XM(3,i),Environment%Depth)
-            CALL Compute_Wave(kwave,w,beta,Mesh%XM(1,i),Mesh%XM(2,i),Mesh%XM(3,i),Phi,p,Vx,Vy,Vz,Environment) 
+            CALL Compute_Wave(kwave,w,beta,Mesh%XM(1,i),Mesh%XM(2,i),Mesh%XM(3,i),Phi,p,Vx,Vy,Vz,Environment)
+            IF (Mesh%XM(3,i).lt.0.) THEN !if ZMN<0, dont calculate on the lid meshes (for irregular freq) by RK 
             PRESSURE(i)=p
+            ELSE
+            PRESSURE(i)=0
+            END IF
             NVEL(i)=-(Vx*Mesh%N(1,i)+Vy*Mesh%N(2,i)+Vz*Mesh%N(3,i))    
         ELSE
 !            wbar=(Mesh%XM(1,i-Mesh%Npanels)-Environment%XEFF)*COS(Beta)+(-Mesh%XM(2,i-Mesh%Npanels)-Environment%YEFF)*SIN(Beta)
@@ -129,7 +133,11 @@ CONTAINS
 !            NVEL(i)=PRESSURE(i)*(II*kwave*(COS(Beta)*Mesh%N(1,i-Mesh%Npanels)+SIN(Beta)*(-1.*Mesh%N(2,i-Mesh%Npanels)))*CIH(kwave,Mesh%XM(3,i-Mesh%Npanels),Environment%Depth)+kwave*Mesh%N(3,i-Mesh%Npanels)*SIH(kwave,Mesh%XM(3,i-Mesh%Npanels),Environment%Depth)) 
 !            PRESSURE(i)=PRESSURE(i)*CIH(kwave,Mesh%XM(3,i-Mesh%Npanels),Environment%Depth)
             CALL Compute_Wave(kwave,w,beta,Mesh%XM(1,i-Mesh%Npanels),-Mesh%XM(2,i-Mesh%Npanels),Mesh%XM(3,i-Mesh%Npanels),Phi,p,Vx,Vy,Vz,Environment) 
+            IF (Mesh%XM(3,i-Mesh%Npanels).lt.0.) THEN !if ZMN<0, dont calculate on the lid meshes (for irregular freq) by RK 
             PRESSURE(i)=p
+            ELSE
+            PRESSURE(i)=0
+            END IF
             NVEL(i)=-(Vx*Mesh%N(1,i-Mesh%Npanels)-Vy*Mesh%N(2,i-Mesh%Npanels)+Vz*Mesh%N(3,i-Mesh%Npanels))  
         END IF        
 !        PRESSURE(i)=Environment%RHO*w*II*PRESSURE(i)

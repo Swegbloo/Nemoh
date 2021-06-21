@@ -3,3 +3,5 @@ bin/
 *.txt
 *.log
 *.exe
+*.o
+*.mod

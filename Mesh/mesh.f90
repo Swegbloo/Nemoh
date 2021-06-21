@@ -228,6 +228,7 @@
 		nmaillage=nmaillage+1
 	end do
 	WRITE(*,'(A,I5)') '    Number of panels in final mesh : ',NF
+	WRITE(*,'(A,I5)') '    Number of points in final mesh : ',NP
 	call ExMaillage(ID,DSCRPT,X,Y,Z,NP,NPMX,facette,NF,NFMX)
 !	Calcul et sauvegarde de la matrice de raideur hydrostatique
 	DO j=1,NP
@@ -272,5 +273,7 @@
 	END DO
 	CLOSE(10)
 
-	end program Mesh
+       
+
+     end program Mesh
 

@@ -185,13 +185,15 @@
 							Npmouillee=4+Npmouillee
 							Nfmouillee=1+Nfmouillee	
 							CALL VOLELMT(P1,P2,P3,P4,VLF,PGF,SEF,KHE)
-							DEPLACEMENT=DEPLACEMENT+VLF
+							IF (ZMN.LT.0.0) THEN
+                                                        DEPLACEMENT=DEPLACEMENT+VLF
 							XF=XF+VLF*PGF(1)
 							YF=YF+VLF*PGF(2)
 							ZF=ZF+VLF*PGF(3)
 							SF=SF+SEF
 							KH=KH+KHE
-							J=3
+                                                        END IF
+                                                        J=3
 							C=P(4,3)/(P(4,3)-P(J,3))
 							DO K=1,3
 								PK(K)=P(4,K)+C*(P(J,K)-P(4,K))
@@ -295,13 +297,16 @@
 									Npmouillee=4+Npmouillee
 									Nfmouillee=1+Nfmouillee	
 									CALL VOLELMT(P1,P2,P3,P4,VLF,PGF,SEF,KHe)
+
+							                IF (ZMN.LT.0.0) THEN
 									DEPLACEMENT=DEPLACEMENT+VLF
 									XF=XF+VLF*PGF(1)
 									YF=YF+VLF*PGF(2)
 									ZF=ZF+VLF*PGF(3)
 									SF=SF+SEF
 									KH=KH+KHe
-									J=4
+                                                                        END IF
+                                                                        J=4
 									C=P(1,3)/(P(1,3)-P(J,3))
 									DO K=1,3
 										PK(K)=P(1,K)+C*(P(J,K)-P(1,K))
@@ -350,13 +355,15 @@
 										Npmouillee=4+Npmouillee
 										Nfmouillee=1+Nfmouillee	
 										CALL VOLELMT(P1,P2,P3,P4,VLF,PGF,SEF,KHe)
+                                                                                IF (ZMN.LT.0.0) THEN
 										DEPLACEMENT=DEPLACEMENT+VLF
 										XF=XF+VLF*PGF(1)
 										YF=YF+VLF*PGF(2)
 										ZF=ZF+VLF*PGF(3)
 										SF=SF+SEF
 										KH=KH+KHe
-										J=2
+                                                                                END IF
+                                                                                J=2
 										C=P(3,3)/(P(3,3)-P(J,3))
 										DO K=1,3
 											PK(K)=P(3,K)+C*(P(J,K)-P(3,K))
@@ -419,12 +426,16 @@
 				WRITE(10,*) (P3(K),K=1,3)
 				WRITE(10,*) (P4(K),K=1,3)
 			END IF
+                        
+
+                        IF (ZMN.LT.0.0) THEN
 			DEPLACEMENT=DEPLACEMENT+VLF
 			XF=XF+VLF*PGF(1)
 			YF=YF+VLF*PGF(2)
 			ZF=ZF+VLF*PGF(3)
 			SF=SF+SEF
 			KH=KH+KHe
+                        END IF
 		END IF
 	END DO
 	IF (DEPLACEMENT.GT.0.0) THEN

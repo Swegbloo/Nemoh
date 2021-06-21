@@ -65,6 +65,9 @@
     REAL,DIMENSION(:,:),ALLOCATABLE :: FNDS 
 !   Froude Krylov forces
     COMPLEX,DIMENSION(:,:,:),ALLOCATABLE :: FKforce 
+    REAL,DIMENSION(4,3) :: P
+    INTEGER  :: IMN,jj
+    REAL :: ZMN
 !   Free surface visualisation
     INTEGER :: Switch_FreeSurface
     INTEGER :: Nx,Ny
@@ -230,7 +233,7 @@
             DO k=1,Nintegration
                 FKForce(i,j,k)=0.
                 DO c=1,Mesh%nPanels*2**Mesh%Isym
-                    FKForce(i,j,k)=FKForce(i,j,k)-PRESSURE(c)*FNDS(k,c)    
+                    FKForce(i,j,k)=FKForce(i,j,k)-PRESSURE(c)*FNDS(k,c)   
                 END DO
             END DO
         END DO

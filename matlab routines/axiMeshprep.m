@@ -21,7 +21,7 @@
 % Licensed under the Apache License, Version 2.0
 % Written by A. Babarit, LHEEA Lab.
 %
-function axiMeshprep1(r,z,n,nang,npanelt,zCoG,depth,wavefreq,wavedir,QTFInput,dirname)
+function axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,wavefreq,wavedir,QTFInput,dirname)
 status=close('all');
 ntheta=nang;%input('\n - Enter number of points for angular discretisation : ');
 theta=[0.:pi/(ntheta-1):pi];
