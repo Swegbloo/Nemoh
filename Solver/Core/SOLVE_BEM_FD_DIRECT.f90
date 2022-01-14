@@ -166,13 +166,13 @@ MODULE SOLVE_BEM_FD_DIRECT
     ZIGB=(0.,0.)
     ZIGS=(0.,0.)
     DO I=1,IMX
-	IF(NSYMY .EQ. 0)THEN
-	    ZIGB(I)=ZOL(I,1)    ! Factor 2 is removed in comparison with previous version of Nemoh because
-	                            ! Normal velocity is halved in Nemoh (because of symmetry)
-	    ZIGS(I)=0.0
-	ELSE
-	    ZIGB(I)=(ZOL(I,1)+ZOL(I,2))
-	    ZIGS(I)=(ZOL(I,1)-ZOL(I,2))
+        IF(NSYMY .EQ. 0)THEN
+            ZIGB(I)=ZOL(I,1)    ! Factor 2 is removed in comparison with previous version of Nemoh because
+                                    ! Normal velocity is halved in Nemoh (because of symmetry)
+            ZIGS(I)=0.0
+        ELSE
+            ZIGB(I)=(ZOL(I,1)+ZOL(I,2))
+            ZIGS(I)=(ZOL(I,1)-ZOL(I,2))
         ENDIF
     END DO  
     
@@ -189,16 +189,17 @@ MODULE SOLVE_BEM_FD_DIRECT
  !   OPEN(99,FILE=ID%ID(1:ID%lID)//'/QTF/QTFper'//strProblemNumber//'_Nemoh1.dat') ! for checking the coef in NEMOH2
 
     DO I=1,IMX
-     IF(ZG(I).LT.0.)THEN
-	DO J=1,IMX
-		call VAVFD(2,XG(I),YG(I),ZG(I),I,J)
-		call VNSFD(AM0,AMH,NEXP,I,J,XG(I),YG(I),ZG(I))  
-	        ZPB(I)=ZPB(I)+0.5*(ZIGB(J)*CMPLX(SP1+SM1,SP2+SM2)+ZIGS(J)*CMPLX(SP1-SM1,SP2-SM2))
-	        ZPS(I)=ZPS(I)+0.5*(ZIGS(J)*CMPLX(SP1+SM1,SP2+SM2)+ZIGB(J)*CMPLX(SP1-SM1,SP2-SM2))
+     IF(ZG(I).LT.0.)THEN           !only calculated on wetted panels not on lid panels for the irreg freq. removal       
+        DO J=1,IMX                 ! but for calculating phi in the wetted panel, source contribution on lid panels need to be
+                                   !     in the calculation
+                call VAVFD(2,XG(I),YG(I),ZG(I),I,J)
+                call VNSFD(AM0,AMH,NEXP,I,J,XG(I),YG(I),ZG(I))  
+                ZPB(I)=ZPB(I)+0.5*(ZIGB(J)*CMPLX(SP1+SM1,SP2+SM2)+ZIGS(J)*CMPLX(SP1-SM1,SP2-SM2))
+                ZPS(I)=ZPS(I)+0.5*(ZIGS(J)*CMPLX(SP1+SM1,SP2+SM2)+ZIGB(J)*CMPLX(SP1-SM1,SP2-SM2))
           !      SP1J(J)=SP1
         END DO
           !       WRITE(99,*)(SP1J(J),J=1,IMX)
-      END IF
+     ENDIF
    END DO
    ! CLOSE(99)
 END SUBROUTINE

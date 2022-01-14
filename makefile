@@ -79,7 +79,7 @@ QTFSolver: ./QTF/QTFSolver/Solver2.f90 ./QTF/QTFSolver/para.o
 	
 # # #Copy to local bin directory
 install : build
-	mv QTFpreProc duokap hasbo hasfs hasfscalc asymp QTFSolver ./bin/
+	mv QTFpreProc duokap hasbo hasfs hasfscalc asymp QTFSolver $(outputdir)
 
 # Remove *.o and main executable
  clean:	

@@ -287,7 +287,7 @@ C *** READING THE GEOMETRY ***
       READ(12,REC=4)(Z(I),I=1,NP)
       READ(12,REC=5)(M1(I),I=1,IMX),(M2(I),I=1,IMX),
      #(M3(I),I=1,IMX),(M4(I),I=1,IMX)
-      READ(12,REC=6)(P(I),I=1,IMX),(Q(I),I=1,IMX),(R(I),I=1,IMX)
+      READ(12,REC=6)(P(I),I=1,IMX),(Q(I),I=1,IMX),(R(I),I=1,IMX)   !is unit normal vector as prepared in QTFpreProcessor
       READ(12,REC=7)(XM(I),I=1,IMX),(YM(I),I=1,IMX),(ZM(I),I=1,IMX)
       READ(12,REC=8)(AIRE(I),I=1,IMX),(TDIS(I),I=1,IMX),
      #(DIST(I),I=1,IMX)
@@ -330,7 +330,7 @@ C LENGTH OF THE SEGMENTS AT THE FLOTATION IS THEN DIVIDED BY 2.
       END DO
       
       DO I=1,IXX  ! NORMALE GENERALISEE
-            IF(I.LE.IMX) THEN
+            IF(I.LE.IMX) THEN  ! since P,Q,R are already unit vector so no effect by normalizing again
                   CN(I,1)=P(I)/SQRT(P(I)**2+Q(I)**2+R(I)**2)
                   CN(I,2)=Q(I)/SQRT(P(I)**2+Q(I)**2+R(I)**2)
                   CN(I,3)=R(I)/SQRT(P(I)**2+Q(I)**2+R(I)**2)
@@ -461,7 +461,7 @@ c~       DO I=1,NHASKIND                                                ! versio
             READ(4444,*) PULS(I),(FEX(J,I),J=1,6),(FEXPH(J,I),J=1,6)  ! FEXPH expected in degrees  
 !!! A.C: WARNING : change to AQ+ phase convention !!!!!
             DO J=1,6
-                  FEXPH(J,I) = FEXPH(J,I)/RADD - PI/2.0	    
+                  FEXPH(J,I) = FEXPH(J,I)/RADD - PI/2.0 
             END DO
       END DO
       CLOSE(4444)      
@@ -491,7 +491,7 @@ c~       DO I1=NDD+1,NHASKIND                                           ! versio
       ! 
       ! i=1,2     : indice de la pulsation du couple etudie
       ! c=R,M     : partie reelle / imaginaire
-	    ! TRi: period of the swell (s)
+       ! TRi: period of the swell (s)
        ! BETAi: angle of incidence of the swell (rad)
        ! AMi: wave number
        ! FORi: excitatory force of order 1
@@ -723,10 +723,10 @@ C PAS PRIS EN COMPTE POUR LE MOMENT
             DO J=1,6
                   ACQ=AIRE(II)*CN(II,J)*
      1 (((-1.)**(J+1))**(JJ+1))*RHO*G*VA
-                  EFWPS(6,J,KNC)=EFWPS(8,J,KNC)+FP(1)*ACQ
-                  EFWPS(6,J+6,KNC)=EFWPS(8,J+6,KNC)+FP(2)*ACQ
-                  EFWMN(6,J,KNC)=EFWMN(8,J,KNC)+FM(1)*ACQ
-                  EFWMN(6,J+6,KNC)=EFWMN(8,J+6,KNC)+FM(2)*ACQ
+                  EFWPS(6,J,KNC)=EFWPS(6,J,KNC)+FP(1)*ACQ !edited by RK, replaced index 8 by 6 in the right hand side
+                  EFWPS(6,J+6,KNC)=EFWPS(6,J+6,KNC)+FP(2)*ACQ
+                  EFWMN(6,J,KNC)=EFWMN(6,J,KNC)+FM(1)*ACQ
+                  EFWMN(6,J+6,KNC)=EFWMN(6,J+6,KNC)+FM(2)*ACQ
             END DO
       END DO
       END DO
@@ -793,7 +793,7 @@ c~             AINTINERTIEM(IJ,IK)=-WR1*AMOR(IJ+6*(KNC-1),IK+6*(KNC-1))
 c~       CALL FORINE(AINTINERTIER,A1,FINT1)
 c~       CALL FORINE(AINTINERTIEM,A1,FINT2)
 
-	  CALL FORINE(AINTR1,A1,FINT11)     ! Matrix multiplication F=[-w^2M+K]_6x6 [X]_6X1         
+      CALL FORINE(AINTR1,A1,FINT11)     ! Matrix multiplication F=[-w^2M+K]_6x6 [X]_6X1         
       CALL FORINE(AINTM1,A1,FINT21)     ! F=[-wB]_6x6 [X]_6X1
       CALL FORINE(AINTR2,A2,FINT12)
       CALL FORINE(AINTM2,A2,FINT22)
@@ -1055,7 +1055,7 @@ C TRANSFER FUNCTION = BICHROMATIC FORCES / 2
 C WRITTEN ACCORDING TO THE PULSATIONS IN THE ABSOLUTE
 C LOW FREQUENCY ------
 C ----------------------------------------------------------------------      
-	IF(IECRBF.EQ.1) THEN
+      IF(IECRBF.EQ.1) THEN
             WRITE(26,799)1/T1,EFWMN(J1,1,KNC)/2
       ENDIF
 C HAUTE FREQUENCE
@@ -1163,11 +1163,11 @@ C *** VALEURS ABSOLUES DES EFFORTS ET PHASES ***
             ZMII=ZM(II)-ZEFF
             C1H=-CH(ABS(AM1-AM2),ZM(II),H)*G*RHO
             PHIR=C1H*COS((AM1-AM2)*(XMII*COS(0.)+YMII*SIN(0.)))
-            PHII=C1H*SIN((AM1-AM2)*(XMII*COS(0.)+YMII*SIN(0.)))
+            PHII=C1H*SIN((AM1-AM2)*(XMII*COS(0.)+YMII*SIN(0.))) !this is only for heading 0
             DO J=1,6!INTEGRATION POUR CHAQUE DOF
                   ACQ=AIRE(II)*CN(II,J)*(((-1.)**(J+1))**(JJ+1))!!N*DS
                   FKR(J)=FKR(J)+ACQ*PHIR/2                          !!-\IINT(PI.N.DS)
-                  FKI(J)=FKR(J)+ACQ*PHII/2
+                  FKI(J)=FKI(J)+ACQ*PHII/2              !edited by RK
             END DO
       END DO
       END DO
@@ -1204,7 +1204,7 @@ c~       IPM=NHASKIND                                                   ! versio
       IPM=N                                                             ! version matrice antitriangulaire sup pour les QTF+ (0 ailleurs)
  3886 CONTINUE
 
-      DO J=1,6	!ReConstructing the excitation force with linear interpolation for freq WM
+      DO J=1,6 !ReConstructing the excitation force with linear interpolation for freq WM
             FKR(J)=(FEX(J,IPM-1)*COS((FEXPH(J,IPM-1))))
      1 *(WWX(IPM)-WM)/(WWX(IPM)-WWX(IPM-1))
      1 +(FEX(J,IPM)*COS((FEXPH(J,IPM))))
@@ -1216,11 +1216,11 @@ c~       IPM=NHASKIND                                                   ! versio
       END DO
       DO J=1,6
             EFFP(J,I2+1,1,2)=WR2
-            EFFP(J,I2+1,I1+1,2)=-C12C*FKI(J)/2   
+            EFFP(J,I2+1,I1+1,2)=-C12C*FKI(J)
 !! FONCTIONNE, MULTIPLICATION PAR i ETRANGE, ON DOIT FAIRE LA MEME AU EFFORTS D'INERTIE (3EME APPROX)
 !! WORKS, MULTIPLICATION BY I ETRANGE, WE MUST DO THE SAME FOR INERTIAL EFFORTS (3RD APPROX)            
-			EFFP(J+6,I2+1,1,2)=WR2
-            EFFP(J+6,I2+1,I1+1,2)=C12C*FKR(J)/2
+            EFFP(J+6,I2+1,1,2)=WR2
+            EFFP(J+6,I2+1,I1+1,2)=-C12C*FKR(J) ! added by RK so Conjugate(1i*FK) then the results same as HASBO
       END DO
 
       DO J=1,6 !interpolating RAO
@@ -1248,8 +1248,8 @@ c~       IPM=NHASKIND                                                   ! versio
       WRITE(99,*)H,((W1**2-W2**2)-(W1-W2)**2),2*W2*(W1-W2)
       WRITE(99,*)'C12 = ',C12,C12B,C12C
       DO J=1,6
-	     FKR(J)=-FINT1(J+6)*DIMM/2 !-w^2 MX
-	     FKI(J)=FINT1(J)*DIMM/2
+             FKR(J)=-FINT1(J+6)*DIMM/2 !-w^2 MX
+             FKI(J)=FINT1(J)*DIMM/2
       END DO
 
       DO J=1,6
@@ -1389,7 +1389,8 @@ c~             DO I=1,NHASKIND+1
            DO I=1,N+1                                                  
                   DO J=1,I
                   DO K=1,3
-                        EFFP(DOF+6*(L-1),I,J,K)=EFFP(DOF+6*(L-1),J,I,K)
+                        EFFP(DOF,I,J,K)=EFFP(DOF,J,I,K)
+                        EFFP(DOF+6,I,J,K)=-EFFP(DOF+6,J,I,K) ! changed by RK such that the imaginer part is skewsymmetric matric as should be!
                   END DO
                   END DO 
 c~                   WRITE(IUNI,*) (EFFP(DOF+6*(L-1),I,J,2),J=1,NHASKIND+1)! (2 : # APPROX)     

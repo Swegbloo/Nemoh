@@ -22,15 +22,6 @@
     !!!!! IL VIENT AVANT HASFSCALC QUI, LUI, EFFECTUE LE CALCUL A PARTIR DES        !!!!!!!!!
     !!!!! QUANTITES CALCULEES ICI                                                   !!!!!!!!!
     !!!!!                                                                           !!!!!!!!!
-    !!!!! THIS PROGRAM CALCULATES THE POTENTIALS AND THEIR DERIVATIVES IN THE POINTS OF THE !!!!!!!!!
-     !!!!! FREE SURFACE. THE MESH USED IS SAVED IN !!!!!!!!!
-     !!!!! THE SF_L12.dat FILE. THE POTENTIALS ARE CALCULATED ON THE POINTS !!!!!!!!!
-     !!!!! CENTRAL FACETS OF THIS MESH AND ARE REGISTERED IN !!!!!!!!!
-     !!!!! POTENTIELS_SL.RES, IN WHICH WE WORK IN FORM !!!!!!!!!
-     !!!!! OF REGISTRATION. !!!!!!!!!
-     !!!!! IT COMES AFTER DUOK AND HASBO EVEN IF IT IS COMPLETELY INDEPENDENT !!!!!!!!!
-     !!!!! IT COMES BEFORE HASFSCALC WHO PERFORMS THE CALCULATION FROM !!!!!!!!!
-     !!!!! QUANTITIES CALCULATED HERE !!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     !
     !
@@ -529,12 +520,11 @@ c~         IF (IJK .LE. NHASKIND) THEN                                  ! versio
           Q5=C1*CIH(AM0,ZPO,H)
           POTB1=+Q5*COS(Q3)
           POTB2=+Q5*SIN(Q3)
-          POTINCSLB(IJK,IK)=CMPLX(POTB1,POTB2)
-          VINCSLB(1,IJK,IK)=CMPLX(VXB1,VXB2)
-          VINCSLB(2,IJK,IK)=CMPLX(VYB1,VYB2)
-          VINCSLB(3,IJK,IK)=CMPLX(VZB1,VZB2)
-          IF (NSYMY.EQ.1) THEN
-  ! SI NSYMY=1, YEFF=0., SIGNE INDIFFERENT
+          POTINCSLB(IJK,IK)=ZI*CMPLX(POTB1,POTB2) ! comments RK: added ZI to be same convention as in the NEMOH First order
+          VINCSLB(1,IJK,IK)=ZI*CMPLX(VXB1,VXB2)
+          VINCSLB(2,IJK,IK)=ZI*CMPLX(VYB1,VYB2)
+          VINCSLB(3,IJK,IK)=ZI*CMPLX(VZB1,VZB2)
+          IF (NSYMY.EQ.1) THEN ! SI NSYMY=1, YEFF=0., SIGNE INDIFFERENT
             Q3=AM0*((XMSL(IK)-XEFF)*CB-(YMSL(IK)+YEFF)*SB)
             VXS1=-Q1*SIN(Q3)*CB
             VYS1=+Q1*SIN(Q3)*SB
@@ -545,10 +535,10 @@ c~         IF (IJK .LE. NHASKIND) THEN                                  ! versio
             Q5=C1*CIH(AM0,ZPO,H)
             POTS1=+Q5*COS(Q3)
             POTS2=+Q5*SIN(Q3)
-            POTINCSLS(IJK,IK)=CMPLX(POTS1,POTS2)
-            VINCSLS(1,IJK,IK)=CMPLX(VXS1,VXS2)
-            VINCSLS(2,IJK,IK)=CMPLX(VYS1,VYS2)
-            VINCSLS(3,IJK,IK)=CMPLX(VZS1,VZS2)
+            POTINCSLS(IJK,IK)=ZI*CMPLX(POTS1,POTS2) ! added ZI by RK
+            VINCSLS(1,IJK,IK)=ZI*CMPLX(VXS1,VXS2)
+            VINCSLS(2,IJK,IK)=ZI*CMPLX(VYS1,VYS2)
+            VINCSLS(3,IJK,IK)=ZI*CMPLX(VZS1,VZS2)
           ENDIF
         END DO
         POTTOTSLB=POTINCSLB+POTPERSLB

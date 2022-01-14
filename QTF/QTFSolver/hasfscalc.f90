@@ -38,8 +38,8 @@
         COMPLEX,DIMENSION(2,2,NFA):: DNSPERC !DENSITE DE SOURCE PERTURBE(PULSATION,?,FACETTE) COMPLXE
         REAL CN(NFA2,6),CNSLC(3,NFASL)
         INTEGER NT(501),LK(5)
-        REAL XR,XZ,APD1X,APD1Z,APD2X,APD2Z
-        COMMON/FIC/XR(328),XZ(46),APD1X(328,46),APD1Z(328,46),APD2X(328,46),APD2Z(328,46)
+     !   REAL XR,XZ,APD1X,APD1Z,APD2X,APD2Z
+     !   COMMON/FIC/XR(328),XZ(46),APD1X(328,46),APD1Z(328,46),APD2X(328,46),APD2Z(328,46)
         ! COMPLEX,DIMENSION(328,46)::APDXC,APDZC
         LOGICAL :: FICHEY,ISXYZIN,ISIN
         REAL :: PTPROCHE(2)
@@ -94,9 +94,9 @@
         REAL::S1BRAD(NFA),S1SRAD(NFA),S2BRAD(NFA),S2SRAD(NFA)
         REAL::MULTSYM(6)
         CHARACTER*50 FMTV,FMT1,FMT2
-	CHARACTER*800 STRFMT
+	CHARACTER*2000 STRFMT
         INTEGER :: FICH,FICH2, lID
-        COMPLEX,DIMENSION(1:6,1:6,1:NFA,1:NFA)::CONTRIBM,CONTRIBP
+        COMPLEX,DIMENSION(1:3,1:6,1:NFA,1:NFA)::CONTRIBM,CONTRIBP  ! bug size fixed by RK 
         COMPLEX::PHI1,PHIP1,PHII1,PHI2,PHIP2,PHII2,&
         &PHI1_X,PHIP1_X,PHII1_X,&
         &PHI1_Y,PHIP1_Y,PHII1_Y,&
@@ -113,18 +113,19 @@
         &,ILLOC_STAT4,ILLOC_STAT5,ILLOC_STAT6,ILLOC_STAT7,ILLOC_STAT8,ILLOC_STAT9&
         &,ILLOCOK,IMIN,IOUI,IR,IREC,ISYM,ITEST,J,JFACSL,JQ,JZ,K,KKK,KNC,&
         &N,N1,N2,N3,N4,NCONT,NFACSL,NIN,NJ,NL,NLIGNE,NM,NN2,NOMBPO&
-        &,NPRINTW1,NPRINTW2,NR1,NR10,NR3,NR5,NR8,NR9,NTOT,NUMPT,NPASR,IPASR,NPASR2,NAN
-        REAL RCEREXT,T,TPE1,TPE2,TPE3,TPE4,VA,W1,W2,W3,W4,WR,WR1,TEST,XL,LONG,LONGPRE,LONGCONT
+        &,NPRINTW1,NPRINTW2,NR1,NR10,NR3,NR5,NR8,NR9,NTOT,NUMPT,NPASR,IPASR,NPASR2
+        REAL RCEREXT,T,TPE1,TPE2,TPE3,TPE4,VA,W1,W2,W3,W4,WR,WR1,TEST,XL,LONG,LONGPRE,LONGCONT,NAN
 	REAL R1,R2,DR,RC1,RC2,DRC,TBAR,G1,X1,X2,Y1,Y2,D1
         INTEGER IL,NICI,NHASKIND,LQTFP,NRCER,INDFACLIM,INDCONT,NTHETA,DOF,ICER,INDFAC2,NW,VDOF,INDFAC0,DOFSYM,IJPRINT
         REAL,DIMENSION(:),ALLOCATABLE ::RAYONS,IRCER,RCER
         COMPLEX TEMP,TEMPPRE,INTLP_DZ,INTLP_DZZ,INTLM_DZ,INTLM_DZZ,VARCONTM,VARCONTP,VS1BM,VS1BP,VE1M,VE1P,VE2M,VE2P,VE3M,VE3P,VE4M,VE4P
         COMPLEX VS4BM,VS4BP,VS1M,VS1P,VS2M,VS2P,VS3M,VS3P,VS4M,VS4P,VS5M,VS5P,VS6M,VS6P,VS7M,VS7P
+        COMPLEX VS1MPsi,VS2MPsi,VS3MPsi
 	INTEGER COLLAPSE	! VARIABLE FICTIVE POUR PLIER / DEPLIER LE CODE
 	
 	NAN=0.
 	NAN=NAN/NAN
-write(*,*) 'checkkk'
+
 !        !!!!!!!!!!!!!                                           !!!!!!!!!!!!!!!!!
 DO 001 COLLAPSE=0,0!!!!!!           OUVERTURE ET ENREGISTREMENT DE LA GEOMETRIE     !!!!!!!!!
 !     !!!!!!!!!!!!!                                           !!!!!!!!!!!!!!!!!
@@ -179,7 +180,7 @@ DO 002 COLLAPSE=0,0!!!!!     OUVERTURE ET ENREGISTREMENT DE GEOMETRIE COMPLETE  
         ZCDG=ZEFF
         NDEB=0
         NFIN=NFAC+NFFL
-
+      
         DO I=1,NFFL
             LK(1)=M1(IND(I))
             LK(2)=M2(IND(I))
@@ -197,9 +198,10 @@ DO 002 COLLAPSE=0,0!!!!!     OUVERTURE ET ENREGISTREMENT DE GEOMETRIE COMPLETE  
                 IF(ABS(Z(LK(J)))+ABS(Z(LK(J+1))) < 1.E-05 .AND. TEST > 1.E-5)THEN
                     AIRE(NFAC+I)=SQRT(TEST)
                 ! !   AIRE(I),I>NFAC, EST LA LONGUEUR DES COTES A LA FLOTTAISON
+                !! AIRE(I>NFAC)=dGAMMA
                 ENDIF
             ENDDO
-       ENDDO
+        ENDDO
     !
         DO I=1,NL
             CN(I,1)=P(I)
@@ -209,7 +211,7 @@ DO 002 COLLAPSE=0,0!!!!!     OUVERTURE ET ENREGISTREMENT DE GEOMETRIE COMPLETE  
             CN(I,5)=(ZM(I)-ZEFF)*CN(I,1)-(XM(I)-XEFF)*CN(I,3)
             CN(I,6)=(XM(I)-XEFF)*CN(I,2)-(YM(I)-YEFF)*CN(I,1)
         END DO
-    !
+        
         BETA=BETA/RADD
         CB=COS(BETA)
         SB=SIN(BETA)
@@ -329,7 +331,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
         END DO
         WRITE(10,*)'0. 0. 0. 0.'
         CLOSE(10)
-
+    
         NTOT=NFACSL+NCONT+NLIGNE
 !!!!!!!!!!!!!! version matrice carre pour les QTF+!!!!!!!!!!!!!!!!!!!!!!
 !~         ALLOCATE(EFFM(6,NHASKIND,NHASKIND,NRCER),STAT=ILLOC_STAT9)
@@ -480,6 +482,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
         ENDIF
         NTOT=NFACSL+NCONT+NLIGNE
         NR10=NTOT*2*2*4
+       ! print *,NTOT,NFACSL,NCONT,NLIGNE
         OPEN(12,FILE='POTENTIELS_SL.RES',ACCESS='DIRECT',RECL=2*NR10)
         DO IJK=1,N
             IREC=(IJK-1)*36
@@ -509,9 +512,6 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 004 ENDDO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-
-
-
 !!!!PLOT DISTANCE RADIALE!!!!
 
 
@@ -535,7 +535,6 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
     IF ( Louthasfs==1 ) THEN
 	
 	OPEN(178,FILE=ID(1:lID)//'/results/QTF/Appendix/PLOT_DZZ_CONT_W'//TRIM(FMT1)//'_W'//TRIM(FMT2)//'_DOF'//TRIM(FMTV)//'.dat')
-	OPEN(128,FILE=ID(1:lID)//'/results/QTF/Appendix/PLOTSURF_W'//TRIM(FMT1)//'_W'//TRIM(FMT2)//'_DOF'//TRIM(FMTV)//'.dat')
 	OPEN(122,FILE=ID(1:lID)//'/results/QTF/Appendix/PLOT_DZ_INT_W'//TRIM(FMT1)//'_W'//TRIM(FMT2)//'_DOF'//TRIM(FMTV)//'.dat')
 	OPEN(121,FILE=ID(1:lID)//'/results/QTF/Appendix/PLOT_DZZ_INT_W'//TRIM(FMT1)//'_W'//TRIM(FMT2)//'_DOF'//TRIM(FMTV)//'.dat')
 	OPEN(130,FILE=ID(1:lID)//'/results/QTF/Appendix/PLOTLIGNE_W'//TRIM(FMT1)//'_W'//TRIM(FMT2)//'_DOF'//TRIM(FMTV)//'.dat')
@@ -544,10 +543,13 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 	OPEN(134,FILE=ID(1:lID)//'/results/QTF/Appendix/DZZ_CONT_W'//TRIM(FMT1)//'_W'//TRIM(FMT2)//'_DOF'//TRIM(FMTV)//'.dat')
 	OPEN(132,FILE=ID(1:lID)//'/results/QTF/Appendix/comp_W'//TRIM(FMT1)//'_W'//TRIM(FMT2)//'_DOF'//TRIM(FMTV)//'.dat')
 	
-	
-	WRITE(178,*) 'X     ','Y     ','CX     ','CY     '&
+	OPEN(128,FILE=ID(1:lID)//'/results/QTF/Appendix/PLOTSURF_W'//TRIM(FMT1)//'_W'//TRIM(FMT2)//'_DOF'//TRIM(FMTV)//'.dat')
+        OPEN(148,FILE=ID(1:lID)//'/results/QTF/Appendix/PLOTSURF_VS17_W'//TRIM(FMT1)//'_W'//TRIM(FMT2)//'_DOF'//TRIM(FMTV)//'.dat')!added by RK
+	OPEN(149,FILE=ID(1:lID)//'/results/QTF/Appendix/DAT_FSMesh.dat')
+	OPEN(150,FILE=ID(1:lID)//'/results/QTF/Appendix/PLOTCONT_W'//TRIM(FMT1)//'_W'//TRIM(FMT2)//'_DOF'//TRIM(FMTV)//'.dat')
+        
+        WRITE(178,*) 'X     ','Y     ','CX     ','CY     '&
 	&,'INTEGRANDE SUR LE CONTOUR DIFF PARTIE REELLE     ','INT CONT DIFF IM     ','[INT CONT SOM RE     ','INT CONT SOM IM]'
-	WRITE(128,*) 'X     ','Y     ','PHI1 PARTIE REELLE     ','IM(PHI1)     ','PHI1_X  .._Y  .._Z     ','PHII1 ...','PHIP1 ...','....2','PSIM  .._X  ....','[PSIP .._X ...]'
 	WRITE(122,*) 'X     ','Y     ','INTEGRANDE DZ (S1-3) DIFF SUR LA SL PARTIE RELLE     ','INT DIFF IM     ','[INT SOM RE     ','INT SOM IM]     '
 	WRITE(121,*) 'X     ','Y     ','INTEGRANDE DZZ (S4-7) DIFF SUR LA SL PARTIE RELLE     ','INT DIFF IM     ','[INT SOM RE     ','INT SOM IM]     '
 	WRITE(130,*) 'X     ','Y     ','PHI1 PARTIE REELLE     ','IM(PHI1)     ','PHI1_X  .._Y  .._Z     ','PHII1 ...','PHIP1 ...','....2','PSIM  .._X  ....','[PSIP .._X ...]'
@@ -555,6 +557,11 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 	WRITE(138,*) 'Rext    ','REAL PART DZZ INTM2D    ','IM DZZ INTM2D','[RE DZZ INTP2D    ','IM DZZ INTP2D]'
 	WRITE(134,*) 'Rext    ','REAL PART DZZ INTMCONT    ','IM DZZ INTMCONT','[RE DZZ INTPCONT    ','IM DZZ INTPCONT]'
 	WRITE(132,*) 'Rext    ','REAL PART S1-7+E1-4 INTM    ','IM S1-7+E1-4 INTM','[RE S1-7+E1-4 INTP    ','IM S1-7+E1-4 INTP]'
+        WRITE(128,*) 'IFACSL','X     ','Y     ','AREA','PHI1 PARTIE REELLE     ','IM(PHI1)     ','PHI1_X  .._Y  .._Z     ','PHII1 ...','PHIP1 ...','....2','PSIM  .._X  ....','[PSIP .._X ...]'
+        WRITE(128,*) 'NFACSL',NFACSL 
+        WRITE(148,*) 'X     ','Y     ','Re(VS1) ','Im(VS1)','...','Re(VS7) ','Im(VS7)'
+	WRITE(150,*) 'ICONT', 'X     ','Y     ','nx  ','ny  ','dGamma','PHI1 PARTIE REELLE     ','IM(PHI1)     ','PHI1_X  .._Y  .._Z     ','PHII1 ...','PHIP1 ...','....2','PSIM  .._X  ....]'
+        WRITE(150,*) 'NCONT',NCONT
     ENDIF
     
     S1BM=CMPLX(0.,0.)
@@ -576,7 +583,6 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
       S7M=CMPLX(0.,0.)
 
       IF (LQTFP==1) THEN
-      
 	S1P=CMPLX(0.,0.)
 	S2P=CMPLX(0.,0.)
 	S3P=CMPLX(0.,0.)
@@ -584,10 +590,8 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 	S5P=CMPLX(0.,0.)
 	S6P=CMPLX(0.,0.)
 	S7P=CMPLX(0.,0.)
-	
       ENDIF
     ENDIF
-      
     AI=0.
     INDFACLIM=0
     ! BOUCLE SUR LES RAYONS LIMITES
@@ -600,21 +604,28 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 	R2=SQRT(XMSLF(INDFACLIM+1)**2+YMSLF(INDFACLIM+1)**2)
 	INDFAC2=(NTHETA)*(IRCER(ICER)-1)
 	DR=ABS(R1-SQRT(XMSLF(INDFAC2)**2+YMSLF(INDFAC2)**2))
-	
+	RCER(ICER)=(R1+R2)/2/COS(PI/NJ/NTHETA)
 	! CONTOURS
 	INDCONT=NCONT/2
-	RC1=SQRT(XMSLF(INDCONT)**2+YMSLF(INDCONT)**2)
-	RC2=SQRT(XMSLF(INDCONT+1)**2+YMSLF(INDCONT+1)**2)
-	DRC=ABS(RC1-SQRT(XMSLF(INDCONT+NTHETA)**2+YMSLF(INDCONT+NTHETA)**2))
-	
-	RCER(ICER)=(R1+R2)/2/COS(PI/NJ/NTHETA)
+	RC1=SQRT(XMSLC(INDCONT)**2+YMSLC(INDCONT)**2) !changed by RK previusly XMSLF, YMSLF 
+	RC2=SQRT(XMSLC(INDCONT+1)**2+YMSLC(INDCONT+1)**2) ! it will be updated depends iterated R in the interpolation process
+                                                          ! XMSLC four outer line is updated in the interpolation 
+	DRC=ABS(RC1-SQRT(XMSLC(INDCONT+NTHETA)**2+YMSLC(INDCONT+NTHETA)**2))
 	
 	IF (R2-R1>DR/2 .AND. RC2-RC1>DRC/4. .AND. INDCONT==NTHETA) THEN 
 	! ON EST ALORS A LA FIN DE L'ARC DE CERCLE DE RAYON ~RCER
-	
+	!
 	! INTERPOLATION DES POTENTIELS POUR NE PAS AVOIR A RELANCER LE PREPROC
+        ! INTERPOLATION for GAMMA in outer line for iterated R(ICER)
+	!WRITE(*,*)   'NTHETA = ',NTHETA
+	!WRITE(*,*)   'INDCONT = ',INDCONT
+	!WRITE(*,*)   'IRCER = ',IRCER(ICER)
+	!WRITE(*,*)   'RCER = ',RCER(ICER)*COS(PI/NJ/NTHETA)
+	!WRITE(*,*)   'R1 = ',R1,'R2 = ',R2,'DR =',DR
+	!WRITE(*,*)   'RC1 = ',RC1,'RC2 = ',RC2,'DRC = ',DRC
+        !WRITE(*,*)   'INDFAC0',INDFAC0,'INDFACLIM',INDFACLIM
 
-	DO IFACSL=1,INDCONT
+        DO IFACSL=1,INDCONT
 	    X1=XSL(M1SLF(IFACSL+INDFACLIM))
 	    Y1=YSL(M1SLF(IFACSL+INDFACLIM))
 	    X2=XSL(M2SLF(IFACSL+INDFACLIM))
@@ -627,7 +638,8 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 	    CNSLC(1,IFACSL+INDCONT)=(Y2-Y1)/G1
 	    CNSLC(2,IFACSL+INDCONT)=-(X2-X1)/G1
 	    TBAR=(D1-SQRT(XMSLF(IFACSL+INDFACLIM)**2+YMSLF(IFACSL+INDFACLIM)**2))/(SQRT(XMSLF(IFACSL+INDFACLIM-NTHETA)**2+YMSLF(IFACSL+INDFACLIM-NTHETA)**2)-SQRT(XMSLF(IFACSL+INDFACLIM)**2+YMSLF(IFACSL+INDFACLIM)**2))
-	    DO ISYM=1,NJ
+	    !WRITE(*,*) RCER(ICER),XMSLC(IFACSL+INDCONT), YMSLC(IFACSL+INDCONT)
+            DO ISYM=1,NJ
 !~ 		DO NW=1,NHASKIND					! version matrice carre pour les QTF+
 		DO NW=1,N						! version matrice antitriangulaire sup pour les QTF+ (0 ailleurs)
 		    POTTOTSLC(ISYM,NW,IFACSL+INDCONT)=POTTOTSLF(ISYM,NW,IFACSL+INDFACLIM-NTHETA)*TBAR+POTTOTSLF(ISYM,NW,IFACSL+INDFACLIM)*(1-TBAR)
@@ -649,7 +661,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 		ENDDO
 	    ENDDO
 	ENDDO
-    
+        
     N1=0
     N2=0
     N3=0
@@ -712,6 +724,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
                 AK4=NAN
                 W4=NAN
             ENDIF
+           ! WRITE(*,*) 'W1=',W1,'W2=',W2,'W-=',W3,'W+=',W4
 
 	    IF ( Louthasfs==1 .AND. N1==NPRINTW1 .AND. N2==NPRINTW2 .AND. ICER==1) THEN
 	      IF (N4/=0) THEN
@@ -723,6 +736,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 		WRITE(138,*) 'W1=',W1,'W2=',W2,'W-=',W3,'W+=',W4
 		WRITE(134,*) 'W1=',W1,'W2=',W2,'W-=',W3,'W+=',W4
 		WRITE(132,*) 'W1=',W1,'W2=',W2,'W-=',W3,'W+=',W4
+                WRITE(148,*) 'W1=',W1,'W2=',W2,'W-=',W3,'W+=',W4
 	      ELSE
 		WRITE(178,*) 'W1=',W1,'W2=',W2,'W-=',W3
 		WRITE(128,*) 'W1=',W1,'W2=',W2,'W-=',W3
@@ -732,6 +746,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 		WRITE(138,*) 'W1=',W1,'W2=',W2,'W-=',W3
 		WRITE(134,*) 'W1=',W1,'W2=',W2,'W-=',W3
 		WRITE(132,*) 'W1=',W1,'W2=',W2,'W-=',W3
+                WRITE(148,*) 'W1=',W1,'W2=',W2,'W-=',W3
 	      ENDIF
 	    ENDIF
 
@@ -740,15 +755,17 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
                 PHI1=POTTOTSLF(ISYM,N1,IFACSL)
                 PHIP1=POTPERSLF(ISYM,N1,IFACSL)
                 PHII1=POTINCSLF(ISYM,N1,IFACSL)
+                !PHI1=PHII1+PHIP1 
 
                 PHI2=POTTOTSLF(ISYM,N2,IFACSL)
                 PHIP2=POTPERSLF(ISYM,N2,IFACSL)
                 PHII2=POTINCSLF(ISYM,N2,IFACSL)
+                !PHI2=PHII2+PHIP2
 
                 PHI1_X=VTOTSLF(ISYM,1,N1,IFACSL)
                 PHIP1_X=VPERSLF(ISYM,1,N1,IFACSL)
                 PHII1_X=VINCSLF(ISYM,1,N1,IFACSL)
-
+                
                 PHI1_Y=VTOTSLF(ISYM,2,N1,IFACSL)
                 PHIP1_Y=VPERSLF(ISYM,2,N1,IFACSL)
                 PHII1_Y=VINCSLF(ISYM,2,N1,IFACSL)
@@ -760,7 +777,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
                 PHI2_X=VTOTSLF(ISYM,1,N2,IFACSL)
                 PHIP2_X=VPERSLF(ISYM,1,N2,IFACSL)
                 PHII2_X=VINCSLF(ISYM,1,N2,IFACSL)
-
+                
                 PHI2_Y=VTOTSLF(ISYM,2,N2,IFACSL)
                 PHIP2_Y=VPERSLF(ISYM,2,N2,IFACSL)
                 PHII2_Y=VINCSLF(ISYM,2,N2,IFACSL)
@@ -771,7 +788,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 
                 AIR=AIRESLF(IFACSL)
                 LONG=SQRT(XMSLF(IFACSL)**2+YMSLF(IFACSL)**2)
-
+                
         !!!!!!!!!!!                                                                        !!!!!!!!!!!
         !!!!   NOUS DEVONS CODER I(W1-W2)(GRAD PHI1 GRAD PHIP2* + GRAD PHIP1 GRAD PHII2) PSI^- DS  !!!!!
         !!!!!!!!!!!                                                                         !!!!!!!!!!
@@ -881,13 +898,14 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 		
 		IF (Louthasfs==1) THEN
 		  IF (N3/=0) THEN
-		      VS1M=	+ ZI*(W1-W2)*					&
-		      &                 (PHI1_X*CONJG(PHIP2_X)+		&
-		      &                  PHI1_Y*CONJG(PHIP2_Y)+		&
-		      &                  PHI1_Z*CONJG(PHIP2_Z)+		&
-		      &                  PHIP1_X*CONJG(PHII2_X)+		&
-		      &                  PHIP1_Y*CONJG(PHII2_Y)+		&
-		      &                  PHIP1_Z*CONJG(PHII2_Z))
+		       VS1M=	+ ZI*(W1-W2)*				&
+			&                 (PHI1_X*CONJG(PHIP2_X)+			&
+			&                  PHI1_Y*CONJG(PHIP2_Y)+			&
+			&                  PHI1_Z*CONJG(PHIP2_Z)+			&
+			&                  PHIP1_X*CONJG(PHII2_X)+			&
+			&                  PHIP1_Y*CONJG(PHII2_Y)+			&
+			&                  PHIP1_Z*CONJG(PHII2_Z))
+                                                 
 		      
 		      VS2M=	- ZI*W1/(2.*G)*					&
 		      &                 (PHI1 *(-W2**2*CONJG(PHIP2_Z))+	&
@@ -899,23 +917,31 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 		      
 		      
 		      DO IJ=1,6,DOFSYM
-			VS4M=	-ZI*W1/2.*						&
-			&    	( (PSIM_X(IJ)*PHI1+PHI1_X*PSIM(IJ)) * CONJG(PHIP2_X)+	&
-			&    	  (PSIM_Y(IJ)*PHI1+PHI1_Y*PSIM(IJ)) * CONJG(PHIP2_Y) )
+		!	VS4M=	-ZI*W1/2.*						&
+		!	&    	( (PSIM_X(IJ)*PHI1+PHI1_X*PSIM(IJ)) * CONJG(PHIP2_X)+	&
+		!	&    	  (PSIM_Y(IJ)*PHI1+PHI1_Y*PSIM(IJ)) * CONJG(PHIP2_Y) )
+		!	
+		!	VS5M=	-ZI*W1/2.*						&
+		!	&    	( (PSIM_X(IJ)*PHIP1+PHIP1_X*PSIM(IJ)) * CONJG(PHII2_X)+	&
+		!	&    	  (PSIM_Y(IJ)*PHIP1+PHIP1_Y*PSIM(IJ)) * CONJG(PHII2_Y) )
+  
+                !        VS6M=	+ZI*W2/2.*						&
+		!	& ( (PSIM_X(IJ)*CONJG(PHI2)+CONJG(PHI2_X)*PSIM(IJ)) * PHIP1_X+	&
+		!	&   (PSIM_Y(IJ)*CONJG(PHI2)+CONJG(PHI2_Y)*PSIM(IJ)) * PHIP1_Y )
+		!	
+		!	VS7M=	+ZI*W2/2.*						&
+		!	& ( (PSIM_X(IJ)*CONJG(PHIP2)+CONJG(PHIP2_X)*PSIM(IJ)) * PHII1_X+	&
+		!	&   (PSIM_Y(IJ)*CONJG(PHIP2)+CONJG(PHIP2_Y)*PSIM(IJ)) * PHII1_Y )
+ 
+			VS4M=-ZI*W1/2.*PSIM(IJ)*(PHI1*K2*K2*CONJG(PHIP2)+PHIP1*K2*K2*CONJG(PHII2))
 			
-			VS5M=	-ZI*W1/2.*						&
-			&    	( (PSIM_X(IJ)*PHIP1+PHIP1_X*PSIM(IJ)) * CONJG(PHII2_X)+	&
-			&    	  (PSIM_Y(IJ)*PHIP1+PHIP1_Y*PSIM(IJ)) * CONJG(PHII2_Y) )
+			VS5M=ZI*W2/2.*PSIM(IJ)*(CONJG(PHI2)*K1*K1*PHIP1+CONJG(PHIP2)*K1*K1*PHII1)
+  
+                        VS6M=0
 			
-			VS6M=	+ZI*W2/2.*						&
-			& ( (PSIM_X(IJ)*CONJG(PHI2)+CONJG(PHI2_X)*PSIM(IJ)) * PHIP1_X+	&
-			&   (PSIM_Y(IJ)*CONJG(PHI2)+CONJG(PHI2_Y)*PSIM(IJ)) * PHIP1_Y )
-			
-			VS7M=	+ZI*W2/2.*						&
-			& ( (PSIM_X(IJ)*CONJG(PHIP2)+CONJG(PHIP2_X)*PSIM(IJ)) * PHII1_X+	&
-			&   (PSIM_Y(IJ)*CONJG(PHIP2)+CONJG(PHIP2_Y)*PSIM(IJ)) * PHII1_Y )
-			
-			
+			VS7M=0
+
+                        			
 			S1M(IJ,N1,N2)=S1M(IJ,N1,N2)+VS1M*PSIM(IJ)*AIR
 			S2M(IJ,N1,N2)=S2M(IJ,N1,N2)+VS2M*PSIM(IJ)*AIR
 			S3M(IJ,N1,N2)=S3M(IJ,N1,N2)+VS3M*PSIM(IJ)*AIR
@@ -924,12 +950,13 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 			S5M(IJ,N1,N2)=S5M(IJ,N1,N2)+VS5M*AIR
 			S6M(IJ,N1,N2)=S6M(IJ,N1,N2)+VS6M*AIR
 			S7M(IJ,N1,N2)=S7M(IJ,N1,N2)+VS7M*AIR
-			
+
 			IF (N1==NPRINTW1 .AND. N2==NPRINTW2 .AND. IJ==IJPRINT) THEN
+                         
 			  INTLM_DZ  = -ZI*RHO*(W1-W2)/G*VS1BM*PSIM(IJ)
 			  INTLM_DZZ = -ZI*RHO*(W1-W2)/G*VS4BM
 			  IF (LQTFP==0) THEN
-			    WRITE(128,*) XMSLF(IFACSL),(-1)**(ISYM-1)*YMSLF(IFACSL) &
+                                  WRITE(128,*) IFACSL,XMSLF(IFACSL),(-1)**(ISYM-1)*YMSLF(IFACSL),AIR &
 			    & ,REAL(PHI1),AIMAG(PHI1),REAL(PHI1_X),AIMAG(PHI1_X),REAL(PHI1_Y),AIMAG(PHI1_Y),REAL(PHI1_Z),AIMAG(PHI1_Z) &
 			    & ,REAL(PHII1),AIMAG(PHII1),REAL(PHII1_X),AIMAG(PHII1_X),REAL(PHII1_Y),AIMAG(PHII1_Y),REAL(PHII1_Z),AIMAG(PHII1_Z) &
 			    & ,REAL(PHIP1),AIMAG(PHIP1),REAL(PHIP1_X),AIMAG(PHIP1_X),REAL(PHIP1_Y),AIMAG(PHIP1_Y),REAL(PHIP1_Z),AIMAG(PHIP1_Z) &
@@ -939,9 +966,15 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 			    & ,REAL(PSIM(IJ)),AIMAG(PSIM(IJ)),REAL(PSIM_X(IJ)),AIMAG(PSIM_X(IJ)),REAL(PSIM_Y(IJ)),AIMAG(PSIM_Y(IJ)),REAL(PSIM_Z(IJ)),AIMAG(PSIM_Z(IJ))
 			    WRITE(122,*) XMSLF(IFACSL),(-1)**(ISYM-1)*YMSLF(IFACSL),REAL(INTLM_DZ ),AIMAG(INTLM_DZ )
 			    WRITE(121,*) XMSLF(IFACSL),(-1)**(ISYM-1)*YMSLF(IFACSL),REAL(INTLM_DZZ),AIMAG(INTLM_DZZ)
-			  ENDIF
-			ENDIF
-			
+                            VS1MPsi=VS1M*PSIM(IJ)
+                            VS2MPsi=VS2M*PSIM(IJ)
+                            VS3MPsi=VS3M*PSIM(IJ)
+
+                            WRITE(148,*) XMSLF(IFACSL),(-1)**(ISYM-1)*YMSLF(IFACSL) &
+                            & ,REAL(VS1MPsi),AIMAG(VS1MPsi),REAL(VS2MPsi),AIMAG(VS2MPsi),REAL(VS3MPsi),AIMAG(VS3MPsi),REAL(VS4M),AIMAG(VS4M) &
+                            & ,REAL(VS5M),AIMAG(VS5M),REAL(VS6M),AIMAG(VS6M),REAL(VS7M),AIMAG(VS7M)
+			   ENDIF
+                        ENDIF
 			
 		      ENDDO
 		  ELSE
@@ -965,7 +998,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 			&                  PHIP1_X*PHII2_X+			&
 			&                  PHIP1_Y*PHII2_Y+			&
 			&                  PHIP1_Z*PHII2_Z)
-			
+			 
 			VS2P=	- ZI*W1/(2.*G)*				&
 			&                 (PHI1 *(-W2**2*PHIP2_Z)+		&
 			&                  PHIP1*(-W2**2*PHII2_Z) )
@@ -975,22 +1008,30 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 			&                  PHIP2*(-W1**2*(PHII1_Z)) )
 			
 			DO IJ=1,6,DOFSYM
-			  VS4P=	-ZI*W1/2.*					&
-			  &    	( (PSIP_X(IJ)*PHI1+PHI1_X*PSIP(IJ)) * PHIP2_X+	&
-			  &    	  (PSIP_Y(IJ)*PHI1+PHI1_Y*PSIP(IJ)) * PHIP2_Y )
-			  
-			  VS5P=	-ZI*W1/2.*					&
-			  &    	( (PSIP_X(IJ)*PHIP1+PHIP1_X*PSIP(IJ)) * PHII2_X+&
-			  &    	  (PSIP_Y(IJ)*PHIP1+PHIP1_Y*PSIP(IJ)) * PHII2_Y )
-			  
-			  VS6P=	-ZI*W2/2.*					&
-			  &   	( (PSIP_X(IJ)*PHI2+PHI2_X*PSIP(IJ)) * PHIP1_X+	&
-			  &   	  (PSIP_Y(IJ)*PHI2+PHI2_Y*PSIP(IJ)) * PHIP1_Y )
-			  
-			  VS7P=	-ZI*W2/2.*					&
-			  &   	( (PSIP_X(IJ)*PHIP2+PHIP2_X*PSIP(IJ)) * PHII1_X+&
-			  &   	  (PSIP_Y(IJ)*PHIP2+PHIP2_Y*PSIP(IJ)) * PHII1_Y )
+                          !VS4P=	-ZI*W1/2.*					&
+			  !&    	( (PSIP_X(IJ)*PHI1+PHI1_X*PSIP(IJ)) * PHIP2_X+	&
+			  !&    	  (PSIP_Y(IJ)*PHI1+PHI1_Y*PSIP(IJ)) * PHIP2_Y )
+			  !
+			  !VS5P=	-ZI*W1/2.*					&
+			  !&    	( (PSIP_X(IJ)*PHIP1+PHIP1_X*PSIP(IJ)) * PHII2_X+&
+			  !&    	  (PSIP_Y(IJ)*PHIP1+PHIP1_Y*PSIP(IJ)) * PHII2_Y )
+			  !
+			  !VS6P=	-ZI*W2/2.*					&
+			  !&   	( (PSIP_X(IJ)*PHI2+PHI2_X*PSIP(IJ)) * PHIP1_X+	&
+			  !&   	  (PSIP_Y(IJ)*PHI2+PHI2_Y*PSIP(IJ)) * PHIP1_Y )
+			  !
+			  !VS7P=	-ZI*W2/2.*					&
+			  !&   	( (PSIP_X(IJ)*PHIP2+PHIP2_X*PSIP(IJ)) * PHII1_X+&
+			  !&   	  (PSIP_Y(IJ)*PHIP2+PHIP2_Y*PSIP(IJ)) * PHII1_Y )
 			
+                          VS4P=-ZI*W1/2.*PSIP(IJ)*(PHI1*K2*K2*PHIP2+PHIP1*K2*K2*PHII2)
+			
+			  VS5P=-ZI*W2/2.*PSIP(IJ)*(PHI2*K1*K1*PHIP1+PHIP2*K1*K1*PHII1)
+  
+                          VS6P=0
+			
+			  VS7P=0
+
 			
 			  S1P(IJ,N1,N2)=S1P(IJ,N1,N2)+VS1P*PSIP(IJ)*AIR
 			  S2P(IJ,N1,N2)=S2P(IJ,N1,N2)+VS2P*PSIP(IJ)*AIR
@@ -1006,17 +1047,9 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 			    INTLP_DZ  = -ZI*RHO*(W1+W2)/G*VS1BP*PSIP(IJ)
 			    INTLP_DZZ = -ZI*RHO*(W1+W2)/G*VS4BP
 			    
-			    WRITE(128,*) XMSLF(IFACSL),(-1)**(ISYM-1)*YMSLF(IFACSL) &
-			    & ,REAL(PHI1 ),AIMAG(PHI1 ),REAL(PHI1_X ),AIMAG(PHI1_X ),REAL(PHI1_Y ),AIMAG(PHI1_Y ),REAL(PHI1_Z ),AIMAG(PHI1_Z ) &
-			    & ,REAL(PHII1),AIMAG(PHII1),REAL(PHII1_X),AIMAG(PHII1_X),REAL(PHII1_Y),AIMAG(PHII1_Y),REAL(PHII1_Z),AIMAG(PHII1_Z) &
-			    & ,REAL(PHIP1),AIMAG(PHIP1),REAL(PHIP1_X),AIMAG(PHIP1_X),REAL(PHIP1_Y),AIMAG(PHIP1_Y),REAL(PHIP1_Z),AIMAG(PHIP1_Z) &
-			    & ,REAL(PHI2 ),AIMAG(PHI2 ),REAL(PHI2_X ),AIMAG(PHI2_X ),REAL(PHI2_Y ),AIMAG(PHI2_Y ),REAL(PHI2_Z ),AIMAG(PHI2_Z ) &
-			    & ,REAL(PHII2),AIMAG(PHII2),REAL(PHII2_X),AIMAG(PHII2_X),REAL(PHII2_Y),AIMAG(PHII2_Y),REAL(PHII2_Z),AIMAG(PHII2_Z) &
-			    & ,REAL(PHIP2),AIMAG(PHIP2),REAL(PHIP2_X),AIMAG(PHIP2_X),REAL(PHIP2_Y),AIMAG(PHIP2_Y),REAL(PHIP2_Z),AIMAG(PHIP2_Z) &
-			    & ,REAL(PSIM(IJ)),AIMAG(PSIM(IJ)),REAL(PSIM_X(IJ)),AIMAG(PSIM_X(IJ)),REAL(PSIM_Y(IJ)),AIMAG(PSIM_Y(IJ)),REAL(PSIM_Z(IJ)),AIMAG(PSIM_Z(IJ)) &
-			    & ,REAL(PSIP(IJ)),AIMAG(PSIP(IJ)),REAL(PSIP_X(IJ)),AIMAG(PSIP_X(IJ)),REAL(PSIP_Y(IJ)),AIMAG(PSIP_Y(IJ)),REAL(PSIP_Z(IJ)),AIMAG(PSIP_Z(IJ)) 
 			    WRITE(122,*) XMSLF(IFACSL),(-1)**(ISYM-1)*YMSLF(IFACSL),REAL(INTLM_DZ ),AIMAG(INTLM_DZ ),REAL(INTLP_DZ ),AIMAG(INTLP_DZ )
 			    WRITE(121,*) XMSLF(IFACSL),(-1)**(ISYM-1)*YMSLF(IFACSL),REAL(INTLM_DZZ),AIMAG(INTLM_DZZ),REAL(INTLP_DZZ),AIMAG(INTLP_DZZ)
+
 			  ENDIF
 			  
 			  
@@ -1047,8 +1080,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 		IF (N3/=0) E1BM(IJ,N1,N2)=CMPLX(0.,0.)
 		IF (N4/=0) E1BP(IJ,N1,N2)=CMPLX(0.,0.)
 		
-		
-		IF (Louthasfs==1) THEN
+		!Louthasf condition removed by RK
 		  IF (N3/=0) THEN
 		    E1M(IJ,N1,N2)=CMPLX(0.,0.)
 		    E2M(IJ,N1,N2)=CMPLX(0.,0.)
@@ -1061,11 +1093,8 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 		    E3P(IJ,N1,N2)=CMPLX(0.,0.)
 		    E4P(IJ,N1,N2)=CMPLX(0.,0.)
 		  ENDIF
-		ENDIF
 	    ENDDO
-	    
-	    
-	    
+            
 
 	    LONGCONT=0
 	    DO 211 IFACSL=1,NCONT
@@ -1073,10 +1102,12 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
                 PHI1 =POTTOTSLC(ISYM,N1,IFACSL)
                 PHIP1=POTPERSLC(ISYM,N1,IFACSL)
                 PHII1=POTINCSLC(ISYM,N1,IFACSL)
+               ! PHI1=PHIP1+PHII1
 
                 PHI2 =POTTOTSLC(ISYM,N2,IFACSL)
 		PHIP2=POTPERSLC(ISYM,N2,IFACSL)
                 PHII2=POTINCSLC(ISYM,N2,IFACSL)
+               ! PHI2=PHII2+PHIP2
 
                 PHI1_X =VTOTSLC(ISYM,1,N1,IFACSL)
                 PHIP1_X=VPERSLC(ISYM,1,N1,IFACSL)
@@ -1104,12 +1135,15 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
                 
                 AIR=AIRESLC(IFACSL)
                 LONG=SQRT(XMSLC(IFACSL)**2+YMSLC(IFACSL)**2)
-
+             !   WRITE(*,*)XMSLC(IFACSL),YMSLC(IFACSL)
 	    ! EiP/M	: INTEGRALE SUR LA LIGNE DE FLOTTAISON (ISSUE DES DERIVEE SECONDE)
 	    ! E1BP/M 	: FORMULATION DES INTEGRALE ISSUE DU PAPIER 
 	    !			E1BP/M = E1P/M + E2P/M + E3P/M + E4P/M
                 CNY=CNSLC(2,IFACSL)*(-1)**(ISYM+1)
                 CNX=CNSLC(1,IFACSL)
+                
+               ! WRITE(*,*) IFACSL,RCER(ICER),XMSLC(IFACSL), YMSLC(IFACSL) 
+                
 		
 		IF (N3/=0) THEN
 		    VARCONTM= 									&
@@ -1147,6 +1181,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 		
 		IF (Louthasfs==1) THEN
 		  IF (N3/=0) THEN
+                          
 		      VE1M= + ZI*W1/2.*( CONJG(PHIP2_X)*CNX + CONJG(PHIP2_Y)*CNY )*PHI1
 		      VE2M= + ZI*W1/2.*( CONJG(PHII2_X)*CNX + CONJG(PHII2_Y)*CNY )*PHIP1
 		      VE3M= - ZI*W2/2.*( PHIP1_X*CNX + PHIP1_Y*CNY )*CONJG(PHI2)
@@ -1158,11 +1193,22 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 			E4M(IJ,N1,N2)=E4M(IJ,N1,N2)+VE4M*PSIM(IJ)*AIR
 			
 			IF (N1==NPRINTW1 .AND. N2==NPRINTW2 .AND. IJ==IJPRINT .AND. N4==0) THEN
-              WRITE(178,*) XMSLC(IFACSL),(-1)**(ISYM-1)*YMSLC(IFACSL),CNX,CNY,REAL(VARCONTM*PSIM(IJ)),AIMAG(VARCONTM*PSIM(IJ))
+                          WRITE(178,*) XMSLC(IFACSL),(-1)**(ISYM-1)*YMSLC(IFACSL),CNX,CNY,REAL(VARCONTM*PSIM(IJ)),AIMAG(VARCONTM*PSIM(IJ))
 			ENDIF
 			
-		      ENDDO
-		  ELSE
+
+			IF (N1==NPRINTW1 .AND. N2==NPRINTW2 .AND. IJ==IJPRINT .AND. ICER==NRCER ) THEN
+                         WRITE(150,*) IFACSL,XMSLC(IFACSL),(-1)**(ISYM-1)*YMSLC(IFACSL),CNX,CNY,AIR&
+                            & ,REAL(PHI1),AIMAG(PHI1),REAL(PHI1_X),AIMAG(PHI1_X),REAL(PHI1_Y),AIMAG(PHI1_Y),REAL(PHI1_Z),AIMAG(PHI1_Z) &
+			    & ,REAL(PHII1),AIMAG(PHII1),REAL(PHII1_X),AIMAG(PHII1_X),REAL(PHII1_Y),AIMAG(PHII1_Y),REAL(PHII1_Z),AIMAG(PHII1_Z) &
+			    & ,REAL(PHIP1),AIMAG(PHIP1),REAL(PHIP1_X),AIMAG(PHIP1_X),REAL(PHIP1_Y),AIMAG(PHIP1_Y),REAL(PHIP1_Z),AIMAG(PHIP1_Z) &
+			    & ,REAL(PHI2),AIMAG(PHI2),REAL(PHI2_X),AIMAG(PHI2_X),REAL(PHI2_Y),AIMAG(PHI2_Y),REAL(PHI2_Z),AIMAG(PHI2_Z) &
+			    & ,REAL(PHII2),AIMAG(PHII2),REAL(PHII2_X),AIMAG(PHII2_X),REAL(PHII2_Y),AIMAG(PHII2_Y),REAL(PHII2_Z),AIMAG(PHII2_Z) &
+			    & ,REAL(PHIP2),AIMAG(PHIP2),REAL(PHIP2_X),AIMAG(PHIP2_X),REAL(PHIP2_Y),AIMAG(PHIP2_Y),REAL(PHIP2_Z),AIMAG(PHIP2_Z) &
+			    & ,REAL(PSIM(IJ)),AIMAG(PSIM(IJ)),REAL(PSIM_X(IJ)),AIMAG(PSIM_X(IJ)),REAL(PSIM_Y(IJ)),AIMAG(PSIM_Y(IJ)),REAL(PSIM_Z(IJ)),AIMAG(PSIM_Z(IJ))
+		        ENDIF 
+                     ENDDO
+		ELSE
 		      DO IJ=1,6,DOFSYM
 			E1M(IJ,N1,N2)=NAN
 			E2M(IJ,N1,N2)=NAN
@@ -1287,24 +1333,30 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
         !!!!!!SOMMATION ET ENREGISTREMENT!!!!!!!!
     DO 201 IJ=1,6,DOFSYM  !DEGRE DE LIBERTE
 	IF (N3/=0) THEN
-	    CONTRIBM(1,IJ,N1,N2)=-ZI*RHO*(W1-W2)/G*(S1BM(IJ,N1,N2))!S1M(IJ)+S2M(IJ)+S3M(IJ)
-	    CONTRIBM(2,IJ,N1,N2)=-ZI*RHO*(W1-W2)/G*(S4BM(IJ,N1,N2))!S4M(IJ)+S5M(IJ)+S6M(IJ)+S7M(IJ))
-	    CONTRIBM(3,IJ,N1,N2)=-ZI*RHO*(W1-W2)/G*(E1BM(IJ,N1,N2))!E1M(IJ)+E2M(IJ)+E3M(IJ)+E4M(IJ))
-	    EFFM(IJ,N1,N2,ICER)=&
+	   !CONTRIBM(1,IJ,N1,N2)=-ZI*RHO*(W1-W2)/G*(S1BM(IJ,N1,N2))!S1M(IJ)+S2M(IJ)+S3M(IJ)
+	   !CONTRIBM(2,IJ,N1,N2)=-ZI*RHO*(W1-W2)/G*(S4BM(IJ,N1,N2))!S4M(IJ,N1,N2)+S5M(IJ,N1,N2)+S6M(IJ,N1,N2)+S7M(IJ,N1,N2))!
+	   !CONTRIBM(3,IJ,N1,N2)=-ZI*RHO*(W1-W2)/G*(E1BM(IJ,N1,N2))!E1M(IJ)+E2M(IJ)+E3M(IJ)+E4M(IJ))
+	   CONTRIBM(1,IJ,N1,N2)=ZI*RHO*(W1-W2)/G*(S1M(IJ,N1,N2)+S2M(IJ,N1,N2)+S3M(IJ,N1,N2))              !added by RK
+	   CONTRIBM(2,IJ,N1,N2)=ZI*RHO*(W1-W2)/G*(S4M(IJ,N1,N2)+S5M(IJ,N1,N2)+S6M(IJ,N1,N2)+S7M(IJ,N1,N2))!
+	   CONTRIBM(3,IJ,N1,N2)=0!ZI*RHO*(W1-W2)/G*(E1M(IJ,N1,N2)+E2M(IJ,N1,N2)+E3M(IJ,N1,N2)+E4M(IJ,N1,N2))
+            EFFM(IJ,N1,N2,ICER)=&
 	    & CONTRIBM(1,IJ,N1,N2)&
 	    &+CONTRIBM(2,IJ,N1,N2)&
 	    &+CONTRIBM(3,IJ,N1,N2)
-	ELSE
-	    CONTRIBM(1,IJ,N1,N2)=0.
+       ELSE
+            CONTRIBM(1,IJ,N1,N2)=0.
 	    CONTRIBM(2,IJ,N1,N2)=0.
 	    CONTRIBM(3,IJ,N1,N2)=0.
 	    EFFM(IJ,N1,N2,ICER)=0.
 	ENDIF
 	IF (N4/=0) THEN
-	    CONTRIBP(1,IJ,N1,N2)=-ZI*RHO*(W1+W2)/G*(S1BP(IJ,N1,N2))!S1M(IJ)+S2M(IJ)+S3M(IJ)
-	    CONTRIBP(2,IJ,N1,N2)=-ZI*RHO*(W1+W2)/G*(S4BP(IJ,N1,N2))!S4M(IJ)+S5M(IJ)+S6M(IJ)+S7M(IJ))
-	    CONTRIBP(3,IJ,N1,N2)=-ZI*RHO*(W1+W2)/G*(E1BP(IJ,N1,N2))!E1M(IJ)+E2M(IJ)+E3M(IJ)+E4M(IJ))
-	    EFFP(IJ,N1,N2,ICER)=&
+	    !CONTRIBP(1,IJ,N1,N2)=-ZI*RHO*(W1+W2)/G*(S1BP(IJ,N1,N2))!S1M(IJ)+S2M(IJ)+S3M(IJ)
+	    !CONTRIBP(2,IJ,N1,N2)=-ZI*RHO*(W1+W2)/G*(S4BP(IJ,N1,N2))!S4M(IJ)+S5M(IJ)+S6M(IJ)+S7M(IJ))
+	    !CONTRIBP(3,IJ,N1,N2)=-ZI*RHO*(W1+W2)/G*(E1BP(IJ,N1,N2))!E1M(IJ)+E2M(IJ)+E3M(IJ)+E4M(IJ))
+	    CONTRIBP(1,IJ,N1,N2)=ZI*RHO*(W1+W2)/G*(S1P(IJ,N1,N2)+S2P(IJ,N1,N2)+S3P(IJ,N1,N2))              !added by RK
+	    CONTRIBP(2,IJ,N1,N2)=ZI*RHO*(W1+W2)/G*(S4P(IJ,N1,N2)+S5P(IJ,N1,N2)+S6P(IJ,N1,N2)+S7P(IJ,N1,N2))!
+	    CONTRIBP(3,IJ,N1,N2)=0!ZI*RHO*(W1+W2)/G*(E1P(IJ,N1,N2)+E2P(IJ,N1,N2)+E3P(IJ,N1,N2)+E4P(IJ,N1,N2))
+            EFFP(IJ,N1,N2,ICER)=&
 	    & CONTRIBP(1,IJ,N1,N2)&
 	    &+CONTRIBP(2,IJ,N1,N2)&
 	    &+CONTRIBP(3,IJ,N1,N2)
@@ -1348,17 +1400,14 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 201     END DO!FIN BOUCLE SUR LES DOF
 200 END DO!FIN DE BOUCLE SUR LES PULSATIONS
     ELSE 
-	WRITE(*,*)   'NTHETA = ',NTHETA
-	WRITE(*,*)   'INDCONT = ',INDCONT
-	WRITE(*,*)   'IRCER = ',IRCER(ICER)
-	WRITE(*,*)   'RCER = ',RCER(ICER)*COS(PI/NJ/NTHETA)
-	WRITE(*,*)   'R1 = ',R1,'R2 = ',R2,'DR =',DR
-	WRITE(*,*)   'RC1 = ',RC1,'RC2 = ',RC2,'DRC = ',DRC
+        WRITE(*,*)   'NTHETA = ',NTHETA
+        WRITE(*,*)   'INDCONT = ',INDCONT
+        WRITE(*,*)   'IRCER = ',IRCER(ICER)
+        WRITE(*,*)   'RCER = ',RCER(ICER)*COS(PI/NJ/NTHETA)
+        WRITE(*,*)   'R1 = ',R1,'R2 = ',R2,'DR =',DR
+        WRITE(*,*)   'RC1 = ',RC1,'RC2 = ',RC2,'DRC = ',DRC
     ENDIF
 215 END DO
-
-
-
     IF ( Louthasfs==1 ) THEN
       CLOSE(178)
       CLOSE(128)
@@ -1371,6 +1420,8 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
       CLOSE(131)
       CLOSE(132)
       CLOSE(133)
+      CLOSE(148)
+      CLOSE(150)
       IF (LQTFP .EQ. 1) THEN
 	  CLOSE(134)
 	  CLOSE(135)
@@ -1378,7 +1429,7 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
     ENDIF
     
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    PRINT *, ''
+    PRINT *,''
     PRINT *,'CALCULS SUR LA PARTIE EXACTE TERMINEE'
     
     
@@ -1496,35 +1547,35 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
       ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     1984 END DO
-	WRITE(STRFMT,*)  "# FORMAT:",CHAR(10),				&
-     & "# Rext     W2[1]    --- W2[j]    --- W2[N]",CHAR(10),		&
-     & "# W1[1]    QTF[1,1] --- QTF[1,j] --- QTF[1,N]",CHAR(10),	&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# W1[i]    QTF[i,1] --- QTF[i,j] --- QTF[i,N]",CHAR(10),	&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# W1[N]    QTF[N,1] --- QTF[N,j] --- QTF[N,N]",CHAR(10),	&
-     & "# Rext[2]   --- ",CHAR(10),					&
-     & "#  . ",CHAR(10),						&
-     & "#  . ",CHAR(10),						&
-     & "#  . ",CHAR(10),CHAR(10)
-     
-	WRITE(124,*)STRFMT
-	WRITE(125,*)STRFMT
+!        WRITE(STRFMT,*)  "# FORMAT:",CHAR(10),                          &
+!     & "# Rext     W2[1]    --- W2[j]    --- W2[N]",CHAR(10),           &
+!     & "# W1[1]    QTF[1,1] --- QTF[1,j] --- QTF[1,N]",CHAR(10),        &
+!     & "# .         .            .            .",CHAR(10),              &
+!     & "# .         .            .            .",CHAR(10),              &
+!     & "# .         .            .            .",CHAR(10),              &
+!     & "# W1[i]    QTF[i,1] --- QTF[i,j] --- QTF[i,N]",CHAR(10),        &
+!     & "# .         .            .            .",CHAR(10),              &
+!     & "# .         .            .            .",CHAR(10),              &
+!     & "# .         .            .            .",CHAR(10),              &
+!     & "# W1[N]    QTF[N,1] --- QTF[N,j] --- QTF[N,N]",CHAR(10),        &
+!     & "# Rext[2]   --- ",CHAR(10),                                     &
+!     & "#  . ",CHAR(10),                                                &
+!     & "#  . ",CHAR(10),                                                &
+!     & "#  . ",CHAR(10),CHAR(10)                                        
+!     
+!	WRITE(124,*)STRFMT
+!	WRITE(125,*)STRFMT
 	CLOSE(124)
 	CLOSE(125)
 	IF (LQTFP .EQ. 1) THEN
-	    WRITE(126,*)STRFMT
-	    WRITE(127,*)STRFMT
-!!!! version matrice antitriangulaire sup pour les QTF+ (0 ailleurs) !!!!
-	    WRITE(126,*) CHAR(10),CHAR(10),"# NB: Les valeurs des QTF+ pour w1+w2>n*dw sont definies a zeros.",CHAR(10),&
-	    & "# en effet, un calcul de ces valeurs necessiterait un calcul d'ordre 1 sur 2 fois plus de pulsation."
-	    WRITE(127,*) CHAR(10),CHAR(10),"# NB: Les valeurs des QTF+ pour w1+w2>n*dw sont definies a zeros.",CHAR(10),&
-	    & "# en effet, un calcul de ces valeurs necessiterait un calcul d'ordre 1 sur 2 fois plus de pulsation."
-	    
+!	    WRITE(126,*)STRFMT
+!	    WRITE(127,*)STRFMT
+!!!!! version matrice antitriangulaire sup pour les QTF+ (0 ailleurs) !!!!
+!	    WRITE(126,*) CHAR(10),CHAR(10),"# NB: Les valeurs des QTF+ pour w1+w2>n*dw sont definies a zeros.",CHAR(10),&
+!	    & "# en effet, un calcul de ces valeurs necessiterait un calcul d'ordre 1 sur 2 fois plus de pulsation."
+!	    WRITE(127,*) CHAR(10),CHAR(10),"# NB: Les valeurs des QTF+ pour w1+w2>n*dw sont definies a zeros.",CHAR(10),&
+!	    & "# en effet, un calcul de ces valeurs necessiterait un calcul d'ordre 1 sur 2 fois plus de pulsation."
+!	    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	    CLOSE(126)
 	    CLOSE(127)

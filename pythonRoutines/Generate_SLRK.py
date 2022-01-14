@@ -16,7 +16,7 @@ import os
 import shutil
 
 
-def generate_mesh(nemohpath,NPASTH, Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
+def generate_mesh(nemohpath, NPASTH, NPASRInput,  Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
     ''' Cette fonction genere un maillage de la surface libre
     pour une ligne de flottaison circulaire de RM a RCEREXT avec NPASTH noeuds
     dans la direction radiale.
@@ -32,9 +32,6 @@ def generate_mesh(nemohpath,NPASTH, Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
         SF_L12.dat		maillage de la surface au format L12 (lu par NEMOH)
         SF_L12.vtk		maillage au format vtk pour visualisation
     '''
-
-    #nemohpath=''
-    nemohpathmeshdat=nemohpath+'/mesh/'
     
     print('NPASTH='+str(NPASTH)+'   RCEREXT='+str(RCEREXT))
 
@@ -48,11 +45,12 @@ def generate_mesh(nemohpath,NPASTH, Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
 
     changename(nemohpath,'SF_L12','.dat')
     changename(nemohpath,'SF_L12','.vtk')
-    
+
     # lecture des fichiers de parametrage de nemoh
     w,G,H,namemb=read_Nemoh_cal(nemohpath)
     Wmax=max(w)
-
+    #print(str(nemohpath+namemb[0]))
+    nemohpathmeshdat=nemohpath+'/mesh/'
     L12=open(nemohpathmeshdat+namemb[0])
     NSYMY=int(L12.readline().strip().split(' ')[-1])
     NJ=NSYMY+1
@@ -69,27 +67,40 @@ def generate_mesh(nemohpath,NPASTH, Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
     elif KMAX*H < 2:
         KMAX*=2.			# intermediate water --> on maximise k
 
-    RCEREXT=min(RCEREXT,(Mbess-1.)/KMAX)					# correction du rayon limit : si Rcerext*K> Mbess, asymp de peut pas tourner
-    MDR=2*np.pi/30./KMAX
+ #   RCEREXT=min(RCEREXT,(Mbess-1.)/KMAX)					# correction du rayon limit : si Rcerext*K> Mbess, asymp de peut pas tourner
+    MDR=2*np.pi/9./KMAX
     print('max(dr)= '+str(MDR))
     print('Rext= '+str(RCEREXT))
     ##
 
 
     # creation de la variation radiale
-    RIND=(RCEREXT0-RM)/NPASR0**PUISS	# rayon caracteristique pour que Ri= RIND.i^2
-    IMAX=np.int((MDR/RIND-1)/2)		# indice a partir duquel dr > MDR     (dr=(i+1).RIND)
-    NPASR=np.int(np.sqrt((RCEREXT-RM)/RIND))# nombre de point radiaux
-    if IMAX>NPASR:	# cas ou on a toujours dr < MDR
-        RSL=RM+RIND*np.arange(NPASR+1)**2
-    else:		# sinon on prolonge par une serie de noeud avec dr = MDR
-        RSL=RM+RIND*np.arange(IMAX)**2
-        RSL=np.append(RSL,RSL[-1]+MDR*(1+np.arange((RCEREXT-RSL[-1])/MDR)))
+    #RIND=(RCEREXT0-RM)/NPASR0**PUISS	# rayon caracteristique pour que Ri= RIND.i^2
+    #IMAX=np.int((MDR/RIND-1)/2)		# indice a partir duquel dr > MDR     (dr=(i+1).RIND)
+    #NPASR=np.int(((RCEREXT-RM)/RIND)**(1./PUISS))# nombre de point radiaux
+    #print('NPASR= '+str(NPASR)+', IMAX= '+str(IMAX)+', RIND= '+str(RIND))
+    #if IMAX>NPASR:	# cas ou on a toujours dr < MDR
+    #    RSL=RM+RIND*np.arange(NPASR+1)**PUISS
+    #else:		# sinon on prolonge par une serie de noeud avec dr = MDR
+    #    #RSL=RM+RIND*np.arange(IMAX)**PUISS
+    #    #RSL=np.append(RSL,RSL[-1]+MDR*(1+np.arange((RCEREXT-RSL[-1])/MDR)))
+
+    ## changed by RK now RIND is depends on NPASRInput
+    NPASR=NPASRInput
+    RIND=(RCEREXT-RM)/NPASR**PUISS	# rayon caracteristique pour que Ri= RIND.i^2
+    RSL=RM+RIND*np.arange(NPASR+1)**PUISS
+    maxdR=RSL[NPASR]-RSL[NPASR-1]
+    print('min dR= '+str(RIND)+', max dR= '+str(maxdR))
     NPASR=len(RSL)-1
     RCEREXT=RSL[-1]
     print('NPASR = '+str(NPASR)+', RCEREXT = '+str(RCEREXT))
     ##
 
+    minLambda=9*maxdR
+    Kmax=2*np.pi/minLambda
+    wmax=np.sqrt(G*Kmax*np.tanh(Kmax*H))
+    print('Suggestion: min  wavelength= '+str(9*maxdR)+ ', Kmax= '+str(Kmax)+', wmax=  '+str(wmax) )
+    
     RSLL=np.append(RSL,RSL[-1]+MDR*(1+np.arange((RLIGNE-RCEREXT)/MDR)))
     if Lligne:
         NPASL=len(RSLL)-1
@@ -113,10 +124,12 @@ def generate_mesh(nemohpath,NPASTH, Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
 
     ## creation du maillage de la surface
     for IR in range(NPASR+1):
+       # print(str(IR)+' RSL= '+str(RSL[IR]))
         for ITH in range(NPASTH+1):
             # creation des noeuds
             NUMPT=ITH+1+IR*(NPASTH+1)   #removed '.' after 1 to be an integer by RK
             PSL=RSL[IR]*np.exp(1j*ITH*2*np.pi/(NJ*NPASTH))
+            # print('NUMPT='+str(NUMPT)+' PSL='+str(PSL))
             XSL[NUMPT-1]=np.real(PSL)
             YSL[NUMPT-1]=np.imag(PSL)
             NOMBPO=NOMBPO+1
@@ -150,7 +163,7 @@ def generate_mesh(nemohpath,NPASTH, Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
     ## creation du contour (normale vers l'exterieur)
     for IR in range(NPASR+1):
         for ITH in range(NPASTH+1):
-            NUMPT=ITH+1.+IR*(NPASTH+1) 
+            NUMPT=ITH+1.+IR*(NPASTH+1)
             if (IR == NPASR) and (ITH != NPASTH):
                 NCONT=NCONT+1
                 M1SL[NCONT+NFACSL-1]=NUMPT
@@ -165,7 +178,6 @@ def generate_mesh(nemohpath,NPASTH, Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
                 AIRESL[NCONT+NFACSL-1]=G1
                 CNSL[0,NCONT+NFACSL-1]=(Y2-Y1)/G1
                 CNSL[1,NCONT+NFACSL-1]=-(X2-X1)/G1
-              #  print('IR='+str(IR)+' X1= '+str(X1)+', Y1 = '+str(Y1)+' X2= '+str(X2)+', Y2 = '+str(Y2))
             elif (IR == 0) and (ITH != NPASTH):
                 NCONT=NCONT+1
                 M1SL[NCONT+NFACSL-1]=NUMPT
@@ -180,8 +192,6 @@ def generate_mesh(nemohpath,NPASTH, Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
                 AIRESL[NCONT+NFACSL-1]=G1
                 CNSL[0,NCONT+NFACSL-1]=-(Y2-Y1)/G1
                 CNSL[1,NCONT+NFACSL-1]=(X2-X1)/G1
-              #  print('IR='+str(IR)+' X1= '+str(X1)+', Y1 = '+str(Y1)+' X2= '+str(X2)+', Y2 = '+str(Y2))
-
     ##
     NTOT=NFACSL+NCONT
 
@@ -245,12 +255,13 @@ def generate_mesh(nemohpath,NPASTH, Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
 
 
 if __name__ == '__main__':
-
-    NPASTH = 50		# nombre de points othoradiaux
+    NPASR  = 120       # number of points in radial
+    NPASTH = 8		# nombre de points othoradiaux
     RCEREXT = 50.		# distance jusqu'a laquelle la surface est maillee
-    Lligne = False		# prise en compte de la ligne?
+    Lligne = False      # prise en compte de la ligne?
     RLIGNE = 10000.		# pour visualisation
-    RM = 6			# distance minimale (a 10cm de la ligne de flottaison)
+    RM = 6.1			# distance minimale (a 10cm de la ligne de flottaison)
     f = open('workdir.txt', 'r')
     nemohpath=f.read()
-    generate_mesh(nemohpath,NPASTH, Lligne, RM, RCEREXT, RLIGNE)
+
+    generate_mesh(nemohpath,NPASTH,NPASR, Lligne, RM, RCEREXT, RLIGNE)

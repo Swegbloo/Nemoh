@@ -2,10 +2,108 @@ clc
 clear all
 close all
 
-testcase=10; 
+testcase=1; 
 
 switch testcase 
        case 1
+        %============ MESH WITH Mesh.m==================%
+        % RECTANGULAR BOX
+        clc
+        clear all
+        close all
+        dirname='RectangularLiu17';
+        L = 10; % Length x axis
+        W = 20; % Width y axis
+        Draft= 5;
+        % left face
+        X(1,1,:,:)=[-L/2,0,-Draft;
+            -L/2,-W/2,-Draft;
+            -L/2,-W/2,0;
+            -L/2,0,0] ;
+        % Bottom face
+        X(1,2,:,:)=[-L/2,-W/2,-Draft;
+            -L/2,0,-Draft
+            L/2,0,-Draft;
+            L/2,-W/2,-Draft;];
+        % right face
+        X(1,3,:,:)=[L/2,0,-Draft;
+            L/2,0,0;
+            L/2,-W/2,0;
+            L/2,-W/2,-Draft] ;
+        % front face
+        X(1,4,:,:)=[-L/2,-W/2,-Draft;
+            L/2,-W/2,-Draft;
+            L/2,-W/2,0;
+            -L/2,-W/2,0];
+        
+        n=4;         % number of panels
+        nBodies=1;   % 1 body
+        tX=0;        % no translation applied to the Mesh
+        CG=[0,0,0]; % position of gravity centre
+        nfobj=600;   % target number of panels for Aquaplus mesh
+        wmax=3;
+        nbfreq=60; % number of calculations = (number of BVP per frequency*number of frequencies)
+        w= linspace(wmax/nbfreq,wmax,nbfreq)'; % Periods from 3s to 20s for waves for instance
+        dir=0;% angle of the incident waves
+        depth=600; % water depth (m)
+        QTFInput=[0]; %[Flag, LQTFP, Contrib, Loutduok,Louthasbo,louthasfs]
+        Meshprep(nBodies,n,X,tX,CG,nfobj,depth,w,dir,QTFInput,dirname);
+             
+         %------------Define calculation options-------------
+       
+         case 2
+        %============ MESH WITH Mesh.m==================%
+        % RECTANGULAR BOX
+        clc
+        clear all
+        close all
+        dirname='RectangularLiu17Lid_test';
+        L = 10; % Length x axis
+        W = 20; % Width y axis
+        Draft= 5;
+        % left face
+        X(1,1,:,:)=[-L/2,0,-Draft;
+            -L/2,-W/2,-Draft;
+            -L/2,-W/2,0;
+            -L/2,0,0] ;
+        % Bottom face
+        X(1,2,:,:)=[-L/2,-W/2,-Draft;
+            -L/2,0,-Draft
+            L/2,0,-Draft;
+            L/2,-W/2,-Draft];
+        % right face
+        X(1,3,:,:)=[L/2,0,-Draft;
+            L/2,0,0;
+            L/2,-W/2,0;
+            L/2,-W/2,-Draft] ;
+        % front face
+        X(1,4,:,:)=[-L/2,-W/2,-Draft;
+            L/2,-W/2,-Draft;
+            L/2,-W/2,0;
+            -L/2,-W/2,0];
+          % TOP face
+     X(1,5,:,:)=[-L/2,-W/2,0;
+            -L/2,0,0
+            L/2,0,0;
+            L/2,-W/2,0];
+        
+        n=5;         % number of panels
+        nBodies=1;   % 1 body
+        tX=0;        % no translation applied to the Mesh
+        CG=[0,0,0]; % position of gravity centre
+        nfobj=800;   % target number of panels for Aquaplus mesh
+        wmax=3;
+        nbfreq=60; % number of calculations = (number of BVP per frequency*number of frequencies)
+        w= linspace(wmax/nbfreq,wmax,nbfreq)'; % Periods from 3s to 20s for waves for instance
+        dir=0;% angle of the incident waves
+        depth=600; % water depth (m)
+        QTFInput=[0]; %[Flag, LQTFP, Contrib, Loutduok,Louthasbo,louthasfs]
+        Meshprep(nBodies,n,X,tX,CG,nfobj,depth,w,dir,QTFInput,dirname);
+             
+         %------------Define calculation options-------------
+       
+        
+       case 3
         %  Don't Forget z(i)> z(i+1) !!
         clc
         clear all
@@ -34,42 +132,63 @@ switch testcase
         QTFInput=[0]; %[Flag, LQTFP, Contrib, Loutduok,Louthasbo,louthasfs]
         
         axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
-    case 2
-        %  Don't Forget z(i)> z(i+1) !!
+        
+        case 4
+            %% SOFTWIND PLATFORM
+            %% specify n angular 50, npanel 500, z gravity -1.789*Frscaled
         clc
         clear all
         close all
         
-        dirname='hemisphereR10InfDLid';
-        nang=50;
-        npanelt=600;
+        dirname='CylinderR10T30D30Npt800_test';
+        FrScaled=1;
+        R1 =10;
+       
         
+        Draft =R1*3; % Height of the submerged part
         
-        n1=10; % number of points for the description of the
-        n=n1+1;
-        Rayon=10;
-        for i=1:n+1
-            r(i)=Rayon*cos((n1-i+1)*pi/2/n1-pi/2);
-            z(i)=Rayon*sin((n1-i+1)*pi/2/n1-pi/2);
-        end
-            rtemp=zeros(1,length(r)+3);ztemp=rtemp;
-            rtemp(5:end)=r(1:end-1);ztemp(5:end)=z(1:end-1);
-            rtemp(1)=0; rtemp(2)=Rayon/4;rtemp(3)=Rayon/2;rtemp(4)=3*Rayon/4;
-            ztemp(1:4)=0;
-            r=rtemp;z=ztemp;n=length(r);
-        %------------Define calculation options-------------
-        nbfreq=20; % number of calculations = (number of BVP per frequency*number of frequencies)
-        g=9.811;
-        w= linspace(sqrt(g)/nbfreq,sqrt(g),nbfreq)'; % Periods from 3s to 20s for waves for instance
-        dir=0;% angle of the incident waves
-        depth=600; % water depth (m)
+        r=[0 R1/4 2*R1/4 3*R1/4 R1 R1      R1        R1        R1    R1    3*R1/4 2*R1/4 1*R1/4 0]; % r is the first coordinates of the
+        z=-[0 0    0        0     0 Draft/4 2*Draft/4 3*Draft/4 Draft Draft Draft Draft Draft Draft];
+        n=length(r);
         zCoG=0;
+        nang=50;
+        npanelt=1600;
+        nbfreq=80; % number of calculations = (number of BVP per frequency*number of frequencies)
+        w= linspace(0.05,4,nbfreq)'; % Periods from 3s to 20s for waves for instance
+        dir=0;% angle of the incident waves
+        depth=Draft; % water depth (m)
+        QTFInput=0;%[1 1 2 1 1 0]; %[Flag, LQTFP, Contrib, Loutduok,Louthasbo,louthasfs]
+        
+        axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
+         case 5
+            %% SOFTWIND PLATFORM
+            %% specify n angular 50, npanel 500, z gravity -1.789*Frscaled
+        clc
+        clear all
+        close all
+        
+        dirname='CylinderR10T30D30Npt800NoLid';
+        FrScaled=1;
+        R1 =10;
+       
+        
+        Draft =R1*3; % Height of the submerged part
+        
+        r=[ R1 R1      R1        R1        R1    R1    3*R1/4 2*R1/4 1*R1/4 0]; % r is the first coordinates of the
+        z=-[0 Draft/4 2*Draft/4 3*Draft/4 Draft Draft Draft Draft Draft Draft];
+        n=length(r);
+        zCoG=0;
+        nang=50;
+        npanelt=800;
+        nbfreq=60; % number of calculations = (number of BVP per frequency*number of frequencies)
+        w= linspace(0.05,3,nbfreq)'; % Periods from 3s to 20s for waves for instance
+        dir=0;% angle of the incident waves
+        depth=Draft; % water depth (m)
         QTFInput=[1 1 2 1 1 0]; %[Flag, LQTFP, Contrib, Loutduok,Louthasbo,louthasfs]
         
         axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
-      
-
-        case 3
+         
+        case 6
             %% SOFTWIND PLATFORM
             %% specify n angular 50, npanel 500, z gravity -1.789*Frscaled
         clc
@@ -99,7 +218,7 @@ switch testcase
         
          axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
          
-          case 4
+          case 7
             %% SOFTWIND PLATFORM
             %% specify n angular 50, npanel 500, z gravity -1.789*Frscaled
         clc
@@ -131,7 +250,7 @@ switch testcase
         
          axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
          
-          case 5
+          case 8
             %% SOFTWIND PLATFORM
             %% specify n angular 50, npanel 500, z gravity -1.789*Frscaled
         clc
@@ -163,7 +282,7 @@ switch testcase
         
          axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
          
-           case 6
+           case 9
             %% SOFTWIND PLATFORM
             %% specify n angular 50, npanel 500, z gravity -1.789*Frscaled
         clc
@@ -195,7 +314,7 @@ switch testcase
         
          axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
          
-             case 7
+             case 10
             %% SOFTWIND PLATFORM
             %% specify n angular 50, npanel 500, z gravity -1.789*Frscaled
         clc
@@ -227,7 +346,7 @@ switch testcase
         
          axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
          
-          case 8
+          case 11
             %% SOFTWIND PLATFORM
             %% specify n angular 50, npanel 500, z gravity -1.789*Frscaled
         clc
@@ -257,7 +376,7 @@ switch testcase
         
          axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
          
-           case 9
+           case 12
             %% SOFTWIND PLATFORM
             %% specify n angular 50, npanel 500, z gravity -1.789*Frscaled
         clc
@@ -287,7 +406,7 @@ switch testcase
         
          axiMeshprep(r,z,n,nang,npanelt,zCoG,depth,w,dir,QTFInput,dirname);% Call the function axiMesh.m
          
-          case 10
+          case 13
             %% SOFTWIND PLATFORM
             %% specify n angular 50, npanel 500, z gravity -1.789*Frscaled
         clc

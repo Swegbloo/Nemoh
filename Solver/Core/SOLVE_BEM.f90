@@ -77,8 +77,8 @@ CONTAINS
         ELSE
 !           Calculate wave number
             AKH=w*w*Depth/G                                                 
-	        AMH=X0(AKH)                                                                                                   
-	        kwave=AMH/Depth 
+	    AMH=X0(AKH)                                                                                                   
+	    kwave=AMH/Depth 
 !           Solve with direct method ?
             IF (Indiq_solver .eq. 0) CALL SOLVE_POTENTIAL_FD_DIRECT(NVEL,AMH,NEXP,ProblemNumber,ID)        
 !           Solve using GMRES ?
@@ -89,15 +89,17 @@ CONTAINS
         END IF
 !       Assemble pressure
         DO i=1,NFA
-           IF (ZG(i).lt.0.) THEN
+!           IF (ZG(i).lt.0.) THEN
                 PRESSURE(i)=RHO*II*W*ZPB(i) !*AIRE(i)
                 IF (NSYMY.EQ.1) THEN
                         PRESSURE(i+NFA)=RHO*II*W*ZPS(i) !*AIRE(i)    
                 END IF
-           ELSE
-                PRESSURE(i)=0
-                PRESSURE(i+NFA)=0
-           ENDIF
+!           ELSE
+!                PRESSURE(i)=0
+!                IF (NSYMY.EQ.1) THEN
+!                PRESSURE(i+NFA)=0
+!                END IF
+!           ENDIF
         END DO
         
         

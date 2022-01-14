@@ -41,7 +41,12 @@ PROGRAM Main
   
   COMPLEX,DIMENSION(:,:),ALLOCATABLE :: ZIGB,ZIGS
   
-  
+   INTEGER :: IPrintPOT,NPRINTW1, IDOFPRINT  !! added by rk to print  potentials on body elements
+   CHARACTER*50 FMTV,FMT1
+    IPrintPOT=1
+    NPRINTW1=11
+    IDOFPRINT=1
+   
   
   !   --- read input datas -------
 
@@ -126,6 +131,16 @@ PROGRAM Main
   
   ALLOCATE(ZIGB(Mesh%Npanels,Nradiation+Nbeta))
   ALLOCATE(ZIGS(Mesh%Npanels,Nradiation+Nbeta))
+
+
+  IF (IPrintPOT==1) THEN
+        WRITE(FMT1,'(I2.2)') NPRINTW1
+        WRITE(FMTV,'(I1)') IDOFPRINT
+        OPEN(188,FILE=ID%ID(1:ID%lID)//'/QTF/PLOTBODYPOT_W'//TRIM(FMT1)//'_DOF'//TRIM(FMTV)//'.dat')   
+        WRITE(188,*) 'IDpanel','XM     ','YM     ','ZM  ','RE(PHI1)  ','IM(PHI1)     ','PHI1_X  .._Y  .._Z'
+        WRITE(188,*) 'IDpanel','XM     ','YM     ','ZM  ','RE(PSIM)  ', 'IM(PSI)     ','PSIM_X  .._Y  ..Z'
+  ENDIF
+
   
   !!!!!!!!!  LOOP ON FREQUENCIES !!!!!!!!!!!!!!!
   DO i=1,Nw
@@ -142,8 +157,7 @@ PROGRAM Main
       do k =1,Nintegration
 	ZF1(k,1,j) = Fe0(i,k,j)
 	!NOTE: Motion ZA should depend on wave direction
-	ZA(k,1) = RAO(i,k,j)
-	
+	ZA(k,1) = RAO(i,k,j) 
       end do
     end do
 
@@ -154,9 +168,10 @@ PROGRAM Main
     CALL QTFWriteSing(ID,i,Nw,Nradiation,Nbeta,Mesh%Npanels, ZIGB,ZIGS)
     
     ! Call the preProcessor for this frequency
-    CALL QTFInit(ID,DPI/w(i),beta(1),i,Environment%Depth)
+    CALL QTFInit(ID,DPI/w(i),beta(1),i,Environment%Depth,IPrintPOT,NPRINTW1,IDOFPRINT)
     
   END DO
+    CLOSE(188)
     DEALLOCATE(ZIGB)
     DEALLOCATE(ZIGS)
     DEALLOCATE(w)

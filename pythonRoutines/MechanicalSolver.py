@@ -40,5 +40,4 @@ if __name__ == '__main__':
         IdMove=1 # 0 to make RAO=0
         f = open('workdir.txt', 'r')
         workdir=f.read()
-        
         mechanicalSolver(workdir,IdMove)

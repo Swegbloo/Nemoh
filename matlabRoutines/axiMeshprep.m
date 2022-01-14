@@ -71,6 +71,9 @@ zG=zCoG;%input(' - Vertical position of gravity center : ');
 fprintf(fid,'%f %f %f \n',[0. 0. zG]);
 nfobj=npanelt;%input(' - Target for number of panels : ');
 fprintf(fid,'%g \n 2 \n 0. \n 1.\n',nfobj);
+fprintf(fid,'%f \n',1025.);
+fprintf(fid,'%f \n',9.81);
+
 status=fclose(fid);
 fid=fopen('ID.dat','w');
 fprintf(fid,['% g \n',nomrep,' \n'],length(nomrep));
@@ -252,6 +255,12 @@ nomrepn=['.',filesep,'..',filesep,'output',filesep,nomrep];
 if QTFInput(1)==1
 system(['mkdir ',nomrepn,filesep,'Mechanics']);   
 system(['mkdir ',nomrepn,filesep,'Motion']); 
+fid=fopen([nomrep,filesep,'RAO.dat'],'w');
+for ii=1:length(wavefreq)
+fprintf(fid,['%f 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.\n',],wavefreq(ii));    
+end
+status=fclose(fid);
+
 system(['mkdir ',nomrepn,filesep,'QTF']);
 save([nomrepn,filesep,'Mechanics',filesep,'Inertia.dat'], 'Inertia','-ascii');
 save([nomrepn,filesep,'Mechanics',filesep,'Kh.dat'], 'KH','-ascii');

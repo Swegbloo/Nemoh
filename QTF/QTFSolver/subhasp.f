@@ -216,8 +216,8 @@ C  PROGRAMMES AQUADYN : (15-04-85) P.GUEVEL,J-C.DAUBISSE,G.DELHOMMEAU  C
       CHARACTER*10 IDEN
       INTEGER I8,UNIT9
       COMMON/CAR/IDEN
-      PL5(U1,U2,U3,U4,U5,XU)=((XU-U1)*(XU-U2)*(XU-U3)*(XU-U4))/
-     #((U5-U1)*(U5-U2)*(U5-U3)*(U5-U4))
+C      PL5(U1,U2,U3,U4,U5,XU)=((XU-U1)*(XU-U2)*(XU-U3)*(XU-U4))/
+C     #((U5-U1)*(U5-U2)*(U5-U3)*(U5-U4))
       DPI2=2.*PI**2
       EPS=0.0001
       WH=DPI/T
@@ -252,20 +252,21 @@ C  PROGRAMMES AQUADYN : (15-04-85) P.GUEVEL,J-C.DAUBISSE,G.DELHOMMEAU  C
       AKP2=AK0/DPI2
       AKZMAX=-1.E10
 	PRINT *,' VNS '
-      DO I8=1,NTOT
-      READ(8,REC=I8)(FSP(J),J=1,IMX),(FSM(J),J=1,IMX),
+C I8 changed to I by RK
+      DO I=1,NTOT   
+      READ(8,REC=I)(FSP(J),J=1,IMX),(FSM(J),J=1,IMX),
      & (VSXP(J),J=1,IMX),(VSYP(J),J=1,IMX),(VSZP(J),J=1,IMX),
      & (VSXM(J),J=1,IMX),(VSYM(J),J=1,IMX),(VSZM(J),J=1,IMX)
-      DO J=1,IMX
-            FSP(J)=0.
-            FSM(J)=0.
-            VSXP(J)=0.
-            VSXM(J)=0.
-            VSYP(J)=0.
-            VSYM(J)=0.
-            VSZP(J)=0.
-            VSZM(J)=0.
-      END DO
+C        DO J=1,IMX       !closed by RK
+C              FSP(J)=0.
+C              FSM(J)=0.
+C              VSXP(J)=0.
+C              VSXM(J)=0.
+C              VSYP(J)=0.
+C              VSYM(J)=0.
+C              VSZP(J)=0.
+C             VSZM(J)=0.
+C        END DO
       ZMIII=ZER
       DO JJ=1,NJJ
         BX=(-1)**(JJ+1)
@@ -585,8 +586,8 @@ C (  (  (  (  (  (  (  (  (  (  (  (  (  (  (  	 ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
       CHARACTER*10 IDEN
       INTEGER UNIT9
       COMMON/CAR/IDEN
-      PL5(U1,U2,U3,U4,U5,XU)=((XU-U1)*(XU-U2)*(XU-U3)*(XU-U4))/
-     #((U5-U1)*(U5-U2)*(U5-U3)*(U5-U4))
+C      PL5(U1,U2,U3,U4,U5,XU)=((XU-U1)*(XU-U2)*(XU-U3)*(XU-U4))/
+C     #((U5-U1)*(U5-U2)*(U5-U3)*(U5-U4))
       WH=DPI/T
       AKH=WH**2*H/G
       AMH=X0(AKH)
@@ -2325,3 +2326,9 @@ C  PROGRAMMES AQUADYN : (15-04-85) P.GUEVEL,J-C.DAUBISSE,G.DELHOMMEAU  C
       ENDIF
       RETURN
       END
+      FUNCTION PL5(U1,U2,U3,U4,U5,XU)
+      PL5=((XU-U1)*(XU-U2)*(XU-U3)*(XU-U4))/
+     #((U5-U1)*(U5-U2)*(U5-U3)*(U5-U4))
+      RETURN
+      END
+

@@ -19,13 +19,6 @@ PROGRAM HASFSASYMP
     !!!!!!!!!   ON INTEGRE ENTRE RAYINT ET L'INFINI ALD PSI DS      !!!!!!!!!!
     !!!!!!!!!   OU LES TERMES SONT APPROXIMES ASYMPTOTIQUEMENT      !!!!!!!!!!
     !!!!!!!!!   (>1/SQRT(R))                                        !!!!!!!!!!
-    !!!!!!!!! PROGRAM FOR CALCULATING THE ASYMPTOTIC PART OF !!!!!!!!!!
-    !!!!!!!!! FREE SURFACE EFFORTS. METHOD USED !!!!!!!!!!
-    !!!!!!!!! DESCRIBED IN FABIEN'S INTERNSHIP REPORT !!!!!!!!!!
-    !!!!!!!!! ROBAUX FOR EDF / INNOSEA !!!!!!!!!!
-    !!!!!!!!! WE INTEGRATE BETWEEN RAYINT AND THE INFINITE ALD PSI DS !!!!!!!!!!
-    !!!!!!!!! OR THE TERMS ARE ASYMPTOTICALLY APPROXIMATE !!!!!!!!!!
-    !!!!!!!!! (> 1 / SQRT (R)) !!!!!!!!!!
     !!!!!!!!!                                                       !!!!!!!!!!
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     USE PARA
@@ -70,7 +63,7 @@ PROGRAM HASFSASYMP
         CHARACTER(16) :: NOMB1,NOMB2,NOMB3,NOMB4,NOMB5
         CHARACTER(16) :: NOMH0,NOMH1,NOMH2,NOMH3,NOMH4,NOMH5
         CHARACTER(16) :: NOMGRUN, NOMBESS
-	CHARACTER*800 STRFMT
+	CHARACTER*2000 STRFMT
         REAL X(NPT),Y(NPT),Z(NPT)
         INTEGER,DIMENSION(NFA)::M1,M2,M3,M4,P,Q,R
         COMMON X,Y,Z,M1,M2&
@@ -505,13 +498,20 @@ PROGRAM HASFSASYMP
 
 
 
+! by RK: No need to read bessel data BESS.QAT, a built in bessel function is added in APBES function
+!    NOMBESS = ID(1:lID)//'/QTF/BESS.QAT'
+!    OPEN(55,FILE=NOMBESS,ACCESS='DIRECT',RECL=8*NPASZ)
+!
+!DO 10 KBES=0,NN
+!        READ(55,REC=KBES+1)(XPLOT(I),I=1,NPASZ),(BESSEL(KBES,I),I=1,NPASZ)
+!10  CONTINUE
 
-    NOMBESS = ID(1:lID)//'/QTF/BESS.QAT'
-    OPEN(55,FILE=NOMBESS,ACCESS='DIRECT',RECL=8*NPASZ)
+!print*,'1 ','0.05 ',APBES(1,0.05)
+!print*,'10 ','5. ',APBES(10,5.)
+!print*,'50 ','10. ',APBES(50,10.)
+!print*,'check bessel, answer:2.5E-2,1.5E-3,1.78E-30 '
+!read(*,*)
 
-DO 10 KBES=0,NN
-        READ(55,REC=KBES+1)(XPLOT(I),I=1,NPASZ),(BESSEL(KBES,I),I=1,NPASZ)
-10  CONTINUE
 
 !~ NPRINTW1=20 !NHASKIND
 !~ NPRINTW2=19 !NHASKIND-1
@@ -684,11 +684,11 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 			POTPER2_Y=POTPER2*DR2*SIN(THETA)
 			POTPER2_Z=POTPER2*DZ(K2,H)
 			
-			POTINC1=-G/OMEG*F1(0.,TABK(NPRINTW1),H)*EXP(ZI*TABK(NPRINTW1)*LONG*(COS(THETA-BETA)))
+			POTINC1=-ZI*G/OMEG*F1(0.,TABK(NPRINTW1),H)*EXP(ZI*TABK(NPRINTW1)*LONG*(COS(THETA-BETA))) !ZI added by RK  such that convention same as in the first order NEMOH
 			POTINC1_X=POTINC1*DR1
 			POTINC1_Y=0
 			POTINC1_Z=POTINC1*DZ(K1,H)
-			POTINC2=-G/OMEG*F1(0.,TABK(NPRINTW2),H)*EXP(ZI*TABK(NPRINTW2)*LONG*(COS(THETA-BETA)))
+			POTINC2=-ZI*G/OMEG*F1(0.,TABK(NPRINTW2),H)*EXP(ZI*TABK(NPRINTW2)*LONG*(COS(THETA-BETA))) !ZI added by RK  such that convention same as in the first order NEMOH
 			POTINC2_X=POTINC2*DR2
 			POTINC2_Y=0
 			POTINC2_Z=POTINC2*DZ(K2,H)
@@ -761,11 +761,11 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 			POTPER2_Y=POTPER2*DR2*SIN(THETA)
 			POTPER2_Z=POTPER2*DZ(K2,H)
 			
-			POTINC1=-G/OMEG*F1(0.,TABK(NPRINTW1),H)*EXP(ZI*TABK(NPRINTW1)*LONG*(COS(THETA-BETA)))
+			POTINC1=-ZI*G/OMEG*F1(0.,TABK(NPRINTW1),H)*EXP(ZI*TABK(NPRINTW1)*LONG*(COS(THETA-BETA))) !ZI added by RK  such that convention same as in the first order NEMOH
 			POTINC1_X=POTINC1*DR1
 			POTINC1_Y=0
 			POTINC1_Z=POTINC1*DZ(K1,H)
-			POTINC2=-G/OMEG*F1(0.,TABK(NPRINTW2),H)*EXP(ZI*TABK(NPRINTW2)*LONG*(COS(THETA-BETA)))
+			POTINC2=-ZI*G/OMEG*F1(0.,TABK(NPRINTW2),H)*EXP(ZI*TABK(NPRINTW2)*LONG*(COS(THETA-BETA))) !ZI added by RK  such that convention same as in the first order NEMOH
 			POTINC2_X=POTINC2*DR2
 			POTINC2_Y=0
 			POTINC2_Z=POTINC2*DZ(K2,H)
@@ -836,22 +836,22 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
 
-	PRINT *, ">ATTENTION, LES FCT DE BESSELS DOIVENT ETRE TABLES JUSQU'A X=",RCER(NRCER)*MAXVAL(TABK)!~         PRINT *, ">ATTENTION, LES FCT DE BESSELS DOIVENT ETRE TABLES JUSQU'A X=",(RCEREXT+10.)*MAXVAL(TABK)
-        PRINT *, ">ATTENTION AU NOMBRE DE FONCTION DE BESSEL, OU UNE APPROXIMATION SERA FAUSSE "
-        PRINT *, "EXP^{(I K R COS(THETA-BETA))} = SUM_J QQCH * J_J(K R) COS(J(THETA - BETA))"
-        PRINT *, "CE QUI EST NECESSAIRE POUR CETTE PARTIE ASYMPTOTIQUE."
-        PRINT *, "POUR VOTRE PULSATION, SE REFERER A L'IMAGE 'FONCTION DE BESS MIN POUR TRONCATURE SERIE'"
-        PRINT *, "CELA VOUS DONNERA L'ERREUR COMMISE EN FONCTION DU NOMBRE DE FCT DE BESS"
-        PRINT *,' '
-        PRINT *, ">VOS VALEURS:"
-        PRINT *, " -----------------------------------"
-        PRINT *,'|NOMBRE FCTS BESS=',NN,'     |'
-	PRINT *,'|K.R             =',RCER(NRCER)*MAXVAL(TABK),'|'!~         PRINT *,'|K.R             =',(RCEREXT+10)*MAXVAL(TABK),'|'
-        PRINT *, " -----------------------------------"
+!	PRINT *, ">ATTENTION, LES FCT DE BESSELS DOIVENT ETRE TABLES JUSQU'A X=",RCER(NRCER)*MAXVAL(TABK)!~         PRINT *, ">ATTENTION, LES FCT DE BESSELS DOIVENT ETRE TABLES JUSQU'A X=",(RCEREXT+10.)*MAXVAL(TABK)
+!        PRINT *, ">ATTENTION AU NOMBRE DE FONCTION DE BESSEL, OU UNE APPROXIMATION SERA FAUSSE "
+!        PRINT *, "EXP^{(I K R COS(THETA-BETA))} = SUM_J QQCH * J_J(K R) COS(J(THETA - BETA))"
+!        PRINT *, "CE QUI EST NECESSAIRE POUR CETTE PARTIE ASYMPTOTIQUE."
+!        PRINT *, "POUR VOTRE PULSATION, SE REFERER A L'IMAGE 'FONCTION DE BESS MIN POUR TRONCATURE SERIE'"
+!        PRINT *, "CELA VOUS DONNERA L'ERREUR COMMISE EN FONCTION DU NOMBRE DE FCT DE BESS"
+!        PRINT *,' '
+!        PRINT *, ">VOS VALEURS:"
+!        PRINT *, " -----------------------------------"
+!        PRINT *,'|NOMBRE FCTS BESS=',NN,'     |'
+!	PRINT *,'|K.R             =',RCER(NRCER)*MAXVAL(TABK),'|'!~         PRINT *,'|K.R             =',(RCEREXT+10)*MAXVAL(TABK),'|'
+!        PRINT *, " -----------------------------------"
         PRINT *,' '
         PRINT *,'>ATTENTION, IL EST RECOMMANDE DE SE PLACER EN RCEREXT, TQ RCEREXT>3 LAMBDA MAX, IE'
         PRINT *,'RCEREXT=',RCER(NRCER),'>',3*2*PI/(MINVAL(TABK)),'=3* LAMBDA MAX'
-
+        PRINT *,' '
 
 
 	IF (Louthasfs==1) THEN	
@@ -938,7 +938,7 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 !~ 	DO 500 NW1=1,NHASKIND						! version matrice carre pour les QTF+
 	DO 500 NW1=1,N							! version matrice antitriangulaire sup pour les QTF+ (0 ailleurs)
             DO 500 NW2=1,NW1
-		WRITE(*,1987,ADVANCE="NO") NW1,NW2,1,0.,CHAR(13)
+!		WRITE(*,1987,ADVANCE="NO") NW1,NW2,1,0.,CHAR(13)
 
                 BETA=0.
                 W1=TABW(NW1)
@@ -992,16 +992,18 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 		
 		! ATTENTION ZI --> POUR COMPENSER LE exp(i*pi/2) EN ABSENT DES VJ EN SOMME DE NOMBRE D'ONDE
                                                                         !DE CETTE FACON CSTI * SUMI=
+                !RK: Added ZI in (-G/W) for changing convention of incoming potential such that same as in first order NEMOH                                                        
 		IF (Nw3/=0) THEN
-			CST1M(NW1,NW2)=(-G/W1)*MK(K2,0.,H)*MK(K3,0.,H)        ! IINT PHII1 PHIP2* PSI DS C'EST AUSSI = 1/(DZ1 DZ2*) IINT PHII1,Z PHIP2*,Z PSI DS
-			CST2M(NW1,NW2)=(-G/W2)*ZI*MK(K1,0.,H)*MK(K3,0.,H)     ! IINT PHIP1 PHII2* PSI DS C'EST AUSSI = 1/(DZ1 DZ2*) IINT PHIP1,Z PHII2*,Z PSI DS
+			CST1M(NW1,NW2)=(-ZI*G/W1)*MK(K2,0.,H)*MK(K3,0.,H)        ! IINT PHII1 PHIP2* PSI DS C'EST AUSSI = 1/(DZ1 DZ2*) IINT PHII1,Z PHIP2*,Z PSI DS
+			CST2M(NW1,NW2)=(ZI*G/W2)*ZI*MK(K1,0.,H)*MK(K3,0.,H)      ! IINT PHIP1 PHII2* PSI DS C'EST AUSSI = 1/(DZ1 DZ2*) IINT PHIP1,Z PHII2*,Z PSI DS
+                                                                                 ! removed minus sign due to conjugation in PHII
 		ELSE
 			CST1M(NW1,NW2)=NAN
 			CST2M(NW1,NW2)=NAN
 		ENDIF
 		IF (NW4/=0) THEN
-			CST1P(NW1,NW2)=(-G/W1)*ZI*MK(K2,0.,H)*MK(K4,0.,H)     		! IINT PHII1 PHIP2* PSI DS C'EST AUSSI = 1/(DZ1 DZ2*) IINT PHII1,Z PHIP2*,Z PSI DS
-			CST2P(NW1,NW2)=(-G/W2)*ZI*MK(K1,0.,H)*MK(K4,0.,H)     		! IINT PHIP1 PHII2* PSI DS C'EST AUSSI = 1/(DZ1 DZ2*) IINT PHIP1,Z PHII2*,Z PSI DS
+			CST1P(NW1,NW2)=(-ZI*G/W1)*ZI*MK(K2,0.,H)*MK(K4,0.,H)     		! IINT PHII1 PHIP2* PSI DS C'EST AUSSI = 1/(DZ1 DZ2*) IINT PHII1,Z PHIP2*,Z PSI DS
+			CST2P(NW1,NW2)=(-ZI*G/W2)*ZI*MK(K1,0.,H)*MK(K4,0.,H)     		! IINT PHIP1 PHII2* PSI DS C'EST AUSSI = 1/(DZ1 DZ2*) IINT PHIP1,Z PHII2*,Z PSI DS
 		ELSE
 			CST1P(NW1,NW2)=NAN
 			CST2P(NW1,NW2)=NAN
@@ -1047,7 +1049,7 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 			RAYINT=0
 			DO 2150 ICER=1,NRCER
 			    RAY0=RAYINT
-			    RAYINT=RCER(ICER)*COS(PI/NTHETA/NJ)		! PRENDS EN COMPTE LA DISCRETISATION DU CERCLE EXT
+			    RAYINT=RCER(ICER)*COS(PI/NTHETA/NJ)                    ! PRENDS EN COMPTE LA DISCRETISATION DU CERCLE EXT
 			    NR=MAX(3,INT(130*(RAYINT-RAY0)/(2*PI/MAX(K1,K2,K3)))) !!TROUVER UNE FORMULE POUR OPTIMISER
 			    DRAY=(RAYINT-RAY0)/FLOAT(NR)
 			    
@@ -1129,7 +1131,7 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 		    SUM3P=0
 		    SUM4P=0
 		    
-!~ 		    WRITE(*,1987,ADVANCE="NO") NW1,NW2,IJ,RCER(ICER),CHAR(13)
+! 		    WRITE(*,1987,ADVANCE="NO") NW1,NW2,IJ,RCER(ICER),CHAR(13)
 		    
 		    DO 2152 J=0,NN
 		    
@@ -1224,8 +1226,8 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 		    !!!  QTFij-=QTFji-* !!!
 		    ! ON PREND LE CONJUGE DU TRIANGLE SUP
 		    IF (NW3/=0) THEN
-			EFFSLM(IJ,NW1,NW2,ICER)=-ZI*WM*RHO/G*ISLM_0
-			EFFSLM(IJ,NW2,NW1,ICER)=CONJG(-ZI*WM*RHO/G*ISLM_0)
+			EFFSLM(IJ,NW1,NW2,ICER)=ZI*WM*RHO/G*ISLM_0              !by RK - sign is removed to be consistent
+			EFFSLM(IJ,NW2,NW1,ICER)=CONJG(ZI*WM*RHO/G*ISLM_0)       ! minus sign wrong in Robaux report
 		    ELSE
 			EFFSLM(IJ,NW1,NW2,ICER)=0.
 			EFFSLM(IJ,NW2,NW1,ICER)=0.
@@ -1233,8 +1235,8 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 		    IF (LQTFP .EQ. 1) THEN
 			!!!  QTFij+=QTFji+ !!!
 			IF (NW4/=0) THEN    
-			    EFFSLP(IJ,NW1,NW2,ICER)=-ZI*WP*RHO/G*ISLP_0
-			    EFFSLP(IJ,NW2,NW1,ICER)=-ZI*WP*RHO/G*ISLP_0
+			    EFFSLP(IJ,NW1,NW2,ICER)=ZI*WP*RHO/G*ISLP_0          
+			    EFFSLP(IJ,NW2,NW1,ICER)=ZI*WP*RHO/G*ISLP_0
 			ELSE    
 			    EFFSLP(IJ,NW1,NW2,ICER)=0.
 			    EFFSLP(IJ,NW2,NW1,ICER)=0.
@@ -1263,7 +1265,7 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 !~ 1989 FORMAT('QTF-',4000(1F13.3,3X))
 1989 FORMAT(1F9.3,4000(1F9.3,3X))
 !250 FORMAT('W2:',1F4.2,1X,'THETA:',1F4.2,1X,'ITER CONV:',1I5,1X,'LONG CONV:',1ES8.2)
-1987 FORMAT('INTEGRATION: NW1 =',1I2,', NW2 =',1I2,',DOF =',1I1,', RCER =',1F5.0,1A1)
+!1987 FORMAT('INTEGRATION: NW1 =',1I2,', NW2 =',1I2,',DOF =',1I1,', RCER =',1F5.0,1A1)
 
 !ECRITURE
     DO 410 IJ=1,6,DOFSYM
@@ -1351,34 +1353,34 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         400 CONTINUE
 
-        WRITE(STRFMT,*) "# FORMAT:",CHAR(10),				&
-     & "# Rext[1]  W2[1]    --- W2[j]    --- W2[N]",CHAR(10),		&
-     & "# W1[1]    QTF[1,1] --- QTF[1,j] --- QTF[1,N]",CHAR(10),	&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# W1[i]    QTF[i,1] --- QTF[i,j] --- QTF[i,N]",CHAR(10),	&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# .         .            .            .",CHAR(10),		&
-     & "# W1[N]    QTF[N,1] --- QTF[N,j] --- QTF[N,N]",CHAR(10),	&
-     & "# Rext[2]   --- ",CHAR(10),					&
-     & "#  . ",CHAR(10),						&
-     & "#  . ",CHAR(10),						&
-     & "#  . ",CHAR(10),CHAR(10)
-        WRITE(IJK,*) STRFMT
-        WRITE(IJKI,*) STRFMT
+!        WRITE(STRFMT,*) "# FORMAT:",CHAR(10),				&
+!     & "# Rext[1]  W2[1]    --- W2[j]    --- W2[N]",CHAR(10),		&
+!     & "# W1[1]    QTF[1,1] --- QTF[1,j] --- QTF[1,N]",CHAR(10),	&
+!     & "# .         .            .            .",CHAR(10),		&
+!     & "# .         .            .            .",CHAR(10),		&
+!     & "# .         .            .            .",CHAR(10),		&
+!     & "# W1[i]    QTF[i,1] --- QTF[i,j] --- QTF[i,N]",CHAR(10),	&
+!     & "# .         .            .            .",CHAR(10),		&
+!     & "# .         .            .            .",CHAR(10),		&
+!     & "# .         .            .            .",CHAR(10),		&
+!     & "# W1[N]    QTF[N,1] --- QTF[N,j] --- QTF[N,N]",CHAR(10),	&
+!     & "# Rext[2]   --- ",CHAR(10),					&
+!     & "#  . ",CHAR(10),						&
+!     & "#  . ",CHAR(10),						&
+!     & "#  . ",CHAR(10),CHAR(10)
+!        WRITE(IJK,*) STRFMT
+!        WRITE(IJKI,*) STRFMT
         CLOSE(IJK)
         CLOSE(IJKI)
 	IF (LQTFP .EQ. 1) THEN
-		WRITE(IJKJ,*) STRFMT
-		WRITE(IJKK,*) STRFMT
-!!!! version matrice antitriangulaire sup pour les QTF+ (0 ailleurs) !!!!
-		WRITE(IJKJ,*) CHAR(10),CHAR(10),"# NB: Les valeurs des QTF+ pour w1+w2>n*dw sont definies a zeros.",CHAR(10),&
-		& "# en effet, un calcul de ces valeurs necessiterait un calcul d'ordre 1 sur 2 fois plus de pulsation."
-		WRITE(IJKK,*) CHAR(10),CHAR(10),"# NB: Les valeurs des QTF+ pour w1+w2>n*dw sont definies a zeros.",CHAR(10),&
-		& "# en effet, un calcul de ces valeurs necessiterait un calcul d'ordre 1 sur 2 fois plus de pulsation."
-	    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!		WRITE(IJKJ,*) STRFMT
+!		WRITE(IJKK,*) STRFMT
+!!!!! version matrice antitriangulaire sup pour les QTF+ (0 ailleurs) !!!!
+!		WRITE(IJKJ,*) CHAR(10),CHAR(10),"# NB: Les valeurs des QTF+ pour w1+w2>n*dw sont definies a zeros.",CHAR(10),&
+!		& "# en effet, un calcul de ces valeurs necessiterait un calcul d'ordre 1 sur 2 fois plus de pulsation."
+!		WRITE(IJKK,*) CHAR(10),CHAR(10),"# NB: Les valeurs des QTF+ pour w1+w2>n*dw sont definies a zeros.",CHAR(10),&
+!		& "# en effet, un calcul de ces valeurs necessiterait un calcul d'ordre 1 sur 2 fois plus de pulsation."
+!	    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		CLOSE(IJKJ)
 		CLOSE(IJKK)
 	ENDIF
@@ -1408,34 +1410,186 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
         RETURN
         END
     FUNCTION APBES(KBES,XAP)
-        !!!!                                                                                !!!!!!!!!
-        !!! FONCTION APPROXIMATION DES FONCTIONS DE BESSEL, NECESSITE LES TABLES (COMMON BESSEL) !!!!
-        !!!                                                                                 !!!!!!!!!
-	USE PARA
+        ! added by RK
         IMPLICIT NONE
-        INTEGER IZ
-        COMMON BESSEL,XPLOT
-        REAL,DIMENSION(0:NN,NPASZ) ::BESSEL
-        REAL,DIMENSION(NPASZ) ::XPLOT
-        REAL APBES,XAP,MULT
+        REAL BESSJ,APBES,XAP
         INTEGER KBES
-        IZ=2
-        MULT=1.
-        IF (KBES<0) THEN
-                KBES=-KBES
-                MULT=(-1)**KBES
-        ENDIF
-        DO WHILE(XPLOT(IZ)<=XAP)
-    !        PRINT *,IZ,X(IZ),XAP
-            IZ=IZ+1
-        ENDDO
-        APBES=MULT*(BESSEL(KBES,IZ)-BESSEL(KBES,IZ-1))/(XPLOT(IZ)-XPLOT(IZ-1))*(XAP-XPLOT(IZ-1))+BESSEL(KBES,IZ-1)
-    !    PRINT *,BESSEL(N,IZ-1),APBES,BESSEL(N,IZ)
-            IF (APBES==0) PRINT *, 'ERREUR APBESS NUL'
+        APBES=BESSJ(KBES,XAP)
+
+       ! !!!!                                                                                !!!!!!!!!
+       ! !!! FONCTION APPROXIMATION DES FONCTIONS DE BESSEL, NECESSITE LES TABLES (COMMON BESSEL) !!!!
+       ! !!!                                                                                 !!!!!!!!!
+       ! USE PARA
+       ! IMPLICIT NONE
+       ! INTEGER IZ
+       ! COMMON BESSEL,XPLOT
+       ! REAL,DIMENSION(0:NN,NPASZ) ::BESSEL
+       ! REAL,DIMENSION(NPASZ) ::XPLOT
+       ! REAL APBES,XAP,MULT
+       ! INTEGER KBES
+       ! IZ=2
+       ! MULT=1.
+       ! IF (KBES<0) THEN
+       !         KBES=-KBES
+       !         MULT=(-1)**KBES
+       ! ENDIF
+       ! DO WHILE(XPLOT(IZ)<=XAP)
+    !  !      PRINT *,IZ,X(IZ),XAP
+       !     IZ=IZ+1
+       ! ENDDO
+       ! APBES=MULT*(BESSEL(KBES,IZ)-BESSEL(KBES,IZ-1))/(XPLOT(IZ)-XPLOT(IZ-1))*(XAP-XPLOT(IZ-1))+BESSEL(KBES,IZ-1)
+    !  !  PRINT *,BESSEL(N,IZ-1),APBES,BESSEL(N,IZ)
+       !     IF (APBES==0) PRINT *, 'ERREUR APBESS NUL'
 
         RETURN
     END
 
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Bessel functions added by RK !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    FUNCTION BESSJ (N,X)
+
+!     This subroutine calculates the first kind modified Bessel function
+!     of integer order N, for any REAL X. We use here the classical
+!     recursion formula, when X > N. For X < N, the Miller's algorithm
+!     is used to avoid overflows. 
+!     REFERENCE:
+!     C.W.CLENSHAW, CHEBYSHEV SERIES FOR MATHEMATICAL FUNCTIONS,
+!     MATHEMATICAL TABLES, VOL.5, 1962.
+
+      IMPLICIT NONE
+      INTEGER, PARAMETER :: IACC = 40
+      REAL, PARAMETER :: BIGNO = 1.D10, BIGNI = 1.D-10
+      INTEGER M, N, J, JSUM
+      REAL  X,BESSJ,BESSJ0,BESSJ1,TOX,BJM,BJ,BJP,SUM
+      IF (N.EQ.0) THEN
+      BESSJ = BESSJ0(X)
+      RETURN
+      ENDIF
+      IF (N.EQ.1) THEN
+      BESSJ = BESSJ1(X)
+      RETURN
+      ENDIF
+      IF (X.EQ.0.) THEN
+      BESSJ = 0.
+      RETURN
+      ENDIF
+      TOX = 2./X
+      IF (X.GT.FLOAT(N)) THEN
+      BJM = BESSJ0(X)
+      BJ  = BESSJ1(X)
+      DO 11 J = 1,N-1
+      BJP = J*TOX*BJ-BJM
+      BJM = BJ
+      BJ  = BJP
+   11 CONTINUE
+      BESSJ = BJ
+      ELSE
+      M = 2*((N+INT(SQRT(FLOAT(IACC*N))))/2)
+      BESSJ = 0.
+      JSUM = 0
+      SUM = 0.
+      BJP = 0.
+      BJ  = 1.
+      DO 12 J = M,1,-1
+      BJM = J*TOX*BJ-BJP
+      BJP = BJ
+      BJ  = BJM
+      IF (ABS(BJ).GT.BIGNO) THEN
+      BJ  = BJ*BIGNI
+      BJP = BJP*BIGNI
+      BESSJ = BESSJ*BIGNI
+      SUM = SUM*BIGNI
+      ENDIF
+      IF (JSUM.NE.0) SUM = SUM+BJ
+      JSUM = 1-JSUM
+      IF (J.EQ.N) BESSJ = BJP
+   12 CONTINUE
+      SUM = 2.*SUM-BJ
+      BESSJ = BESSJ/SUM
+      ENDIF
+      RETURN
+      END
+
+      FUNCTION BESSJ0 (X)
+      IMPLICIT NONE
+      REAL X,BESSJ0,AX,FR,FS,Z,FP,FQ,XX
+
+!     This subroutine calculates the First Kind Bessel Function of
+!     order 0, for any real number X. The polynomial approximation by
+!     series of Chebyshev polynomials is used for 0<X<8 and 0<8/X<1.
+!     REFERENCES:
+!     M.ABRAMOWITZ,I.A.STEGUN, HANDBOOK OF MATHEMATICAL FUNCTIONS, 1965.
+!     C.W.CLENSHAW, NATIONAL PHYSICAL LABORATORY MATHEMATICAL TABLES,
+!     VOL.5, 1962.
+
+      REAL  Y,P1,P2,P3,P4,P5,R1,R2,R3,R4,R5,R6  &
+               ,Q1,Q2,Q3,Q4,Q5,S1,S2,S3,S4,S5,S6
+      DATA P1,P2,P3,P4,P5 /1.D0,-.1098628627D-2,.2734510407D-4, &
+      -.2073370639D-5,.2093887211D-6 /
+      DATA Q1,Q2,Q3,Q4,Q5 /-.1562499995D-1,.1430488765D-3, &
+      -.6911147651D-5,.7621095161D-6,-.9349451520D-7 /
+      DATA R1,R2,R3,R4,R5,R6 /57568490574.D0,-13362590354.D0, &
+      651619640.7D0,-11214424.18D0,77392.33017D0,-184.9052456D0 /
+      DATA S1,S2,S3,S4,S5,S6 /57568490411.D0,1029532985.D0, &
+      9494680.718D0,59272.64853D0,267.8532712D0,1.D0 /
+      IF(X.EQ.0.D0) GO TO 1
+      AX = ABS (X)
+      IF (AX.LT.8.) THEN
+      Y = X*X
+      FR = R1+Y*(R2+Y*(R3+Y*(R4+Y*(R5+Y*R6))))
+      FS = S1+Y*(S2+Y*(S3+Y*(S4+Y*(S5+Y*S6))))
+      BESSJ0 = FR/FS
+      ELSE
+      Z = 8./AX
+      Y = Z*Z
+      XX = AX-.785398164
+      FP = P1+Y*(P2+Y*(P3+Y*(P4+Y*P5)))
+      FQ = Q1+Y*(Q2+Y*(Q3+Y*(Q4+Y*Q5)))
+      BESSJ0 = SQRT(.636619772/AX)*(FP*COS(XX)-Z*FQ*SIN(XX))
+      ENDIF
+      RETURN
+    1 BESSJ0 = 1.D0
+      RETURN
+      END
+! ---------------------------------------------------------------------------
+      FUNCTION BESSJ1 (X)
+      IMPLICIT NONE
+      REAL X,BESSJ1,AX,FR,FS,Z,FP,FQ,XX
+!     This subroutine calculates the First Kind Bessel Function of
+!     order 1, for any real number X. The polynomial approximation by
+!     series of Chebyshev polynomials is used for 0<X<8 and 0<8/X<1.
+!     REFERENCES:
+!     M.ABRAMOWITZ,I.A.STEGUN, HANDBOOK OF MATHEMATICAL FUNCTIONS, 1965.
+!     C.W.CLENSHAW, NATIONAL PHYSICAL LABORATORY MATHEMATICAL TABLES,
+!     VOL.5, 1962.
+      REAL  Y,P1,P2,P3,P4,P5,P6,R1,R2,R3,R4,R5,R6  &
+               ,Q1,Q2,Q3,Q4,Q5,S1,S2,S3,S4,S5,S6
+      DATA P1,P2,P3,P4,P5 /1.D0,.183105D-2,-.3516396496D-4,  &
+      .2457520174D-5,-.240337019D-6 /,P6 /.636619772D0 /
+      DATA Q1,Q2,Q3,Q4,Q5 /.04687499995D0,-.2002690873D-3,   &
+      .8449199096D-5,-.88228987D-6,.105787412D-6 /
+      DATA R1,R2,R3,R4,R5,R6 /72362614232.D0,-7895059235.D0, & 
+      242396853.1D0,-2972611.439D0,15704.48260D0,-30.16036606D0 /
+      DATA S1,S2,S3,S4,S5,S6 /144725228442.D0,2300535178.D0, &
+      18583304.74D0,99447.43394D0,376.9991397D0,1.D0 /
+
+      AX = ABS(X)
+      IF (AX.LT.8.) THEN
+      Y = X*X
+      FR = R1+Y*(R2+Y*(R3+Y*(R4+Y*(R5+Y*R6))))
+      FS = S1+Y*(S2+Y*(S3+Y*(S4+Y*(S5+Y*S6))))
+      BESSJ1 = X*(FR/FS)
+      ELSE
+      Z = 8./AX
+      Y = Z*Z
+      XX = AX-2.35619491
+      FP = P1+Y*(P2+Y*(P3+Y*(P4+Y*P5)))
+      FQ = Q1+Y*(Q2+Y*(Q3+Y*(Q4+Y*Q5)))
+      BESSJ1 = SQRT(P6/AX)*(COS(XX)*FP-Z*SIN(XX)*FQ)*SIGN(S6,X)
+      ENDIF
+      RETURN
+      END
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     FUNCTION EPS(KBES)
         IMPLICIT NONE
         INTEGER KBES
@@ -1899,7 +2053,7 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
         ELSE
             DZ=K*TANH(K*H)
         ENDIF
-            IF (DZ==0) PRINT *,'ERREUR, DZ=0; K=',K
+       !     IF (DZ==0) PRINT *,'ERREUR, DZ=0; K=',K
         RETURN
       END
 
@@ -1976,7 +2130,7 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 
             2 CONTINUE
         1 CONTINUE
-        IF(KJ==0)PRINT *,'ERREUR KJ NUL'
+       ! IF(KJ==0)PRINT *,'ERREUR KJ NUL'
         RETURN
       END
       FUNCTION KJPR(J,IJ,CSL,SSL,NN,N,BETA,N2,N3)
@@ -1999,6 +2153,6 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 !                IF (L==K-J .OR. L==K+J .OR. L==J-K ) PRINT *, 'ON DOIT ETRE NON NUL',J,K,L
             2 CONTINUE
         1 CONTINUE
-        IF(KJPR==0)PRINT *,'ERREUR KJ NUL'
+       ! IF(KJPR==0)PRINT *,'ERREUR KJ NUL'
         RETURN
       END

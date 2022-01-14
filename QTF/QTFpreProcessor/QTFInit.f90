@@ -25,8 +25,8 @@ MODULE MQTFInit
 
 CONTAINS
 
-  SUBROUTINE QTFInit(ID,T,BETA,IMIN,H)
-      
+  SUBROUTINE QTFInit(ID,T,BETA,IMIN,H,IPrintPOT,NPRINTW1,IDOFPRINT)
+
       
     !BETA in rad  
       
@@ -56,6 +56,8 @@ CONTAINS
     REAL :: H,AM0,AKK,ZER,CCIH,CP,COEFB,CIB,SIB,COEFS,CIS,SIS
     COMPLEX :: ZI ! the imaginary number i*i=-1
     INTEGER :: JQ,I1,IINC, IMIN, NR,NJJ,N0,NM,NSM,KS,KKK,I,IQ,K,L,NR8,JJ,J,NR1,NR3,II,IJ,NIJ,NR5,NR2,N00
+    INTEGER :: IPrintPOT,NPRINTW1, IDOFPRINT  !! added by rk to print  potentials on body elements
+
     
     ! -----> INITIALISATION
     ZI=(0.,1.)
@@ -232,18 +234,18 @@ CONTAINS
 	    COEFB=AM0*((XM(I)-XEFF)*CB+(YM(I)-YEFF)*SB)
 	    CIB=COS(COEFB)
 	    SIB=SIN(COEFB)
-	    ZVXB(I)=CP*CB*CMPLX(-SIB,CIB)
-	    ZVYB(I)=CP*SB*CMPLX(-SIB,CIB)
-	    ZVZB(I)=CR*CMPLX(CIB,SIB)
-	    ZPB(I)=C1*CCIH*CMPLX(CIB,SIB)
+	    ZVXB(I)=ZI*CP*CB*CMPLX(-SIB,CIB) !comments by RK: added [ZI] to be consistent convention as in the first order NEMOH
+	    ZVYB(I)=ZI*CP*SB*CMPLX(-SIB,CIB)
+	    ZVZB(I)=ZI*CR*CMPLX(CIB,SIB)
+	    ZPB(I)=ZI*C1*CCIH*CMPLX(CIB,SIB)
 	    IF(NSYMY.EQ.1)THEN
 		COEFS=AM0*((XM(I)-XEFF)*CB-(YM(I)-YEFF)*SB)
 		CIS=COS(COEFS)
 		SIS=SIN(COEFS)
-		ZVXS(I)=CP*CB*CMPLX(-SIS,CIS)
-		ZVYS(I)=CP*SB*CMPLX(-SIS,CIS)
-		ZVZS(I)=CR*CMPLX(CIS,SIS)
-		ZPS(I)=C1*CCIH*CMPLX(CIS,SIS)
+		ZVXS(I)=ZI*CP*CB*CMPLX(-SIS,CIS)
+		ZVYS(I)=ZI*CP*SB*CMPLX(-SIS,CIS)
+		ZVZS(I)=ZI*CR*CMPLX(CIS,SIS)
+		ZPS(I)=ZI*C1*CCIH*CMPLX(CIS,SIS)
 	    ENDIF
 	    DO J=1,IMX
 		! ATTENTION, 1 ET 2 NE FONT PAS REFERENCE AUX PULSATION 1 ET 2
@@ -269,6 +271,13 @@ CONTAINS
 	    ZVZS(I)=(0.,0.)
 	    ZPS(I)=(0.,0.)
 	ENDIF
+        IF (IPrintPOT==1 .AND. IMIN==NPRINTW1) THEN
+            WRITE(188,*) I,XM(I),YM(I),ZM(I) &
+            & ,REAL(ZPB(I)),AIMAG(ZPB(I)),REAL(ZPS(I)),AIMAG(ZPS(I)) &
+            & ,REAL(ZVXB(I)),AIMAG(ZVXB(I)),REAL(ZVXS(I)),AIMAG(ZVXS(I)) &
+            & ,REAL(ZVYB(I)),AIMAG(ZVYB(I)),REAL(ZVYS(I)),AIMAG(ZVYS(I)) &
+            & ,REAL(ZVZB(I)),AIMAG(ZVZB(I)),REAL(ZVZS(I)),AIMAG(ZVZS(I)) 
+        ENDIF 
     END DO
     !
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CC
@@ -419,6 +428,13 @@ CONTAINS
 		ZVYS(I)=(0.,0.)
 		ZVZS(I)=(0.,0.)
 	    ENDIF
+            IF (IPrintPOT==1 .AND. IMIN==NPRINTW1 .AND. IJ==IDOFPRINT) THEN
+                    WRITE(188,*) I,XM(I),YM(I),ZM(I) &
+                    & ,REAL(ZPB(I)),AIMAG(ZPB(I)),REAL(ZPS(I)),AIMAG(ZPS(I)) &
+                    & ,REAL(ZVXB(I)),AIMAG(ZVXB(I)),REAL(ZVXS(I)),AIMAG(ZVXS(I)) &
+                    & ,REAL(ZVYB(I)),AIMAG(ZVYB(I)),REAL(ZVYS(I)),AIMAG(ZVYS(I)) &
+                    & ,REAL(ZVZB(I)),AIMAG(ZVZB(I)),REAL(ZVZS(I)),AIMAG(ZVZS(I))
+            ENDIF 
 	END DO
 	DO I=1,IXX
 	    POR(1,I)=REAL(ZPB(I))

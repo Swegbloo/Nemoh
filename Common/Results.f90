@@ -201,7 +201,7 @@
             WRITE(10,'(A,I4,I4,A,I4,I4,A)') '"abs(F',Results%IndxForce(k,2),Results%IndxForce(k,3),')" "angle(F',Results%IndxForce(k,2),Results%IndxForce(k,3),')"'
         END DO
         DO j=1,Results%Nbeta
-            WRITE(10,'(A,F7.3,A,I6,A)') 'Zone t="Diffraction force - beta = ',Results%beta(j)*180./(4.*ATAN(1.0)),' deg",I=',Results%Nw,',F=POINT'
+            WRITE(10,'(A,F7.3,A,I6,A)') 'Zone t="Excitation force - beta = ',Results%beta(j)*180./(4.*ATAN(1.0)),' deg",I=',Results%Nw,',F=POINT'
             DO i=1,Results%Nw
                 WRITE(10,'(80(X,E14.7))') Results%w(i),(ABS(Results%DiffractionForce(i,j,k)+Results%FroudeKrylovForce(i,j,k)),ATAN2(IMAG(Results%DiffractionForce(i,j,k)+Results%FroudeKrylovForce(i,j,k)),REAL(Results%DiffractionForce(i,j,k)+Results%FroudeKrylovForce(i,j,k))),k=1,Results%Nintegration)
             END DO
@@ -210,7 +210,7 @@
 !       Added by Christophe Peyrard
 !       Save hydrodynamic database with Aquaplus format
         OPEN(10,FILE=namedir//'/CA.dat')
-        WRITE(10,'(A,I5)') 'Nb de periode : ',Results%Nw
+        WRITE(10,'(A,I5)') 'Nb de frequency : ',Results%Nw
         DO l=1,Results%Nw
 	        WRITE(10,'(F7.4)') Results%w(l)
 	        DO j=1,Results%Nradiation
@@ -219,7 +219,7 @@
         END DO
         CLOSE(10)
         OPEN(10,FILE=namedir//'/CM.dat')
-        WRITE(10,'(A,I5)') 'Nb de periode : ',Results%Nw
+        WRITE(10,'(A,I5)') 'Nb de frequency : ',Results%Nw
         DO l=1,Results%Nw
 	        WRITE(10,'(F7.4)') Results%w(l)
 	        DO j=1,Results%Nradiation
@@ -228,10 +228,10 @@
         END DO
         CLOSE(10)
         OPEN(10,FILE=namedir//'/Fe.dat')
-        WRITE(10,'(A)') 'VARIABLES="Period (s)" "|Fx| (N/m)" "|Fy| (N/m)" "|Fz| (N/m)" "|Cx| (N)" "|Cy| (N)" "|Cz| (N)" "ang(Fx) (°)" "ang(Fy) (°)" "ang(Fz) (°)" "ang(Cx) (°)" "ang(Cy) (°)" "ang(Cz) (°)"'
+        WRITE(10,'(A)') 'VARIABLES="Frequency (rad/s)" "|Fx| (N/m)" "|Fy| (N/m)" "|Fz| (N/m)" "|Cx| (N)" "|Cy| (N)" "|Cz| (N)" "ang(Fx) (°)" "ang(Fy) (°)" "ang(Fz) (°)" "ang(Cx) (°)" "ang(Cy) (°)" "ang(Cz) (°)"'
         WRITE(10,'(A,I2,A)') 'Zone t="Corps ',1,'"'
         DO j=1,Results%Nbeta
-            WRITE(10,'(A,F7.3,A,I6,A)') 'Zone t="Diffraction force - beta = ',Results%beta(j)*180./PI,' deg",I=',Results%Nw,',F=POINT'
+            WRITE(10,'(A,F7.3,A,I6,A)') 'Zone t="Excitation force - beta = ',Results%beta(j)*180./PI,' deg",I=',Results%Nw,',F=POINT'
             DO l=1,Results%Nw
             
 ! !           Be careful of the phase referential

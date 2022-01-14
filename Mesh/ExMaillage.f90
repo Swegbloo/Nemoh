@@ -19,7 +19,7 @@
 !
 !--------------------------------------------------------------------------------------
 !
-	SUBROUTINE ExMaillage(ID,DSCRPT,X,Y,Z,NP,NPMX,facette,NF,NFMX)
+	SUBROUTINE ExMaillage(ID,DSCRPT,X,Y,Z,NP,NPMX,facette,NF,NFMX,NSYM)
 	
 	USE MIdentification
 
@@ -30,6 +30,7 @@
 	INTEGER NP,NF,NPMX,NFMX
 	REAL,DIMENSION(*) :: X,Y,Z
 	INTEGER,DIMENSION(4,*) :: facette
+	INTEGER :: NSYM
 	! Locales
 	REAL,DIMENSION(NFMX) :: Xn,Yn,Zn	! Normale a la facette
 	REAL,DIMENSION(NFMX) :: Xg,Yg,Zg	! CdG des facettes
@@ -97,13 +98,13 @@
 	close(10)
 	! Fichier de maillage
 	open(10,file=ID%ID(1:ID%lID)//'/mesh/'//DSCRPT%ID(1:DSCRPT%lID)//'.dat')
-	write(10,'(20X,I1,10X,I1)') 2,1
+	write(10,'(20X,I1,10X,I1)') 2,NSYM
 	do i=1,np
 		write(10,'(10X,I4,3(10X,F14.7))') i,X(i),Y(i),Z(i)
 	end do
 	write(10,'(10X,I4,3(10X,F4.2))') 0,0.,0.,0.
 	do i=1,nf
-		write(10,'(4(10X,I4))') facette(1,i),facette(2,i),facette(3,i),facette(4,i)
+		write(10,'(4(10X,I6))') facette(1,i),facette(2,i),facette(3,i),facette(4,i)
 	end do
 	write(10,'(4(10X,I1))') 0,0,0,0
 	close(10)

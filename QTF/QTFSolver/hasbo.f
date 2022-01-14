@@ -25,16 +25,13 @@ C                                                                        C
 C          EFFORTS DU 2D ORDRE PROVENANT DU POTENTIEL DU 2D ORDRE        C
 C                     METHODE PROPOSEE PAR B. MOLIN                      C
 C                     FROUDE KRYLOV ET HASKIND CARENE                    C
-C           EFFORTS OF 2D ORDER FROM THE POTENTIAL OF 2D ORDER           C
-C           METHOD PROPOSED BY B. MOLIN                                  C
-C           FROUDE KRYLOV AND HASKIND CARENE                             C        
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
       COMMON NSYM,NFAC,NFFL,RHO,
      1 XEFF,YEFF,ZEFF,XCDG,YCDG,ZCDG,TPER,BETA,NDEB,NFIN
       COMMON X(NPT),Y(NPT),Z(NPT)
       COMMON M1(NFA2),M2(NFA2),M3(NFA2),M4(NFA2)
-      COMMON XM(NFA2),YM(NFA2),ZM(NFA2),AIRE(NFA2)
+      COMMON XM(NFA2),YM(NFA2),ZM(NFA2),AIRE(NFA2),ALF(NFA2)
       COMMON P(NFA2),Q(NFA2),R(NFA2)
       DIMENSION VXR1(4,NFA),VXM1(4,NFA),VYR1(4,NFA),VYM1(4,NFA)
       DIMENSION VZR1(4,NFA),VZM1(4,NFA),VYR2(4,NFA),VYM2(4,NFA)
@@ -105,8 +102,8 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       READ(12,REC=8)(AIRE(I),I=1,NFAC),(TDIS(I),I=1,NFAC),
      # (DIST(I),I=1,NFAC)
       I1=NFAC+1
-      READ(12,REC=9)(XM(I),I=I1,IXX),(YM(I),I=I1,IXX),(ZM(I),I=I1,IXX),
-     # (IND(I),I=1,IXX-NFAC)
+      READ(12,REC=9)(XM(I),I=I1,IXX),(YM(I),I=I1,IXX),
+     #(ALF(I),I=1,IXX-NFAC),(IND(I),I=1,IXX-NFAC) ! ALF edited by RK 
       JQ=6*NC
       READ(12,REC=10)(((AIN(I,J,K),I=1,6),J=1,6),
      # ((ASH(I,J,K),I=1,6),J=1,6),K=1,NC),((RAID(I,J),I=1,JQ),J=1,JQ),
@@ -121,6 +118,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       NDEB=0
       NFIN=NFAC+NFFL
 
+     
       DO I=1,NFFL   ! DEFINITION DES GRANDEUR A LA FLOTTAISON (N0 HORIZONTALE --> R=0)
         LK(1)=M1(IND(I))
         LK(2)=M2(IND(I))
@@ -129,7 +127,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
         LK(5)=LK(1)
         P(NFAC+I)=P(IND(I))
         Q(NFAC+I)=Q(IND(I))
-        R(I)=0.
+        R(NFAC+I)=0.            !edited by RK
 C LES QUANTITES N'ONT PAS ETE CALCULEES EN Z=0 A LA FLOTTAISON
 C CEPANDANT ECRIRE ZSL=0 PERMET D'ETRE EXACT DANS LA GEOMETRIE (LES CN)
         ZM(IMX+I)=0.
@@ -143,12 +141,21 @@ C CEPANDANT ECRIRE ZSL=0 PERMET D'ETRE EXACT DANS LA GEOMETRIE (LES CN)
       END DO
 
       DO I=1,NL     ! VECTEUR NORMALE GENERALISE
-        CN(I,1)=P(I)
-        CN(I,2)=Q(I)
-        CN(I,3)=R(I)
-        CN(I,4)=(YM(I)-YEFF)*CN(I,3)-(ZM(I)-ZEFF)*CN(I,2)
-        CN(I,5)=(ZM(I)-ZEFF)*CN(I,1)-(XM(I)-XEFF)*CN(I,3)
-        CN(I,6)=(XM(I)-XEFF)*CN(I,2)-(YM(I)-YEFF)*CN(I,1)
+        IF(I.LE.NFAC) THEN  ! since P,Q,R are already unit vector so no effect by normalizing again
+                  CN(I,1)=P(I)/SQRT(P(I)**2+Q(I)**2+R(I)**2)
+                  CN(I,2)=Q(I)/SQRT(P(I)**2+Q(I)**2+R(I)**2)
+                  CN(I,3)=R(I)/SQRT(P(I)**2+Q(I)**2+R(I)**2)
+                  CN(I,4)=(YM(I)-YEFF)*CN(I,3)-(ZM(I)-ZEFF)*CN(I,2)
+                  CN(I,5)=(ZM(I)-ZEFF)*CN(I,1)-(XM(I)-XEFF)*CN(I,3)
+                  CN(I,6)=(XM(I)-XEFF)*CN(I,2)-(YM(I)-YEFF)*CN(I,1)
+            ELSE  ! FACETTE HORIZONTALE A LA FLOTTAISON
+                  CN(I,1)=P(I)/SQRT(P(I)**2+Q(I)**2)
+                  CN(I,2)=Q(I)/SQRT(P(I)**2+Q(I)**2)
+                  CN(I,3)=0.
+                  CN(I,4)=(YM(I)-YEFF)*CN(I,3)-(ZM(I)-ZEFF)*CN(I,2)
+                  CN(I,5)=(ZM(I)-ZEFF)*CN(I,1)-(XM(I)-XEFF)*CN(I,3)
+                  CN(I,6)=(XM(I)-XEFF)*CN(I,2)-(YM(I)-YEFF)*CN(I,1)
+            ENDIF
       END DO
 
       BETA=BETA/RADD
@@ -387,7 +394,7 @@ c~               STOP POURQUOI STOP ?
           ENDIF
 C
 C ** INTEGRALE D'HASKIND SUR LE CORPS **
-C                             TERME:   GRAD(PHI).GRAD(PSI)*MOM.N
+C                             TERME:   (GRAD(PHI).GRAD(PSI))*(MOM.N)
 C HVPSI
 C --------------------------------------------------------------
           DO JJ=1,NJ
@@ -403,8 +410,8 @@ C --------------------------------------------------------------
      1             VYR2(JJ,II)*YRM(JJ,II)-B*VYM2(JJ,II)*YMM(JJ,II)+     !
      1             VZR2(JJ,II)*ZRM(JJ,II)-B*VZM2(JJ,II)*ZMM(JJ,II))     !TEST DE MODIFICATION DE SIGNE POUR AVOIR LES BONS
             PRO1(1,4)=(B*VXR2(JJ,II)*XMM(JJ,II)+VXM2(JJ,II)*XRM(JJ,II)+ !PARTIE IMAGINAIRE  !JE LA GARDE CAR LA PENSE OK
-     1             B*VYR2(JJ,II)*YMM(JJ,II)+VYM2(JJ,II)*YRM(JJ,II)+     !
-     1             B*VZR2(JJ,II)*ZMM(JJ,II)+VZM2(JJ,II)*ZRM(JJ,II))     !
+     1             B*VYR2(JJ,II)*YMM(JJ,II)+VYM2(JJ,II)*YRM(JJ,II)+     !it is correct because it will be conjugated in PRODTN such that
+     1             B*VZR2(JJ,II)*ZMM(JJ,II)+VZM2(JJ,II)*ZRM(JJ,II))     !!VXM2/VYM2/VZM2 become negatif and XMM/YMM/ZMM terms become positive
 
             PRO3(1,1)=(VXR1(JJ,II)*XRP(JJ,II)-VXM1(JJ,II)*XMP(JJ,II)+
      1             VYR1(JJ,II)*YRP(JJ,II)-VYM1(JJ,II)*YMP(JJ,II)+
@@ -444,11 +451,11 @@ C --------------------------------------------------------------
             PRO2(1,1)=XPR1*CN1+YPR1*CN2+ZPR1*CN3  !ON CALCULE RE(MOM_1.N)
             PRO2(1,2)=XPM1*CN1+YPM1*CN2+ZPM1*CN3  !ON CALCULE IM(MOM_1.N)
             PRO2(1,3)=XPR2*CN1+YPR2*CN2+ZPR2*CN3  !ON CALCULE RE(MOM_2.N)
-            PRO2(1,4)=XPM2*CN1+YPM2*CN2+ZPM2*CN3  !ON CALCULE IM(MOM_2.N)
+            PRO2(1,4)=XPM2*CN1+YPM2*CN2+ZPM2*CN3  !
             DO IP=1,4
               PRO4(1,IP)=PRO2(1,IP)
             END DO
-            CALL PRODTN(PRO3,PRO4,PRO1,PRO2,FP,FM,1)
+            CALL PRODTN(PRO3,PRO4,PRO1,PRO2,FP,FM,1) ! not this products include conjugation for QTF- , RK
             EFWPS(1,IJ)=EFWPS(1,IJ)+FP(1)*AIRE(II)
             EFWPS(1,IJ6)=EFWPS(1,IJ6)+FP(2)*AIRE(II)
             EFWMN(1,IJ)=EFWMN(1,IJ)+FM(1)*AIRE(II)  !ON CALCULE LA CONTRIBUTION A L'EFFORT SUIVANT X (RE) EN AJOUTANT POUR CHAQUE FACE CE QUE L'ON A CALCULE
@@ -456,68 +463,152 @@ C --------------------------------------------------------------
           END DO
           END DO
           EFP=EFWPS(1,IJ)
-          EFM=EFWMN(1,IJ)                            !ON SAUVEGARDE AVANT DE MULTIPLIER PAR -I
-          EFWPS(1,IJ)=-EFWPS(1,IJ6)*RHO*WP
+          EFM=EFWMN(1,IJ)                            !ON SAUVEGARDE AVANT DE MULTIPLIER PAR I
+          EFWPS(1,IJ)=-EFWPS(1,IJ6)*RHO*WP            !1i*w*
           EFWPS(1,IJ6)=EFP*RHO*WP
-          EFWMN(1,IJ)=EFWMN(1,IJ6)*RHO*WM             !POURQUOI '-' ET SURTOUT POURQUOI ON CHANGE PARTIE REELLE/IMM => REPONSE : TERME -I OUBLIE DANS THESE DE CHEN
-          EFWMN(1,IJ6)=-EFM*RHO*WM
-C
-C
-C ** INTEGRALE D'HASKIND SUR LE CORPS **
-C                             TERME:   -GRAD(PHI).N*GRAD(PSI).MOM
-C HVN
-C ---------------------------------------------------------------
-C CODE EN COMPLEXE PAR FABIEN ROBAUX, POUR INNOSEA/EDF
+          EFWMN(1,IJ)=-EFWMN(1,IJ6)*RHO*WM             
+          EFWMN(1,IJ6)=EFM*RHO*WM
 
+
+C ** INTEGRALE D'HASKIND SUR LE CORPS **
+C                             TERME:   -(GRAD(PHI).N) (GRAD(PSI).MOM)
+C HVN by RK
+C --------------------------------------------------------------
           DO JJ=1,NJ
           DO II=1,NFAC
+            XOII=XM(II)-XEFF
+            YOII=YM(II)*(-1.)**(JJ+1)-YEFF
+            ZOII=ZM(II)-ZEFF
+            
             CN1=CN(II,1)
             CN2=CN(II,2)*(-1.)**(JJ+1)
             CN3=CN(II,3)
-
-            VX1=CMPLX(VXR1(JJ,II),VXM1(JJ,II))
-            VY1=CMPLX(VYR1(JJ,II),VYM1(JJ,II))
-            VZ1=CMPLX(VZR1(JJ,II),VZM1(JJ,II))
-            VN1=VX1*CN1+VY1*CN2+VZ1*CN3    !CALCUL DE \NABLA{PHI}.N
             
-            VX2=CMPLX(VXR2(JJ,II),VXM2(JJ,II))
-            VY2=CMPLX(VYR2(JJ,II),VYM2(JJ,II))
-            VZ2=CMPLX(VZR2(JJ,II),VZM2(JJ,II))
-            VN2=VX2*CN1+VY2*CN2+VZ2*CN3    !CALCUL DE \NABLA{PHI}.N
+            XPR1=A1(1)+A1(5)*ZOII-A1(6)*YOII      !AMPLITUDE DU MOUVEMENT /POINT DE CALCUL DES EFFORTS MOM
+            YPR1=A1(2)+A1(6)*XOII-A1(4)*ZOII
+            ZPR1=A1(3)+A1(4)*YOII-A1(5)*XOII
+            XPM1=A1(7)+A1(11)*ZOII-A1(12)*YOII    !PARTIE IMAGINAIRE
+            YPM1=A1(8)+A1(12)*XOII-A1(10)*ZOII
+            ZPM1=A1(9)+A1(10)*YOII-A1(11)*XOII
 
-            DO I=1,6
-                AC1(I)=CMPLX(A1(I),A1(I+6))    ! DEPLACEMENT 1 COMPLEXE
-                AC2(I)=CMPLX(A2(I),A2(I+6))    ! DEPLACEMENT 2 COMPLEXE
+            XPR2=A2(1)+A2(5)*ZOII-A2(6)*YOII      !PAREIL POUR LE POINT 2
+            YPR2=A2(2)+A2(6)*XOII-A2(4)*ZOII
+            ZPR2=A2(3)+A2(4)*YOII-A2(5)*XOII
+            XPM2=A2(7)+A2(11)*ZOII-A2(12)*YOII
+            YPM2=A2(8)+A2(12)*XOII-A2(10)*ZOII
+            ZPM2=A2(9)+A2(10)*YOII-A2(11)*XOII
+
+            PRO1(1,1)=VXR1(JJ,II)*CN1+VYR1(JJ,II)*CN2+VZR1(JJ,II)*CN3 !PARTIE REELLE DE \NABLA PHI_1.N
+            PRO1(1,2)=VXM1(JJ,II)*CN1+VYM1(JJ,II)*CN2+VZM1(JJ,II)*CN3 !Imaginer part
+            PRO1(1,3)=VXR2(JJ,II)*CN1+VYR2(JJ,II)*CN2+VZR2(JJ,II)*CN3 !PARTIE REELLE DE \NABLA conj(PHI_2).N
+            PRO1(1,4)=VXM2(JJ,II)*CN1+VYM2(JJ,II)*CN2+VZM2(JJ,II)*CN3 !Imaginer part
+            DO IP=1,4
+              PRO3(1,IP)=PRO1(1,IP)
             END DO
-            XP1=AC1(1)+AC1(5)*ZOII-AC1(6)*YOII     !
-            YP1=AC1(2)+AC1(6)*XOII-AC1(4)*ZOII     !CALCUL DE MOM_1
-            ZP1=AC1(3)+AC1(4)*YOII-AC1(5)*XOII     !
-            
-            XP2=AC2(1)+AC2(5)*ZOII-AC2(6)*YOII     !CALCUL DE MOM_2
-            YP2=AC2(2)+AC2(6)*XOII-AC2(4)*ZOII     !
-            ZP2=AC2(3)+AC2(4)*YOII-AC2(5)*XOII     !
-            
-            XMC=CMPLX(XRM(JJ,II),XMM(JJ,II))         !
-            YMC=CMPLX(YRM(JJ,II),YMM(JJ,II))         ! NABLA PSI-
-            ZMC=CMPLX(ZRM(JJ,II),ZMM(JJ,II))         !
-            
-            GPM1=XMC*XP1+YMC*YP1+ZMC*ZP1                             !CALCUL GRAD(PSI)(MOM_1)
-            GPM2C=XMC*CONJG(XP2)+YMC*CONJG(YP2)+ZMC*CONJG(ZP2)       !CALCUL GRAD(PSI)(MOM_2*)
-            GPM2=XMC*XP2+YMC*YP2+ZMC*ZP2                             !CALCUL GRAD(PSI)(MOM_2)
+            B=-1    !CELA NE CHANGE ABSOLUMENT RIEN SUR LA SPHERE LIBRE
 
+            PRO2(1,1)=(XRM(JJ,II)*XPR1-XMM(JJ,II)*XPM1+   !PARTIE REELLE DE (GRADPSI.MOM_1)
+     1             YRM(JJ,II)*YPR1-YMM(JJ,II)*YPM1+
+     1             ZRM(JJ,II)*ZPR1-ZMM(JJ,II)*ZPM1)
+            PRO2(1,2)=(XMM(JJ,II)*XPR1+XRM(JJ,II)*XPM1+   !PARTIE IMAGINAIRE
+     1             YMM(JJ,II)*YPR1+YRM(JJ,II)*YPM1+
+     1             ZMM(JJ,II)*YPR1+ZRM(JJ,II)*ZPM1)
+            PRO2(1,3)=(XRM(JJ,II)*XPR2-B*XMM(JJ,II)*XPM2+   !PARTIE REELLE DE (GRADPSI.Conj(MOM_2))
+     1             YRM(JJ,II)*YPR2-B*YMM(JJ,II)*YPM2+
+     1             ZRM(JJ,II)*ZPR2-B*ZMM(JJ,II)*ZPM2)
+            PRO2(1,4)=(B*XMM(JJ,II)*XPR2+XRM(JJ,II)*XPM2+   !PARTIE IMAGINAIRE
+     1             B*YMM(JJ,II)*YPR2+YRM(JJ,II)*YPM2+       !!it is correct because it will be conjugated in PRODTN
+     1             B*ZMM(JJ,II)*YPR2+ZRM(JJ,II)*ZPM2)
 
+            PRO4(1,1)=(XRP(JJ,II)*XPR1-XMP(JJ,II)*XPM1+   !PARTIE REELLE DE (GRADPSI.MOM_1) for QTF+
+     1             YRP(JJ,II)*YPR1-YMP(JJ,II)*YPM1+
+     1             ZRP(JJ,II)*ZPR1-ZMP(JJ,II)*ZPM1)
+            PRO4(1,2)=(XMP(JJ,II)*XPR1+XRP(JJ,II)*XPM1+   !PARTIE IMAGINAIRE
+     1             YMP(JJ,II)*YPR1+YRP(JJ,II)*YPM1+
+     1             ZMP(JJ,II)*YPR1+ZRP(JJ,II)*ZPM1)
+            PRO4(1,3)=(XRP(JJ,II)*XPR2-XMP(JJ,II)*XPM2+   !PARTIE REELLE DE (GRADPSI.(MOM_2))
+     1             YRP(JJ,II)*YPR2-YMP(JJ,II)*YPM2+
+     1             ZRP(JJ,II)*ZPR2-ZMP(JJ,II)*ZPM2)
+            PRO4(1,4)=(XMP(JJ,II)*XPR2+XRP(JJ,II)*XPM2+   !PARTIE IMAGINAIRE
+     1             YMP(JJ,II)*YPR2+YRP(JJ,II)*YPM2+
+     1             ZMP(JJ,II)*YPR2+ZRP(JJ,II)*ZPM2)
 
-
-            FMC=1./2.*(GPM2C*VN1+CONJG(VN2)*GPM1)
-            EFWMNC(2,IJ)=EFWMNC(2,IJ)+FMC*AIRE(II)
+     
+            CALL PRODTN(PRO3,PRO4,PRO1,PRO2,FP,FM,1)    ! note this products includes conjugation for QTF-
+            EFWPS(2,IJ)=EFWPS(2,IJ)+FP(1)*AIRE(II)
+            EFWPS(2,IJ6)=EFWPS(2,IJ6)+FP(2)*AIRE(II)
+            EFWMN(2,IJ)=EFWMN(2,IJ)+FM(1)*AIRE(II)  !ON CALCULE LA CONTRIBUTION A L'EFFORT SUIVANT X (RE) EN AJOUTANT POUR CHAQUE FACE CE QUE L'ON A CALCULE
+            EFWMN(2,IJ6)=EFWMN(2,IJ6)+FM(2)*AIRE(II)
           END DO
           END DO
+          EFP=EFWPS(2,IJ)
+          EFM=EFWMN(2,IJ)                            !ON SAUVEGARDE AVANT DE MULTIPLIER PAR -I
+          EFWPS(2,IJ)=EFWPS(2,IJ6)*RHO*WP            !-1i*w*
+          EFWPS(2,IJ6)=-EFP*RHO*WP
+          EFWMN(2,IJ)=EFWMN(2,IJ6)*RHO*WM             
+          EFWMN(2,IJ6)=-EFM*RHO*WM
 
-          EFWMNC(2,IJ)=ZI*EFWMNC(2,IJ)*RHO*WM
-          
-          EFWMN(2,IJ)=REAL(EFWMNC(2,IJ))
-          EFWMN(2,IJ6)=IMAG(EFWMNC(2,IJ))
 
+
+CC ** INTEGRALE D'HASKIND SUR LE CORPS **
+CC                             TERME:   -GRAD(PHI).N*GRAD(PSI).MOM
+CC HVN
+CC ---------------------------------------------------------------
+CC CODE EN COMPLEXE PAR FABIEN ROBAUX, POUR INNOSEA/EDF
+C
+C          DO JJ=1,NJ
+C          DO II=1,NFAC
+C            CN1=CN(II,1)
+C            CN2=CN(II,2)*(-1.)**(JJ+1)
+C            CN3=CN(II,3)
+C
+C            VX1=CMPLX(VXR1(JJ,II),VXM1(JJ,II))
+C            VY1=CMPLX(VYR1(JJ,II),VYM1(JJ,II))
+C            VZ1=CMPLX(VZR1(JJ,II),VZM1(JJ,II))
+C            VN1=VX1*CN1+VY1*CN2+VZ1*CN3    !CALCUL DE \NABLA{PHI}.N
+C            
+C            VX2=CMPLX(VXR2(JJ,II),VXM2(JJ,II))
+C            VY2=CMPLX(VYR2(JJ,II),VYM2(JJ,II))
+C            VZ2=CMPLX(VZR2(JJ,II),VZM2(JJ,II))
+C            VN2=VX2*CN1+VY2*CN2+VZ2*CN3    !CALCUL DE \NABLA{PHI}.N
+C
+C            DO I=1,6
+C                AC1(I)=CMPLX(A1(I),A1(I+6))    ! DEPLACEMENT 1 COMPLEXE
+C                AC2(I)=CMPLX(A2(I),A2(I+6))    ! DEPLACEMENT 2 COMPLEXE
+C            END DO
+C            XOII=XM(II)-XEFF                   ! added by RK
+C            YOII=YM(II)*(-1.)**(JJ+1)-YEFF
+C            ZOII=ZM(II)-ZEFF
+C
+C            XP1=AC1(1)+AC1(5)*ZOII-AC1(6)*YOII     !
+C            YP1=AC1(2)+AC1(6)*XOII-AC1(4)*ZOII     !CALCUL DE MOM_1
+C            ZP1=AC1(3)+AC1(4)*YOII-AC1(5)*XOII     !
+C            
+C            XP2=AC2(1)+AC2(5)*ZOII-AC2(6)*YOII     !CALCUL DE MOM_2
+C            YP2=AC2(2)+AC2(6)*XOII-AC2(4)*ZOII     !
+C            ZP2=AC2(3)+AC2(4)*YOII-AC2(5)*XOII     !
+C            
+C            XMC=CMPLX(XRM(JJ,II),XMM(JJ,II))         !
+C            YMC=CMPLX(YRM(JJ,II),YMM(JJ,II))         ! NABLA PSI-
+C            ZMC=CMPLX(ZRM(JJ,II),ZMM(JJ,II))         !
+C            
+C            GPM1=XMC*XP1+YMC*YP1+ZMC*ZP1                             !CALCUL GRAD(PSI)(MOM_1)
+C            GPM2C=XMC*CONJG(XP2)+YMC*CONJG(YP2)+ZMC*CONJG(ZP2)       !CALCUL GRAD(PSI)(MOM_2*)
+C            GPM2=XMC*XP2+YMC*YP2+ZMC*ZP2                             !CALCUL GRAD(PSI)(MOM_2)
+C
+C
+C
+C
+C            FMC=1./2.*(GPM2C*VN1+CONJG(VN2)*GPM1)
+C            EFWMNC(2,IJ)=EFWMNC(2,IJ)+FMC*AIRE(II)
+C          END DO
+C          END DO
+C
+C          EFWMNC(2,IJ)=ZI*EFWMNC(2,IJ)*RHO*WM
+C          
+C          EFWMN(2,IJ)=REAL(EFWMNC(2,IJ))
+C          EFWMN(2,IJ6)=IMAG(EFWMNC(2,IJ))
+C
 
 
 C
@@ -531,12 +622,12 @@ C -------------------------------------------------------------
             XOII=XM(II)-XEFF
             YOII=YM(II)*(-1.)**(JJ+1)-YEFF
             ZOII=ZM(II)-ZEFF
+            GAMMA0=ALF(II1)  !added by RK, LONGUEUR DE LA LIGNE DE FLOTTAISON --> OUI! cf QTFGeom l.99
 C ATTENTION A LA DEFINITION DE DL SUR LA PARTIE SYMETRIQUE DU CORPS
 C LE CONTOUR EST ORIENTE VERS L'EXTERIEUR DU CORPS (INVERSE DE Z!)
-            CL1=Q(II)*(-1.)**(JJ+1)!!DL_X/|DL|
+            CL1=Q(II)*(-1.)**(JJ+1)!!DL_X/|DL| ny/|n|
             
-            CL2=-P(II)             !!DL_Y/|DL|
-            
+            CL2=-P(II)             !!DL_Y/|DL|  -nx/|n|
 
             XPR1=A1(1)+A1(5)*ZOII-A1(6)*YOII
             YPR1=A1(2)+A1(6)*XOII-A1(4)*ZOII
@@ -554,7 +645,7 @@ C LE CONTOUR EST ORIENTE VERS L'EXTERIEUR DU CORPS (INVERSE DE Z!)
 
             PRO1(1,1)=ZPR1*CL1                      !ON FAIT MOM1_Z*DL_X
             PRO1(1,2)=ZPM1*CL1
-            PRO1(1,3)=ZPR2*CL1                      !ON FAIT MOM1_Z*DL_X
+            PRO1(1,3)=ZPR2*CL1                      !ON FAIT MOM2_Z*DL_X
             PRO1(1,4)=ZPM2*CL1
 
             PRO1(2,1)=-YPR1*CL1                     !ON FAIT -MOM1_Y*DL_X
@@ -591,15 +682,17 @@ C LE CONTOUR EST ORIENTE VERS L'EXTERIEUR DU CORPS (INVERSE DE Z!)
             PRO2(4,2)=VXM1(JJ,II)
             PRO2(4,3)=VXR2(JJ,II)
             PRO2(4,4)=VXM2(JJ,II)
+           
             CALL PRODTN(PRO1,PRO2,PRO1,PRO2,FP,FM,4)!NORMALEMENT VERIFIE, C'EST OK ON OBTIENT BIEN LES BONS SIGNES:(POUR FM) +1/2 DL/|DL|.(\NABLA PHI_1 ^ MOM_2*   + \NABLA PHI_2* ^ MOM_1)
             AIR=AIRE(II)
-            EFWPS(3,IJ)=EFWPS(3,IJ)+AIR*(FP(1)*PRP(JJ,II)
+           ! print*,GAMMA0,AIR  !GAMMA0=AIR for II>NFAC 
+            EFWPS(3,IJ)=EFWPS(3,IJ)+GAMMA0*(FP(1)*PRP(JJ,II) !AIR replaced with GAMMA0 by RK
      1 -FP(2)*PMP(JJ,II))                            !! PRP ET PMP SONT LES PARTIES R ET I DE PSI+ POUR LA PULSATION W+ ET DE DOF K
-            EFWPS(3,IJ6)=EFWPS(3,IJ6)+AIR*(FP(1)*PMP(JJ,II)
+            EFWPS(3,IJ6)=EFWPS(3,IJ6)+GAMMA0*(FP(1)*PMP(JJ,II)
      1 +FP(2)*PRP(JJ,II))
-            EFWMN(3,IJ)=EFWMN(3,IJ)+AIR*(FM(1)*PRM(JJ,II)
+            EFWMN(3,IJ)=EFWMN(3,IJ)+GAMMA0*(FM(1)*PRM(JJ,II)
      1 -FM(2)*PMM(JJ,II))                            ! ON FAIT TERME 4LIGNES PLUS HAUT *PSI_K ET ON INTEGRE
-            EFWMN(3,IJ6)=EFWMN(3,IJ6)+AIR*(FM(1)*PMM(JJ,II)
+            EFWMN(3,IJ6)=EFWMN(3,IJ6)+GAMMA0*(FM(1)*PMM(JJ,II)
      1 +FM(2)*PRM(JJ,II))
           END DO
           END DO
@@ -607,8 +700,8 @@ C LE CONTOUR EST ORIENTE VERS L'EXTERIEUR DU CORPS (INVERSE DE Z!)
           EFM=EFWMN(3,IJ)
           EFWPS(3,IJ)=-EFWPS(3,IJ6)*RHO*WP
           EFWPS(3,IJ6)=EFP*RHO*WP
-          EFWMN(3,IJ)=EFWMN(3,IJ6)*RHO*WM            !ON MULTIPLIE PAR -IWM RHO
-          EFWMN(3,IJ6)=-EFM*RHO*WM
+          EFWMN(3,IJ)=-EFWMN(3,IJ6)*RHO*WM            !ON MULTIPLIE PAR IWM RHO
+          EFWMN(3,IJ6)=EFM*RHO*WM
 C
 C
 C ** INTEGRALE D'HASKIND SUR LE CORPS **
@@ -639,8 +732,8 @@ C --------------------------------------------------------------
             YPM2=A2(8)+A2(12)*XOII-A2(10)*ZOII
             ZPM2=A2(9)+A2(10)*YOII-A2(11)*XOII
 
-            A=2                               !!ON FIXE CE PARAMETRE A 1 CAR LE DEVEPNT EN SERIE DU PB DE BASE (GRAD(PHI).N=VE.N)
-            PRO1(1,1)=(YPM1*W1-A*VYR1(JJ,II))
+            A=1                               !!ON FIXE CE PARAMETRE A 1 CAR LE DEVEPNT EN SERIE DU PB DE BASE (GRAD(PHI).N=VE.N)
+            PRO1(1,1)=(YPM1*W1-A*VYR1(JJ,II))           ! dtMoM=-iw*MoM
             PRO1(1,2)=(-YPR1*W1-A*VYM1(JJ,II))
             PRO1(1,3)=(YPM2*W2-A*VYR2(JJ,II))
             PRO1(1,4)=(-YPR2*W2-A*VYM2(JJ,II))
@@ -659,7 +752,7 @@ C --------------------------------------------------------------
               PRO1(5,IP)=PRO1(3,IP)
               PRO1(6,IP)=PRO1(1,IP)
             END DO
-            PRO2(1,1)=-A1(6)*CN1
+            PRO2(1,1)=-A1(6)*CN1                        !! R.N
             PRO2(1,2)=-A1(12)*CN1
             PRO2(1,3)=-A2(6)*CN1
             PRO2(1,4)=-A2(12)*CN1
@@ -718,10 +811,10 @@ C--------------------------------------------------------------------
           ELSE
             HII=1.E20
           ENDIF
-          IF(W1.EQ.W2)THEN
-            PHIM=0.
-            PHIP=0.
-          ELSE
+C          IF(W1.EQ.W2)THEN ! closed by RK
+C            PHIM=0.
+C            PHIP=0.
+C          ELSE
             IF(HII.GE.1.E19)THEN
               PHIM=AMAX1(W1,W2)
               PHIP=0
@@ -735,9 +828,11 @@ C--------------------------------------------------------------------
               PHIM=PHIM*G*G/(G*AKMM*TANH(AKHMM)-WM**2)
               PHIP=WP*AK1*AK2*(TANH(AKH1)*TANH(AKH2)-1)/(W1*W2)-
      1    (AK1*AK1/(W1*COSH(AKH1)**2)+AK2*AK2/(W2*COSH(AKH2)**2))/2
-              PHIP=PHIP*G*G/(G*AKPP*TANH(AKHPP)-WP**2)
+              PHIP=-PHIP*G*G/(G*AKPP*TANH(AKHPP)-WP**2)
+C due to convention of the first order incoming potential in NEMOH
+C PHIP is multiplied by -1, by RK  
             ENDIF
-          ENDIF
+C         ENDIF
 
           DO JJ=1,NJ
           DO II=1,NFAC
@@ -756,7 +851,7 @@ C--------------------------------------------------------------------
             ACQP=AIRE(II)*PHIP*AKPP
             DFRP=-AZCHP*(CN1*CB+CN2*SB)*COS(COEFP)-AZSHP*CN3*SIN(COEFP)
             DFMP=-AZCHP*(CN1*CB+CN2*SB)*SIN(COEFP)+AZSHP*CN3*COS(COEFP)
-
+            IF (ZM(II).LT.0.) THEN   ! not calculating on lid panels for irreg. freq removal ,added by RK
             EFWPS(5,IJ)=EFWPS(5,IJ)+ACQP*(DFRP*PRP(JJ,II)
      1 -DFMP*PMP(JJ,II))
             EFWPS(5,IJ6)=EFWPS(5,IJ6)+ACQP*(DFRP*PMP(JJ,II)
@@ -765,11 +860,12 @@ C--------------------------------------------------------------------
      1 -DFMM*PMM(JJ,II))
             EFWMN(5,IJ6)=EFWMN(5,IJ6)+ACQM*(DFRM*PMM(JJ,II)
      1 +DFMM*PRM(JJ,II))
+             ENDIF
           END DO
           END DO
           EFP=EFWPS(5,IJ)
           EFM=EFWMN(5,IJ)
-          EFWPS(5,IJ)=-EFWPS(5,IJ6)*RHO*WP
+          EFWPS(5,IJ)=-EFWPS(5,IJ6)*RHO*WP              !i omega
           EFWPS(5,IJ6)=EFP*RHO*WP
           EFWMN(5,IJ)=-EFWMN(5,IJ6)*RHO*WM
           EFWMN(5,IJ6)=EFM*RHO*WM
@@ -788,11 +884,15 @@ C HFRK
 C--------------------------------------------------------------
 C  PROFONDEUR FINIE , 2 HOULES DE MEME DIRECTION
 C                      E = A*SIN(AK*(X.COSB+Y.SINB)-WT)
-        IF(W1.EQ.W2)THEN
-          PHIM=0.
-          PHIP=0.
-        ELSE
-          IF(HII.GE.1.E19)THEN
+C  Replace convention by RK to be same as in first order NEMOH
+C                     Phi=-iAg/w f(z) e^(ik.x)
+C  difference frequency part is same but not in the sum freq
+C So PHIP is multiply by - sign
+C          IF(W1.EQ.W2)THEN ! closed by RK
+C            PHIM=0.
+C            PHIP=0.
+C          ELSE
+        IF(HII.GE.1.E19)THEN
             PHIM=AMAX1(W1,W2)
             PHIP=0
           ELSE
@@ -805,9 +905,11 @@ C                      E = A*SIN(AK*(X.COSB+Y.SINB)-WT)
             PHIM=PHIM*G*G/(G*AKMM*TANH(AKHMM)-WM**2)
             PHIP=WP*AK1*AK2*(TANH(AKH1)*TANH(AKH2)-1)/(W1*W2)-
      1    (AK1*AK1/(W1*COSH(AKH1)**2)+AK2*AK2/(W2*COSH(AKH2)**2))/2
-            PHIP=PHIP*G*G/(G*AKPP*TANH(AKHPP)-WP**2)
+            PHIP=-PHIP*G*G/(G*AKPP*TANH(AKHPP)-WP**2)
+C due to convention of the first order incoming potential in NEMOH
+C PHIP is multiplied by -1, by RK  
           ENDIF
-        ENDIF
+C       ENDIF
 
         DO JJ=1,NJ
         DO II=1,NFAC
@@ -821,10 +923,12 @@ C                      E = A*SIN(AK*(X.COSB+Y.SINB)-WT)
      1 *CN(II,IJ)
             ACQP=AIRE(II)*RHO*WP*PHIP*AZCHP*((-1.)**(IJ+1))**(JJ+1)
      1 *CN(II,IJ)
+            IF (ZM(II).LT.0.) THEN   ! not calculating on lid panels for irreg. freq removal
             EFWPS(6,IJ)=EFWPS(6,IJ)+ACQP*COS(COEFP)
             EFWPS(6,IJ6)=EFWPS(6,IJ6)+ACQP*SIN(COEFP)
             EFWMN(6,IJ)=EFWMN(6,IJ)+ACQM*COS(COEFM)
             EFWMN(6,IJ6)=EFWMN(6,IJ6)+ACQM*SIN(COEFM)
+            ENDIF
           END DO
         END DO
         END DO
@@ -1010,7 +1114,7 @@ c~      1 ,(CONTRIB(M,DOF+6*(L-1),I2,I1,K),I2=I1+1,NHASKIND)            ! versio
           WRITE(IUNI,*) CHAR(10),CHAR(10),"# NB: Les valeurs des QTF+",
      1 "pour w1+w2>n*dw sont definies a zeros. ", CHAR(10),
      1 "# en effet, un calcul de ces valeurs ",
-     1 "#necessiterait un calcul d'ordre 1 sur 2 fois plus de pulsation"
+     1 "#necessiterat un calcul d'ordre 1 sur 2 fois plus de pulsation."
         ENDIF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         CLOSE(IUNI)

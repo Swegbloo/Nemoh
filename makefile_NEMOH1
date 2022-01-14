@@ -2,13 +2,18 @@
 # edited by Adrien Combourieu from INNOSEA (adrien.combourieu@innosea.fr)
 
 #COMPILATEUR  
-# FC=ifort
-FC=gfortran
-#OPTIONS  
-# FFLAGS= -c 
-FFLAGS= -O3 -ffree-line-length-0 -c 
-#LIBRAIRIES  
-#LFLAGS= -L./ -lVAWTBEMT -lstdc++
+gtest=$(shell which gfortran 2> /dev/null | grep -o gfortran)
+itest=$(shell which ifort 2> /dev/null | grep -o ifort)
+
+ifeq ($(gtest), gfortran)
+	FC=gfortran
+	FFLAGS=-cpp -DGNUFORT -O2 -ffree-line-length-none -c
+endif
+
+ifeq ($(itest), ifort)
+	FC=ifort
+	FFLAGS=-c -cpp
+endif
 
 outputdir=./bin
 
@@ -21,9 +26,21 @@ SRCM=./Common/Identification.f90\
 ./Mesh/Mailleur.f90\
 ./Mesh/mesh.f90\
 
-# LISTE DES .o preProc
+# LISTE DES .o mesh
 #TRANSFORME f90 en o  
 OBJM=$(SRCM:.f90=.o)
+
+#SOURCES FORTRAN Hydrostatic
+SRCHS=./Common/Environment.f90\
+./Common/Identification.f90\
+./preProcessor/Mesh.f90\
+./Mesh/hydre.f90\
+./Mesh/coque.f90\
+./Mesh/hydrostatic_cal.f90\
+
+# LISTE DES .o hydrostatic
+#TRANSFORME f90 en o  
+OBJHS=$(SRCHS:.f90=.o)
 
 
 #SOURCES FORTRAN preProc(modules de preprocessing)
@@ -65,7 +82,7 @@ SRCS=./Solver/Core/FIC_COM.f90\
 #./Solver/Core/SOLVE_BEM_INFD_ITERATIVE.f90
 
 
-# LISTE DES .o preProc
+# LISTE DES .o solver
 #TRANSFORME f90 en o  
 OBJS=$(SRCS:.f90=.o)
 
@@ -85,17 +102,25 @@ SRCO=./Common/Identification.f90\
 OBJO=$(SRCO:.f90=.o)
 
 
-build: clean bin msh pre solver post  
+build: clean bin msh hyd pre solver post  
 
 bin:
 	mkdir -p $(outputdir)
 #
 #Build Mesh executable
-msh:	mesh.exe
+msh:	meshexe
 #Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
-mesh.exe:	$(OBJM) 
+meshexe:	$(OBJM) 
 		$(FC) -o meshExe $(OBJM)
 #
+
+#Build Hydrostatic cal executable
+hyd:	hydstexe
+#Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
+hydstexe:	$(OBJHS) 
+		$(FC) -o hydroStaticExe $(OBJHS)
+#
+
 #Build preProc executable
 pre:	preProc
 #Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
@@ -104,7 +129,7 @@ preProc:	$(OBJP)
 
 #
 #Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
-solver:	$(OBJS) 
+solver:	        $(OBJS) 
 		$(FC) -o solverExe $(OBJS)
 
 #
@@ -123,7 +148,7 @@ postProc:	$(OBJO)
 
 # # #Copy to local bin directory
 install: build
-	mv meshExe preProcExe solverExe postProcExe ./bin/
+	mv meshExe hydroStaticExe preProcExe solverExe postProcExe ./bin/
 
 # Remove *.o and *.mod
 clean:

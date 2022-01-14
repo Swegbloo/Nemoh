@@ -125,8 +125,8 @@
     WRITE(*,*) ' -> Solve BVPs and calculate forces ' 
     WRITE(*,*) ' '
     DO j=1,BodyConditions%Nproblems 
-        WRITE(*,'(A,I5,A,I5,A,A)',ADVANCE="NO") ' Problem ',j,' / ',BodyConditions%Nproblems,' . .Processing',CHAR(13)
-!~         WRITE(*,'(A,I5,A,I5,A,$)') ' Problem ',j,' / ',BodyConditions%Nproblems,' .'
+!         WRITE(*,'(A,I5,A,I5,A,A)',ADVANCE='NO') ' Problem ',j,' / ',BodyConditions%Nproblems,' . . Processing',CHAR(13)
+        WRITE(*,'(A,I5,A,I5,A,A,$)') ' Problem ',j,' / ',BodyConditions%Nproblems,' .',CHAR(13)
         DO c=1,Mesh%Npanels*2**Mesh%Isym
             NVEL(c)=BodyConditions%NormalVelocity(c,j)
         END DO
@@ -141,9 +141,10 @@
 !~         WRITE(*,'(A,I5,A,I5,A,A)',ADVANCE="NO") ' Problem ',j,' / ',BodyConditions%Nproblems,' . . Done !',CHAR(13)
 !~         WRITE(*,*) '. Done !'      
     END DO    
-    WRITE(*,*) ' ' 
-    CLOSE(10)
-    CLOSE(12)
+    WRITE(*,*) '. Done !'      
+!    WRITE(*,*) ' ' 
+!    CLOSE(10)
+!    CLOSE(12)
 !
 !   --- Save results -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 !
@@ -167,12 +168,14 @@
 !
 !   --- Finalize -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 !
+   
+    IF (MeshFS%Npoints.GT.0) CALL DeleteTMesh(MeshFS)
+    CALL DEALLOCATE_DATA
+    DEALLOCATE(line)
     DEALLOCATE(NVEL,PRESSURE)    
     DEALLOCATE(Force)
     DEALLOCATE(Theta,HKochin)
-    IF (MeshFS%Npoints.GT.0) CALL DeleteTMesh(MeshFS)
-    CALL DEALLOCATE_DATA
-!
+
     END PROGRAM Main
 !----------------------------------------------------------------
 

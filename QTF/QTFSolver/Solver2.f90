@@ -78,7 +78,6 @@
     endif
   CLOSE(10)
   
-  
   if (NW2 > NW1) then
     NW=NW1
     NW1=NW2
@@ -147,26 +146,25 @@
   
   IF(contrib>2) THEN
     write(*,*) 
-   ! write(*,*) 'hasfs   ##################################'
-   ! CALL SYSTEM(TRIM(EXEDIR)//'/hasfs <avs.txt')
-    write(*,*) 'CHECK0'
+    write(*,*) 'hasfs   ##################################'
+    CALL SYSTEM(TRIM(EXEDIR)//'/hasfs <avs.txt')
     write(*,*) 'hasfscalc    #############################'
     CALL SYSTEM(TRIM(EXEDIR)//'/hasfscalc <avs.txt ')
-  !  write(*,*) 
-  !  write(*,*) 'hasfsasym    #############################'
-  !  CALL SYSTEM(TRIM(EXEDIR)//'/asymp <avs.txt')
+    write(*,*) 
+    write(*,*) 'hasfsasym    #############################'
+    CALL SYSTEM(TRIM(EXEDIR)//'/asymp <avs.txt')
   ENDIF
 
 ! ! Clean old results !
    inquire( file=ID(1:lID)//'/QTF/WRH.dat', exist=dir_e )
    if ( dir_e ) then
- !	CALL SYSTEM('rm '//ID(1:lID)//'/QTF/WRH.dat')
+        CALL SYSTEM('rm '//ID(1:lID)//'/QTF/WRH.dat')
    endif
    inquire( file=ID(1:lID)//'/avs.txt', exist=dir_e )
    if ( dir_e ) then
- !	CALL SYSTEM('rm '//ID(1:lID)//'/avs.txt')
+       CALL SYSTEM('rm '//ID(1:lID)//'/avs.txt')
    endif
-!   CALL SYSTEM('rm '//ID(1:lID)//'/QTF/*.RES 2> /dev/null')
-!   CALL SYSTEM('rm '//ID(1:lID)//'/QTF/*.wat 2> /dev/null') 
+   CALL SYSTEM('rm '//ID(1:lID)//'/QTF/*.RES 2> /dev/null')
+   CALL SYSTEM('rm '//ID(1:lID)//'/QTF/*.wat 2> /dev/null') 
 
   END

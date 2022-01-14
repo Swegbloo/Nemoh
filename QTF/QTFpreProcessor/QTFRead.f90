@@ -283,7 +283,7 @@ CONTAINS
 	    Phase(k) = Phase(k)*PI/180.0  ! pass to radians
 	    
 	    !A.C. : WARNING: phase convention is modified here
-	    Phase(k) = Phase(k)-PI/2.0
+	   ! Phase(k) = Phase(k)-PI/2.0   ! closed by RK
 	    
 	    Fe(l,k,j) = Amp(k)*CEXP(CMPLX(0.,1.)*Phase(k))
 	  
@@ -368,12 +368,12 @@ CONTAINS
 	    Phase(k) = Phase(k)*PI/180.0  ! pass to radians
 	    
 	    !A.C. : WARNING: phase convention is modified here
- 	    Phase(k) = Phase(k)-PI/2.0
+ 	    ! Phase(k) = Phase(k)-PI/2.0 ! close by RK   
 	    IF (k>3) THEN
 		Amp(k)=Amp(k)*PI/180.0	  ! JND :degre de liberte en rotation en deg/m --> rad/m 
 	    ENDIF
 	    
-	    RAO(l,k,j) = Amp(k)*CEXP(CMPLX(0.,1.)*Phase(k))
+	    RAO(l,k,j) =Amp(k)*CEXP(CMPLX(0.,1.)*Phase(k))
 	    
 	  END DO
 
@@ -422,12 +422,13 @@ CONTAINS
    
       do i=1,Npanels
 	READ(11,*) RE,IM 
-	ZIGB(I,idiffrad) = CMPLX(RE,IM)
+       ZIGB(I,idiffrad) = CMPLX(RE,IM)
+
       end do
       
       do i=1,Npanels
 	READ(11,*) RE,IM 
-	ZIGS(I,idiffrad) = CMPLX(RE,IM)
+       ZIGS(I,idiffrad) = CMPLX(RE,IM)
       end do
      
       CLOSE(11)
@@ -444,17 +445,16 @@ CONTAINS
    
       do i=1,IMX
 	READ(11,*) RE,IM 
-! 	ZIGB(I,idiffrad) = CMPLX(RE,IM)
-	! Change convention for difffraction problems
-	ZIGB(I,idiffrad) = CMPLX(IM,-RE)
-	
+ 	ZIGB(I,idiffrad) = CMPLX(RE,IM)        ! Now convention same as the potential in first order NEMOH  
+	! Change convention for diffraction problems
+	! ZIGB(I,idiffrad) = CMPLX(IM,-RE)  ! comments RK: it is multiply by [-i] also compensated in PhiI (missing i) 
       end do
       
       do i=1,IMX
 	READ(11,*) RE,IM 
-! 	ZIGS(I,idiffrad) = CMPLX(RE,IM)
+ 	ZIGS(I,idiffrad) = CMPLX(RE,IM)
 	! Change convention for difffraction problems
-	ZIGS(I,idiffrad) = CMPLX(IM,-RE)
+	!ZIGS(I,idiffrad) = CMPLX(IM,-RE)
 	
       end do
     
