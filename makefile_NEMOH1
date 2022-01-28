@@ -7,12 +7,12 @@ itest=$(shell which ifort 2> /dev/null | grep -o ifort)
 
 ifeq ($(gtest), gfortran)
 	FC=gfortran
-	FFLAGS=-cpp -DGNUFORT -O2 -ffree-line-length-none -c
+	FFLAGS=-cpp -DGNUFORT -O2 -ffree-line-length-none -c -fdefault-real-8
 endif
 
 ifeq ($(itest), ifort)
 	FC=ifort
-	FFLAGS=-c -cpp
+	FFLAGS=-O3 -c -cpp -r8
 endif
 
 outputdir=./bin

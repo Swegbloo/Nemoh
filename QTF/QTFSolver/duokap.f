@@ -1332,7 +1332,7 @@ c~                 DO I=1,NHASKIND+1                                    ! versio
                      !!!  QTFij-=QTFji-* !!!
                      ! ON PREND LE CONJUGE DU TRIANGLE SUP
                      FCONT(DOF,K,I,I,L,M)=0.
-                     DO J=I+1,N
+                     DO J=I+1,N+1
                         FCONT(DOF,K,I,J,L,M)=-FCONT(DOF,K,I,J,L,M)
                      ENDDO
                   ENDIF

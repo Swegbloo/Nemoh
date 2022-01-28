@@ -310,6 +310,7 @@ CONTAINS
 
       ENDDO
       ELSE
+      WRITE(*,*) 'Existing GRIN.QAT data is used.'
      OPEN(UNIT=44,FILE='GRIN.QAT',FORM='UNFORMATTED',STATUS='OLD')
       READ(44)IIR,JJZ,(Xr(I),I=1,IIR),(xZ(J),J=1,JJZ)
       DO J=1,JJZ

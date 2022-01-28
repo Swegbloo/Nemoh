@@ -107,11 +107,13 @@
   
   ICER0=10
   if (contrib>2) then
-  OPEN(2,FILE=ID(1:lID)//'/mesh/SF_L12.dat')
-  do i=1,7
-    read(2,*)
-  enddo
-  READ(2,*) trash,trash,trash,trash,trash,trash,npasr
+  !OPEN(2,FILE=ID(1:lID)//'/mesh/SF_L12.dat')
+  OPEN(2,FILE=ID(1:lID)//'/mesh/SF_L12_2.dat')
+  !do i=1,7
+  !  read(2,*)
+  !enddo
+  !READ(2,*) trash,trash,trash,trash,trash,trash,npasr
+  READ(2,*) trash,trash,trash,trash,npasr
   CLOSE(2)
   NRCER=npasr-ICER0-10
   else
@@ -164,7 +166,7 @@
    if ( dir_e ) then
        CALL SYSTEM('rm '//ID(1:lID)//'/avs.txt')
    endif
-   CALL SYSTEM('rm '//ID(1:lID)//'/QTF/*.RES 2> /dev/null')
+!   CALL SYSTEM('rm '//ID(1:lID)//'/QTF/*.RES 2> /dev/null')
    CALL SYSTEM('rm '//ID(1:lID)//'/QTF/*.wat 2> /dev/null') 
 
   END

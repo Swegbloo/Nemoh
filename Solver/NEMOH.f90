@@ -65,7 +65,8 @@
     INTEGER                 :: c,d,M,l,i,j,k
     REAL                    :: Discard
     COMPLEX,PARAMETER       :: II=CMPLX(0.,1.)
-
+!   CPU TIME
+    REAL                    :: tcpu_start, tcpu_finish, comptime,relcomptime
 !
 !   --- Initialisation -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 !     
@@ -122,6 +123,7 @@
 !
 !   --- Solve BVPs and calculate forces -------------------------------------------------------------------------------------------------------------------------------------------------
 !
+    CALL CPU_TIME(tcpu_start)
     WRITE(*,*) ' -> Solve BVPs and calculate forces ' 
     WRITE(*,*) ' '
     DO j=1,BodyConditions%Nproblems 
@@ -141,6 +143,12 @@
 !~         WRITE(*,'(A,I5,A,I5,A,A)',ADVANCE="NO") ' Problem ',j,' / ',BodyConditions%Nproblems,' . . Done !',CHAR(13)
 !~         WRITE(*,*) '. Done !'      
     END DO    
+    CALL CPU_TIME(tcpu_finish)
+    comptime=tcpu_finish-tcpu_start
+!    relcomptime=comptime/Mesh%Npanels/BodyConditions%Nproblems
+
+    WRITE(*,*) 'Computation time=',comptime,' [s]'
+!    WRITE(*,*) 'Relative Comp. time=',relcomptime,'[ s/Npanel/Nproblem]'
     WRITE(*,*) '. Done !'      
 !    WRITE(*,*) ' ' 
 !    CLOSE(10)
