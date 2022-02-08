@@ -43,6 +43,7 @@ MODULE SOLVE_BEM_INFD_DIRECT
     REAL:: AKAD,AM0,SD1B,SD1S,SD2B,SD2S,PI,DPI,ZERO
     REAL:: TIRAN,ZMAX,ZMIN
     COMPLEX:: ZOL(IMX,2),B(IMX)
+      
 
       ZMAX=0.
       DO 7333 I=1,IMX
@@ -91,11 +92,11 @@ MODULE SOLVE_BEM_INFD_DIRECT
                    GM=AMAX1(DIJ,GM)     ! maximum horizontal distance all of nodes
     7200 CONTINUE
  7100 CONTINUE                                               
-      AKK=AM0*GM                ! dimensionless wavenumber*body length 
+      AKK=AM0*GM                ! dimensionless wavenumber*body length
       CALL CINT_INFD(AKK,N)     ! interpolation green function ????
       N=NQ
 
-!   Construction of the influence matrix 
+!   Construction of the influence matrix only once for each freq and applied to all computed problem
     IF (w.NE.w_previous) THEN
         w_previous=w            ! ang freq
         DO ISYM=1,NJJ           ! if symmetric ISYM=1:2 else ISYM=1:1
@@ -103,6 +104,7 @@ MODULE SOLVE_BEM_INFD_DIRECT
                 DO 1 ISP=1,IMX  ! index of panel, IMX Npanels
                     IF(ISYM.EQ.1)THEN
                         DO 31 IFP=1,IMX !index of panel
+            
                         call VAVINFD(1,XG(ISP),YG(ISP),ZG(ISP),ISP,IFP)  !1/r+1/r1
                         call VNSINFD(1,ISP,IFP,XG(ISP),YG(ISP),ZG(ISP))  
                             PCOS=VSXP1*XN(ISP)+VSYP1*YN(ISP)+VSZP1*ZN(ISP)   !real part Kij =dxS Nx+dyS Ny + dzS Nz
@@ -111,7 +113,7 @@ MODULE SOLVE_BEM_INFD_DIRECT
 	                31 CONTINUE
 	            ELSE
 	                DO 32 IFP=1,IMX
-	                    call VAVINFD(1,XG(ISP),YG(ISP),ZG(ISP),ISP,IFP)
+                        call VAVINFD(1,XG(ISP),YG(ISP),ZG(ISP),ISP,IFP)
                         call VNSINFD(1,ISP,IFP,XG(ISP),YG(ISP),ZG(ISP))  
 	                    PCOS=VSXM1*XN(ISP)+VSYM1*YN(ISP)+VSZM1*ZN(ISP)  !real part Kij
 	                    PSIN=VSXM2*XN(ISP)+VSYM2*YN(ISP)+VSZM2*ZN(ISP)  !imaginary part Kij
@@ -119,19 +121,31 @@ MODULE SOLVE_BEM_INFD_DIRECT
 	                32 CONTINUE
 	            ENDIF
             1 CONTINUE
+
+              IF (Indiq_solver.EQ.0) THEN ! for gauss elimination method
 	        DO I=1,IMX
-    	        DO J=1,IMX
-    	            ZIJ(I,J+IMX)=CMPLX(0.,0.)
+    	                DO J=1,IMX
+    	                ZIJ(I,J+IMX)=CMPLX(0.,0.)
+    	                END DO
+    	                ZIJ(I,I+IMX)=CMPLX(1.,0.)
     	        END DO
-    	        ZIJ(I,I+IMX)=CMPLX(1.,0.)
-    	    END DO
-!------------------------------------------------!
-           CALL GAUSSZ(ZIJ,NFA,IMX,2*IMX)
-!------------------------------------------------!
+        !------------------------------------------------!
+                CALL GAUSSZ(ZIJ,NFA,IMX,2*IMX)
+        !------------------------------------------------!
+              ELSE
+        !------------------------------------------------! added by RK
+                CALL LU_INVERS_MATRIX(ZIJ,IMX,IMX)
+        !------------------------------------------------!
+              END IF
+          
     	    DO I=1,IMX
     	        DO J=1,IMX
-    	            AInv(I,J,(ISYM-1)+1)=ZIJ(I,IMX+J)
-    	        END DO
+                    IF (Indiq_solver.EQ.0) THEN ! for gauss elimination method
+                    AInv(I,J,(ISYM-1)+1)=ZIJ(I,IMX+J)
+                    ELSE
+                    AInv(I,J,(ISYM-1)+1)=ZIJ(I,J)
+                    END IF
+                END DO
     	    END DO
         END DO
     END IF

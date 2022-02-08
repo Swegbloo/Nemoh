@@ -1,6 +1,7 @@
 # makefile written by Christophe Peyrard from EDF R&D
 # edited by Adrien Combourieu from INNOSEA (adrien.combourieu@innosea.fr)
-
+# edited by Ruddy Kurnia, ECN 2022
+#
 #COMPILATEUR  
 gtest=$(shell which gfortran 2> /dev/null | grep -o gfortran)
 itest=$(shell which ifort 2> /dev/null | grep -o ifort)
@@ -111,7 +112,7 @@ bin:
 msh:	meshexe
 #Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
 meshexe:	$(OBJM) 
-		$(FC) -o meshExe $(OBJM)
+		$(FC)  -o meshExe $(OBJM)
 #
 
 #Build Hydrostatic cal executable
@@ -130,7 +131,7 @@ preProc:	$(OBJP)
 #
 #Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
 solver:	        $(OBJS) 
-		$(FC) -o solverExe $(OBJS)
+		$(FC) -llapack -lblas -o solverExe $(OBJS)
 
 #
 #Build postProc executable

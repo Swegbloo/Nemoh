@@ -78,7 +78,7 @@
     COMPLEX, DIMENSION(:), ALLOCATABLE :: ZIGB,ZIGS
     
     ! --- Solver ------------------------------------------------------
-    ! Which solver: (0) direct solver, (1): GMRES
+    ! Which solver: (0) direct solver GAUSS ELIMINATION, (1) LU DECOMPOSITION (2): GMRES
     INTEGER:: Indiq_solver
     ! Linear complex matrix to be solved
     COMPLEX, DIMENSION(:,:), ALLOCATABLE :: ZIJ

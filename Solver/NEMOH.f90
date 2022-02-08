@@ -67,9 +67,11 @@
     COMPLEX,PARAMETER       :: II=CMPLX(0.,1.)
 !   CPU TIME
     REAL                    :: tcpu_start, tcpu_finish, comptime,relcomptime
+    INTEGER,DIMENSION(8)    :: DATETIMEVAL
+    CHARACTER(20)           :: SOLVER_NAME, GreenFun_name
 !
 !   --- Initialisation -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-!     
+!   
     PI=4.*ATAN(1.)
     WRITE(*,*) ' '
     WRITE(*,'(A,$)') '  -> Initialisation ' 
@@ -82,7 +84,7 @@
 !   Initialise Nemoh
     CALL INITIALIZE(ID,NFA,NSYMY,XEFF,YEFF,Mesh)
     ALLOCATE(NVEL(NFA*2**NSYMY),PRESSURE(NFA*2**NSYMY))
-    WRITE(*,'(A,$)') '.'
+!    WRITE(*,'(A,$)') '.'
 !   Initialise Force matrix
     OPEN(10,FILE=ID%ID(1:ID%lID)//'/mesh/Integration.dat')
     READ(10,*) Nintegration
@@ -118,17 +120,22 @@
 !   Initialise results table
     ALLOCATE(Force(Nintegration,Bodyconditions%Nproblems))
     Force(:,:)=0.
-    WRITE(*,*) '. Done !'
+   ! WRITE(*,*) '. Done !'
     WRITE(*,*) ' '
 !
 !   --- Solve BVPs and calculate forces -------------------------------------------------------------------------------------------------------------------------------------------------
 !
     CALL CPU_TIME(tcpu_start)
+    call date_and_time(VALUES=DATETIMEVAL)
+
+  !  OPEN(100,FILE=ID%ID(1:ID%lID)//'/computation_time.txt' ) 
+    WRITE(100,*) 'Date: ',DATETIMEVAL(3),'-',DATETIMEVAL(2),'-',DATETIMEVAL(1)
+    WRITE(100,*) 'Time: ',DATETIMEVAL(5),':',DATETIMEVAL(6),':',DATETIMEVAL(7)
     WRITE(*,*) ' -> Solve BVPs and calculate forces ' 
     WRITE(*,*) ' '
     DO j=1,BodyConditions%Nproblems 
 !         WRITE(*,'(A,I5,A,I5,A,A)',ADVANCE='NO') ' Problem ',j,' / ',BodyConditions%Nproblems,' . . Processing',CHAR(13)
-        WRITE(*,'(A,I5,A,I5,A,A,$)') ' Problem ',j,' / ',BodyConditions%Nproblems,' .',CHAR(13)
+        WRITE(*,'(A,I5,A,I5,A,A,$)') ' Problem ',j,' / ',BodyConditions%Nproblems,' ',CHAR(13)
         DO c=1,Mesh%Npanels*2**Mesh%Isym
             NVEL(c)=BodyConditions%NormalVelocity(c,j)
         END DO
@@ -146,7 +153,8 @@
     CALL CPU_TIME(tcpu_finish)
     comptime=tcpu_finish-tcpu_start
 !    relcomptime=comptime/Mesh%Npanels/BodyConditions%Nproblems
-
+    WRITE(100,*) 'Computation time', comptime, ' [s]'
+    CLOSE(100)
     WRITE(*,*) 'Computation time=',comptime,' [s]'
 !    WRITE(*,*) 'Relative Comp. time=',relcomptime,'[ s/Npanel/Nproblem]'
     WRITE(*,*) '. Done !'      

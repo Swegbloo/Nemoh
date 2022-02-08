@@ -101,7 +101,7 @@ MODULE SOLVE_BEM_FD_DIRECT
     NQ=N
     CALL LISC(AKH,AMH,NEXP)
 
-!   Construction of the influence matrix 
+!   Construction of the influence matrix only once for each freq. then applied to all computed problem 
     IF (w.NE.w_previous) THEN
         w_previous=w
         DO ISYM=1,NJJ
@@ -125,18 +125,29 @@ MODULE SOLVE_BEM_FD_DIRECT
 	            32 CONTINUE
     	        ENDIF
            1 CONTINUE
-    	    DO I=1,IMX
-    	        DO J=1,IMX
-    	            ZIJ(I,J+IMX)=CMPLX(0.,0.)
+    	      IF (Indiq_solver.EQ.0) THEN ! for gauss elimination method
+	        DO I=1,IMX
+    	                DO J=1,IMX
+    	                ZIJ(I,J+IMX)=CMPLX(0.,0.)
+    	                END DO
+    	                ZIJ(I,I+IMX)=CMPLX(1.,0.)
     	        END DO
-    	        ZIJ(I,I+IMX)=CMPLX(1.,0.)
-    	    END DO
-!------------------------------------------------!
-           CALL GAUSSZ(ZIJ,NFA,IMX,2*IMX)
-!------------------------------------------------!
+        !------------------------------------------------!
+                CALL GAUSSZ(ZIJ,NFA,IMX,2*IMX)
+        !------------------------------------------------!
+              ELSE
+        !------------------------------------------------! added by RK
+                CALL LU_INVERS_MATRIX(ZIJ,IMX,IMX)
+        !------------------------------------------------!
+              END IF
+
     	    DO I=1,IMX
     	        DO J=1,IMX
+                    IF (Indiq_solver.EQ.0) THEN ! for gauss elimination method
     	            AInv(I,J,(ISYM-1)+1)=ZIJ(I,J+IMX)
+                    ELSE
+                    AInv(I,J,(ISYM-1)+1)=ZIJ(I,J)
+                    END IF
     	        END DO
     	    END DO
         END DO

@@ -64,25 +64,29 @@ CONTAINS
         kwave=w*w/g
 !       Select calculation in function of water depth
         IF ((Depth.EQ.0.).OR.(kwave*Depth.GE.20)) THEN
+!            WRITE(*,'(A,$)') 'GREEN FUNCTION: INFINITE DEPTH'
 !           Calculate wave number
             kwave=w*w/g
             AMH=kwave*Depth
 !           Solve with direct method ?
-            IF (Indiq_solver .eq. 0) CALL SOLVE_POTENTIAL_INFD_DIRECT(NVEL)        
+            IF (Indiq_solver .LE. 1) THEN
+            CALL SOLVE_POTENTIAL_INFD_DIRECT(NVEL)        
 !           Solve using GMRES ?
-            IF (Indiq_solver .eq. 1) THEN
+            ELSE
                 WRITE(*,*) ' Iterative solver is not available'
                 STOP
-             END IF
+            END IF
         ELSE
+!            WRITE(*,'(A,$)') 'GREEN FUNCTION: FINITE DEPTH'
 !           Calculate wave number
             AKH=w*w*Depth/G                                                 
 	    AMH=X0(AKH)                                                                                                   
 	    kwave=AMH/Depth 
 !           Solve with direct method ?
-            IF (Indiq_solver .eq. 0) CALL SOLVE_POTENTIAL_FD_DIRECT(NVEL,AMH,NEXP,ProblemNumber,ID)        
+            IF (Indiq_solver .LE. 1) THEN
+               CALL SOLVE_POTENTIAL_FD_DIRECT(NVEL,AMH,NEXP,ProblemNumber,ID)        
 !           Solve using GMRES ?
-            IF (Indiq_solver .eq. 1) THEN
+            ELSE
                 WRITE(*,*) ' Iterative solver is not available'
                 STOP
             END IF        

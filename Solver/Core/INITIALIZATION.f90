@@ -38,7 +38,8 @@ CONTAINS
 !   Geometry
     INTEGER :: NF,NSYM,c,i,M
     REAL :: XF,YF
-    TYPE(TMesh) :: Mesh    
+    TYPE(TMesh) :: Mesh
+    CHARACTER(20) :: SOLVER_NAME    
 !
 !   Read input file and geometry
     OPEN(10,file=ID%ID(1:ID%lID)//'/Nemoh.cal',form='formatted',status='old')
@@ -71,8 +72,8 @@ CONTAINS
     END DO
     READ(10,*) Switch_Sources
     CLOSE(10)
-    OPEN(10,file=ID%ID(1:ID%lID)//'/input.txt',form='formatted',status='old')
-    READ(10,*) 
+    OPEN(10,file=ID%ID(1:ID%lID)//'/input_solver.txt',form='formatted',status='old')
+    READ(10,*) Indiq_solver
     CLOSE(10)   
     XEFF=XF
     YEFF=YF
@@ -88,6 +89,20 @@ CONTAINS
     w_previous=-1.
     CALL PRE_PROC_MESH(Mesh)
 !
+    IF (Indiq_solver.EQ.0) THEN
+            SOLVER_NAME='GAUSS ELIMINATION'
+    ELSE IF (Indiq_solver.EQ.1) THEN
+            SOLVER_NAME='LU DECOMPOSITION'
+    ELSE 
+            SOLVER_NAME='NOT AVAILABLE'
+            WRITE(*,*) 'SOLVER 2 is not available'
+            STOP
+    END IF
+   
+    WRITE(*,*) 'LINEAR SOLVER: ', SOLVER_NAME
+    OPEN(100,FILE=ID%ID(1:ID%lID)//'/computation_time.txt') 
+    WRITE(100,*) 'LINEAR SOLVER=', SOLVER_NAME
+   ! CLOSE(100)
     END SUBROUTINE INITIALIZE  
 
 END MODULE INITIALIZATION

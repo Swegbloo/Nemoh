@@ -30,9 +30,10 @@ MODULE M_SOLVER
 !---------------------------------------------------------------------------!
     SUBROUTINE GAUSSZ(A,NMAX,N,M)
     INTEGER:: N,M,NMAX,I,J,K,L,IL
-	COMPLEX A(NMAX,1),C,P
+    !COMPLEX A(NMAX,1),C,P   
+    COMPLEX A(NMAX,2*NMAX),C,P    !RK: size matrix A is changed to be consistent
     REAL:: EPS
-    
+ 
     EPS=1.E-20
 	DO J=1,N-1
 	    K=J
@@ -101,6 +102,36 @@ MODULE M_SOLVER
 !    500 FORMAT(5X,'PIVOT INFERIEUR A ',1P,E16.6)
 !	STOP
 	
+    END SUBROUTINE
+
+   SUBROUTINE LU_INVERS_MATRIX(Ainv,M,N)
+    INTEGER:: M,N,I,J,INFO,K
+    COMPLEX, DIMENSION(M,N)  :: Ainv
+    INTEGER, DIMENSION(M)    :: IPIV
+    COMPLEX, DIMENSION(M)    :: WORK  ! work array for LAPACK
+    
+    ! ZGETRF is for complex double variable, use CGETRF for complex variable
+    ! Note that all of variables in this codes are defined as complex/ real (single precision)
+    ! but in the compile process,it is forced to be double precision with '-r8', see the makefile
+    ! if the -r8 is removed, then CGETRF and CGETRI must be used.
+    ! ZGETRF computes an LU factorization of a general M-by-N matrix A
+    ! using partial pivoting with row interchanges.
+    CALL ZGETRF(M,N,Ainv,M,IPIV,INFO) !LAPACK function
+    IF (INFO /= 0) THEN
+     stop 'Matrix is numerically singular!'
+    END IF
+
+    ! ZGETRI is for complex double variable, use CGETRI for complex variable
+    ! ZGETRI computes the inverse of a matrix using the LU factorization
+    ! computed by ZGETRF.
+     call ZGETRI(M, Ainv, M, IPIV, WORK, M, info)
+
+    IF (INFO /= 0) THEN
+         STOP 'Matrix inversion failed!'
+    END IF
+
+    RETURN
+       
     END SUBROUTINE
 
 END MODULE 
