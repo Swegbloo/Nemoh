@@ -187,10 +187,10 @@ MODULE M_SOLVER
     END SUBROUTINE
    
 
-    SUBROUTINE GMRES_SOLVER(A,B,nD,mD,ZOL_GMRES,ID_DP)
+    SUBROUTINE GMRES_SOLVER(A,B,nD,mD,ZOL_GMRES,ID_DP,TOLGMRES,NITERGMRES)
 !   For GMRES variables and parameters   
     integer mD,nD  ! dimension for othonormal basis mD, and the matrix size nD x nD
-    integer i,j,lda, lwork, ldstrt, ID_DP
+    integer i,j,lda, lwork, ldstrt, ID_DP,NITERGMRES
     integer revcom, colx, coly, colz, nbscal
     integer irc(5), icntl(8), info(3)
     integer matvec, precondLeft, precondRight, dotProd
@@ -198,7 +198,7 @@ MODULE M_SOLVER
     integer nout
     complex B(nD),A(nD,nD)
     complex, dimension(:), allocatable :: work
-    real  cntl(5), rinfo(2)
+    real  cntl(5), rinfo(2),TOLGMRES
     complex ZERO, ONE
     complex ZOL_GMRES(nD)
     parameter (ZERO = (0.0e0, 0.0e0), ONE = (1.0e0, 0.0e0))
@@ -238,11 +238,12 @@ ENDIF
 !*************************
 !*c Tune some parameters
 !*************************
-!*
+!*The tolerance
+      icntl(1)=TOLGMRES
 !* Save the convergence history on standard output
       icntl(3) = 40
 !* Maximum number of iterations
-      icntl(7) = 1000 
+      icntl(7) = NITERGMRES
 !*
 !* preconditioner location
       icntl(4) = 1

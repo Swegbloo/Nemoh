@@ -153,7 +153,7 @@ MODULE SOLVE_BEM_FD_GMRES
     	END DO
 !*******************************************************        
 ! ITERATIVE SOLVER GMRES
-        CALL GMRES_SOLVER(Amat,B,IMX,mRestartGMRES,ZOL_GMRES,ID_DP) ! ID_DP is set in COM_VAR
+        CALL GMRES_SOLVER(Amat,B,IMX,mRestartGMRES,ZOL_GMRES,ID_DP,TOLGMRES,NITERGMRES) ! ID_DP is set in COM_VAR
 !******************************************************** 
 
     	DO I=1,IMX

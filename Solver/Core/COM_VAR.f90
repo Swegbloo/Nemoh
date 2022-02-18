@@ -79,7 +79,8 @@
     
     ! --- Solver ------------------------------------------------------
     ! Which solver: (0) direct solver GAUSS ELIMINATION, (1) LU DECOMPOSITION (2): GMRES
-    INTEGER:: Indiq_solver,mRestartGMRES
+    INTEGER:: Indiq_solver,mRestartGMRES,NITERGMRES
+    REAL   :: TOLGMRES
     INTEGER,PARAMETER :: ID_DP=1  ! 1 if compiled with -r8 for the double precision, 0 otherwise
     ! Linear complex matrix to be solved
     COMPLEX, DIMENSION(:,:), ALLOCATABLE :: ZIJ

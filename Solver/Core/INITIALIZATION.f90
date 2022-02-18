@@ -74,7 +74,7 @@ CONTAINS
     CLOSE(10)
     OPEN(10,file=ID%ID(1:ID%lID)//'/input_solver.txt',form='formatted',status='old')
     READ(10,*) Indiq_solver
-    IF (Indiq_solver.Eq.2) READ(10,*) mRestartGMRES
+    IF (Indiq_solver.Eq.2) READ(10,*) mRestartGMRES,TOLGMRES,NITERGMRES
     CLOSE(10)   
     XEFF=XF
     YEFF=YF
@@ -105,7 +105,14 @@ CONTAINS
     WRITE(*,*) 'LINEAR SOLVER: ', SOLVER_NAME
     OPEN(100,FILE=ID%ID(1:ID%lID)//'/computation_time.txt') 
     WRITE(100,*) 'LINEAR SOLVER=', SOLVER_NAME
-   ! CLOSE(100)
+    IF (Indiq_solver.EQ.2) THEN
+    WRITE(*,*) 'mRestart= ',mRestartGMRES
+    WRITE(*,*) 'TOLERANCE= ', TOLGMRES, '; Max Iter= ',NITERGMRES
+    WRITE(100,*) 'mRestart= ',mRestartGMRES
+    WRITE(100,*) 'TOLERANCE= ', TOLGMRES, '; Max Iter= ',NITERGMRES
+    END IF
+
+    ! CLOSE(100)
     END SUBROUTINE INITIALIZE  
 
 END MODULE INITIALIZATION
