@@ -74,6 +74,7 @@ CONTAINS
     CLOSE(10)
     OPEN(10,file=ID%ID(1:ID%lID)//'/input_solver.txt',form='formatted',status='old')
     READ(10,*) Indiq_solver
+    IF (Indiq_solver.Eq.2) READ(10,*) mRestartGMRES
     CLOSE(10)   
     XEFF=XF
     YEFF=YF
@@ -94,9 +95,11 @@ CONTAINS
     ELSE IF (Indiq_solver.EQ.1) THEN
             SOLVER_NAME='LU DECOMPOSITION'
     ELSE 
-            SOLVER_NAME='NOT AVAILABLE'
-            WRITE(*,*) 'SOLVER 2 is not available'
-            STOP
+            SOLVER_NAME='GMRES'
+            IF (mRestartGMRES.LT.1) THEN
+                    WRITE(*,*) 'Specify in input_solver.txt, the restart parameter for GMRES, m>0 and m<Npanels'
+                    STOP
+            END IF
     END IF
    
     WRITE(*,*) 'LINEAR SOLVER: ', SOLVER_NAME

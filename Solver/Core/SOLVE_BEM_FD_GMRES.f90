@@ -19,9 +19,10 @@
 !   - J. Singh
 !   - P. Guével
 !   - J.C. Daubisse 
-!
+!   2022 02 08
+!   R. Kurnia ! GMRES solver 
 !--------------------------------------------------------------------------------------
-MODULE SOLVE_BEM_FD_DIRECT
+MODULE SOLVE_BEM_FD_GMRES
   
   USE MIDENTIFICATION
   USE COM_VAR
@@ -31,7 +32,7 @@ MODULE SOLVE_BEM_FD_DIRECT
 
   CONTAINS
 !--------------------------------------------------------------------------!
-  SUBROUTINE SOLVE_POTENTIAL_FD_DIRECT(NVEL,AMH,NEXP,ProblemNumber,ID)
+  SUBROUTINE SOLVE_POTENTIAL_FD_GMRES(NVEL,AMH,NEXP,ProblemNumber,ID)
 !In this subroutine the linear system Ax=b is constructed
 
 !    LOGICAL:: RHS
@@ -42,7 +43,7 @@ MODULE SOLVE_BEM_FD_DIRECT
     REAL:: W,BETA,BJ,GM,DIJ,AKK 
     REAL:: CB,SB,CP,CR,COEFB,COEFS,PCOS,PSIN
     REAL:: AKAD,AM0,AKH,AMH,SD1B,SD1S,SD2B,SD2S,PI,DPI,ZERO
-    COMPLEX:: ZOL(IMX,2),B(IMX)
+    COMPLEX:: ZOL(IMX,2),B(IMX),ZOL_GMRES(IMX)
     REAL::  SP1J(IMX)
     INTEGER:: ProblemNumber 
     CHARACTER*5:: strProblemNumber
@@ -125,30 +126,10 @@ MODULE SOLVE_BEM_FD_DIRECT
 	            32 CONTINUE
     	        ENDIF
            1 CONTINUE
-    	      IF (Indiq_solver.EQ.0) THEN ! for gauss elimination method
-	        DO I=1,IMX
-    	                DO J=1,IMX
-    	                ZIJ(I,J+IMX)=CMPLX(0.,0.)
-    	                END DO
-    	                ZIJ(I,I+IMX)=CMPLX(1.,0.)
-    	        END DO
-        !------------------------------------------------!
-                CALL GAUSSZ(ZIJ,NFA,IMX,2*IMX)
-        !------------------------------------------------!
-              ELSE
-        !------------------------------------------------! added by RK
-                CALL LU_INVERS_MATRIX(ZIJ,IMX,IMX,ID_DP) ! ID_DP is set in COM_VAR
-        !------------------------------------------------!
-              END IF
-
     	    DO I=1,IMX
     	        DO J=1,IMX
-                    IF (Indiq_solver.EQ.0) THEN ! for gauss elimination method
-    	            AInv(I,J,(ISYM-1)+1)=ZIJ(I,J+IMX)
-                    ELSE
-                    AInv(I,J,(ISYM-1)+1)=ZIJ(I,J)
-                    END IF
-    	        END DO
+                    AmatIs(I,J,(ISYM-1)+1)=ZIJ(I,J)
+                END DO
     	    END DO
         END DO
     END IF
@@ -166,14 +147,21 @@ MODULE SOLVE_BEM_FD_DIRECT
             ELSE
                         B(I)=0
             END IF
+             DO J=1,IMX
+               Amat(I,J)=AmatIs(I,J,(ISYM-1)+1)
+            END DO
     	END DO
+!*******************************************************        
+! ITERATIVE SOLVER GMRES
+        CALL GMRES_SOLVER(Amat,B,IMX,mRestartGMRES,ZOL_GMRES,ID_DP) ! ID_DP is set in COM_VAR
+!******************************************************** 
+
     	DO I=1,IMX
-    	    ZOL(I,(ISYM-1)+1)=(0.,0.)
-    	    DO K=1,IMX
-    	        ZOL(I,(ISYM-1)+1)=ZOL(I,(ISYM-1)+1)+AInv(I,K,(ISYM-1)+1)*B(K)    
-    	    END DO
+    	    ZOL(I,(ISYM-1)+1)= ZOL_GMRES(I) ! sigma=Ainv*B , source solution 
     	END DO
     END DO
+
+
     ZIGB=(0.,0.)
     ZIGS=(0.,0.)
     DO I=1,IMX

@@ -26,7 +26,9 @@
       DEALLOCATE(X,Y,Z,XG,YG,ZG)
       DEALLOCATE(AIRE,M1,M2,M3,M4)
       DEALLOCATE(XN,YN,ZN,DIST,TDIS)
-      if(Indiq_solver .le. 1)DEALLOCATE(ZIJ)
+      DEALLOCATE(ZIJ)
+      IF (Indiq_solver.le.1) DEALLOCATE(AInv)
+      IF (Indiq_solver.eq.2) DEALLOCATE(Amat,AmatIs)
       DEALLOCATE(ZPB,ZPS)
       DEALLOCATE(ZIGB,ZIGS)
       

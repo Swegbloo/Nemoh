@@ -43,6 +43,7 @@
       ALLOCATE(ZPB(NFA),ZPS(NFA))   !potential
 	! Linear complex matrix to be solved by direct solver
         !For GMRES workspace is calculated inside the main subroutine
-	  if(Indiq_solver .le. 1) ALLOCATE(ZIJ(NFA,2*NFA),AInv(NFA,NFA,2**NSYMY))
-
+	  if(Indiq_solver .eq. 0) ALLOCATE(ZIJ(NFA,2*NFA),AInv(NFA,NFA,2**NSYMY))
+          if(Indiq_solver .eq. 1) ALLOCATE(ZIJ(NFA,NFA),AInv(NFA,NFA,2**NSYMY))
+          if(Indiq_solver .eq. 2) ALLOCATE(ZIJ(NFA,NFA),AmatIs(NFA,NFA,2**NSYMY),Amat(NFA,NFA))
     END SUBROUTINE

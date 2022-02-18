@@ -33,6 +33,8 @@ CONTAINS
         USE OUTPUT
         USE SOLVE_BEM_INFD_DIRECT
         USE SOLVE_BEM_FD_DIRECT
+        USE SOLVE_BEM_FD_GMRES
+        USE SOLVE_BEM_INFD_GMRES
 !
         IMPLICIT NONE
 !       Inputs/outputs
@@ -73,8 +75,7 @@ CONTAINS
             CALL SOLVE_POTENTIAL_INFD_DIRECT(NVEL)        
 !           Solve using GMRES ?
             ELSE
-                WRITE(*,*) ' Iterative solver is not available'
-                STOP
+            CALL SOLVE_POTENTIAL_INFD_GMRES(NVEL)        
             END IF
         ELSE
 !            WRITE(*,'(A,$)') 'GREEN FUNCTION: FINITE DEPTH'
@@ -87,8 +88,7 @@ CONTAINS
                CALL SOLVE_POTENTIAL_FD_DIRECT(NVEL,AMH,NEXP,ProblemNumber,ID)        
 !           Solve using GMRES ?
             ELSE
-                WRITE(*,*) ' Iterative solver is not available'
-                STOP
+               CALL SOLVE_POTENTIAL_FD_GMRES(NVEL,AMH,NEXP,ProblemNumber,ID)        
             END IF        
         END IF
 !       Assemble pressure

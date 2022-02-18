@@ -2,6 +2,7 @@
 # edited by Adrien Combourieu from INNOSEA (adrien.combourieu@innosea.fr)
 # edited by Ruddy Kurnia, ECN 2022
 #
+
 #COMPILATEUR  
 gtest=$(shell which gfortran 2> /dev/null | grep -o gfortran)
 itest=$(shell which ifort 2> /dev/null | grep -o ifort)
@@ -9,11 +10,17 @@ itest=$(shell which ifort 2> /dev/null | grep -o ifort)
 ifeq ($(gtest), gfortran)
 	FC=gfortran
 	FFLAGS=-cpp -DGNUFORT -O2 -ffree-line-length-none -c -fdefault-real-8
+# if with  -fdefault-real-8 change the source library for solver zPackgmres.f
+# 	then change in Solver/Core/Com_Var.f90 ID_DP=1
+# else cPackgmres.f
+# 	then change in Solver/Core/Com_Var.f90 ID_DP=0
 endif
 
 ifeq ($(itest), ifort)
 	FC=ifort
 	FFLAGS=-O3 -c -cpp -r8
+# if with -r8 change in Solver/Core/Com_Var.f90 ID_DP=1
+# else  change in Solver/Core/Com_Var.f90 ID_DP=0
 endif
 
 outputdir=./bin
@@ -67,26 +74,29 @@ SRCS=./Solver/Core/FIC_COM.f90\
 ./Solver/Core/PREPARE_MESH.f90\
 ./Solver/Core/INITIALIZATION.f90\
 ./Solver/Core/OUTPUT.f90\
+./Solver/Core/cPackgmres.f\
+./Solver/Core/zPackgmres.f\
+./Solver/Core/blas_rot.f\
 ./Solver/Core/M_SOLVER.f90\
 ./Solver/Core/ALLOCATE_DATA.f90\
 ./Solver/Core/COMPUTE_GREEN_INFD.f90\
 ./Solver/Core/SOLVE_BEM_INFD_DIRECT.f90\
 ./Solver/Core/COMPUTE_GREEN_FD.f90\
 ./Solver/Core/SOLVE_BEM_FD_DIRECT.f90\
+./Solver/Core/SOLVE_BEM_FD_GMRES.f90\
+./Solver/Core/SOLVE_BEM_INFD_GMRES.f90\
 ./Solver/Core/SOLVE_BEM.f90\
 ./Solver/Core/COMPUTE_KOCHIN.f90\
 ./Solver/Core/COMPUTE_GREEN_FREESURFACE.f90\
 ./Solver/Core/COMPUTE_POTENTIAL_DOMAIN.f90\
 ./Solver/NEMOH.f90\
 ./Solver/Core/DEALLOCATE_DATA.f90\
-#./Solver/Core/SOLVE_BEM_FD_ITERATIVE.f90
-#./Solver/Core/SOLVE_BEM_INFD_ITERATIVE.f90
+
 
 
 # LISTE DES .o solver
 #TRANSFORME f90 en o  
 OBJS=$(SRCS:.f90=.o)
-
 
 #SOURCES FORTRAN postProc(modules de postprocessing)
 SRCO=./Common/Identification.f90\
@@ -130,7 +140,7 @@ preProc:	$(OBJP)
 
 #
 #Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
-solver:	        $(OBJS) 
+solver:	        $(OBJS)
 		$(FC) -llapack -lblas -o solverExe $(OBJS)
 
 #
@@ -146,6 +156,7 @@ postProc:	$(OBJO)
 	$(FC) $(FFLAGS) $<
 %.o:	%.f90
 	$(FC) $(FFLAGS) $< -o $@
+	
 
 # # #Copy to local bin directory
 install: build

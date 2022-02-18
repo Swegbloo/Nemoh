@@ -79,11 +79,13 @@
     
     ! --- Solver ------------------------------------------------------
     ! Which solver: (0) direct solver GAUSS ELIMINATION, (1) LU DECOMPOSITION (2): GMRES
-    INTEGER:: Indiq_solver
+    INTEGER:: Indiq_solver,mRestartGMRES
+    INTEGER,PARAMETER :: ID_DP=1  ! 1 if compiled with -r8 for the double precision, 0 otherwise
     ! Linear complex matrix to be solved
     COMPLEX, DIMENSION(:,:), ALLOCATABLE :: ZIJ
     ! Storage of inverter matrix to speed up computations (influence coefficients depending only on w)
-    COMPLEX, DIMENSION(:,:,:), ALLOCATABLE :: AInv
+    COMPLEX, DIMENSION(:,:,:), ALLOCATABLE :: AInv,AmatIs
+    COMPLEX, DIMENSION(:,:), ALLOCATABLE :: Amat
     REAL w_previous
     !
     REAL :: FSP,FSM,VSXP,VSYP,VSZP,VSXM,VSYM,VSZM
