@@ -45,7 +45,7 @@ MODULE SOLVE_BEM_FD_GMRES
     REAL:: AKAD,AM0,AKH,AMH,SD1B,SD1S,SD2B,SD2S,PI,DPI,ZERO
     COMPLEX:: ZOL(IMX,2),B(IMX),ZOL_GMRES(IMX)
     REAL::  SP1J(IMX)
-    INTEGER:: ProblemNumber 
+    INTEGER:: ProblemNumber,ID_RHS_NULL
     CHARACTER*5:: strProblemNumber
     TYPE(TID):: ID
       NJJ=NSYMY+1
@@ -137,6 +137,7 @@ MODULE SOLVE_BEM_FD_GMRES
 !   Solution of the linear problem A*ZOL=B and calculation of source distribution (ZI)
     DO ISYM=1,NJJ
         BX=(-1)**(ISYM+1)
+        ID_RHS_NULL=1      
         DO I=1,IMX
             IF(ZG(I).NE.0.)THEN
     	        IF (NSYMY.EQ.1) THEN
@@ -147,18 +148,29 @@ MODULE SOLVE_BEM_FD_GMRES
             ELSE
                         B(I)=0
             END IF
-             DO J=1,IMX
+            DO J=1,IMX
                Amat(I,J)=AmatIs(I,J,(ISYM-1)+1)
             END DO
+             IF (ID_RHS_NULL.EQ.1) THEN
+                IF (B(I).NE.0) THEN
+                    ID_RHS_NULL=0
+                END IF
+            END IF
     	END DO
 !*******************************************************        
 ! ITERATIVE SOLVER GMRES
+        IF (ID_RHS_NULL.EQ.0) THEN
         CALL GMRES_SOLVER(Amat,B,IMX,mRestartGMRES,ZOL_GMRES,ID_DP,TOLGMRES,NITERGMRES) ! ID_DP is set in COM_VAR
+        END IF
 !******************************************************** 
 
     	DO I=1,IMX
-    	    ZOL(I,(ISYM-1)+1)= ZOL_GMRES(I) ! sigma=Ainv*B , source solution 
-    	END DO
+            IF (ID_RHS_NULL.EQ.0) THEN
+    	    ZOL(I,(ISYM-1)+1)= ZOL_GMRES(I) ! sigma=Ainv*B , source solution
+            ELSE
+            ZOL(I,(ISYM-1)+1)=0
+            END IF
+        END DO
     END DO
 
 

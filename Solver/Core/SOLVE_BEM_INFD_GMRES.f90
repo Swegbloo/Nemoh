@@ -38,7 +38,7 @@ MODULE SOLVE_BEM_INFD_GMRES
     COMPLEX,DIMENSION(*) :: NVEL
     INTEGER :: BX,ISYM,NJJ,N
     INTEGER ::I,J,ISP,IFP
-    INTEGER:: NP1,I1,JJ,K
+    INTEGER:: NP1,I1,JJ,K,ID_RHS_NULL
     REAL:: W,tdepth,BETA,BJ,GM,DIJ,AKK
     REAL:: CB,SB,CP,CR,COEFB,COEFS,PCOS,PSIN
     REAL:: AKAD,AM0,SD1B,SD1S,SD2B,SD2S,PI,DPI,ZERO
@@ -134,6 +134,7 @@ MODULE SOLVE_BEM_INFD_GMRES
 !   Solution of the linear problem A*ZOL=B and calculation of source distribution (ZI)
     DO ISYM=1,NJJ           ! if symmetric ISYM=1:2 else ISYM=1:1
         BX=(-1)**(ISYM+1)   ! if BX(ISYM=1)=1 else BX(ISYM=2)=-1
+        ID_RHS_NULL=1  
         DO I=1,IMX
             IF(ZG(I).NE.0.)THEN
     	        IF (NSYMY.EQ.1) THEN    ! if symmetric
@@ -147,15 +148,26 @@ MODULE SOLVE_BEM_INFD_GMRES
             DO J=1,IMX
                Amat(I,J)=AmatIs(I,J,(ISYM-1)+1)
             END DO
+            IF (ID_RHS_NULL.EQ.1) THEN
+                IF (B(I).NE.0) THEN
+                    ID_RHS_NULL=0
+                END IF
+            END IF
     	END DO
 
 !*******************************************************        
 ! ITERATIVE SOLVER GMRES
+        IF (ID_RHS_NULL.EQ.0) THEN
         CALL GMRES_SOLVER(Amat,B,IMX,mRestartGMRES,ZOL_GMRES,ID_DP,TOLGMRES,NITERGMRES) ! ID_DP is set in COM_VAR
+        END IF
 !******************************************************** 
 
     	DO I=1,IMX
-    	    ZOL(I,(ISYM-1)+1)= ZOL_GMRES(I) ! sigma=Ainv*B , source solution 
+    	    IF (ID_RHS_NULL.EQ.0) THEN
+    	    ZOL(I,(ISYM-1)+1)= ZOL_GMRES(I) ! sigma=Ainv*B , source solution
+            ELSE
+            ZOL(I,(ISYM-1)+1)=0
+            END IF
     	END DO
      
     END DO
