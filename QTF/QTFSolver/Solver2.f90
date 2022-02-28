@@ -14,6 +14,7 @@
   CHARACTER*20 ID
   CHARACTER*255 :: EXEDIR
   CHARACTER*255:: CMD
+  INTEGER       :: lengthArg
   logical :: dir_e ! to check if directories exist
   Nbodies = 1 ! Only one body for now
   
@@ -29,11 +30,13 @@
   END IF
   
   ! !   get exe directory to call exe
-  CALL GETARG(1, EXEDIR)
-  !  arguments so exe are in NEMOH working dir
+  CALL GET_COMMAND_ARGUMENT(0,EXEDIR)
+  lengthArg=LEN_TRIM(EXEDIR)-10
+  EXEDIR = EXEDIR(1:lengthArg)
   IF (LEN_TRIM(EXEDIR) == 0) THEN
-    EXEDIR = './../../bin/'         ! added by RK
+    EXEDIR = './../../../../../bin/' ! For specifying the directory manually        
   END IF
+  !WRITE(*,*) EXEDIR
   ! ! 	read number of frequencies
   OPEN(10,FILE=ID(1:lID)//'/Nemoh.cal')
     DO c=1,7
@@ -107,13 +110,13 @@
   
   ICER0=10
   if (contrib>2) then
-  !OPEN(2,FILE=ID(1:lID)//'/mesh/SF_L12.dat')
-  OPEN(2,FILE=ID(1:lID)//'/mesh/SF_L12_2.dat')
-  !do i=1,7
-  !  read(2,*)
-  !enddo
-  !READ(2,*) trash,trash,trash,trash,trash,trash,npasr
-  READ(2,*) trash,trash,trash,trash,npasr
+  OPEN(2,FILE=ID(1:lID)//'/mesh/SF_L12.dat')
+  !OPEN(2,FILE=ID(1:lID)//'/mesh/SF_L12_2.dat')
+  do i=1,7
+    read(2,*)
+  enddo
+  READ(2,*) trash,trash,trash,trash,trash,trash,npasr
+  !READ(2,*) trash,trash,trash,trash,npasr
   CLOSE(2)
   NRCER=npasr-ICER0-10
   else

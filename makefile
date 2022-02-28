@@ -5,7 +5,7 @@
 #FC=gfortran
 #OPTIONS  
 # FFLAGS= -c 
-FFLAGS=  -O3 -ffree-line-length-0 -fbounds-check -c -r8
+FFLAGS=  -O3 -ffree-line-length-0 -fbounds-check -c
 FFLAGS2=  -O3 -ffree-line-length-0 -finit-local-zero -mcmodel=medium -fbounds-check
 #FFLAGS2= -O3 -fopenmp -ffree-line-length-0 -finit-local-zero -mcmodel=medium -fbounds-check -fno-automatic
 outputdir=./bin
@@ -55,15 +55,15 @@ hasbo: ./QTF/QTFSolver/hasbo.f ./QTF/QTFSolver/para.o
 	
 hasfs: ./QTF/QTFSolver/hasfs.f ./QTF/QTFSolver/subhasp.f ./QTF/QTFSolver/para.o 
 		$(FC) -c ./QTF/QTFSolver/para.f90
-		$(FC) $(FFLAGS2) ./QTF/QTFSolver/hasfs22.f ./QTF/QTFSolver/subhasp.f -o hasfs
+		$(FC) $(FFLAGS2) ./QTF/QTFSolver/hasfs.f ./QTF/QTFSolver/subhasp.f -o hasfs
 
 hasfscalc: ./QTF/QTFSolver/hasfscalc.f90 ./QTF/QTFSolver/para.o
 		$(FC) -c ./QTF/QTFSolver/para.f90
-		$(FC) $(FFLAGS2) ./QTF/QTFSolver/hasfscalc22.f90 -o hasfscalc
+		$(FC) $(FFLAGS2) ./QTF/QTFSolver/hasfscalc.f90 -o hasfscalc
 
 asymp: ./QTF/QTFSolver/hasfsasymp.f90 ./QTF/QTFSolver/para.o
 		$(FC) -c ./QTF/QTFSolver/para.f90
-		$(FC) $(FFLAGS2) ./QTF/QTFSolver/hasfsasymp22.f90 -o asymp
+		$(FC) $(FFLAGS2) ./QTF/QTFSolver/hasfsasymp.f90 -o asymp
 
 QTFSolver: ./QTF/QTFSolver/Solver2.f90 ./QTF/QTFSolver/para.o
 		$(FC) $(FFLAGS2) ./QTF/QTFSolver/Solver2.f90 -o QTFSolver
