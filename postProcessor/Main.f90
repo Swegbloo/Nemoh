@@ -29,7 +29,7 @@
     USE MEnvironment
     USE MResults
     USE MIRF
-    USE iflport
+!     USE iflport
 !    
     IMPLICIT NONE
 !   ID

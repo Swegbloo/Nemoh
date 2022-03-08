@@ -22,6 +22,34 @@ MODULE OUTPUT
 
 CONTAINS
 !
+    
+!     AC: add write sources for QTF
+    SUBROUTINE WRITE_SOURCES(ID,Pbnumber)
+    USE MIDENTIFICATION
+!     USE MMesh
+    USE COM_VAR
+    TYPE(TID) :: ID
+    INTEGER :: Pbnumber
+    CHARACTER*5 :: str
+    WRITE(str,'(I5)') Pbnumber
+    OPEN(11,FILE=ID%ID(1:ID%lID)//'/results/sources.'//str//'.dat')
+    
+    do i=1,NFA
+      WRITE(11,'(2(X,E14.7))') REAL(ZIGB(I)), IMAG(ZIGB(I))
+    end do
+    
+    do i=1,NFA
+      WRITE(11,'(2(X,E14.7))') REAL(ZIGS(I)), IMAG(ZIGS(I))
+    end do
+    
+    CLOSE(11)
+    END SUBROUTINE WRITE_SOURCES
+    
+    
+    
+    
+    
+    
     SUBROUTINE WRITE_KOCHIN(ID,Pbnumber,HKochin,Ntheta,Theta)
     USE MIDENTIFICATION
     IMPLICIT NONE

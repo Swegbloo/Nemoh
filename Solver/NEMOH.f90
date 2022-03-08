@@ -4,7 +4,7 @@
 !
 !--------------------------------------------------------------------------------------
 !
-!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la Noë, 44300 Nantes, France
+!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la NoÃ«, 44300 Nantes, France
 !
 !   Licensed under the Apache License, Version 2.0 (the "License");
 !   you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 !
 !   Contributors list:
 !   - G. Delhommeau
-!   - P. Guével
+!   - P. GuÃ©vel
 !   - J.C. Daubisse
 !   - J. Singh
 !   - A. Babarit  
@@ -32,7 +32,7 @@
     USE MIdentification
     USE MMesh
     USE MBodyConditions
-    USE iflport
+!     USE iflport
     USE SOLVE_BEM
     USE OUTPUT
     USE INITIALIZATION
@@ -62,7 +62,7 @@
     REAL,DIMENSION(:),ALLOCATABLE :: line
 !   Locals
     REAL                    :: PI
-    INTEGER			        :: c,d,M,l,i,j,k
+    INTEGER                 :: c,d,M,l,i,j,k
     REAL                    :: Discard
     COMPLEX,PARAMETER       :: II=CMPLX(0.,1.)
 
@@ -125,7 +125,8 @@
     WRITE(*,*) ' -> Solve BVPs and calculate forces ' 
     WRITE(*,*) ' '
     DO j=1,BodyConditions%Nproblems 
-        WRITE(*,'(A,I5,A,I5,A,$)') ' Problem ',j,' / ',BodyConditions%Nproblems,' .'
+        WRITE(*,'(A,I5,A,I5,A,A)',ADVANCE="NO") ' Problem ',j,' / ',BodyConditions%Nproblems,' . .Processing',CHAR(13)
+!~         WRITE(*,'(A,I5,A,I5,A,$)') ' Problem ',j,' / ',BodyConditions%Nproblems,' .'
         DO c=1,Mesh%Npanels*2**Mesh%Isym
             NVEL(c)=BodyConditions%NormalVelocity(c,j)
         END DO
@@ -137,7 +138,8 @@
                 Force(i,j)=Force(i,j)-PRESSURE(c)*NDS(i,c)
             END DO
         END DO
-        WRITE(*,*) '. Done !'      
+!~         WRITE(*,'(A,I5,A,I5,A,A)',ADVANCE="NO") ' Problem ',j,' / ',BodyConditions%Nproblems,' . . Done !',CHAR(13)
+!~         WRITE(*,*) '. Done !'      
     END DO    
     WRITE(*,*) ' ' 
     CLOSE(10)
@@ -174,42 +176,51 @@
     END PROGRAM Main
 !----------------------------------------------------------------
 
-    SUBROUTINE CREK
+    SUBROUTINE CREK(ID)
+    !this is is preparation for constructing Second part of Green Function Snm^2 NEMOH paper Eq 35
+    !In this subroutine X discretization (AKR) and Z discretization (AKZ) are constructed base on Eq. 46 in NEMOH paper
     USE COM_VAR
+    USE MIdentification
+!
     IMPLICIT NONE
     INTEGER:: I,J,JZ,IR
     REAL:: AKZ,AKR
+!   ID
+    TYPE(TID) :: ID
+
     JZ=46
     IR=328
     DO 8006 J=1,JZ
-      AKZ=AMIN1(10**(J/5.-6),10**(J/8.-4.5),16.)
+      AKZ=AMIN1(10**(J/5.-6),10**(J/8.-4.5),16.)    ! Z discretization Eq 46
       XZ(J)=-AKZ     
 8006 CONTINUE
     XR(1)=0.
     DO 8007 I=2,IR
       IF(I.LT.40)THEN
-	AKR=AMIN1(10**((I-1.)/5-6),4./3.+ABS((I-32.)/3.))
+        AKR=AMIN1(10**((I-1.)/5-6),4./3.+ABS((I-32.)/3.)) ! X discretization Eq 46
       ELSE
-	AKR=4./3.+ABS((I-32.)/3.)
+        AKR=4./3.+ABS((I-32.)/3.)
       ENDIF
       XR(I)=AKR
 8007 CONTINUE
-
-    DO 8009 J=1,JZ
+   !   OPEN(UNIT=44,FILE=ID%ID(1:ID%lID)//'/QTF/GRIN.QAT',FORM='UNFORMATTED',STATUS='UNKNOWN')
+   !   WRITE(44)IR,JZ,(X(I),I=1,IR),(Z(J),J=1,JZ)
+     DO 8009 J=1,JZ
       DO 8008 I=1,IR
-	CALL VNS(XZ(J),XR(I),I,J)                                           
+        CALL VNS(XZ(J),XR(I),I,J)                                           
 8008 CONTINUE
+   !  WRITE(44)(APD1X(I,J),I=1,IR),(APD1Z(I,J),I=1,IR),(APD2X(I,J),I=1,IR),(APD2Z(I,J),I=1,IR)
 8009 CONTINUE
-
+   ! CLOSE(UNIT=44)
     RETURN
-
+!
     END SUBROUTINE
 !---------------------------------------------------------                                                                    
 
       SUBROUTINE VNS(AKZ,AKR,I,J) 
       USE COM_VAR
       USE ELEMENTARY_FNS
-    IMPLICIT NONE         
+      IMPLICIT NONE         
       INTEGER:: I,J,IT
       REAL:: AKZ,AKR,PI,CT,ST,CQIT,TETA
       REAL:: QQT(NPINTE),CQT(NPINTE)
@@ -223,22 +234,22 @@
       FD2JX=0.                                                              
       FD2JZ=0.                                                              
       DO 30 IT=1,NPINTE                                           
-	TETA=QQT(IT)                                                           
-	CQIT=CQT(IT)                                                   
-	CT=COS(TETA)                                                              
-	ST=SIN(TETA)                                                              
-	ZIK=AKZ+IM*AKR*CT    
-	IF(REAL(ZIK)+30.)2,2,1
-      2 CEX=(0.,0.)
-	GOTO 3 
-      1 CEX=CEXP(ZIK)                                               
-      3 GZ=GG(ZIK,CEX)                      
-	C1=CQIT*(GZ-1./ZIK)
-	C2=CQIT*CEX
-	FD1JX=FD1JX+CT*AIMAG(C1)                                 
-	FD1JZ=FD1JZ+REAL(C1)                                     
-	FD2JX=FD2JX+CT*AIMAG(C2)                                 
-	FD2JZ=FD2JZ+REAL(C2)                                     
+        TETA=QQT(IT)                                                           
+        CQIT=CQT(IT)                                                   
+        CT=COS(TETA)
+        ST=SIN(TETA)
+        ZIK=AKZ+IM*AKR*CT    
+        IF(REAL(ZIK)+30.)2,2,1
+         2 CEX=(0.,0.)
+        GOTO 3 
+         1 CEX=CEXP(ZIK)                                               
+         3 GZ=GG(ZIK,CEX)                      
+        C1=CQIT*(GZ-1./ZIK)
+        C2=CQIT*CEX
+        FD1JX=FD1JX+CT*AIMAG(C1)                                 
+        FD1JZ=FD1JZ+REAL(C1)                                     
+        FD2JX=FD2JX+CT*AIMAG(C2)                                 
+        FD2JZ=FD2JZ+REAL(C2)                                     
    30 CONTINUE                                                                
       APD1X(I,J)=FD1JX                                               
       APD1Z(I,J)=FD1JZ                                               
@@ -253,7 +264,7 @@
       USE COM_VAR
     IMPLICIT NONE 
       INTEGER :: J
-      REAL:: PI,QQT(NPINTE),CQT(NPINTE)
+      REAL:: PI,QQT(NPINTE),CQT(NPINTE)   !NPINTE=256
 
       PI=4.*ATAN(1.)
       DO 160 J=1,NPINTE   

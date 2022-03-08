@@ -1,6 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la Noë, 44300 Nantes, France
+!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la NoÃ«, 44300 Nantes, France
 !
 !   Licensed under the Apache License, Version 2.0 (the "License");
 !   you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ CONTAINS
 	        AMH=X0(AKH)                                                                                                   
 	        kwave=AMH/Depth 
 !           Solve with direct method ?
-            IF (Indiq_solver .eq. 0) CALL SOLVE_POTENTIAL_FD_DIRECT(NVEL,AMH,NEXP)        
+            IF (Indiq_solver .eq. 0) CALL SOLVE_POTENTIAL_FD_DIRECT(NVEL,AMH,NEXP,ProblemNumber,ID)        
 !           Solve using GMRES ?
             IF (Indiq_solver .eq. 1) THEN
                 WRITE(*,*) ' Iterative solver is not available'
@@ -94,6 +94,14 @@ CONTAINS
                 PRESSURE(i+NFA)=RHO*II*W*ZPS(i) !*AIRE(i)    
             END IF
         END DO
+        
+        
+! 	Add here a flag to save sources
+        IF (Switch_Sources.EQ.1) THEN
+            CALL WRITE_SOURCES(ID,ProblemNumber)
+        END IF
+        
+        
 !       Compute Kochin Functions
         IF (Switch_Kochin.EQ.1) THEN
             DO j=1,NTheta

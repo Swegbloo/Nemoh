@@ -98,7 +98,7 @@ for c=1:nBodies
 %   Raffinement automatique du maillage et calculs hydrostatiques
     l = isunix;
     if l == 1
-        system('mesh >Mesh.log');
+        system('mesh.exe >Mesh.log');
     else
         system('.\Mesh\Mesh.exe >Mesh\Mesh.log');
     end

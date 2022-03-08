@@ -22,7 +22,8 @@
 !
 !--------------------------------------------------------------------------------------
 MODULE SOLVE_BEM_FD_DIRECT
-
+  
+  USE MIDENTIFICATION
   USE COM_VAR
   USE COMPUTE_GREEN_FD
   USE ELEMENTARY_FNS
@@ -30,7 +31,7 @@ MODULE SOLVE_BEM_FD_DIRECT
 
   CONTAINS
 !--------------------------------------------------------------------------!
-  SUBROUTINE SOLVE_POTENTIAL_FD_DIRECT(NVEL,AMH,NEXP)
+  SUBROUTINE SOLVE_POTENTIAL_FD_DIRECT(NVEL,AMH,NEXP,ProblemNumber,ID)
 !In this subroutine the linear system Ax=b is constructed
 
 !    LOGICAL:: RHS
@@ -42,9 +43,10 @@ MODULE SOLVE_BEM_FD_DIRECT
     REAL:: CB,SB,CP,CR,COEFB,COEFS,PCOS,PSIN
     REAL:: AKAD,AM0,AKH,AMH,SD1B,SD1S,SD2B,SD2S,PI,DPI,ZERO
     COMPLEX:: ZOL(IMX,2),B(IMX)
-    
-
-
+    REAL::  SP1J(IMX)
+    INTEGER:: ProblemNumber 
+    CHARACTER*5:: strProblemNumber
+    TYPE(TID):: ID
       NJJ=NSYMY+1
       PI=4.*ATAN(1.)
       DPI=2.*PI
@@ -158,30 +160,41 @@ MODULE SOLVE_BEM_FD_DIRECT
     	END DO
     END DO
     ZIGB=(0.,0.)
-	ZIGS=(0.,0.)
-	DO I=1,IMX
-	    IF(NSYMY .EQ. 0)THEN
-	        ZIGB(I)=ZOL(I,1)    ! Factor 2 is removed in comparison with previous version of Nemoh because
+    ZIGS=(0.,0.)
+    DO I=1,IMX
+	IF(NSYMY .EQ. 0)THEN
+	    ZIGB(I)=ZOL(I,1)    ! Factor 2 is removed in comparison with previous version of Nemoh because
 	                            ! Normal velocity is halved in Nemoh (because of symmetry)
-	        ZIGS(I)=0.0
-	    ELSE
-	        ZIGB(I)=(ZOL(I,1)+ZOL(I,2))
-	        ZIGS(I)=(ZOL(I,1)-ZOL(I,2))
+	    ZIGS(I)=0.0
+	ELSE
+	    ZIGB(I)=(ZOL(I,1)+ZOL(I,2))
+	    ZIGS(I)=(ZOL(I,1)-ZOL(I,2))
         ENDIF
     END DO  
-
+    
+    
+    
+    
+    
+    
+    
 !   Computation of potential phi=S*sigma on the boundary
     ZPB=(0.,0.)
     ZPS=(0.,0.)
+ !   WRITE(strProblemNumber,'(I5)') ProblemNumber
+ !   OPEN(99,FILE=ID%ID(1:ID%lID)//'/QTF/QTFper'//strProblemNumber//'_Nemoh1.dat') ! for checking the coef in NEMOH2
+
     DO I=1,IMX
 	    DO J=1,IMX
-	        call VAVFD(2,XG(I),YG(I),ZG(I),I,J)
-            call VNSFD(AM0,AMH,NEXP,I,J,XG(I),YG(I),ZG(I))  
+		call VAVFD(2,XG(I),YG(I),ZG(I),I,J)
+		call VNSFD(AM0,AMH,NEXP,I,J,XG(I),YG(I),ZG(I))  
 	        ZPB(I)=ZPB(I)+0.5*(ZIGB(J)*CMPLX(SP1+SM1,SP2+SM2)+ZIGS(J)*CMPLX(SP1-SM1,SP2-SM2))
 	        ZPS(I)=ZPS(I)+0.5*(ZIGS(J)*CMPLX(SP1+SM1,SP2+SM2)+ZIGB(J)*CMPLX(SP1-SM1,SP2-SM2))
+          !      SP1J(J)=SP1
         END DO
+          !       WRITE(99,*)(SP1J(J),J=1,IMX)
     END DO
-    
+   ! CLOSE(99)
 END SUBROUTINE
 !-------------------------------------------------
 END MODULE

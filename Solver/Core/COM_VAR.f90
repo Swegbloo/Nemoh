@@ -46,7 +46,7 @@
     INTEGER :: IMX
     INTEGER :: IXX
     !!!!!!!!!
-    !Symmetry: 0 for no symmetry and1 for symmetry
+    !Symmetry: 0 for no symmetry and 1 for symmetry
     INTEGER:: NSYMY
     !
     REAL :: ZER
@@ -96,6 +96,7 @@
     
     ! --- Reading and writing units -----------------------------------
     ! File for visualization of potential
-    INTEGER :: Sav_potential
+!     INTEGER :: Sav_potential		!AC: unused
+    INTEGER :: Switch_Sources   !AC: Always save sources for now (for QTF), updated in INITIALIZATION.f90
        
   END MODULE COM_VAR

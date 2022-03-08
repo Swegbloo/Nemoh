@@ -863,7 +863,6 @@ MODULE COMPUTE_GREEN_FD
 	  VSZP2=VSZ2(J,1)                                                        
 	  VSZM2=VSZP2                                                              
       ENDIF !101F
-
       RETURN                                                                    
       END SUBROUTINE  
 !------------------------------------------------------------------------
