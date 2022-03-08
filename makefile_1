@@ -1,0 +1,140 @@
+# makefile written by Christophe Peyrard from EDF R&D
+# edited by Adrien Combourieu from INNOSEA (adrien.combourieu@innosea.fr)
+
+#COMPILATEUR  
+# FC=ifort
+FC=gfortran
+#OPTIONS  
+# FFLAGS= -c 
+FFLAGS= -O3 -ffree-line-length-0 -c 
+#LIBRAIRIES  
+#LFLAGS= -L./ -lVAWTBEMT -lstdc++
+
+outputdir=./bin
+
+#SOURCES FORTRAN Mesh(modules de maillage)
+SRCM=./Common/Identification.f90\
+./Mesh/calCol.f90\
+./Mesh/coque.f90\
+./Mesh/ExMaillage.f90\
+./Mesh/hydre.f90\
+./Mesh/Mailleur.f90\
+./Mesh/mesh.f90\
+
+# LISTE DES .o preProc
+#TRANSFORME f90 en o  
+OBJM=$(SRCM:.f90=.o)
+
+
+#SOURCES FORTRAN preProc(modules de preprocessing)
+SRCP=./Common/Identification.f90\
+./Common/Environment.f90\
+./preProcessor/Mesh.f90\
+./preProcessor/BodyConditions.f90\
+./preProcessor/Integration.f90\
+./preProcessor/Main.f90\
+
+# LISTE DES .o preProc
+#TRANSFORME f90 en o  
+OBJP=$(SRCP:.f90=.o)
+
+#SOURCES FORTRAN Solver(modules de preprocessing)
+SRCS=./Solver/Core/COM_VAR.f90\
+./Common/Environment.f90\
+./Common/Identification.f90\
+./Common/Mesh.f90\
+./Solver/Core/Bodyconditions.f90\
+./Solver/Core/PREPARE_MESH.f90\
+./Solver/Core/INITIALIZATION.f90\
+./Solver/Core/OUTPUT.f90\
+./Solver/Core/ELEMENTARY_FNS.f90\
+./Solver/Core/M_SOLVER.f90\
+./Solver/Core/ALLOCATE_DATA.f90\
+./Solver/Core/COMPUTE_GREEN_INFD.f90\
+./Solver/Core/SOLVE_BEM_INFD_DIRECT.f90\
+./Solver/Core/COMPUTE_GREEN_FD.f90\
+./Solver/Core/SOLVE_BEM_FD_DIRECT.f90\
+./Solver/Core/SOLVE_BEM.f90\
+./Solver/Core/COMPUTE_KOCHIN.f90\
+./Solver/Core/COMPUTE_GREEN_FREESURFACE.f90\
+./Solver/Core/COMPUTE_POTENTIAL_DOMAIN.f90\
+./Solver/NEMOH.f90\
+./Solver/Core/DEALLOCATE_DATA.f90\
+#./Solver/Core/SOLVE_BEM_FD_ITERATIVE.f90
+#./Solver/Core/SOLVE_BEM_INFD_ITERATIVE.f90
+
+
+# LISTE DES .o preProc
+#TRANSFORME f90 en o  
+OBJS=$(SRCS:.f90=.o)
+
+
+#SOURCES FORTRAN postProc(modules de postprocessing)
+SRCO=./Common/Identification.f90\
+./Common/Environment.f90\
+./Common/Results.f90\
+./Common/Mesh.f90\
+./postProcessor/Compute_RAOs.f90\
+./postProcessor/IRF.f90\
+./postProcessor/Plot_WaveElevation.f90\
+./postProcessor/Main.f90\
+
+# LISTE DES .o postProc
+#TRANSFORME f90 en o  
+OBJO=$(SRCO:.f90=.o)
+
+
+build: clean bin msh pre solver post  
+
+bin:
+	mkdir -p $(outputdir)
+#
+#Build Mesh executable
+msh:	mesh.exe
+#Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
+mesh.exe:	$(OBJM) 
+		$(FC) -o mesh.exe $(OBJM)
+#
+#Build preProc executable
+pre:	preProc
+#Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
+preProc:	$(OBJP) 
+		$(FC) -o preProc $(OBJP)
+
+#
+#Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
+solver:	$(OBJS) 
+		$(FC) -o solverN $(OBJS)
+
+#
+#Build postProc executable
+post:	postProc
+#Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
+postProc:	$(OBJO) 
+		$(FC) -o postProc $(OBJO)
+
+		
+# Rules for .f compilation
+.f.o:
+	$(FC) $(FFLAGS) $<
+%.o:	%.f90
+	$(FC) $(FFLAGS) $< -o $@
+
+# # #Copy to local bin directory
+install: build
+	mv mesh.exe preProc solverN postProc ./bin/
+
+# Remove *.o and *.mod
+clean:
+	rm -f *.o */*.o */*/*.o *.mod
+	
+#remove executable as well
+cleanall:
+	rm -r ./bin
+	rm ./preProcessor/*.o
+	rm ./postProcessor/*.o
+	rm ./Solver/*.o
+	rm ./Solver/Core/*.o
+	rm ./Mesh/*.o 
+	rm ./Common/*.o
+	rm -f *.o *.mod
