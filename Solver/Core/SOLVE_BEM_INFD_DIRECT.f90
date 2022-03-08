@@ -44,17 +44,17 @@ MODULE SOLVE_BEM_INFD_DIRECT
     COMPLEX:: ZOL(IMX,2),B(IMX)
 
 
-      NJJ=NSYMY+1
+      NJJ=NSYMY+1               !NSYMY=0, NJJ=1 for not symmetric structure; NSYMY= 1 NJJ=2 for symmetric
       PI=4.*ATAN(1.)
       DPI=2.*PI
-      W=DPI/T
+      W=DPI/T                   !angular frequency w=[rad/s]
       ZERO=0.0
-      AM0=W**2/G
+      AM0=W**2/G                !deep water wave number
       tdepth=1.E+20
 !--------------Initilizations---------------
-      CQ=0.0
-      QQ=0.0
-      VSXP=0.
+      CQ=0.0                    ! variable used in interpolation infinite part of the Greens function
+      QQ=0.0                    ! 
+      VSXP=0.                   ! variable for strorage green function
       VSXM=0.
       VSYP=0.
       VSYM=0.
@@ -64,41 +64,41 @@ MODULE SOLVE_BEM_INFD_DIRECT
       ZIJ=CMPLX(0.,0.)
 !--------------------------------------------                                                                                                                    
       GM=0.
-      NP1=NP-1
+      NP1=NP-1                  !Number of point
       DO 7100 I=1,NP1
-	I1=I+1
-	DO 7200 JJ=1,NJJ
-	  BJ=(-1.)**(JJ+1)
-	  DO 7200 J=I1,NP
-	    DIJ=SQRT((X(J)-X(I))**2+(Y(I)-Y(J)*BJ)**2)
-	    	    GM=AMAX1(DIJ,GM)
+        I1=I+1
+        DO 7200 JJ=1,NJJ        ! if symmetric NJJ=2 else NJJ=1
+        BJ=(-1.)**(JJ+1)        ! if symmetric BJ=1 else BJ=-1
+          DO 7200 J=I1,NP
+            DIJ=SQRT((X(J)-X(I))**2+(Y(I)-Y(J)*BJ)**2)
+                   GM=AMAX1(DIJ,GM)     ! maximum horizontal distance all of nodes
     7200 CONTINUE
  7100 CONTINUE                                               
-      AKK=AM0*GM      
-      CALL CINT_INFD(AKK,N)
+      AKK=AM0*GM                ! dimensionless wavenumber*body length 
+      CALL CINT_INFD(AKK,N)     ! interpolation green function ????
       N=NQ
 
 !   Construction of the influence matrix 
     IF (w.NE.w_previous) THEN
-        w_previous=w
-        DO ISYM=1,NJJ
-            BX=(-1)**(ISYM+1)
-	        DO 1 ISP=1,IMX
-	            IF(ISYM.EQ.1)THEN
-	                DO 31 IFP=1,IMX
-              	        call VAVINFD(1,XG(ISP),YG(ISP),ZG(ISP),ISP,IFP)  !1/r+1/r1
+        w_previous=w            ! ang freq
+        DO ISYM=1,NJJ           ! if symmetric ISYM=1:2 else ISYM=1:1
+            BX=(-1)**(ISYM+1)   ! if BX(ISYM=1)=1 else BX(ISYM=2)=-1
+                DO 1 ISP=1,IMX  ! index of panel, IMX Npanels
+                    IF(ISYM.EQ.1)THEN
+                        DO 31 IFP=1,IMX !index of panel
+                        call VAVINFD(1,XG(ISP),YG(ISP),ZG(ISP),ISP,IFP)  !1/r+1/r1
                         call VNSINFD(1,ISP,IFP,XG(ISP),YG(ISP),ZG(ISP))  
-                        PCOS=VSXP1*XN(ISP)+VSYP1*YN(ISP)+VSZP1*ZN(ISP)
-	                    PSIN=VSXP2*XN(ISP)+VSYP2*YN(ISP)+VSZP2*ZN(ISP)
-	                    ZIJ(ISP,IFP)=CMPLX(PCOS,PSIN)
+                            PCOS=VSXP1*XN(ISP)+VSYP1*YN(ISP)+VSZP1*ZN(ISP)   !real part Kij =dxS Nx+dyS Ny + dzS Nz
+                            PSIN=VSXP2*XN(ISP)+VSYP2*YN(ISP)+VSZP2*ZN(ISP)   !imaginary part Kij
+                            ZIJ(ISP,IFP)=CMPLX(PCOS,PSIN)                    ! Kij
 	                31 CONTINUE
 	            ELSE
 	                DO 32 IFP=1,IMX
 	                    call VAVINFD(1,XG(ISP),YG(ISP),ZG(ISP),ISP,IFP)
                         call VNSINFD(1,ISP,IFP,XG(ISP),YG(ISP),ZG(ISP))  
-	                    PCOS=VSXM1*XN(ISP)+VSYM1*YN(ISP)+VSZM1*ZN(ISP)
-	                    PSIN=VSXM2*XN(ISP)+VSYM2*YN(ISP)+VSZM2*ZN(ISP)
-	                    ZIJ(ISP,IFP)=CMPLX(PCOS,PSIN)           
+	                    PCOS=VSXM1*XN(ISP)+VSYM1*YN(ISP)+VSZM1*ZN(ISP)  !real part Kij
+	                    PSIN=VSXM2*XN(ISP)+VSYM2*YN(ISP)+VSZM2*ZN(ISP)  !imaginary part Kij
+	                    ZIJ(ISP,IFP)=CMPLX(PCOS,PSIN)                   ! Kij
 	                32 CONTINUE
 	            ENDIF
             1 CONTINUE
@@ -120,11 +120,11 @@ MODULE SOLVE_BEM_INFD_DIRECT
     END IF
 
 !   Solution of the linear problem A*ZOL=B and calculation of source distribution (ZI)
-    DO ISYM=1,NJJ
-        BX=(-1)**(ISYM+1)
+    DO ISYM=1,NJJ           ! if symmetric ISYM=1:2 else ISYM=1:1
+        BX=(-1)**(ISYM+1)   ! if BX(ISYM=1)=1 else BX(ISYM=2)=-1
         DO I=1,IMX
-    	    IF (NSYMY.EQ.1) THEN
-    	        B(I)=(NVEL(I)+BX*NVEL(I+NFA))*0.5
+    	    IF (NSYMY.EQ.1) THEN    ! if symmetric
+    	        B(I)=(NVEL(I)+BX*NVEL(I+NFA))*0.5      
     	    ELSE
     	        B(I)=NVEL(I)
     	    END IF
@@ -132,7 +132,7 @@ MODULE SOLVE_BEM_INFD_DIRECT
     	DO I=1,IMX
     	    ZOL(I,(ISYM-1)+1)=(0.,0.)
     	    DO K=1,IMX
-    	        ZOL(I,(ISYM-1)+1)=ZOL(I,(ISYM-1)+1)+AInv(I,K,(ISYM-1)+1)*B(K)    
+    	        ZOL(I,(ISYM-1)+1)=ZOL(I,(ISYM-1)+1)+AInv(I,K,(ISYM-1)+1)*B(K)   ! sigma=Ainv*B , source solution 
     	    END DO
     	   
     	END DO
@@ -147,8 +147,8 @@ MODULE SOLVE_BEM_INFD_DIRECT
 	    ELSE
 	        ZIGB(I)=(ZOL(I,1)+ZOL(I,2))
 	        ZIGS(I)=(ZOL(I,1)-ZOL(I,2))
-        ENDIF
-    END DO 
+            ENDIF
+        END DO 
     
 !   Computation of potential phi=S*sigma on the boundary
     ZPB=(0.,0.)

@@ -36,7 +36,7 @@ CONTAINS
 !   ID
     TYPE(TID) :: ID
 !   Geometry
-    INTEGER :: NF,NSYM
+    INTEGER :: NF,NSYM,c,i,M
     REAL :: XF,YF
     TYPE(TMesh) :: Mesh    
 !
@@ -47,6 +47,29 @@ CONTAINS
     READ(10,*) G
     READ(10,*) DEPTH
     READ(10,*) XF,YF
+    READ(10,*)
+    READ(10,*)
+     DO c=1,Mesh%Nbodies
+        DO i=1,3
+            READ(10,*)
+        END DO
+        READ(10,*) M ! Ndof  
+        DO i=1,M
+            READ(10,*)
+        END DO
+        READ(10,*) M !Nforce
+        DO i=1,M
+            READ(10,*)
+        END DO
+        READ(10,*) M !Nadditional line
+        DO i=1,M
+            READ(10,*)
+        END DO
+    END DO
+    DO c=1,9
+    READ(10,*)
+    END DO
+    READ(10,*) Switch_Sources
     CLOSE(10)
     OPEN(10,file=ID%ID(1:ID%lID)//'/input.txt',form='formatted',status='old')
     READ(10,*) 
@@ -64,7 +87,7 @@ CONTAINS
     CALL ALLOCATE_DATA
     w_previous=-1.
     CALL PRE_PROC_MESH(Mesh)
-    CALL CREK
+    CALL CREK(ID)
 !
     END SUBROUTINE INITIALIZE  
 

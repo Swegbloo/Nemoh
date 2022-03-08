@@ -30,8 +30,11 @@ MODULE COMPUTE_GREEN_INFD
 
   CONTAINS   
 !-------------------------------------------------------------------------------!
-      SUBROUTINE VAVINFD(KKK,XGI,YGI,ZGI,ISP,IFP) 
-                                                  
+      SUBROUTINE VAVINFD(KKK,XGI,YGI,ZGI,ISP,IFP)
+      ! This subroutine calculate first term of influence coefficients Snm and Knm 
+      ! Snm=int_sm 1/OnM'dS=sum_k+1^4 J_k  see eq 37 
+      ! output variables are FSP and FSM
+      ! Knm= int grad Snm . vect_n dS, output variabels are grad Snm, (VSXP,VSYP,VSZP)      
       INTEGER:: ISP,IFP
       INTEGER:: KKK,I,J,IMXX,MK,NJJ,JJ,L,MH,MY,MZ,MJJ
       INTEGER:: KK(5)
@@ -54,9 +57,9 @@ MODULE COMPUTE_GREEN_INFD
       IF(KKK.EQ.1)IMXX=IMX
       IF(KKK.EQ.2)IMXX=IXX
 
-       I=ISP
-       J=IFP                                                  
-       XOI=XGI                                                             
+       I=ISP       !source point index
+       J=IFP       !field point index                                           
+       XOI=XGI     ! x centre of the source point                                                        
        YOI=YGI
        ZOI=ZGI
        IF(KKK.EQ.1)THEN 
@@ -88,9 +91,9 @@ MODULE COMPUTE_GREEN_INFD
 	A3J=XN(J)                                                               
 	A6J=YN(J)*MY                                                            
 	A9J=ZN(J)*MZ                                                           
-	RO=SQRT((XOI-XOJ)**2+(YOI-YOJ)**2+(ZOI-ZOJ)**2)
-	IF(RO.GT.7.*TDIS(J))THEN                                               
-	  AIJS(JJ)=AIRE(J)/RO                                                     
+	RO=SQRT((XOI-XOJ)**2+(YOI-YOJ)**2+(ZOI-ZOJ)**2)  ! ||OnOm||
+	IF(RO.GT.7.*TDIS(J))THEN                        ! TDIS= max_k ||P_k O_m||                       
+	  AIJS(JJ)=AIRE(J)/RO                           ! See Eq. 39 paper NEMOH                                              
 	  ASRO=AIJS(JJ)/RO**2                                                       
 	  VXS(JJ)=-(XOI-XOJ)*ASRO                                              
 	  VYS(JJ)=-(YOI-YOJ)*ASRO                                              
@@ -123,9 +126,9 @@ MODULE COMPUTE_GREEN_INFD
 	  DRX(5)=DRX(1)                                                           
 	  DRY(5)=DRY(1)                                                           
 	  DRZ(5)=DRZ(1)                                                           
-	  GZ=(XOI-XOJ)*A3J+(YOI-YOJ)*A6J+(ZOI-ZOJ)*A9J
+	  GZ=(XOI-XOJ)*A3J+(YOI-YOJ)*A6J+(ZOI-ZOJ)*A9J                          !vect_n . vect(Om.On)
 	  DO 29 L=1,4                                                               
-	  DK=SQRT((TXN(L+1)-TXN(L))**2+(TYN(L+1)-TYN(L))**2+(TZN(L+1)-TZN(L))**2)
+	  DK=SQRT((TXN(L+1)-TXN(L))**2+(TYN(L+1)-TYN(L))**2+(TZN(L+1)-TZN(L))**2) ! ||P_k P_k+1||
 	    IF(DK.GE.1.E-3*TDIS(J))THEN                                             
 	    PJ=(TXN(L+1)-TXN(L))/DK                                                     
 	    QJ=(TYN(L+1)-TYN(L))/DK                                                     
@@ -133,22 +136,22 @@ MODULE COMPUTE_GREEN_INFD
 	    GYX=A6J*RJ-A9J*QJ                                                     
 	    GYY=A9J*PJ-A3J*RJ                                                     
 	    GYZ=A3J*QJ-A6J*PJ                                                     
-	    GY=(XOI-TXN(L))*GYX+(YOI-TYN(L))*GYY+(ZOI-TZN(L))*GYZ
+	    GY=(XOI-TXN(L))*GYX+(YOI-TYN(L))*GYY+(ZOI-TZN(L))*GYZ               !Yk=||P_k On||.(n_vect cross product vector(P_k P_k+1)/||P_k P_k+1||)
 	    SGN=SIGN(1.,GZ)                                                           
 	    DDK=2.*DK                                                                 
-	    ANT=GY*DDK                                                                
-	    DNT=(RR(L+1)+RR(L))**2-DK*DK+2.*ABS(GZ)*(RR(L+1)+RR(L))          
+	    ANT=GY*DDK                                                          !2Y_k ||P_k P_k+1||                                                     
+	    DNT=(RR(L+1)+RR(L))**2-DK*DK+2.*ABS(GZ)*(RR(L+1)+RR(L))             !D_k^t=(||P_k+1 On||+||P_k On||)^2-||P_kP_k+1||^2+2|Z|(||P_k+1 Om||+||P_k On||)
 	    ARG=ANT/DNT                                                               
-	    ANL=RR(L+1)+RR(L)+DK                                                      
-	    DNL=RR(L+1)+RR(L)-DK                                                      
-	    DEN=ANL/DNL                                                               
+	    ANL=RR(L+1)+RR(L)+DK                                                !N_k^l      
+	    DNL=RR(L+1)+RR(L)-DK                                                !D_k^l      
+	    DEN=ANL/DNL                                                         !N_k^l/D_k^l                
 	    ALDEN=ALOG(DEN)                                                           
 	      IF(ABS(GZ).GE.1.E-4*TDIS(J))THEN                                       
 	      AT=ATAN(ARG)
 	      ELSE
 	      AT=0.                                                                     
 	      ENDIF                                                                  
-	    AIJS(JJ)=AIJS(JJ)+GY*ALDEN-2.*ABS(GZ)*AT                                  
+	    AIJS(JJ)=AIJS(JJ)+GY*ALDEN-2.*ABS(GZ)*AT       !Jk=Yk log (N_k^l/D_k^l)-2|Z|atan(N_k^t/D_k^t)     see eq 38                      
 	    DAT=2.*AT*SGN                                                             
 	    ANTX=GYX*DDK                                                              
 	    ANTY=GYY*DDK                                                              
@@ -185,8 +188,8 @@ MODULE COMPUTE_GREEN_INFD
 	ENDIF
     25 CONTINUE                                                                  
 	  IF(NSYMY.EQ.1)THEN                                                       
-	    W=AIJS(1)-MK*(AIJS(2)+AIJS(3))+AIJS(4)                                   
-	    FSP=-W/QPI                                                            
+	    W=AIJS(1)-MK*(AIJS(2)+AIJS(3))+AIJS(4)       ! this is sum_(k=1)^4 of Jk see Eq (37) paper NEMOH 2015                           
+	    FSP=-W/QPI                                   ! FSM and FSP is first part of the influence coef S                        
 	    W=AIJS(1)-MK*(AIJS(2)-AIJS(3))-AIJS(4)                                  
 	    FSM=-W/QPI                                                            
 	    W=VXS(1)-MK*(VXS(2)+VXS(3))+VXS(4)                                 
@@ -247,15 +250,15 @@ MODULE COMPUTE_GREEN_INFD
                                                              
       IF(KKK.EQ.1)IMXX=IMX
       IF(KKK.EQ.2)IMXX=IXX
-      WH=DPI/T  
+      WH=DPI/T                                          !angular freq [rad/s] 
       WR=WH                                           
       IF(ABS(WR).LT.1.E-4)THEN
        WRITE(*,*)'ABS(WR)  = ',ABS(WR),' < 1.E-4'
        STOP
       ENDIF
 
-      AK0=WR**2/9.81
-      NJJ=NSYMY+1                                     
+      AK0=WR**2/9.81                                    ! deep water wave number
+      NJJ=NSYMY+1                                       ! NJJ=1 for not symmetric, 2 for symmetric      
       IJUMP=0                                                           
 
       I=ISP  !source point
@@ -457,9 +460,9 @@ MODULE COMPUTE_GREEN_INFD
 	  AKAIR=AK0*AIRE(J)                  
 	  ADPI2=AKAIR/DPI2
 	  ADPI=AKAIR/DPI
-	  SM1=FSM-(FS1(J,1)-FS1(J,2))*ADPI2                             
-	  SP1=FSP-(FS1(J,1)+FS1(J,2))*ADPI2
-	  SM2=-(FS2(J,1)-FS2(J,2))*ADPI                                   
+	  SM1=FSM-(FS1(J,1)-FS1(J,2))*ADPI2            ! SM and SP are in the influence coef S               
+	  SP1=FSP-(FS1(J,1)+FS1(J,2))*ADPI2            ! FSM and FSP is first part of the influence coef S, S1 =int_sj 1/OnM'dS=sum_(k=1)^4 J_k, the FSM and FSP is calculated in VNSINFD()          
+          SM2=-(FS2(J,1)-FS2(J,2))*ADPI                                 
 	  SP2=-(FS2(J,1)+FS2(J,2))*ADPI
 	  AKDPI2=ADPI2*AK0
 	  AKDPI=ADPI*AK0
