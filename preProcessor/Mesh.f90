@@ -1,6 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la No?, 44300 Nantes, France
+!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la Noe, 44300 Nantes, France
 !
 !   Licensed under the Apache License, Version 2.0 (the "License");
 !   you may not use this file except in compliance with the License.
@@ -91,6 +91,7 @@
         END SUBROUTINE CopyTMesh
 !       ---
         SUBROUTINE ReadTMesh(Mesh,ID)
+
 #ifdef GNUFORT
 #define DIRECTORY FILE
 #endif
@@ -268,9 +269,8 @@
 		    WRITE(10,'(7(2X,E14.7))') (Mesh%XM(j,i),j=1,3),(Mesh%N(j,i),j=1,3),Mesh%A(i) 
 	    END DO
 	    CLOSE(10)
-! 	    INQUIRE (DIRECTORY=ID%ID(1:ID%lID)//'/results', EXIST=ex)
-! 	    IF (.NOT.ex) M=SYSTEM('mkdir '//ID%ID(1:ID%lID)//'/results')	    
-	    M=SYSTEM('mkdir '//ID%ID(1:ID%lID)//'/results')	    
+	    INQUIRE (DIRECTORY=ID%ID(1:ID%lID)//'/results', EXIST=ex)
+	    IF (.NOT.ex) M=SYSTEM('mkdir '//ID%ID(1:ID%lID)//'/results')	    
         END SUBROUTINE ReadTMesh
 !       --- 
         SUBROUTINE DeleteTMesh(Mesh)

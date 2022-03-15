@@ -3,7 +3,7 @@
 # edited by Ruddy Kurnia, ECN 2022
 #
 
-#COMPILATEUR  
+#COMPILATEUR
 gtest=$(shell which gfortran 2> /dev/null | grep -o gfortran)
 itest=$(shell which ifort 2> /dev/null | grep -o ifort)
 
@@ -114,6 +114,9 @@ OBJO=$(SRCO:.f90=.o)
 
 
 build: clean bin msh hyd pre solver post  
+
+bin:
+	mkdir -p $(outputdir)
 
 bin:
 	mkdir -p $(outputdir)
