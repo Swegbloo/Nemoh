@@ -99,7 +99,7 @@
     INTEGER,PARAMETER :: NPINTE=5001
     INTEGER:: NQ
     REAL:: CQ(NPINTE),QQ(NPINTE),AMBDA(31),AR(31)
-    
+
     ! --- Reading and writing units -----------------------------------
     ! File for visualization of potential
 !     INTEGER :: Sav_potential		!AC: unused

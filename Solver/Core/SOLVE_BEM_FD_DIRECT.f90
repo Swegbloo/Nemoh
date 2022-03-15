@@ -84,7 +84,7 @@ MODULE SOLVE_BEM_FD_DIRECT
       VSZM=0.
       ZOL=CMPLX(0.,0.)
       ZIJ=CMPLX(0.,0.)
-!--------------------------------------------                                                                                                                          
+!--------------------------------------------
     GM=0.
     NP1=NP-1
     DO 7100 I=1,NP1
@@ -170,7 +170,7 @@ MODULE SOLVE_BEM_FD_DIRECT
     	DO I=1,IMX
     	    ZOL(I,(ISYM-1)+1)=(0.,0.)
     	    DO K=1,IMX
-    	        ZOL(I,(ISYM-1)+1)=ZOL(I,(ISYM-1)+1)+AInv(I,K,(ISYM-1)+1)*B(K)    
+    	        ZOL(I,(ISYM-1)+1)=ZOL(I,(ISYM-1)+1)+AInv(I,K,(ISYM-1)+1)*B(K)
     	    END DO
     	END DO
     END DO

@@ -18,7 +18,7 @@ endif
 
 ifeq ($(itest), ifort)
 	FC=ifort
-	FFLAGS=-O3 -c -cpp
+	FFLAGS=-c -cpp -O3
 # if with -r8 change in Solver/Core/Com_Var.f90 ID_DP=1
 # else  change in Solver/Core/Com_Var.f90 ID_DP=0
 endif

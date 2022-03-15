@@ -1,6 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la Noe, 44300 Nantes, France
+!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la Noë, 44300 Nantes, France
 !
 !   Licensed under the Apache License, Version 2.0 (the "License");
 !   you may not use this file except in compliance with the License.
@@ -232,10 +232,8 @@
             END DO
         END DO
 !       Export mesh
-!         INQUIRE (DIRECTORY=ID%ID(1:ID%lID)//'/mesh', EXIST=ex) 
-!         IF (.NOT.ex) M=SYSTEM('mkdir '//ID%ID(1:ID%lID)//'/mesh')
-        M=SYSTEM('mkdir '//ID%ID(1:ID%lID)//'/mesh')
-        
+        INQUIRE (DIRECTORY=ID%ID(1:ID%lID)//'/mesh', EXIST=ex) 
+        IF (.NOT.ex) M=SYSTEM('mkdir '//ID%ID(1:ID%lID)//'/mesh')
         OPEN(10,FILE=ID%ID(1:ID%lID)//'/mesh/L12.dat')
         WRITE(10,'(I3,X,I3)') 2,Mesh%Isym
         DO i=1,Mesh%Npoints

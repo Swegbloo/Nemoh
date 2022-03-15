@@ -38,7 +38,7 @@ CONTAINS
     REAL :: GL,BL 
     REAL,DIMENSION(3) :: N13,N24  
     REAL :: DPOINT 
-    REAL :: XL,YL,ZL  
+    REAL :: XL,YL,ZL
     TYPE(TMesh) :: Mesh                    
 
 !-------------------------------------------------------------------------------------!
@@ -66,23 +66,22 @@ CONTAINS
 	    END DO
 	END DO                          
     IF(NSYMY.EQ.1)BL=2.*BL                                                   
-    GL=AMAX1(GL,BL) 
+    GL=AMAX1(GL,BL)
     ZER=-1.E-5*GL
 !-------------------------------------------------------------------------------------!
     IXX=IMX
 !-------------------------------------------------------------------------------------!
     CALL GOMG
-    
+
     RETURN
     
     END SUBROUTINE
 !----------------------------------------------------------------------------
 
     SUBROUTINE GOMG
-    
+
     USE COM_VAR
     USE FIC_COM
-    
     IMPLICIT NONE
 
     INTEGER :: I,J,K,L,M,N,IJJ,NJJ,IMETH
@@ -162,20 +161,20 @@ CONTAINS
     NSYM=NSYMY+1                                                          
     EPPM=1.E-25
     DO I=1,IMX                                                         
-	    K=M1(I)                                                                   
+	    K=M1(I)
 	    L=M2(I)                                                                   
 	    M=M3(I)                                                                   
-	    N=M4(I)                                                                   
+	    N=M4(I)
 	    T1X=X(M)-X(K)                                                             
-	    T1Y=Y(M)-Y(K)                                                             
-	    T1Z=Z(M)-Z(K)                                                             
+	    T1Y=Y(M)-Y(K)
+	    T1Z=Z(M)-Z(K)
 	    T2X=X(N)-X(L)                                                             
 	    T2Y=Y(N)-Y(L)                                                             
 	    T2Z=Z(N)-Z(L)                                                             
-	    XNX=T1Y*T2Z-T2Y*T1Z                                                       
+	    XNX=T1Y*T2Z-T2Y*T1Z
 	    XNY=T1Z*T2X-T2Z*T1X                                                       !
-	    XNZ=T1X*T2Y-T2X*T1Y                                                       
-	    XNQ=SQRT(XNX**2+XNY**2+XNZ**2)                                           
+	    XNZ=T1X*T2Y-T2X*T1Y
+	    XNQ=SQRT(XNX**2+XNY**2+XNZ**2)
 	    IF(XNQ.LE.EPPM)THEN                                                         !
 	        WRITE(*,*) 
             WRITE(*,'(A,I7,A)') 'Error: area of panel ',i,' is too small'
@@ -183,7 +182,7 @@ CONTAINS
             WRITE(*,'(A,E14.7)') '       - XG   = ',0.25*(X(M1(I))+X(M2(I))+X(M3(I))+X(M4(I)))
             WRITE(*,'(A,E14.7)') '       - YG   = ',0.25*(Y(M1(I))+Y(M2(I))+Y(M3(I))+Y(M4(I)))
             WRITE(*,'(A,E14.7)') '       - ZG   = ',0.25*(Z(M1(I))+Z(M2(I))+Z(M3(I))+Z(M4(I)))
-            STOP          
+            STOP
         ENDIF
         XN(I)=XNX/XNQ
         YN(I)=XNY/XNQ
@@ -227,15 +226,15 @@ CONTAINS
         ETAN2=ETA2-ETAO
         ETAN3=ETA3-ETAO                                                      
         ETAN4=ETA4-ETAO                                                           
-        XIN1=XI1-XIO                                                              
+        XIN1=XI1-XIO
         XIN2=XI2-XIO                                                              
         XIN3=XI3-XIO                                                              
         XIN4=XI4-XIO                                                              
-        XG(I)=XAVER+T1UNX*XIO+T2UNX*ETAO                                          
+        XG(I)=XAVER+T1UNX*XIO+T2UNX*ETAO
         YG(I)=YAVER+T1UNY*XIO+T2UNY*ETAO                                          
         ZG(I)=ZAVER+T1UNZ*XIO+T2UNZ*ETAO                                         
         DIST(I)=0.                                                                
-        DO IJJ=1,NSYM                                                        
+        DO IJJ=1,NSYM
             NJJ=(-1)**(IJJ+1)                                                         
             DO K=1,NP                                                            
                 DPOINT=AMAX1(ABS(XG(I)-X(K)),ABS(YG(I)-Y(K)*NJJ))                         

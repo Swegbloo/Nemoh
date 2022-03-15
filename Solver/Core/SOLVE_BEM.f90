@@ -16,7 +16,7 @@
 !
 !   Contributors list:
 !   - J. Singh
-!   - A. Babarit 
+!   - A. Babarit
 !
 !--------------------------------------------------------------------------------------
 MODULE SOLVE_BEM
