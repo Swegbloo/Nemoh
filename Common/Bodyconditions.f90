@@ -1,6 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la Noë, 44300 Nantes, France
+!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la NoÃ«, 44300 Nantes, France
 !
 !   Licensed under the Apache License, Version 2.0 (the "License");
 !   you may not use this file except in compliance with the License.
@@ -12,13 +12,15 @@
 !   distributed under the License is distributed on an "AS IS" BASIS,
 !   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 !   See the License for the specific language governing permissions and
-!   limitations under the License. 
+!   limitations under the License.
 !
 !   Contributors list:
-!   - A. Babarit  
+!   - A. Babarit
 !
 !--------------------------------------------------------------------------------------
     MODULE MBodyConditions
+
+    PUBLIC
 !
     TYPE TBodyConditions
         INTEGER :: Nproblems
@@ -28,7 +30,7 @@
         INTEGER,DIMENSION(:),ALLOCATABLE :: Switch_Potential
         INTEGER,DIMENSION(:),ALLOCATABLE :: Switch_FreeSurface
         INTEGER,DIMENSION(:),ALLOCATABLE :: Switch_Kochin
-        REAL,DIMENSION(:),ALLOCATABLE :: Switch_Type
+        INTEGER,DIMENSION(:),ALLOCATABLE :: Switch_Type
     END TYPE TBodyConditions
 !
     CONTAINS
@@ -44,11 +46,11 @@
         ALLOCATE(BodyConditions%NormalVelocity(Npanels,Nproblems))
         ALLOCATE(BodyConditions%Omega(Nproblems),BodyConditions%Switch_Potential(Nproblems),BodyConditions%Switch_FreeSurface(Nproblems),BodyConditions%Switch_Kochin(Nproblems),BodyConditions%Switch_Type(Nproblems))
         END SUBROUTINE CreateTBodyConditions
-!       --- 
+!       ---
         SUBROUTINE CopyTBodyConditions(BodyConditionsTarget,BodyConditionsSource)
         IMPLICIT NONE
-        INTEGER :: i,j,k
-        TYPE(TBodyConditions) :: BodyConditionsTarget,BodyConditionsSource      
+        INTEGER :: i,k
+        TYPE(TBodyConditions) :: BodyConditionsTarget,BodyConditionsSource
         CALL CreateTBodyConditions(BodyConditionsTarget,BodyConditionsSource%Nproblems,BodyConditionsSource%Npanels)
         DO i=1,BodyConditionsTarget%Nproblems
             BodyConditionsTarget%Omega(i)=BodyConditionsSource%Omega(i)
@@ -63,11 +65,11 @@
         END SUBROUTINE CopyTBodyConditions
 !       ---
         SUBROUTINE ReadTBodyConditions(BodyConditions,Npanels,namefile)
-        IMPLICIT NONE	    
+        IMPLICIT NONE
         TYPE(TBodyConditions) :: BodyConditions
-        CHARACTER*(*) :: namefile
+        CHARACTER(LEN=*) :: namefile
         INTEGER :: Nproblems,Npanels
-        INTEGER :: i,j,k
+        INTEGER :: i,k
         REAL,DIMENSION(:),ALLOCATABLE :: RBC,IBC
         OPEN(10,FILE=namefile)
         READ(10,*) Nproblems
@@ -87,12 +89,12 @@
         CLOSE(10)
         DEALLOCATE(RBC,IBC)
         END SUBROUTINE ReadTBodyConditions
-!       --- 
+!       ---
         SUBROUTINE DeleteTBodyConditions(BodyConditions)
         IMPLICIT NONE
         TYPE(TBodyConditions) :: BodyConditions
         DEALLOCATE(BodyConditions%Omega,BodyConditions%Switch_potential,BodyConditions%Switch_FreeSurface,BodyConditions%Switch_Kochin,BodyConditions%Switch_Type)
         DEALLOCATE(BodyConditions%NormalVelocity)
-        END SUBROUTINE DeleteTBodyConditions  
+        END SUBROUTINE DeleteTBodyConditions
 !       ---
 END MODULE

@@ -1,6 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la Noë, 44300 Nantes, France
+!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la NoÃ«, 44300 Nantes, France
 !
 !   Licensed under the Apache License, Version 2.0 (the "License");
 !   you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@
 !
 !--------------------------------------------------------------------------------------
 !
-	SUBROUTINE coque(X,Y,Z,NP,facettes,NF,Deplacement,Icoque,Gcoque,CG,Nsym,rho)
+SUBROUTINE coque(X,Y,Z,NP,facettes,NF,Deplacement,Icoque,Gcoque,CG,Nsym,rho)
 
-	IMPLICIT NONE
+  IMPLICIT NONE
 
 !	Globale
 	REAL,PARAMETER :: PI=3.141592653589
@@ -156,8 +156,7 @@
 	Icoque(2,1)=Icoque(1,2)
 	Icoque(3,1)=Icoque(1,3)
 	Icoque(3,2)=Icoque(2,3)
+  RETURN
 
-	RETURN
-
-	END SUBROUTINE
-	
+END SUBROUTINE
+  

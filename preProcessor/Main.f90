@@ -4,7 +4,7 @@
 !
 !--------------------------------------------------------------------------------------
 !
-!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la Noë, 44300 Nantes, France
+!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la NoÃ«, 44300 Nantes, France
 !
 !   Licensed under the Apache License, Version 2.0 (the "License");
 !   you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@
 !
     PROGRAM Main
 !
+    USE Constants
+    USE Elementary_functions
     USE MEnvironment
     USE MIdentification
     USE MMesh
@@ -77,23 +79,20 @@
     INTEGER :: NTheta
     REAL :: Thetamin,Thetamax
 !   Other local variables
-    INTEGER :: M,N
-    INTEGER :: i,j,c,d,k
+    INTEGER :: M
+    INTEGER :: i,j,c,k
     INTEGER :: jrad,jint
-    REAL :: PI
-!
-    PI=4.*ATAN(1.)
 !
 !   --- Initialize and read input datas ----------------------------------------------------------------------------------------
 !
-    CALL ReadTID(ID,'ID.dat')
-    CALL ReadTMesh(Mesh,ID)   
-    CALL ReadTEnvironment(Environment,ID%ID(1:ID%lID)//'/Nemoh.cal')
+    CALL ReadTID(ID)
+    CALL ReadTMesh(Mesh,ID)  
+    CALL ReadTEnvironment(Environment,TRIM(ID%ID)//'/Nemoh.cal')
 !   Read number of radiation cases, number of force integration cases, range of considered periods and diffraction cases
 !   an directions for Kochin function
     Nradiation=0
     Nintegration=0
-    OPEN(10,FILE=ID%ID(1:ID%lID)//'/Nemoh.cal')
+    OPEN(10,FILE=TRIM(ID%ID)//'/Nemoh.cal')
     DO c=1,7
         READ(10,*)
     END DO
@@ -154,7 +153,7 @@
 !   re-read input file and store radiation and integration cases
     ALLOCATE(RadCase(Nradiation))
     ALLOCATE(IntCase(Nintegration))
-    OPEN(10,FILE=ID%ID(1:ID%lID)//'/Nemoh.cal')
+    OPEN(10,FILE=TRIM(ID%ID)//'/Nemoh.cal')
     DO c=1,7
         READ(10,*)
     END DO
@@ -210,7 +209,7 @@
         END DO
     END DO
     DEALLOCATE(NDS)
-    OPEN(11,FILE=ID%ID(1:ID%lID)//'/mesh/Integration.dat',status='unknown')
+    OPEN(11,FILE=TRIM(ID%ID)//'/mesh/Integration.dat')
     WRITE(11,*) Nintegration
     DO j=1,Nintegration
         WRITE(11,*) (FNDS(j,c),c=1,Mesh%Npanels*2**Mesh%Isym)
@@ -249,12 +248,13 @@
 !
 !   --- Save body conditions ----------------------------------------------------------------------------------------
 !
-    OPEN(11,FILE=ID%ID(1:ID%lID)//'/Normalvelocities.dat')
+    OPEN(11,FILE=TRIM(ID%ID)//'/Normalvelocities.dat')
     WRITE(11,*) (Nbeta+Nradiation)*Nw
     WRITE(11,*) ((w(i),j=1,Nbeta+Nradiation),i=1,Nw)
     DO i=1,Nw
-        WRITE(11,*) (/ (/(beta(j),j=1,Nbeta)/),(-1.,j=1,Nradiation) /)
+      WRITE(11,*) (/ (DIFFRACTION_PROBLEM, j=1,Nbeta), (RADIATION_PROBLEM, j=1,Nradiation) /)
     ENDDO
+    !WRITE(11,*) ( (beta(j),j=1,Nbeta)  ,   (-1.,j=1,Nradiation)  ,  i=1,Nw)
     WRITE(11,*) ((Switch_Potential,j=1,Nbeta+Nradiation),i=1,Nw)
     WRITE(11,*) ((Switch_Freesurface,j=1,Nbeta+Nradiation),i=1,Nw)
     WRITE(11,*) ((Switch_Kochin,j=1,Nbeta+Nradiation),i=1,Nw)
@@ -266,7 +266,7 @@
 !
 !   --- Save FK forces ----------------------------------------------------------------------------------------
 !
-    OPEN(10,FILE=ID%ID(1:ID%lID)//'/results/FKForce.tec')
+    OPEN(10,FILE=TRIM(ID%ID)//'/results/FKForce.tec')
     WRITE(10,'(A)') 'VARIABLES="w (rad/s)"'
     DO k=1,Nintegration
         WRITE(10,'(A,I4,I4,A,I4,I4,A)') '"abs(F',IntCase(k)%Body,k,')" "angle(F',IntCase(k)%Body,k,')"'
@@ -278,7 +278,7 @@
         END DO
     END DO
     CLOSE(10)
-    OPEN(10,FILE=ID%ID(1:ID%lID)//'/results/FKForce.dat')
+    OPEN(10,FILE=TRIM(ID%ID)//'/results/FKForce.dat')
     DO k=1,Nintegration
         WRITE(10,*) ((ABS(FKForce(i,c,k)),ATAN2(IMAG(FKForce(i,c,k)),REAL(FKForce(i,c,k))),c=1,Nbeta),(0.*c,0.*c,c=1,Nradiation),i=1,Nw) 
     END DO
@@ -287,7 +287,7 @@
 !
 !   --- Generate Free Surface visualisation file ----------------------------------------------------------------------
 !
-    OPEN(11,FILE=ID%ID(1:ID%lID)//'/mesh/Freesurface.dat')
+    OPEN(11,FILE=TRIM(ID%ID)//'/mesh/Freesurface.dat')
     WRITE(11,*) Nx*Ny,(Nx-1)*(Ny-1)
     DO i=1,Nx
         DO j=1,Ny
@@ -303,7 +303,7 @@
 !
 !   --- Generate Kochin file ----------------------------------------------------------------------------------------
 !
-    OPEN(11,FILE=ID%ID(1:ID%lID)//'/mesh/Kochin.dat')
+    OPEN(11,FILE=TRIM(ID%ID)//'/mesh/Kochin.dat')
     WRITE(11,*) NTheta    
     IF (Ntheta.GT.0) THEN
         IF (NTheta.GT.1) THEN
@@ -318,7 +318,7 @@
 !   
 !   --- Save index of cases ----------------------------------------------------------------------------------------------
 !
-    OPEN(10,FILE=ID%ID(1:ID%lID)//'/results/index.dat')
+    OPEN(10,FILE=TRIM(ID%ID)//'/results/index.dat')
     WRITE(10,*) Nw,Nbeta,Nradiation,Nintegration,Ntheta
     WRITE(10,*) '--- Force ---'
     DO k=1,Nintegration

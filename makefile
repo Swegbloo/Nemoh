@@ -1,181 +1,197 @@
-# makefile written by Christophe Peyrard from EDF R&D
-# edited by Adrien Combourieu from INNOSEA (adrien.combourieu@innosea.fr)
-# edited by Ruddy Kurnia, ECN 2022
-#
+# Makefile written by Christophe Peyrard from EDF R&D
+# Extended to OS X by Yi-Hsiang Hu & Eliot Quin from NREL
+# Clean up by Matthieu Ancellin (only tested with gfortran on Linux for the moment)
 
-#COMPILATEUR
+# Compiler
 gtest=$(shell which gfortran 2> /dev/null | grep -o gfortran)
 itest=$(shell which ifort 2> /dev/null | grep -o ifort)
+# M.A.: this test does not work by me...
+
+MOD_DIR=/tmp/
 
 ifeq ($(gtest), gfortran)
 	FC=gfortran
-	FFLAGS=-cpp -DGNUFORT -O2 -ffree-line-length-none -c -fdefault-real-8
-# if with  -fdefault-real-8 change the source library for solver zPackgmres.f
-# 	then change in Solver/Core/Com_Var.f90 ID_DP=1
-# else cPackgmres.f
-# 	then change in Solver/Core/Com_Var.f90 ID_DP=0
+	FFLAGS=  -c                                     # No linker (yet)
+	FFLAGS+= -g                                     # Add extra indormations for debugging
+	FFLAGS+= -O2                                    # Optimization level
+	FFLAGS+= -J$(MOD_DIR)                           # Where to put .mod files
+	FFLAGS+= -cpp -DGNUFORT -ffree-line-length-none # Run preprocessor
 endif
 
 ifeq ($(itest), ifort)
 	FC=ifort
-	FFLAGS=-c -cpp -O3
-# if with -r8 change in Solver/Core/Com_Var.f90 ID_DP=1
-# else  change in Solver/Core/Com_Var.f90 ID_DP=0
+	FFLAGS=-c -cpp
+	FFLAGS+= -g                                     # Add extra indormations for debugging
 endif
 
+# Output directory
 outputdir=./bin
 
-#SOURCES FORTRAN Mesh(modules de maillage)
+# Default rule: build all
+.PHONY: all clean_all remake
+all:		mesh preProc solver postProc
+
+clean_all:	clean_mesh clean_preProc clean_solver clean_postProc
+			@rm -f $(MOD_DIR)/*.mod
+
+remake:		clean_all all
+
+# Rule to compile f90 file
+%.o:	%.f90
+		@$(FC) $(FFLAGS) $< -o $@
+
+##################
+#  Meshing tool  #
+##################
+
+# Sources (relative to DIRM)
 SRCM=./Common/Identification.f90\
 ./Mesh/calCol.f90\
 ./Mesh/coque.f90\
 ./Mesh/ExMaillage.f90\
 ./Mesh/hydre.f90\
 ./Mesh/Mailleur.f90\
-./Mesh/mesh.f90\
+./Mesh/mesh.f90
 
-# LISTE DES .o mesh
-#TRANSFORME f90 en o  
 OBJM=$(SRCM:.f90=.o)
 
-#SOURCES FORTRAN Hydrostatic
-SRCHS=./Common/Environment.f90\
+# Rules to build
+mesh:		$(OBJM)
+			@test -d $(outputdir) || mkdir $(outputdir)
+			@$(FC) -o $(outputdir)/mesh $(OBJM)
+			@echo "Meshing tool compilation successful!"
+
+clean_mesh:
+			@rm -f $(OBJM)
+			@rm -f $(outputdir)/mesh
+
+###################
+#  Pre-processor  #
+###################
+
+# Sources
+SRCP=./Common/Constants.f90\
+./Common/Elementary_functions.f90\
 ./Common/Identification.f90\
-./preProcessor/Mesh.f90\
-./Mesh/hydre.f90\
-./Mesh/coque.f90\
-./Mesh/hydrostatic_cal.f90\
-
-# LISTE DES .o hydrostatic
-#TRANSFORME f90 en o  
-OBJHS=$(SRCHS:.f90=.o)
-
-
-#SOURCES FORTRAN preProc(modules de preprocessing)
-SRCP=./Common/Identification.f90\
 ./Common/Environment.f90\
 ./preProcessor/Mesh.f90\
 ./preProcessor/BodyConditions.f90\
 ./preProcessor/Integration.f90\
-./preProcessor/Main.f90\
+./preProcessor/Main.f90
 
-# LISTE DES .o preProc
-#TRANSFORME f90 en o  
 OBJP=$(SRCP:.f90=.o)
 
-#SOURCES FORTRAN Solver(modules de preprocessing)
-SRCS=./Solver/Core/FIC_COM.f90\
-./Solver/Core/COM_VAR.f90\
+# Rules to build
+preProc:	$(OBJP)
+			@test -d $(outputdir) || mkdir $(outputdir)
+			@$(FC) -o $(outputdir)/preProc $(OBJP)
+			@echo "Preprocessor compilation successful!"
+
+clean_preProc:
+			@rm -f $(OBJP)
+			@rm -f $(outputdir)/preProc
+
+############
+#  Solver  #
+############
+
+# Sources
+SRCS=./Common/Constants.f90\
+./Common/Elementary_functions.f90\
+./Common/Bodyconditions.f90\
 ./Common/Environment.f90\
-./Common/Identification.f90\
 ./Common/Mesh.f90\
-./Solver/Core/Bodyconditions.f90\
-./Solver/Core/ELEMENTARY_FNS.f90\
-./Solver/Core/PREPARE_MESH.f90\
-./Solver/Core/INITIALIZATION.f90\
+./Common/Face.f90\
 ./Solver/Core/OUTPUT.f90\
-./Solver/Core/cPackgmres.f\
-./Solver/Core/zPackgmres.f\
-./Solver/Core/blas_rot.f\
 ./Solver/Core/M_SOLVER.f90\
-./Solver/Core/ALLOCATE_DATA.f90\
-./Solver/Core/COMPUTE_GREEN_INFD.f90\
-./Solver/Core/SOLVE_BEM_INFD_DIRECT.f90\
-./Solver/Core/COMPUTE_GREEN_FD.f90\
-./Solver/Core/SOLVE_BEM_FD_DIRECT.f90\
-./Solver/Core/SOLVE_BEM_FD_GMRES.f90\
-./Solver/Core/SOLVE_BEM_INFD_GMRES.f90\
-./Solver/Core/SOLVE_BEM.f90\
-./Solver/Core/COMPUTE_KOCHIN.f90\
-./Solver/Core/COMPUTE_GREEN_FREESURFACE.f90\
-./Solver/Core/COMPUTE_POTENTIAL_DOMAIN.f90\
-./Solver/NEMOH.f90\
-./Solver/Core/DEALLOCATE_DATA.f90\
+./Solver/Core/INITIALIZE_GREEN_2.f90\
+./Solver/Core/GREEN_1.f90\
+./Solver/Core/GREEN_2.f90\
+./Solver/Core/SOLVE_BEM_DIRECT.f90\
+./Solver/Core/KOCHIN.f90\
+./Solver/Core/FREESURFACE.f90\
+./Solver/Core/FORCES.f90\
+./Solver/NEMOH.f90
 
-
-
-# LISTE DES .o solver
-#TRANSFORME f90 en o  
 OBJS=$(SRCS:.f90=.o)
 
-#SOURCES FORTRAN postProc(modules de postprocessing)
-SRCO=./Common/Identification.f90\
+# Rules to build
+solver:		$(OBJS)
+			@test -d $(outputdir) || mkdir $(outputdir)
+			@$(FC) -o $(outputdir)/solver $(OBJS)
+			@echo "Solver compilation succesful!"
+
+clean_solver:
+			@rm -f $(OBJS)
+			@rm -f $(outputdir)/solver
+
+####################
+#  Post-processor  #
+####################
+
+# Sources
+SRCO=./Common/Constants.f90\
+./Common/Elementary_functions.f90\
+./Common/Identification.f90\
 ./Common/Environment.f90\
 ./Common/Results.f90\
 ./Common/Mesh.f90\
 ./postProcessor/Compute_RAOs.f90\
 ./postProcessor/IRF.f90\
 ./postProcessor/Plot_WaveElevation.f90\
-./postProcessor/Main.f90\
+./postProcessor/Main.f90
 
-# LISTE DES .o postProc
-#TRANSFORME f90 en o  
 OBJO=$(SRCO:.f90=.o)
 
+# Rules to build
+postProc:	$(OBJO)
+			@test -d $(outputdir) || mkdir $(outputdir)
+			@$(FC) -o $(outputdir)/postProc $(OBJO)
+			@echo "Postprocessor compilation succesful!"
 
-build: clean bin msh hyd pre solver post  
+clean_postProc:
+			@rm -f $(OBJO)
+			@rm -f $(outputdir)/postProc
 
-bin:
-	mkdir -p $(outputdir)
+################
+#  Test cases  #
+################
 
-bin:
-	mkdir -p $(outputdir)
-#
-#Build Mesh executable
-msh:	meshexe
-#Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
-meshexe:	$(OBJM) 
-		$(FC)  -o meshExe $(OBJM)
-#
+.PHONY: run_cylinder clean_cylinder
+run_cylinder: preProc solver postProc
+	$(MAKE) -C Verification/Cylinder/ run
 
-#Build Hydrostatic cal executable
-hyd:	hydstexe
-#Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
-hydstexe:	$(OBJHS) 
-		$(FC) -o hydroStaticExe $(OBJHS)
-#
+clean_cylinder:
+	$(MAKE) -C Verification/Cylinder/ clean
 
-#Build preProc executable
-pre:	preProc
-#Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
-preProc:	$(OBJP) 
-		$(FC) -o preProcExe $(OBJP)
+.PHONY: run_nonsymmetrical clean_nonsymmetrical
+run_nonsymmetrical: preProc solver postProc
+	$(MAKE) -C Verification/NonSymmetrical/ run
 
-#
-#Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
-solver:	        $(OBJS)
-		$(FC) -llapack -lblas -o solverExe $(OBJS)
+clean_nonsymmetrical:
+	$(MAKE) -C Verification/NonSymmetrical/ clean
 
-#
-#Build postProc executable
-post:	postProc
-#Rules to Build MAIN EXECUTABLE  (dependances et regle d'execution)
-postProc:	$(OBJO) 
-		$(FC) -o postProcExe $(OBJO)
+.PHONY: test clean_test
+test: preProc solver postProc
+	@echo ""
+	@echo "Sphere"
+	@$(MAKE) --silent -C Verification/QuickTests/1_Sphere/                     test
+	@echo ""
+	@echo "Sphere using y-symmetry"
+	@$(MAKE) --silent -C Verification/QuickTests/2_SymmetricSphere/            test
+	@echo ""
+	@echo "Sphere in finite depth"
+	@$(MAKE) --silent -C Verification/QuickTests/3_FiniteDepthSphere/          test
+	@echo ""
+	@echo "Sphere in finite depth using y-symmetry"
+	@$(MAKE) --silent -C Verification/QuickTests/4_SymmetricFiniteDepthSphere/ test
+	@echo ""
+	@echo "Alien sphere"
+	@$(MAKE) --silent -C Verification/QuickTests/5_AlienSphere/                test
 
-		
-# Rules for .f compilation
-.f.o:
-	$(FC) $(FFLAGS) $<
-%.o:	%.f90
-	$(FC) $(FFLAGS) $< -o $@
-	
-
-# # #Copy to local bin directory
-install: build
-	mv meshExe hydroStaticExe preProcExe solverExe postProcExe ./bin/
-
-# Remove *.o and *.mod
-clean:
-	rm -f *.o */*.o */*/*.o *.mod
-	
-#remove executable as well
-cleanall:
-	rm -r ./bin
-	rm ./preProcessor/*.o
-	rm ./postProcessor/*.o
-	rm ./Solver/*.o
-	rm ./Solver/Core/*.o
-	rm ./Mesh/*.o 
-	rm ./Common/*.o
-	rm -f *.o *.mod
+clean_test:
+	@$(MAKE) --silent -C Verification/QuickTests/1_Sphere/                     clean
+	@$(MAKE) --silent -C Verification/QuickTests/2_SymmetricSphere/            clean
+	@$(MAKE) --silent -C Verification/QuickTests/3_FiniteDepthSphere/          clean
+	@$(MAKE) --silent -C Verification/QuickTests/4_SymmetricFiniteDepthSphere/ clean
+	@$(MAKE) --silent -C Verification/QuickTests/5_AlienSphere/                clean
