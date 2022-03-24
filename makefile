@@ -12,16 +12,20 @@ MOD_DIR=/tmp/
 ifeq ($(gtest), gfortran)
 	FC=gfortran
 	FFLAGS=  -c                                     # No linker (yet)
-	FFLAGS+= -g                                     # Add extra indormations for debugging
+	FFLAGS+= -g                                     # Add extra informations for debugging
 	FFLAGS+= -O2                                    # Optimization level
 	FFLAGS+= -J$(MOD_DIR)                           # Where to put .mod files
 	FFLAGS+= -cpp -DGNUFORT -ffree-line-length-none # Run preprocessor
+	#FFLAGS+=-fdefault-real-8			# forcing variables to be double precision
+	#if with -fdefault-real-8  change in Common/Constants.f90 ID_DP=1 else ID_DP=0
 endif
 
 ifeq ($(itest), ifort)
 	FC=ifort
 	FFLAGS=-c -cpp
-	FFLAGS+= -g                                     # Add extra indormations for debugging
+	FFLAGS+= -g                                     # Add extra informations for debugging
+	#FFLAGS+=-r8					# forcing variables to be double precision
+	# if with -r8  change in Common/Constants.f90 ID_DP=1 else ID_DP=0
 endif
 
 # Output directory
@@ -97,12 +101,16 @@ clean_preProc:
 
 # Sources
 SRCS=./Common/Constants.f90\
+./Common/Logfile.f90\
 ./Common/Elementary_functions.f90\
 ./Common/Bodyconditions.f90\
 ./Common/Environment.f90\
 ./Common/Mesh.f90\
 ./Common/Face.f90\
 ./Solver/Core/OUTPUT.f90\
+./Solver/Core/cPackgmres.f\
+./Solver/Core/zPackgmres.f\
+./Solver/Core/blas_rot.f\
 ./Solver/Core/M_SOLVER.f90\
 ./Solver/Core/INITIALIZE_GREEN_2.f90\
 ./Solver/Core/GREEN_1.f90\
@@ -118,7 +126,7 @@ OBJS=$(SRCS:.f90=.o)
 # Rules to build
 solver:		$(OBJS)
 			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -o $(outputdir)/solver $(OBJS)
+			@$(FC) -llapack -lblas -o $(outputdir)/solver $(OBJS)
 			@echo "Solver compilation succesful!"
 
 clean_solver:

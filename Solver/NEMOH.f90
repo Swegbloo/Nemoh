@@ -33,14 +33,15 @@ PROGRAM Main
   USE MMesh,                ONLY: TMesh,           ReadTMesh
   USE MEnvironment,         ONLY: TEnvironment,    ReadTEnvironment
   USE MBodyConditions,      ONLY: TBodyConditions, ReadTBodyConditions
-
+  USE M_Solver,             ONLY: TSolver,         ReadTSolver, ID_GMRES
+  USE MLogFile              !ID 
   ! Preprocessing and initialization
   USE INITIALIZE_GREEN_2,   ONLY: INITIALIZE_GREEN
   USE Elementary_functions, ONLY: X0
 
   ! Resolution
   USE SOLVE_BEM_DIRECT,     ONLY: SOLVE_POTENTIAL_DIRECT
-
+ ! USE SOLVE_BEM_ITERATIVE,  ONLY: SOLVE_POTENTIAL_GMRES
   ! Post processing and output
   USE OUTPUT,               ONLY: WRITE_DATA_ON_MESH
   USE FORCES,               ONLY: COMPUTE_AND_WRITE_FORCES
@@ -53,11 +54,15 @@ PROGRAM Main
   TYPE(TMesh)           :: Mesh           ! Mesh of the floating body
   TYPE(TBodyConditions) :: BodyConditions ! Physical conditions on the floating body
   TYPE(TEnvironment)    :: Env            ! Physical conditions of the environment
+  TYPE(TSolver)         :: SolverOpt      ! Solver Option, specified by user in input_solver.txt 
 
   INTEGER                            :: i_problem          ! Index of the current problem
   REAL                               :: omega, wavenumber  ! Wave frequency and wavenumber
   COMPLEX, DIMENSION(:), ALLOCATABLE :: ZIGB, ZIGS         ! Computed source distribution
   COMPLEX, DIMENSION(:), ALLOCATABLE :: Potential          ! Computed potential
+
+  REAL                               :: tcpu_start
+  CHARACTER(LEN=1000)                :: LogTextToBeWritten
 
   ! Initialization ---------------------------------------------------------------------
 
@@ -82,7 +87,7 @@ PROGRAM Main
     )
 
   CALL ReadTEnvironment(Env, file=TRIM(wd)//'/Nemoh.cal')
-       
+
   call INITIALIZE_GREEN()
 
   WRITE(*, *) '. Done !'
@@ -91,10 +96,15 @@ PROGRAM Main
   ! Solve BVPs and calculate forces ----------------------------------------------------
 
   WRITE(*, *) ' -> Solve BVPs and calculate forces '
+  CALL ReadTSolver(SolverOpt,TRIM(wd))
+  WRITE(LogTextToBeWritten,*) 'Linear Solver: ', SolverOpt%SNAME
+  CALL WRITE_LOGFILE(trim(wd)//'/logfile.txt',TRIM(LogTextToBeWritten),IdStartLog,IdprintTerm)
+  CALL START_RECORD_TIME(tcpu_start,trim(wd)//'/logfile.txt',IdAppend)
   WRITE(*, *) ' '
 
   DO i_problem = 1, BodyConditions%Nproblems
-    WRITE(*, '(A,I5,A,I5,A,$)') ' Problem ', i_problem, ' / ', BodyConditions%Nproblems, ' .'
+    WRITE(*,'(A,I5,A,I5,A,A,$)') ' Problem ',i_problem,' / ',BodyConditions%Nproblems,' ',CHAR(13)
+
     omega = BodyConditions%omega(i_problem) ! Wave frequency
     ! Compute wave number
     IF ((Env%depth == INFINITE_DEPTH) .OR. (omega**2*Env%depth/Env%g >= 20)) THEN
@@ -106,14 +116,23 @@ PROGRAM Main
     !===============
     ! BEM Resolution
     !===============
-    
-    CALL SOLVE_POTENTIAL_DIRECT                                              &
-    !==========================
-    ( Mesh, Env, omega, wavenumber,                                          &
-      BodyConditions%NormalVelocity(1:Mesh%Npanels*2**Mesh%Isym, i_problem), &
-      ZIGB, ZIGS,                                                            &
-      Potential(:))
- 
+    IF (SolverOpt%ID == ID_GMRES)  THEN
+     ! CALL SOLVE_POTENTIAL_GMRES                                              &
+     ! !==========================
+     ! ( Mesh, Env, omega, wavenumber,                                          &
+     !   BodyConditions%NormalVelocity(1:Mesh%Npanels*2**Mesh%Isym, i_problem), &
+     !   ZIGB, ZIGS,                                                            &
+     !   Potential(:),SolverOpt)
+
+    ELSE
+      CALL SOLVE_POTENTIAL_DIRECT                                              &
+      !==========================
+      ( Mesh, Env, omega, wavenumber,                                          &
+        BodyConditions%NormalVelocity(1:Mesh%Npanels*2**Mesh%Isym, i_problem), &
+        ZIGB, ZIGS,                                                            &
+        Potential(:),SolverOpt%ID)
+    END IF
+
     !===========================
     ! Post processing and output
     !===========================
@@ -151,11 +170,9 @@ PROGRAM Main
         TRIM(wd)//'/results/freesurface.'//string(i_problem)//'.dat' &
         )
     END IF
-
-    WRITE(*,*) '. Done !'
   END DO
-  WRITE(*,*) ' '
-
+  CALL END_RECORD_TIME(tcpu_start,trim(wd)//'/logfile.txt')
+  WRITE(*,*) '. Done !'
   ! Finalize ---------------------------------------------------------------------------
 
   DEALLOCATE(ZIGB, ZIGS, Potential)
@@ -168,8 +185,10 @@ CONTAINS
     CHARACTER(LEN=5) :: s
     WRITE(s, '(I0.5)') i
   END FUNCTION
-END PROGRAM Main
 
+      
+END PROGRAM Main
+    
 
 !<<<<<<< HEAD
 !!--------------------------------------------------------------------------------------

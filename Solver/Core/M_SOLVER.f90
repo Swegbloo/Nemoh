@@ -28,11 +28,49 @@ MODULE M_SOLVER
 
   IMPLICIT NONE
 
-  PUBLIC :: GAUSSZ
+  PUBLIC :: GAUSSZ,LU_INVERS_MATRIX,ReadTSolver,TSolver
+
+  INTEGER, PARAMETER, PUBLIC ::  ID_GAUSS=0
+  INTEGER, PARAMETER, PUBLIC ::  ID_LU=1
+  INTEGER, PARAMETER, PUBLIC ::  ID_GMRES=2
+
+  ! Definition of TYPE TSolver
+  TYPE TSolver
+    INTEGER       :: ID      !0= GAUSS, 1=LU, 2=GMRES
+    INTEGER       :: mRestart,MaxIter
+    REAL          :: Tolerance
+    CHARACTER(20) :: SNAME
+  END TYPE TSolver
+
  
   CONTAINS
 
   !---------------------------------------------------------------------------!
+
+  SUBROUTINE ReadTSolver(SolverOpt,wd)
+  
+   TYPE(TSolver) :: SolverOpt
+   CHARACTER(LEN=*) :: wd
+   CHARACTER(20) :: SOLVER_NAME 
+   
+   OPEN(10,file=wd//'/input_solver.txt',form='formatted',status='old')
+   READ(10,*) SolverOpt%ID 
+   IF (SolverOpt%ID == ID_GMRES) READ(10,*) SolverOpt%mRestart, SolverOpt%Tolerance, SolverOpt%MaxIter
+   CLOSE(10)    
+
+   IF (SolverOpt%ID == ID_GAUSS ) THEN
+            SolverOpt%SNAME='GAUSS ELIMINATION'
+   ELSE IF (SolverOpt%ID == ID_LU) THEN
+            SolverOpt%SNAME='LU DECOMPOSITION'
+   ELSE 
+            SolverOpt%SNAME='GMRES'
+            IF (SolverOpt%mRestart < 1) THEN
+                    WRITE(*,*) 'Specify in input_solver.txt, the restart parameter for GMRES, m>0 and m<Npanels'
+                    STOP
+            END IF
+    END IF
+  
+  END SUBROUTINE
 
   SUBROUTINE GAUSSZ(A,N, Ainv)
 
@@ -101,45 +139,56 @@ MODULE M_SOLVER
 
   END SUBROUTINE
 
-!   SUBROUTINE LU_INVERS_MATRIX(Ainv,M,N,ID_DP)
-!    INTEGER:: M,N,I,J,INFO,K, ID_DP
-!    COMPLEX, DIMENSION(M,N)  :: Ainv
-!    INTEGER, DIMENSION(M)    :: IPIV
-!    COMPLEX, DIMENSION(M)    :: WORK  ! work array for LAPACK
-!    
-!    ! ZGETRF is for complex double variable, use CGETRF for complex variable
-!    ! Note that all of variables in this codes are defined as complex/ real (single precision)
-!    ! but in the compile process,it is forced to be double precision with '-r8', see the makefile
-!    ! if the -r8 is removed, then CGETRF and CGETRI must be used.
-!    ! ZGETRF computes an LU factorization of a general M-by-N matrix A
-!    ! using partial pivoting with row interchanges.
-!    
-!    IF (ID_DP.EQ.1) THEN
-!      CALL ZGETRF(M,N,Ainv,M,IPIV,INFO) !LAPACK function
-!    ELSE
-!      CALL CGETRF(M,N,Ainv,M,IPIV,INFO) !LAPACK function
-!    END IF
-!
-!    IF (INFO /= 0) THEN
-!     stop 'Matrix is numerically singular!'
-!    END IF
-!
-!    ! ZGETRI is for complex double variable, use CGETRI for complex variable
-!    ! ZGETRI computes the inverse of a matrix using the LU factorization
-!    ! computed by ZGETRF.
-!     
-!      IF (ID_DP.EQ.1) THEN
-!      call ZGETRI(M, Ainv, M, IPIV, WORK, M, info)
-!      ELSE
-!      call CGETRI(M, Ainv, M, IPIV, WORK, M, info)
-!      END IF
-!    IF (INFO /= 0) THEN
-!         STOP 'Matrix inversion failed!'
-!    END IF
-!
-!    RETURN
-!       
-!    END SUBROUTINE
+   SUBROUTINE LU_INVERS_MATRIX(A,N,Ainv,ID_DP)
+
+    ! Input
+    INTEGER,                  INTENT(IN)   :: N
+    COMPLEX, DIMENSION(N, N), INTENT(IN)   :: A
+    INTEGER,                  INTENT(IN)   :: ID_DP
+    ! Output
+    COMPLEX, DIMENSION(N, N), INTENT(OUT)  :: Ainv
+    !Local variables
+    INTEGER:: I,J,INFO
+    INTEGER, DIMENSION(N)    :: IPIV
+    COMPLEX, DIMENSION(N)    :: WORK  ! work array for LAPACK
+    
+    !Initialization
+    Ainv(:,:)=A
+    
+    ! ZGETRF is for complex double variable, use CGETRF for complex variable
+    ! Note that all of variables in this codes are defined as complex/ real (single precision)
+    ! but in the compile process,it is forced to be double precision with '-r8', see the makefile
+    ! if the -r8 is removed, then CGETRF and CGETRI must be used.
+    ! ZGETRF computes an LU factorization of a general M-by-N matrix A
+    ! using partial pivoting with row interchanges.
+    
+    IF (ID_DP.EQ.1) THEN
+      CALL ZGETRF(N,N,Ainv,N,IPIV,INFO) !LAPACK function
+    ELSE
+      CALL CGETRF(N,N,Ainv,N,IPIV,INFO) !LAPACK function
+    END IF
+
+    IF (INFO /= 0) THEN
+     stop 'Matrix is numerically singular!'
+    END IF
+
+    ! ZGETRI is for complex double variable, use CGETRI for complex variable
+    ! ZGETRI computes the inverse of a matrix using the LU factorization
+    ! computed by ZGETRF.
+     
+    IF (ID_DP.EQ.1) THEN
+    call ZGETRI(N, Ainv, N, IPIV, WORK, N, info)
+    ELSE
+    call CGETRI(N, Ainv, N, IPIV, WORK, N, info)
+    END IF
+    
+    IF (INFO /= 0) THEN
+         STOP 'Matrix inversion failed!'
+    END IF
+
+    RETURN
+       
+    END SUBROUTINE
 !
 !    SUBROUTINE LU_SOLVER(A,B,M,N,ID_DP)
 !    INTEGER:: M,N,I,J,INFO,K, ID_DP
@@ -210,123 +259,123 @@ MODULE M_SOLVER
 !    !    STOP
 !    !endif
 !
-!!***************************************
-!! setting up the RHS
-!    DO i=1,nD
-!     work(nD+i)=B(i)
-!    END DO
+!    !***************************************
+!    ! setting up the RHS
+!        DO i=1,nD
+!         work(nD+i)=B(i)
+!        END DO
+!        
+!    !*****************************************
+!    !** Reverse communication implementation
+!    !*
 !    
-!!*****************************************
-!!** Reverse communication implementation
-!!*
-!
-!!*******************************************************
-!!** Initialize the control parameters to default value
-!!*******************************************************
-!!*
-!IF (ID_DP.EQ.1) THEN
-!      call init_zgmres(icntl,cntl)
-!ELSE
-!      call init_cgmres(icntl,cntl)
-!ENDIF
-!!*
-!!*************************
-!!*c Tune some parameters
-!!*************************
-!!*The tolerance
-!      icntl(1)=TOLGMRES
-!!* Save the convergence history on standard output
-!      icntl(3) = 40
-!!* Maximum number of iterations
-!      icntl(7) = NITERGMRES
-!!*
-!!* preconditioner location
-!      icntl(4) = 1
-!!* orthogonalization scheme
-!      icntl(5)=0
-!!* initial guess
-!      icntl(6) = 0
-!!* residual calculation strategy at restart
-!      icntl(8) = 1
-!!****************************************
-!!*
-!
-!IF (ID_DP.EQ.1) THEN
-!10     call drive_zgmres(nD,nD,mD,lwork,work,irc,icntl,cntl,info,rinfo)
-!               revcom = irc(1)
-!               colx   = irc(2)
-!               coly   = irc(3)
-!               colz   = irc(4)
-!               nbscal = irc(5)
-!        !*
-!        IF (revcom.eq.matvec) then
-!        !* perform the matrix vector product
-!        !*        work(colz) <-- A * work(colx)
-!                call zgemv('N',nD,nD,ONE,A,lda,work(colx),1,ZERO,work(colz),1)
-!                goto 10
-!        !*
-!        ELSE IF (revcom.eq.precondLeft) then
-!        !* perform the left preconditioning
-!        !*         work(colz) <-- M^{-1} * work(colx)
-!        
-!                 call zcopy(nD,work(colx),1,work(colz),1)
-!                 call ztrsm('L','L','N','N',nD,1,ONE,A,lda,work(colz),nD)
-!                 goto 10
-!        !*
-!        ELSE IF (revcom.eq.precondRight) then
-!        !* perform the right preconditioning
-!                 
-!                 call zcopy(nD,work(colx),1,work(colz),1)
-!                 call ztrsm('L','U','N','N',nD,1,ONE,A,lda,work(colz),nD)
-!                 goto 10
-!        !*
-!        ELSE IF (revcom.eq.dotProd) then
-!        !*      perform the scalar product
-!        !*      work(colz) <-- work(colx) work(coly)
-!        !*
-!        
-!                 call zgemv('C',nD,nbscal,ONE,work(colx),nD,work(coly),1,ZERO,work(colz),1)
-!                 goto 10
-!        END IF
-!ELSE
-!12     call drive_cgmres(nD,nD,mD,lwork,work,irc,icntl,cntl,info,rinfo)
-!               revcom = irc(1)
-!               colx   = irc(2)
-!               coly   = irc(3)
-!               colz   = irc(4)
-!               nbscal = irc(5)
-!        !*
-!        IF (revcom.eq.matvec) then
-!        !* perform the matrix vector product
-!        !*        work(colz) <-- A * work(colx)
-!                call cgemv('N',nD,nD,ONE,A,lda,work(colx),1,ZERO,work(colz),1)
-!                goto 12
-!        !*
-!        ELSE IF (revcom.eq.precondLeft) then
-!        !* perform the left preconditioning
-!        !*         work(colz) <-- M^{-1} * work(colx)
-!        
-!                 call ccopy(nD,work(colx),1,work(colz),1)
-!                 call ctrsm('L','L','N','N',nD,1,ONE,A,lda,work(colz),nD)
-!                 goto 12
-!        !*
-!        ELSE IF (revcom.eq.precondRight) then
-!        !* perform the right preconditioning
-!                 
-!                 call ccopy(nD,work(colx),1,work(colz),1)
-!                 call ctrsm('L','U','N','N',nD,1,ONE,A,lda,work(colz),nD)
-!                 goto 12
-!        !*
-!        ELSE IF (revcom.eq.dotProd) then
-!        !*      perform the scalar product
-!        !*      work(colz) <-- work(colx) work(coly)
-!        !*
-!        
-!                 call cgemv('C',nD,nbscal,ONE,work(colx),nD,work(coly),1,ZERO,work(colz),1)
-!                 goto 12
-!        END IF
-!END IF
-!!*
+!    !*******************************************************
+!    !** Initialize the control parameters to default value
+!    !*******************************************************
+!    !*
+!    IF (ID_DP.EQ.1) THEN
+!          call init_zgmres(icntl,cntl)
+!    ELSE
+!          call init_cgmres(icntl,cntl)
+!    ENDIF
+!    !*
+!    !*************************
+!    !*c Tune some parameters
+!    !*************************
+!    !*The tolerance
+!          icntl(1)=TOLGMRES
+!    !* Save the convergence history on standard output
+!          icntl(3) = 40
+!    !* Maximum number of iterations
+!          icntl(7) = NITERGMRES
+!    !*
+!    !* preconditioner location
+!          icntl(4) = 1
+!    !* orthogonalization scheme
+!          icntl(5)=0
+!    !* initial guess
+!          icntl(6) = 0
+!    !* residual calculation strategy at restart
+!          icntl(8) = 1
+!    !****************************************
+!    !*
+!    
+!    IF (ID_DP.EQ.1) THEN
+!    10     call drive_zgmres(nD,nD,mD,lwork,work,irc,icntl,cntl,info,rinfo)
+!                   revcom = irc(1)
+!                   colx   = irc(2)
+!                   coly   = irc(3)
+!                   colz   = irc(4)
+!                   nbscal = irc(5)
+!            !*
+!            IF (revcom.eq.matvec) then
+!            !* perform the matrix vector product
+!            !*        work(colz) <-- A * work(colx)
+!                    call zgemv('N',nD,nD,ONE,A,lda,work(colx),1,ZERO,work(colz),1)
+!                    goto 10
+!            !*
+!            ELSE IF (revcom.eq.precondLeft) then
+!            !* perform the left preconditioning
+!            !*         work(colz) <-- M^{-1} * work(colx)
+!            
+!                     call zcopy(nD,work(colx),1,work(colz),1)
+!                     call ztrsm('L','L','N','N',nD,1,ONE,A,lda,work(colz),nD)
+!                     goto 10
+!            !*
+!            ELSE IF (revcom.eq.precondRight) then
+!            !* perform the right preconditioning
+!                     
+!                     call zcopy(nD,work(colx),1,work(colz),1)
+!                     call ztrsm('L','U','N','N',nD,1,ONE,A,lda,work(colz),nD)
+!                     goto 10
+!            !*
+!            ELSE IF (revcom.eq.dotProd) then
+!            !*      perform the scalar product
+!            !*      work(colz) <-- work(colx) work(coly)
+!            !*
+!            
+!                     call zgemv('C',nD,nbscal,ONE,work(colx),nD,work(coly),1,ZERO,work(colz),1)
+!                     goto 10
+!            END IF
+!    ELSE
+!    12     call drive_cgmres(nD,nD,mD,lwork,work,irc,icntl,cntl,info,rinfo)
+!                   revcom = irc(1)
+!                   colx   = irc(2)
+!                   coly   = irc(3)
+!                   colz   = irc(4)
+!                   nbscal = irc(5)
+!            !*
+!            IF (revcom.eq.matvec) then
+!            !* perform the matrix vector product
+!            !*        work(colz) <-- A * work(colx)
+!                    call cgemv('N',nD,nD,ONE,A,lda,work(colx),1,ZERO,work(colz),1)
+!                    goto 12
+!            !*
+!            ELSE IF (revcom.eq.precondLeft) then
+!            !* perform the left preconditioning
+!            !*         work(colz) <-- M^{-1} * work(colx)
+!            
+!                     call ccopy(nD,work(colx),1,work(colz),1)
+!                     call ctrsm('L','L','N','N',nD,1,ONE,A,lda,work(colz),nD)
+!                     goto 12
+!            !*
+!            ELSE IF (revcom.eq.precondRight) then
+!            !* perform the right preconditioning
+!                     
+!                     call ccopy(nD,work(colx),1,work(colz),1)
+!                     call ctrsm('L','U','N','N',nD,1,ONE,A,lda,work(colz),nD)
+!                     goto 12
+!            !*
+!            ELSE IF (revcom.eq.dotProd) then
+!            !*      perform the scalar product
+!            !*      work(colz) <-- work(colx) work(coly)
+!            !*
+!            
+!                     call cgemv('C',nD,nbscal,ONE,work(colx),nD,work(coly),1,ZERO,work(colz),1)
+!                     goto 12
+!            END IF
+!    END IF
+!    !*
 !        if (info(1).eq.0) then
 !        write(*,*) ' Normal exit'
 !        write(*,*) ' Convergence after ', info(2),' iterations'

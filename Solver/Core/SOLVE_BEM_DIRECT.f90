@@ -34,7 +34,7 @@ MODULE SOLVE_BEM_DIRECT
   USE GREEN_2,            ONLY: VNSINFD, VNSFD
 
   ! Solver for linear problem
-  USE M_SOLVER,           ONLY: GAUSSZ
+  USE M_SOLVER,           ONLY: GAUSSZ,LU_INVERS_MATRIX,ID_GAUSS
 
   IMPLICIT NONE
 
@@ -50,12 +50,13 @@ CONTAINS
   
   SUBROUTINE SOLVE_POTENTIAL_DIRECT  &
   ( Mesh, Env, omega, wavenumber,    &
-    NVel, ZIGB, ZIGS,Potential)
+    NVel, ZIGB, ZIGS,Potential,IDSolver)
 
   ! Input/output
   TYPE(TMesh),                                    INTENT(IN)  :: Mesh
   TYPE(TEnvironment),                             INTENT(IN)  :: Env
   REAL,                                           INTENT(IN)  :: omega, wavenumber
+  INTEGER,                                        INTENT(IN)  :: IDSolver                             
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(IN)  :: NVel
   COMPLEX, DIMENSION(Mesh%Npanels),               INTENT(OUT) :: ZIGB, ZIGS ! Source distribution
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(OUT) :: Potential
@@ -136,10 +137,18 @@ CONTAINS
       END DO
 
       ! Invert matrix V
+      IF (IDSolver== ID_GAUSS) THEN
       CALL GAUSSZ(V(:,:,1),Mesh%NPanels, Vinv(:,:,1))
+      ELSE
+      CALL LU_INVERS_MATRIX(V(:,:,1),Mesh%NPanels, Vinv(:,:,1),ID_DP)
+      END IF
 
       IF (Mesh%ISym == Y_SYMMETRY) THEN
-        CALL GAUSSZ(V(:,:,2),Mesh%NPanels, Vinv(:,:,2))
+        IF (IDSolver== ID_GAUSS) THEN
+           CALL GAUSSZ(V(:,:,2),Mesh%NPanels, Vinv(:,:,2))
+        ELSE
+           CALL LU_INVERS_MATRIX(V(:,:,2),Mesh%NPanels, Vinv(:,:,2),ID_DP)
+        END IF
       END IF
   END IF
 
