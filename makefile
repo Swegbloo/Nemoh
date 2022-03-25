@@ -23,8 +23,9 @@ endif
 ifeq ($(itest), ifort)
 	FC=ifort
 	FFLAGS=-c -cpp
+	FFLAGS+= -O2                                    # Optimization level
 	FFLAGS+= -g                                     # Add extra informations for debugging
-	#FFLAGS+=-r8					# forcing variables to be double precision
+	# FFLAGS+= -r8					# forcing variables to be double precision
 	# if with -r8  change in Common/Constants.f90 ID_DP=1 else ID_DP=0
 endif
 
@@ -42,6 +43,10 @@ remake:		clean_all all
 
 # Rule to compile f90 file
 %.o:	%.f90
+		@$(FC) $(FFLAGS) $< -o $@
+
+# Rule to compile f file
+%.o:	%.f
 		@$(FC) $(FFLAGS) $< -o $@
 
 ##################
@@ -98,8 +103,12 @@ clean_preProc:
 ############
 #  Solver  #
 ############
+SRCSEXT=./Solver/Core/cPackgmres.f\
+./Solver/Core/zPackgmres.f\
+./Solver/Core/blas_rot.f
 
-# Sources
+OBJSEXT=$(SRCSEXT:.f=.o)
+
 SRCS=./Common/Constants.f90\
 ./Common/Logfile.f90\
 ./Common/Elementary_functions.f90\
@@ -108,14 +117,12 @@ SRCS=./Common/Constants.f90\
 ./Common/Mesh.f90\
 ./Common/Face.f90\
 ./Solver/Core/OUTPUT.f90\
-./Solver/Core/cPackgmres.f\
-./Solver/Core/zPackgmres.f\
-./Solver/Core/blas_rot.f\
 ./Solver/Core/M_SOLVER.f90\
 ./Solver/Core/INITIALIZE_GREEN_2.f90\
 ./Solver/Core/GREEN_1.f90\
 ./Solver/Core/GREEN_2.f90\
 ./Solver/Core/SOLVE_BEM_DIRECT.f90\
+./Solver/Core/SOLVE_BEM_ITERATIVE.f90\
 ./Solver/Core/KOCHIN.f90\
 ./Solver/Core/FREESURFACE.f90\
 ./Solver/Core/FORCES.f90\
@@ -124,13 +131,13 @@ SRCS=./Common/Constants.f90\
 OBJS=$(SRCS:.f90=.o)
 
 # Rules to build
-solver:		$(OBJS)
+solver:		$(OBJSEXT) $(OBJS)
 			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -llapack -lblas -o $(outputdir)/solver $(OBJS)
+			@$(FC) -llapack -lblas -o $(outputdir)/solver $(OBJSEXT) $(OBJS)
 			@echo "Solver compilation succesful!"
 
 clean_solver:
-			@rm -f $(OBJS)
+			@rm -f $(OBJSEXT) $(OBJS)
 			@rm -f $(outputdir)/solver
 
 ####################

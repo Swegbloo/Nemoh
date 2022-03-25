@@ -19,9 +19,9 @@
 !   - J. Singh
 !   - P. Guével
 !   - J.C. Daubisse
-!
+!   - R Kurnia (2020)
 !--------------------------------------------------------------------------------------
-MODULE SOLVE_BEM_DIRECT
+MODULE SOLVE_BEM_ITERATIVE
   ! Resolution of the boundary elements problem
 
   USE Constants
@@ -34,11 +34,11 @@ MODULE SOLVE_BEM_DIRECT
   USE GREEN_2,            ONLY: VNSINFD, VNSFD
 
   ! Solver for linear problem
-  USE M_SOLVER,           ONLY: GAUSSZ,LU_INVERS_MATRIX,ID_GAUSS
+  USE M_SOLVER,           ONLY: GMRES_SOLVER,TSolver
 
   IMPLICIT NONE
 
-  PUBLIC :: SOLVE_POTENTIAL_DIRECT
+  PUBLIC :: SOLVE_POTENTIAL_ITERATIVE
 
   PRIVATE
   ! Those variables will be conserved between calls of the subroutine.
@@ -48,20 +48,21 @@ MODULE SOLVE_BEM_DIRECT
 
 CONTAINS
   
-  SUBROUTINE SOLVE_POTENTIAL_DIRECT  &
+  SUBROUTINE SOLVE_POTENTIAL_ITERATIVE  &
   ( Mesh, Env, omega, wavenumber,    &
-    NVel, ZIGB, ZIGS,Potential,IDSolver)
+    NVel, ZIGB, ZIGS,Potential,SolverOpt)
 
   ! Input/output
   TYPE(TMesh),                                    INTENT(IN)  :: Mesh
   TYPE(TEnvironment),                             INTENT(IN)  :: Env
   REAL,                                           INTENT(IN)  :: omega, wavenumber
-  INTEGER,                                        INTENT(IN)  :: IDSolver                             
+  TYPE(TSolver),                                  INTENT(IN)  :: SolverOpt                             
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(IN)  :: NVel
   COMPLEX, DIMENSION(Mesh%Npanels),               INTENT(OUT) :: ZIGB, ZIGS ! Source distribution
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(OUT) :: Potential
   
   INTEGER :: I, J
+  COMPLEX, DIMENSION(Mesh%Npanels) :: RHS ! temporary variable
   ! Return of GREEN_1 module
   REAL :: FSP, FSM
   REAL, DIMENSION(3) :: VSXP, VSXM
@@ -135,46 +136,23 @@ CONTAINS
 
         END DO
       END DO
-
-      ! Invert matrix V
-      IF (IDSolver== ID_GAUSS) THEN
-      CALL GAUSSZ(V(:,:,1),Mesh%NPanels, Vinv(:,:,1))
-      ELSE
-      CALL LU_INVERS_MATRIX(V(:,:,1),Mesh%NPanels, Vinv(:,:,1))
-      END IF
-
-      IF (Mesh%ISym == Y_SYMMETRY) THEN
-        IF (IDSolver== ID_GAUSS) THEN
-           CALL GAUSSZ(V(:,:,2),Mesh%NPanels, Vinv(:,:,2))
-        ELSE
-           CALL LU_INVERS_MATRIX(V(:,:,2),Mesh%NPanels, Vinv(:,:,2))
-        END IF
-      END IF
   END IF
+
 
   !=========================
   ! Solve the linear problem
   !=========================
    
   IF (Mesh%ISym == NO_Y_SYMMETRY) THEN
-    ZIGB(:) = MATMUL(Vinv(:, :,1), NVEL(1:Mesh%NPanels))
-
+    CALL GMRES_SOLVER(V(:,:,1),NVEL(1:Mesh%NPanels), ZIGB(:), Mesh%NPanels,SolverOpt)
   ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
-    ZOL(:, 1) = MATMUL(                                              &
-      Vinv(:, :,1),                                                 &
-      (NVEL(1:Mesh%NPanels) + NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2 &
-      )
-
-    ZOL(:, 2) = MATMUL(                                              &
-      Vinv(:, :,2),                                                 &
-      (NVEL(1:Mesh%NPanels) - NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2 &
-      )
-
+    RHS(:)=(NVEL(1:Mesh%NPanels) + NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2
+    CALL GMRES_SOLVER(V(:,:,1),RHS(:),ZOL(:, 1),Mesh%NPanels,SolverOpt)
+    RHS(:)=(NVEL(1:Mesh%NPanels) - NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2
+    CALL GMRES_SOLVER(V(:,:,2),RHS(:),ZOL(:, 2),  Mesh%NPanels,SolverOpt)
     ZIGB(:) = ZOL(:, 1) + ZOL(:, 2)
     ZIGS(:) = ZOL(:, 1) - ZOL(:, 2)
   END IF
-  ! print*,'Vinv=',Vinv(100,100,1),' ZIGB=',ZIGB(100) 
-  ! print*,NVEL(100),NVEL(200)
   !=============================================================
   ! Computation of potential phi = S*source on the floating body
   !=============================================================

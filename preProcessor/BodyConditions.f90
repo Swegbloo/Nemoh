@@ -42,6 +42,7 @@ CONTAINS
     CASE (1)
 !       Degree of freedom is a translation      
         DO i=1,Mesh%Npanels
+          IF (Mesh%XM(3,i).lt.0.) THEN !if ZMN<0, dont calculate on the lid meshes (for irregular freq) by RK 
             IF (Mesh%cPanel(i).EQ.c) THEN
                 VEL(1)=Direction(1)
                 VEL(2)=Direction(2)
@@ -60,10 +61,17 @@ CONTAINS
                     NVEL(i+Mesh%Npanels)=CMPLX(0.,0.)
                 END IF
             END IF
+          ELSE
+                NVEL(i)=CMPLX(0.,0.)
+                IF (Mesh%iSym.EQ.1) THEN
+                    NVEL(i+Mesh%Npanels)=CMPLX(0.,0.)
+                END IF
+          ENDIF
         END DO
     CASE (2)
 !       Degree of freedom is a rotation
         DO i=1,Mesh%Npanels
+          IF (Mesh%XM(3,i).lt.0.) THEN !if ZMN<0, dont calculate on the lid meshes (for irregular freq) by RK 
             IF (Mesh%cPanel(i).EQ.c) THEN
                 VEL(1)=Direction(2)*(Mesh%XM(3,i)-Axis(3))-Direction(3)*(Mesh%XM(2,i)-Axis(2))
                 VEL(2)=Direction(3)*(Mesh%XM(1,i)-Axis(1))-Direction(1)*(Mesh%XM(3,i)-Axis(3))
@@ -82,6 +90,12 @@ CONTAINS
                     NVEL(i+Mesh%Npanels)=CMPLX(0.,0.)
                 END IF
             END IF
+          ELSE
+                NVEL(i)=CMPLX(0.,0.)
+                IF (Mesh%iSym.EQ.1) THEN
+                    NVEL(i+Mesh%Npanels)=CMPLX(0.,0.)
+                END IF
+          ENDIF
         END DO
     CASE (3)
         WRITE(*,*) 'Error: radiation case 3 not implemented yet'
@@ -131,10 +145,11 @@ CONTAINS
             CALL Compute_Wave(kwave,w,beta,Mesh%XM(1,i),Mesh%XM(2,i),Mesh%XM(3,i),Phi,p,Vx,Vy,Vz,Environment)
             IF (Mesh%XM(3,i).lt.0.) THEN !if ZMN<0, dont calculate on the lid meshes (for irregular freq) by RK 
             PRESSURE(i)=p
+            NVEL(i)=-(Vx*Mesh%N(1,i)+Vy*Mesh%N(2,i)+Vz*Mesh%N(3,i))    
             ELSE
             PRESSURE(i)=0
+            NVEL(i)=0                   !forcing to be zero at lid panels for the extended BIE irreg freq. removal 
             END IF
-            NVEL(i)=-(Vx*Mesh%N(1,i)+Vy*Mesh%N(2,i)+Vz*Mesh%N(3,i))    
         ELSE
 !            wbar=(Mesh%XM(1,i-Mesh%Npanels)-Environment%XEFF)*COS(Beta)+(-Mesh%XM(2,i-Mesh%Npanels)-Environment%YEFF)*SIN(Beta)
 !            PRESSURE(i)=-Environment%g/w*CEXP(II*kwave*wbar)
@@ -143,10 +158,11 @@ CONTAINS
             CALL Compute_Wave(kwave,w,beta,Mesh%XM(1,i-Mesh%Npanels),-Mesh%XM(2,i-Mesh%Npanels),Mesh%XM(3,i-Mesh%Npanels),Phi,p,Vx,Vy,Vz,Environment) 
             IF (Mesh%XM(3,i-Mesh%Npanels).lt.0.) THEN !if ZMN<0, dont calculate on the lid meshes (for irregular freq) by RK 
             PRESSURE(i)=p
+            NVEL(i)=-(Vx*Mesh%N(1,i-Mesh%Npanels)-Vy*Mesh%N(2,i-Mesh%Npanels)+Vz*Mesh%N(3,i-Mesh%Npanels))  
             ELSE
             PRESSURE(i)=0
+            NVEL(i)=0  
             END IF
-            NVEL(i)=-(Vx*Mesh%N(1,i-Mesh%Npanels)-Vy*Mesh%N(2,i-Mesh%Npanels)+Vz*Mesh%N(3,i-Mesh%Npanels))  
         END IF        
 !        PRESSURE(i)=Environment%RHO*w*II*PRESSURE(i)
    END DO

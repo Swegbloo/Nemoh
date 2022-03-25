@@ -41,7 +41,7 @@ PROGRAM Main
 
   ! Resolution
   USE SOLVE_BEM_DIRECT,     ONLY: SOLVE_POTENTIAL_DIRECT
- ! USE SOLVE_BEM_ITERATIVE,  ONLY: SOLVE_POTENTIAL_GMRES
+  USE SOLVE_BEM_ITERATIVE,  ONLY: SOLVE_POTENTIAL_ITERATIVE
   ! Post processing and output
   USE OUTPUT,               ONLY: WRITE_DATA_ON_MESH
   USE FORCES,               ONLY: COMPUTE_AND_WRITE_FORCES
@@ -117,12 +117,12 @@ PROGRAM Main
     ! BEM Resolution
     !===============
     IF (SolverOpt%ID == ID_GMRES)  THEN
-     ! CALL SOLVE_POTENTIAL_GMRES                                              &
-     ! !==========================
-     ! ( Mesh, Env, omega, wavenumber,                                          &
-     !   BodyConditions%NormalVelocity(1:Mesh%Npanels*2**Mesh%Isym, i_problem), &
-     !   ZIGB, ZIGS,                                                            &
-     !   Potential(:),SolverOpt)
+      CALL SOLVE_POTENTIAL_ITERATIVE                                           &
+      !==========================
+      ( Mesh, Env, omega, wavenumber,                                          &
+        BodyConditions%NormalVelocity(1:Mesh%Npanels*2**Mesh%Isym, i_problem), &
+        ZIGB, ZIGS,                                                            &
+        Potential(:),SolverOpt)
 
     ELSE
       CALL SOLVE_POTENTIAL_DIRECT                                              &
