@@ -36,7 +36,7 @@ CONTAINS
     COMPLEX, DIMENSION(Mesh%NPanels*(Mesh%Isym+1)), INTENT(IN) :: Potential
 
     ! Local variables
-    INTEGER :: i, j
+    INTEGER :: i, j,indj
     COMPLEX, DIMENSION(:), ALLOCATABLE :: Momentum
 
     CALL INITIALIZE_FORCE_PARAMETERS(parameters_file, mesh, output_file)
@@ -48,7 +48,9 @@ CONTAINS
     ! momentum int_Sb phi nu dS, with nu=-NDS, NDS Normal towards fluids
     DO i = 1, Nintegration
       DO j = 1, Mesh%NPanels*(Mesh%Isym+1)
-        IF (Mesh%XM(3, j)<0.) THEN      !dont compute at lid panels
+        indj=j
+        IF (j> Mesh%Npanels) indj=j-Mesh%NPanels
+        IF (Mesh%XM(3, indj)<0.) THEN      !dont compute at lid panels
         Momentum(i) = Momentum(i) - RHO * potential(j)*NDS(i, j)
         END IF
       END DO

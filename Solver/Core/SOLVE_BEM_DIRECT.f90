@@ -19,7 +19,7 @@
 !   - J. Singh
 !   - P. Guével
 !   - J.C. Daubisse
-!
+!   - R. Kurnia (2020)
 !--------------------------------------------------------------------------------------
 MODULE SOLVE_BEM_DIRECT
   ! Resolution of the boundary elements problem
@@ -34,7 +34,8 @@ MODULE SOLVE_BEM_DIRECT
   USE GREEN_2,            ONLY: VNSINFD, VNSFD
 
   ! Solver for linear problem
-  USE M_SOLVER,           ONLY: GAUSSZ,LU_INVERS_MATRIX,ID_GAUSS
+  USE M_SOLVER,           ONLY:GAUSSZ,LU_INVERS_MATRIX,GMRES_SOLVER, &
+                               ID_GAUSS,ID_GMRES,TSolver
 
   IMPLICIT NONE
 
@@ -50,18 +51,18 @@ CONTAINS
   
   SUBROUTINE SOLVE_POTENTIAL_DIRECT  &
   ( Mesh, Env, omega, wavenumber,    &
-    NVel, ZIGB, ZIGS,Potential,IDSolver)
+    NVel, ZIGB, ZIGS,Potential,SolverOpt)
 
   ! Input/output
   TYPE(TMesh),                                    INTENT(IN)  :: Mesh
   TYPE(TEnvironment),                             INTENT(IN)  :: Env
   REAL,                                           INTENT(IN)  :: omega, wavenumber
-  INTEGER,                                        INTENT(IN)  :: IDSolver                             
+  TYPE(TSolver),                                  INTENT(IN)  :: SolverOpt                             
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(IN)  :: NVel
   COMPLEX, DIMENSION(Mesh%Npanels),               INTENT(OUT) :: ZIGB, ZIGS ! Source distribution
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(OUT) :: Potential
   
-  INTEGER :: I, J
+  INTEGER :: I, J,FLAG_CAL
   ! Return of GREEN_1 module
   REAL :: FSP, FSM
   REAL, DIMENSION(3) :: VSXP, VSXM
@@ -71,6 +72,8 @@ CONTAINS
   COMPLEX, DIMENSION(3) :: VSP, VSM
 
   COMPLEX, DIMENSION(Mesh%NPanels, 2**Mesh%ISym) :: ZOL
+  COMPLEX, DIMENSION(Mesh%Npanels) :: RHS ! temporary variable
+
   IF (.NOT. ALLOCATED(Vinv)) THEN
         ALLOCATE(S   (Mesh%NPanels, Mesh%NPanels, 2**Mesh%ISym))
         ALLOCATE(V(Mesh%NPanels, Mesh%NPanels, 2**Mesh%ISym))
@@ -88,14 +91,14 @@ CONTAINS
   ! IF (omega**2*depth/g <= 0.1) THEN
   !   PRINT*, 'Depth is too low for the given wavelength'
   ! END IF
-
+  FLAG_CAL=0
   !=====================================
   ! Construction of the influence matrix
   !=====================================
   IF (omega /= omega_previous) THEN
       ! Do not recompute if the same frequency is studied twice
       omega_previous = omega
-
+      FLAG_CAL=1
       ! Initialization of the Green function computations
       IF (.NOT. Env%depth == INFINITE_DEPTH) THEN
         CALL LISC(omega**2*Env%depth/Env%g, wavenumber*Env%depth)
@@ -132,49 +135,56 @@ CONTAINS
             S(I, J, 2) = FSM + SM
             V(I, J, 2) = DOT_PRODUCT(Mesh%N(:, I), VSXM + VSM)
           ENDIF
-
+                
         END DO
       END DO
-
-      ! Invert matrix V
-      IF (IDSolver== ID_GAUSS) THEN
-      CALL GAUSSZ(V(:,:,1),Mesh%NPanels, Vinv(:,:,1))
-      ELSE
-      CALL LU_INVERS_MATRIX(V(:,:,1),Mesh%NPanels, Vinv(:,:,1))
-      END IF
-
-      IF (Mesh%ISym == Y_SYMMETRY) THEN
-        IF (IDSolver== ID_GAUSS) THEN
-           CALL GAUSSZ(V(:,:,2),Mesh%NPanels, Vinv(:,:,2))
-        ELSE
-           CALL LU_INVERS_MATRIX(V(:,:,2),Mesh%NPanels, Vinv(:,:,2))
-        END IF
-      END IF
   END IF
-
+      
   !=========================
   ! Solve the linear problem
   !=========================
-   
-  IF (Mesh%ISym == NO_Y_SYMMETRY) THEN
-    ZIGB(:) = MATMUL(Vinv(:, :,1), NVEL(1:Mesh%NPanels))
+   IF (FLAG_CAL==1 .AND. (SolverOpt%ID .NE. ID_GMRES) ) THEN 
+      ! Invert matrix V
+      IF (SolverOpt%ID== ID_GAUSS) THEN
+         CALL GAUSSZ(V(:,:,1),Mesh%NPanels, Vinv(:,:,1))
+         IF (Mesh%ISym == Y_SYMMETRY) THEN
+              CALL GAUSSZ(V(:,:,2),Mesh%NPanels, Vinv(:,:,2))
+         END IF
+      ELSE
+         CALL LU_INVERS_MATRIX(V(:,:,1),Mesh%NPanels, Vinv(:,:,1))
+         IF (Mesh%ISym == Y_SYMMETRY) THEN
+              CALL LU_INVERS_MATRIX(V(:,:,2),Mesh%NPanels, Vinv(:,:,2))
+         END IF
+      END IF
+  END IF
 
+  IF (Mesh%ISym == NO_Y_SYMMETRY) THEN
+    IF (SolverOpt%ID .EQ. ID_GMRES) THEN
+        CALL GMRES_SOLVER(V(:,:,1),NVEL(1:Mesh%NPanels), ZIGB(:), Mesh%NPanels,SolverOpt)
+    ELSE    
+        ZIGB(:) = MATMUL(Vinv(:, :,1), NVEL(1:Mesh%NPanels))
+    ENDIF
   ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
+    IF (SolverOpt%ID .EQ. ID_GMRES) THEN
+        RHS(:)=(NVEL(1:Mesh%NPanels) + NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2
+        CALL GMRES_SOLVER(V(:,:,1),RHS(:),ZOL(:, 1),Mesh%NPanels,SolverOpt)
+        RHS(:)=(NVEL(1:Mesh%NPanels) - NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2
+        CALL GMRES_SOLVER(V(:,:,2),RHS(:),ZOL(:, 2),  Mesh%NPanels,SolverOpt)
+    ELSE
     ZOL(:, 1) = MATMUL(                                              &
-      Vinv(:, :,1),                                                 &
+      Vinv(:, :,1),                                                  &
       (NVEL(1:Mesh%NPanels) + NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2 &
       )
-
     ZOL(:, 2) = MATMUL(                                              &
-      Vinv(:, :,2),                                                 &
+      Vinv(:, :,2),                                                  &
       (NVEL(1:Mesh%NPanels) - NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2 &
       )
-
+    ENDIF
+    
     ZIGB(:) = ZOL(:, 1) + ZOL(:, 2)
     ZIGS(:) = ZOL(:, 1) - ZOL(:, 2)
   END IF
-  ! print*,'Vinv=',Vinv(100,100,1),' ZIGB=',ZIGB(100) 
-  ! print*,NVEL(100),NVEL(200)
+
   !=============================================================
   ! Computation of potential phi = S*source on the floating body
   !=============================================================
@@ -183,10 +193,10 @@ CONTAINS
     Potential(:) = MATMUL(S(:, :, 1), ZIGB(:))
 
   ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
-    Potential(1:Mesh%NPanels) =                    &
+     Potential(1:Mesh%NPanels) =                    &
       MATMUL(S(:, :, 1) + S(:, :, 2), ZIGB(:))/2   &
       + MATMUL(S(:, :, 1) - S(:, :, 2), ZIGS(:))/2
-    Potential(Mesh%NPanels+1:) =                   &
+     Potential(Mesh%NPanels+1:2*Mesh%NPanels) =     &
       MATMUL(S(:, :, 1) - S(:, :, 2), ZIGB(:))/2   &
       + MATMUL(S(:, :, 1) + S(:, :, 2), ZIGS(:))/2
   END IF

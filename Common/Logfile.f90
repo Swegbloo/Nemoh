@@ -58,9 +58,9 @@ CONTAINS
         CALL DATE_AND_TIME(VALUES=DATETIMEVAL)
   
         CALL WRITE_LOGFILE(logfile,' STARTING TIME:',FlagW,IdprintTerm)
-        WRITE(textToBeWritten,*)  'Date: ',DATETIMEVAL(3),'-',DATETIMEVAL(2),'-',DATETIMEVAL(1)
+        WRITE(textToBeWritten,*)  ' Date: ',DATETIMEVAL(3),'-',DATETIMEVAL(2),'-',DATETIMEVAL(1)
         CALL WRITE_LOGFILE(logfile,TRIM(textToBeWritten),IDAppend,IdprintTerm)
-        WRITE(textToBeWritten,*) 'Time: ',DATETIMEVAL(5),':',DATETIMEVAL(6),':',DATETIMEVAL(7)
+        WRITE(textToBeWritten,*) ' Time: ',DATETIMEVAL(5),':',DATETIMEVAL(6),':',DATETIMEVAL(7)
         CALL WRITE_LOGFILE(logfile,TRIM(textToBeWritten),IDAppend,IdprintTerm)
   END SUBROUTINE        
   

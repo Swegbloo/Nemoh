@@ -73,6 +73,29 @@ mesh:		$(OBJM)
 clean_mesh:
 			@rm -f $(OBJM)
 			@rm -f $(outputdir)/mesh
+##################
+#  HYDROSTATIC  #
+##################
+
+# Sources (relative to DIRM)
+SRCHS=./Common/Identification.f90\
+./Common/Elementary_functions.f90\
+./Common/Environment.f90\
+./Common/Mesh.f90\
+./Mesh/coque.f90\
+./Mesh/hydre.f90\
+./Mesh/hydrostatic_cal.f90
+
+OBJHS=$(SRCHS:.f90=.o)
+
+# Rules to build
+hydroCal:
+			@test -d $(outputdir) || mkdir $(outputdir)
+			@$(FC) -o $(outputdir)/hydroCal $(OBJHS)
+			@echo "HydroCal compilation successful!"
+
+clean_hydroCal:
+			@rm -f $(OBJHS)
 
 ###################
 #  Pre-processor  #
@@ -122,7 +145,6 @@ SRCS=./Common/Constants.f90\
 ./Solver/Core/GREEN_1.f90\
 ./Solver/Core/GREEN_2.f90\
 ./Solver/Core/SOLVE_BEM_DIRECT.f90\
-./Solver/Core/SOLVE_BEM_ITERATIVE.f90\
 ./Solver/Core/KOCHIN.f90\
 ./Solver/Core/FREESURFACE.f90\
 ./Solver/Core/FORCES.f90\

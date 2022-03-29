@@ -164,7 +164,7 @@ CONTAINS
     Potential(1:Mesh%NPanels) =                    &
       MATMUL(S(:, :, 1) + S(:, :, 2), ZIGB(:))/2   &
       + MATMUL(S(:, :, 1) - S(:, :, 2), ZIGS(:))/2
-    Potential(Mesh%NPanels+1:) =                   &
+    Potential(Mesh%NPanels+1:2*Mesh%NPanels) =                   &
       MATMUL(S(:, :, 1) - S(:, :, 2), ZIGB(:))/2   &
       + MATMUL(S(:, :, 1) + S(:, :, 2), ZIGS(:))/2
   END IF
