@@ -51,7 +51,7 @@ CONTAINS
   
   SUBROUTINE SOLVE_POTENTIAL_DIRECT  &
   ( Mesh, Env, omega, wavenumber,    &
-    NVel, ZIGB, ZIGS,Potential,SolverOpt)
+    NVel, ZIGB, ZIGS,Potential,SolverOpt,wd)
 
   ! Input/output
   TYPE(TMesh),                                    INTENT(IN)  :: Mesh
@@ -62,7 +62,7 @@ CONTAINS
   COMPLEX, DIMENSION(Mesh%Npanels),               INTENT(OUT) :: ZIGB, ZIGS ! Source distribution
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(OUT) :: Potential
   
-  INTEGER :: I, J,FLAG_CAL
+  INTEGER :: I, J,FLAG_CAL,ITERLID
   ! Return of GREEN_1 module
   REAL :: FSP, FSM
   REAL, DIMENSION(3) :: VSXP, VSXM
@@ -74,6 +74,9 @@ CONTAINS
   COMPLEX, DIMENSION(Mesh%NPanels, 2**Mesh%ISym) :: ZOL
   COMPLEX, DIMENSION(Mesh%Npanels) :: RHS ! temporary variable
 
+  CHARACTER(LEN=*),                               INTENT(IN)  :: wd
+  REAL line(Mesh%Npanels*2)
+  REAL tempMat(2,2)
   IF (.NOT. ALLOCATED(Vinv)) THEN
         ALLOCATE(S   (Mesh%NPanels, Mesh%NPanels, 2**Mesh%ISym))
         ALLOCATE(V(Mesh%NPanels, Mesh%NPanels, 2**Mesh%ISym))
@@ -95,6 +98,8 @@ CONTAINS
   !=====================================
   ! Construction of the influence matrix
   !=====================================
+  !OPEN(200, FILE=wd//'/LinearSystem_temp.txt', ACTION='WRITE')
+
   IF (omega /= omega_previous) THEN
       ! Do not recompute if the same frequency is studied twice
       omega_previous = omega
@@ -103,10 +108,9 @@ CONTAINS
       IF (.NOT. Env%depth == INFINITE_DEPTH) THEN
         CALL LISC(omega**2*Env%depth/Env%g, wavenumber*Env%depth)
       END IF
-
+      ITERLID=0
       DO I = 1, Mesh%NPanels
         DO J = 1, Mesh%NPanels
-
           ! First part of the Green function
           CALL VAV                                &
           ( I, Mesh%XM(:, I), J, Mesh, Env%depth, &
@@ -136,10 +140,26 @@ CONTAINS
             V(I, J, 2) = DOT_PRODUCT(Mesh%N(:, I), VSXM + VSM)
           ENDIF
                 
+
+   !       IF (Mesh%XM(3,I)>=-0.00001) THEN
+   !             V(I, J, 1) = -V(I, J, 1)
+   !             IF (Mesh%ISym == Y_SYMMETRY) V(I, J, 2) = -V(I, J, 2)
+   !       ENDIF 
+   !      line(2*J-1)= REAL(V(I, J, 1)) 
+   !      line(2*J)  =AIMAG(V(I, J, 1)) 
+
         END DO
+    !  WRITE(200,*) (line(J),J=1,2*Mesh%NPanels)
+    !  WRITE(200,*) ''
       END DO
-  END IF
-      
+    !  CLOSE(200)
+    END IF
+      !  print*,'---------------------------' 
+      !  DO I=1,Mesh%Npanels
+      !          print*,I,Mesh%XM(3,I),NVEL(I)
+      !  END DO
+      !  READ(*,*)
+      !  print*,'---------------------------' 
   !=========================
   ! Solve the linear problem
   !=========================

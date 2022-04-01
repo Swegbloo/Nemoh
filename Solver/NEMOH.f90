@@ -120,7 +120,7 @@ PROGRAM Main
       ( Mesh, Env, omega, wavenumber,                                          &
         BodyConditions%NormalVelocity(1:Mesh%Npanels*2**Mesh%Isym, i_problem), &
         ZIGB, ZIGS,                                                            &
-        Potential(:),SolverOpt)
+        Potential(:),SolverOpt,trim(wd))
 
     !===========================
     ! Post processing and output

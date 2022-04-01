@@ -38,13 +38,15 @@ CONTAINS
 
     ! Local variables
     REAL                               :: ADPI, ADPI2, AKDPI, AKDPI2
-    REAL, DIMENSION(3)                 :: XI
+    REAL, DIMENSION(3)                 :: XI,XJ
     COMPLEX, DIMENSION(Mesh%ISym+1)    :: FS
     COMPLEX, DIMENSION(3, Mesh%ISym+1) :: VS
 
-    XI(:) = X0I(:)
-    ! XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
-    CALL COMPUTE_S2(XI, Mesh%XM(:, J), INFINITE_DEPTH, wavenumber, FS(1), VS(:, 1))
+     XI(:) = X0I(:)
+    XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
+    XJ(:) = Mesh%XM(:, J)
+    XJ(3) = MIN(XJ(3), -EPS*Mesh%xy_diameter)
+    CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, FS(1), VS(:, 1))
 
     IF (Mesh%Isym == NO_Y_SYMMETRY) THEN
       SP       = FS(1)
@@ -55,7 +57,7 @@ CONTAINS
     ELSE IF (Mesh%Isym == Y_SYMMETRY) THEN
       ! Reflect the source point across the (xOz) plane and compute another coefficient
       XI(2) = -X0I(2)
-      CALL COMPUTE_S2(XI, Mesh%XM(:, J), INFINITE_DEPTH, wavenumber, FS(2), VS(:, 2))
+      CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, FS(2), VS(:, 2))
       VS(2, 2) = -VS(2, 2) ! Reflection of the output vector
 
       ! Assemble the two results
@@ -112,9 +114,10 @@ CONTAINS
     !========================================
 
     XI(:) = X0I(:)
-    ! XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
+    XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
     XJ(:) = Mesh%XM(:, J)
-
+    XJ(3) = MIN(XJ(3), -EPS*Mesh%xy_diameter)
+    
     ! Distance in xOy plane
     RRR = NORM2(XI(1:2) - XJ(1:2))
 

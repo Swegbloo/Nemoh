@@ -51,7 +51,7 @@ CONTAINS
         indj=j
         IF (j> Mesh%Npanels) indj=j-Mesh%NPanels
         IF (Mesh%XM(3, indj)<0.) THEN      !dont compute at lid panels
-        Momentum(i) = Momentum(i) - RHO * potential(j)*NDS(i, j)
+                Momentum(i) = Momentum(i) - RHO * potential(j)*NDS(i, j)
         END IF
       END DO
     !   print*,Momentum(i)
