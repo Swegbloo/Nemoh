@@ -36,7 +36,7 @@ PROGRAM Main
   USE M_Solver,             ONLY: TSolver,         ReadTSolver, ID_GMRES
   USE MLogFile              !ID 
   ! Preprocessing and initialization
-  USE INITIALIZE_GREEN_2,   ONLY: INITIALIZE_GREEN
+  USE M_INITIALIZE_GREEN,   ONLY: TGREEN, INITIALIZE_GREEN
   USE Elementary_functions, ONLY: X0
 
   ! Resolution
@@ -60,6 +60,8 @@ PROGRAM Main
   COMPLEX, DIMENSION(:), ALLOCATABLE :: ZIGB, ZIGS         ! Computed source distribution
   COMPLEX, DIMENSION(:), ALLOCATABLE :: Potential          ! Computed potential
 
+  TYPE(TGREEN)                       ::IGreen              ! Initial Green variables
+  
   REAL                               :: tcpu_start
   CHARACTER(LEN=1000)                :: LogTextToBeWritten
 
@@ -87,7 +89,7 @@ PROGRAM Main
 
   CALL ReadTEnvironment(Env, file=TRIM(wd)//'/Nemoh.cal')
 
-  call INITIALIZE_GREEN()
+  call INITIALIZE_GREEN(Mesh,Env%depth,IGreen)
 
   WRITE(*, *) '. Done !'
   WRITE(*, *) ' '
@@ -117,7 +119,7 @@ PROGRAM Main
     !===============
       CALL SOLVE_POTENTIAL_DIRECT                                              &
       !==========================
-      ( Mesh, Env, omega, wavenumber,                                          &
+      ( Mesh, Env, omega, wavenumber,IGreen,                                   &
         BodyConditions%NormalVelocity(1:Mesh%Npanels*2**Mesh%Isym, i_problem), &
         ZIGB, ZIGS,                                                            &
         Potential(:),SolverOpt,trim(wd))

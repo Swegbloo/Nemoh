@@ -29,8 +29,7 @@ MODULE SOLVE_BEM_DIRECT
   USE MEnvironment,       ONLY: TEnvironment
 
   ! Green functions
-  USE INITIALIZE_GREEN_2, ONLY: LISC
-  USE GREEN_1,            ONLY: VAV
+  USE M_INITIALIZE_GREEN, ONLY: TGREEN, LISC
   USE GREEN_2,            ONLY: VNSINFD, VNSFD
 
   ! Solver for linear problem
@@ -49,14 +48,15 @@ MODULE SOLVE_BEM_DIRECT
 
 CONTAINS
   
-  SUBROUTINE SOLVE_POTENTIAL_DIRECT  &
-  ( Mesh, Env, omega, wavenumber,    &
+  SUBROUTINE SOLVE_POTENTIAL_DIRECT             &
+  ( Mesh, Env, omega, wavenumber, IGreen,       &
     NVel, ZIGB, ZIGS,Potential,SolverOpt,wd)
 
   ! Input/output
   TYPE(TMesh),                                    INTENT(IN)  :: Mesh
   TYPE(TEnvironment),                             INTENT(IN)  :: Env
   REAL,                                           INTENT(IN)  :: omega, wavenumber
+  TYPE(TGREEN),                                   INTENT(IN)  :: IGreen
   TYPE(TSolver),                                  INTENT(IN)  :: SolverOpt                             
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(IN)  :: NVel
   COMPLEX, DIMENSION(Mesh%Npanels),               INTENT(OUT) :: ZIGB, ZIGS ! Source distribution
@@ -111,12 +111,13 @@ CONTAINS
       ITERLID=0
       DO I = 1, Mesh%NPanels
         DO J = 1, Mesh%NPanels
+
           ! First part of the Green function
-          CALL VAV                                &
-          ( I, Mesh%XM(:, I), J, Mesh, Env%depth, &
-            FSP, FSM, VSXP, VSXM                  &
-            )
-          ! These output are actually independent of omega and could be computed only once.
+          ! These output are independent of omega and computed only once in INITIALIZE_GREEN().
+            FSP=IGreen%FSP1(I,J)
+            FSM=IGreen%FSM1(I,J)
+            VSXP=IGreen%VSP1(I,J,:)
+            VSXM=IGreen%VSM1(I,J,:)
 
           ! Second part of the Green function
           IF (Env%depth == INFINITE_DEPTH) THEN

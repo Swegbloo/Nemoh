@@ -2,15 +2,18 @@
 ! NEMOH Solver
 ! See license and contributors list in the main directory.
 !--------------------------------------------------------------------------------------
-MODULE INITIALIZE_GREEN_2
+MODULE M_INITIALIZE_GREEN
 
   USE Constants
   USE Elementary_functions, ONLY: GG
+  USE GREEN_1,              ONLY: VAV
+  USE MMesh,                ONLY: TMesh
 
   IMPLICIT NONE
 
 
   PUBLIC :: INITIALIZE_GREEN
+  PRIVATE :: INITIALIZE_GREEN2 ! Called by INITIALIZE_GREEN
 
   PUBLIC  :: LISC   ! Initialization of AMBDA and AR
   PRIVATE :: EXPORS ! Called by LISC
@@ -33,9 +36,57 @@ MODULE INITIALIZE_GREEN_2
   INTEGER                 :: NEXP
   REAL, DIMENSION(31)     :: AMBDA, AR
 
+ !Init Green var
+  TYPE TGREEN
+     REAL,DIMENSION(:,:)  ,ALLOCATABLE :: FSP1,FSM1  !First term green function
+     REAL,DIMENSION(:,:,:),ALLOCATABLE :: VSP1,VSM1  !First term gradient of the green function
+    ! INTEGER                 :: IR,JZ                      !for Green2
+    ! REAL,ALLOCATABLE(:)     :: XR,XZ                      !for Green2
+    ! REAL,ALLOCATABLE(:,:)   :: APD1X, APD1Z, APD2X, APD2Z ! for Green2
+  END TYPE TGREEN
+
 CONTAINS
 
-  SUBROUTINE INITIALIZE_GREEN()
+  SUBROUTINE INITIALIZE_GREEN(Mesh,Depth,IGreen)
+
+  !INPUT/OUTPUT
+  TYPE(TMESH),                  INTENT(IN)  :: Mesh
+  REAL,                         INTENT(IN)  :: Depth
+  
+  TYPE(TGREEN),                 INTENT(OUT) :: IGreen  
+
+  !LOCAL
+  INTEGER       :: I,J
+
+  !IGREEN%IR=IR
+  !IGREEN%JZ=JZ
+  ALLOCATE(IGREEN%FSP1(Mesh%Npanels,Mesh%Npanels))
+  ALLOCATE(IGREEN%FSM1(Mesh%Npanels,Mesh%Npanels))
+  ALLOCATE(IGREEN%VSP1(Mesh%Npanels,Mesh%Npanels,3))
+  ALLOCATE(IGREEN%VSM1(Mesh%Npanels,Mesh%Npanels,3))
+ ! ALLOCATE(IGREEN%APD1X(IR,JZ),IGREEN%APD2X(IR,JZ))
+ ! ALLOCATE(IGREEN%APD1Z(IR,JZ),IGREEN%APD2Z(IR,JZ))
+
+
+  !First term of Green function
+   DO I = 1, Mesh%NPanels
+        DO J = 1, Mesh%NPanels
+          ! First part of the Green function
+          ! These output are independent of omega and computed only once.
+          CALL VAV                                       &
+          ( I, Mesh%XM(:, I), J, Mesh, Depth,            &
+            IGreen%FSP1(I,J), IGreen%FSM1(I,J),    &
+            IGreen%VSP1(I,J,:), IGreen%VSM1(I,J,:) &
+            )
+        END DO
+   END DO
+
+  !Initialization of the second green function
+  CALL INITIALIZE_GREEN2()
+
+  END SUBROUTINE
+
+  SUBROUTINE INITIALIZE_GREEN2()
     ! Initialize XR, XZ, APD1X, APD2X, APD1Z, APD2Z
     ! Those parameters are independent of the depth and the frequency.
     ! Thus, they are initialized only once at the beginning of the execution of the code.
@@ -101,7 +152,7 @@ CONTAINS
 
     RETURN
 
-  END SUBROUTINE INITIALIZE_GREEN
+  END SUBROUTINE INITIALIZE_GREEN2
 
 !-------------------------------------------------------------------------------!
 
@@ -666,4 +717,4 @@ CONTAINS
     RETURN
 
   END FUNCTION FF
-END MODULE INITIALIZE_GREEN_2
+END MODULE M_INITIALIZE_GREEN
