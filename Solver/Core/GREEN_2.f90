@@ -9,8 +9,8 @@ MODULE GREEN_2
   USE MFace
   USE Elementary_functions
 
-  USE M_INITIALIZE_GREEN
-  USE GREEN_1, ONLY: COMPUTE_ASYMPTOTIC_S0
+  USE M_INITIALIZE_GREEN, ONLY: TGreen
+  USE GREEN_1,            ONLY: COMPUTE_ASYMPTOTIC_S0
 
   IMPLICIT NONE
 
@@ -23,7 +23,7 @@ CONTAINS
 
   SUBROUTINE VNSINFD             &
       (wavenumber, X0I, J, Mesh, &
-      SP, SM, VSP, VSM)
+      SP, SM, VSP, VSM, IGreen)
     ! Compute the frequency-dependent part of the Green function in the infinite depth case.
 
     ! Inputs
@@ -31,7 +31,8 @@ CONTAINS
     REAL, DIMENSION(3),    INTENT(IN)  :: X0I   ! Coordinates of the source point
     INTEGER,               INTENT(IN)  :: J     ! Index of the integration panel
     TYPE(TMesh),           INTENT(IN)  :: Mesh
-
+    TYPE(TGreen),          INTENT(IN)  :: IGreen ! Initial green variable
+   
     ! Outputs
     COMPLEX,               INTENT(OUT) :: SP, SM   ! Integral of the Green function over the panel.
     COMPLEX, DIMENSION(3), INTENT(OUT) :: VSP, VSM ! Gradient of the integral of the Green function with respect to X0I.
@@ -46,7 +47,7 @@ CONTAINS
     XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
     XJ(:) = Mesh%XM(:, J)
     XJ(3) = MIN(XJ(3), -EPS*Mesh%xy_diameter)
-    CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, FS(1), VS(:, 1))
+    CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, FS(1), VS(:, 1), IGreen)
 
     IF (Mesh%Isym == NO_Y_SYMMETRY) THEN
       SP       = FS(1)
@@ -57,7 +58,7 @@ CONTAINS
     ELSE IF (Mesh%Isym == Y_SYMMETRY) THEN
       ! Reflect the source point across the (xOz) plane and compute another coefficient
       XI(2) = -X0I(2)
-      CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, FS(2), VS(:, 2))
+      CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, FS(2), VS(:, 2), IGreen)
       VS(2, 2) = -VS(2, 2) ! Reflection of the output vector
 
       ! Assemble the two results
@@ -85,7 +86,7 @@ CONTAINS
 
   !------------------------------------------------
 
-  SUBROUTINE VNSFD(wavenumber, X0I, J, Mesh, depth, SP, SM, VSP, VSM)
+  SUBROUTINE VNSFD(wavenumber, X0I, J, Mesh, depth, SP, SM, VSP, VSM, IGreen)
     ! Compute the frequency-dependent part of the Green function in the finite depth case.
 
     ! Inputs
@@ -93,6 +94,7 @@ CONTAINS
     REAL, DIMENSION(3),    INTENT(IN)  :: X0I   ! Coordinates of the source point
     INTEGER,               INTENT(IN)  :: J     ! Index of the integration panel
     TYPE(TMesh),           INTENT(IN)  :: Mesh
+    TYPE(TGreen),          INTENT(IN)  :: IGreen ! Initial green variable
 
     ! Outputs
     COMPLEX,               INTENT(OUT) :: SP, SM   ! Integral of the Green function over the panel.
@@ -108,7 +110,14 @@ CONTAINS
     REAL, DIMENSION(3, 4, 2**Mesh%Isym)    :: VTS
     COMPLEX, DIMENSION(4, 2**Mesh%Isym)    :: FS
     COMPLEX, DIMENSION(3, 4, 2**Mesh%Isym) :: VS
+    
+    INTEGER                 :: NEXP
+    REAL, DIMENSION(31)     :: AMBDA, AR
 
+    !passing values
+    NEXP =IGreen%NEXP
+    AMBDA=IGreen%AMBDA(:)
+    AR   =IGreen%AR(:)
     !========================================
     ! Part 1: Solve 4 infinite depth problems
     !========================================
@@ -122,14 +131,14 @@ CONTAINS
     RRR = NORM2(XI(1:2) - XJ(1:2))
 
     ! 1.a First infinite depth problem
-    CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(1, 1), VS(:, 1, 1))
+    CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(1, 1), VS(:, 1, 1), IGreen)
 
     PSR(1, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
 
     ! 1.b Shift and reflect XI and compute another value of the Green function
     XI(3) = -X0I(3) - 2*depth
     XJ(3) = Mesh%XM(3, J)
-    CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(2, 1), VS(:, 2, 1))
+    CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(2, 1), VS(:, 2, 1), IGreen)
     VS(3, 2, 1) = -VS(3, 2, 1) ! Reflection of the output vector
 
     PSR(2, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
@@ -137,14 +146,14 @@ CONTAINS
     ! 1.c Shift and reflect XJ and compute another value of the Green function
     XI(3) = X0I(3)
     XJ(3) = -Mesh%XM(3, J) - 2*depth
-    CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(3, 1), VS(:, 3, 1))
+    CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(3, 1), VS(:, 3, 1), IGreen)
 
     PSR(3, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
 
     ! 1.d Shift and reflect both XI and XJ and compute another value of the Green function
     XI(3) = -X0I(3)        - 2*depth
     XJ(3) = -Mesh%XM(3, J) - 2*depth
-    CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(4, 1), VS(:, 4, 1))
+    CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(4, 1), VS(:, 4, 1), IGreen)
     VS(3, 4, 1) = -VS(3, 4, 1) ! Reflection of the output vector
 
     PSR(4, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
@@ -166,14 +175,14 @@ CONTAINS
       RRR = NORM2(XI(1:2) - XJ(1:2))
 
       ! 1.a' First infinite depth problem
-      CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(1, 2), VS(:, 1, 2))
+      CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(1, 2), VS(:, 1, 2), IGreen)
 
       PSR(1, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
 
       ! 1.b' Shift and reflect XI and compute another value of the Green function
       XI(3) = -X0I(3)        - 2*depth
       XJ(3) = Mesh%XM(3, J)
-      CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(2, 2), VS(:, 2, 2))
+      CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(2, 2), VS(:, 2, 2), IGreen)
       VS(3, 2, 2) = -VS(3, 2, 2)
 
       PSR(2, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
@@ -181,14 +190,14 @@ CONTAINS
       ! 1.c' Shift and reflect XJ and compute another value of the Green function
       XI(3) = X0I(3)
       XJ(3) = -Mesh%XM(3, J) - 2*depth
-      CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(3, 2), VS(:, 3, 2))
+      CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(3, 2), VS(:, 3, 2), IGreen)
 
       PSR(3, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
 
       ! 1.d' Shift and reflect both XI and XJ and compute another value of the Green function
       XI(3) = -X0I(3)        - 2*depth
       XJ(3) = -Mesh%XM(3, J) - 2*depth
-      CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(4, 2), VS(:, 4, 2))
+      CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, FS(4, 2), VS(:, 4, 2), IGreen)
       VS(3, 4, 2) = -VS(3, 4, 2)
 
       PSR(4, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
@@ -297,11 +306,12 @@ CONTAINS
 
 !------------------------------------------------------------------------
 
-  SUBROUTINE COMPUTE_S2(XI, XJ, depth, wavenumber, FS, VS)
+  SUBROUTINE COMPUTE_S2(XI, XJ, depth, wavenumber, FS, VS, IGreen)
 
     ! Inputs
     REAL, DIMENSION(3),    INTENT(IN)  :: XI, XJ
     REAL,                  INTENT(IN)  :: depth, wavenumber
+   TYPE(TGREEN),           INTENT(IN)  :: IGreen  
 
     ! Outputs
     COMPLEX,               INTENT(OUT) :: FS
@@ -314,6 +324,7 @@ CONTAINS
     REAL                               :: PD1X, PD2X, PD1Z, PD2Z
     REAL, DIMENSION(3)                 :: XL, ZL
 
+   
     RRR = NORM2(XI(1:2) - XJ(1:2))
     AKR = wavenumber*RRR
 
@@ -354,19 +365,19 @@ CONTAINS
         ENDIF
         KI = MAX(MIN(KI, 327), 2)
 
-        XL(1) = PL2(XR(KI),   XR(KI+1), XR(KI-1), AKR)
-        XL(2) = PL2(XR(KI+1), XR(KI-1), XR(KI),   AKR)
-        XL(3) = PL2(XR(KI-1), XR(KI),   XR(KI+1), AKR)
-        ZL(1) = PL2(XZ(KJ),   XZ(KJ+1), XZ(KJ-1), AKZ)
-        ZL(2) = PL2(XZ(KJ+1), XZ(KJ-1), XZ(KJ),   AKZ)
-        ZL(3) = PL2(XZ(KJ-1), XZ(KJ),   XZ(KJ+1), AKZ)
+        XL(1) = PL2(IGreen%XR(KI),   IGreen%XR(KI+1), IGreen%XR(KI-1), AKR)
+        XL(2) = PL2(IGreen%XR(KI+1), IGreen%XR(KI-1), IGreen%XR(KI),   AKR)
+        XL(3) = PL2(IGreen%XR(KI-1), IGreen%XR(KI),   IGreen%XR(KI+1), AKR)
+        ZL(1) = PL2(IGreen%XZ(KJ),   IGreen%XZ(KJ+1), IGreen%XZ(KJ-1), AKZ)
+        ZL(2) = PL2(IGreen%XZ(KJ+1), IGreen%XZ(KJ-1), IGreen%XZ(KJ),   AKZ)
+        ZL(3) = PL2(IGreen%XZ(KJ-1), IGreen%XZ(KJ),   IGreen%XZ(KJ+1), AKZ)
 
-        PD1Z = DOT_PRODUCT(XL, MATMUL(APD1Z(KI-1:KI+1, KJ-1:KJ+1), ZL))
-        PD2Z = DOT_PRODUCT(XL, MATMUL(APD2Z(KI-1:KI+1, KJ-1:KJ+1), ZL))
+        PD1Z = DOT_PRODUCT(XL, MATMUL(IGreen%APD1Z(KI-1:KI+1, KJ-1:KJ+1), ZL))
+        PD2Z = DOT_PRODUCT(XL, MATMUL(IGreen%APD2Z(KI-1:KI+1, KJ-1:KJ+1), ZL))
 
         IF (RRR > EPS) THEN
-          PD1X = DOT_PRODUCT(XL, MATMUL(APD1X(KI-1:KI+1, KJ-1:KJ+1), ZL))
-          PD2X = DOT_PRODUCT(XL, MATMUL(APD2X(KI-1:KI+1, KJ-1:KJ+1), ZL))
+          PD1X = DOT_PRODUCT(XL, MATMUL(IGreen%APD1X(KI-1:KI+1, KJ-1:KJ+1), ZL))
+          PD2X = DOT_PRODUCT(XL, MATMUL(IGreen%APD2X(KI-1:KI+1, KJ-1:KJ+1), ZL))
         END IF
 
       ELSE  ! 99.7 < AKR

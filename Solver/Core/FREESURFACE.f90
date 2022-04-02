@@ -29,6 +29,7 @@ MODULE FREESURFACE
   USE MEnvironment,              ONLY: TEnvironment
 
   ! Green functions
+  USE M_INITIALIZE_GREEN,        ONLY: TGreen
   USE GREEN_1,                   ONLY: VAV
   USE GREEN_2,                   ONLY: VNSFD, VNSINFD
 
@@ -48,7 +49,7 @@ CONTAINS
 
   SUBROUTINE COMPUTE_AND_WRITE_FREE_SURFACE_ELEVATION  &
     ! Main subroutine of the module. Called in NEMOH.f90.
-    ( parameters_file,                                 &
+    ( parameters_file,  IGreen,                        &
       Mesh, Env, omega, wavenumber, ZIGB, ZIGS,        &
       output_file                                      &
       )
@@ -58,7 +59,8 @@ CONTAINS
     TYPE(TEnvironment),               INTENT(IN) :: Env
     REAL,                             INTENT(IN) :: omega, wavenumber
     COMPLEX, DIMENSION(Mesh%NPanels), INTENT(IN) :: ZIGB, ZIGS ! Sources
-
+    TYPE(TGREEN),                     INTENT(IN) :: IGreen
+    
     ! Local variables
     INTEGER :: j
     COMPLEX :: PHI
@@ -74,7 +76,7 @@ CONTAINS
       !==============================
       ( Mesh, Env, omega, wavenumber, ZIGB, ZIGS, &
         MeshFS%X(1, j), MeshFS%X(2, j), 0.0,      &
-        PHI                                       &
+        PHI, IGreen                               &
         )
 
       ! Get elevation ETA from potential PHI
@@ -126,7 +128,7 @@ CONTAINS
   SUBROUTINE COMPUTE_POTENTIAL_AT_POINT         &
     ( Mesh, Env, omega, wavenumber, ZIGB, ZIGS, &
       XC, YC, ZC,                               &
-      PHI                                       &
+      PHI,IGreen                                &
       )
     ! Compute the potential PHI at the given coordinate (XC, YC, ZC) using the
     ! source distributions ZIGB abd ZIGS.
@@ -137,7 +139,8 @@ CONTAINS
     REAL,                             INTENT(IN) :: omega, wavenumber
     COMPLEX, DIMENSION(Mesh%NPanels), INTENT(IN) :: ZIGB, ZIGS
     REAL,                             INTENT(IN) :: XC, YC, ZC
-
+    TYPE(TGREEN),                     INTENT(IN) :: IGreen
+    
     ! Output
     COMPLEX,                          INTENT(OUT) :: PHI
 
@@ -158,9 +161,9 @@ CONTAINS
 
       CALL VAV(0, (/XC, YC, ZC/), J, Mesh, Env%depth, FSP, FSM, VSXP, VSXM)
       IF ((Env%depth == INFINITE_DEPTH) .OR. (wavenumber*Env%depth >= 20)) THEN
-        CALL VNSINFD(wavenumber, (/XC, YC, ZC/), J, Mesh, SP, SM, VSP, VSM)
+        CALL VNSINFD(wavenumber, (/XC, YC, ZC/), J, Mesh, SP, SM, VSP, VSM, IGreen)
       ELSE
-        CALL VNSFD(wavenumber, (/XC, YC, ZC/), J, Mesh, Env%depth, SP, SM, VSP, VSM)
+        CALL VNSFD(wavenumber, (/XC, YC, ZC/), J, Mesh, Env%depth, SP, SM, VSP, VSM, IGreen)
       ENDIF
 
       ! Compute potential from sources and Green function.

@@ -53,14 +53,14 @@ CONTAINS
     NVel, ZIGB, ZIGS,Potential,SolverOpt,wd)
 
   ! Input/output
-  TYPE(TMesh),                                    INTENT(IN)  :: Mesh
-  TYPE(TEnvironment),                             INTENT(IN)  :: Env
-  REAL,                                           INTENT(IN)  :: omega, wavenumber
-  TYPE(TGREEN),                                   INTENT(IN)  :: IGreen
-  TYPE(TSolver),                                  INTENT(IN)  :: SolverOpt                             
-  COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(IN)  :: NVel
-  COMPLEX, DIMENSION(Mesh%Npanels),               INTENT(OUT) :: ZIGB, ZIGS ! Source distribution
-  COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(OUT) :: Potential
+  TYPE(TMesh),                                    INTENT(IN)    :: Mesh
+  TYPE(TEnvironment),                             INTENT(IN)    :: Env
+  REAL,                                           INTENT(IN)    :: omega, wavenumber
+  TYPE(TGREEN),                                   INTENT(INOUT) :: IGreen
+  TYPE(TSolver),                                  INTENT(IN)    :: SolverOpt                             
+  COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(IN)    :: NVel
+  COMPLEX, DIMENSION(Mesh%Npanels),               INTENT(OUT)   :: ZIGB, ZIGS ! Source distribution
+  COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(OUT)   :: Potential
   
   INTEGER :: I, J,FLAG_CAL,ITERLID
   ! Return of GREEN_1 module
@@ -106,7 +106,7 @@ CONTAINS
       FLAG_CAL=1
       ! Initialization of the Green function computations
       IF (.NOT. Env%depth == INFINITE_DEPTH) THEN
-        CALL LISC(omega**2*Env%depth/Env%g, wavenumber*Env%depth)
+        CALL LISC(omega**2*Env%depth/Env%g, wavenumber*Env%depth,IGreen)
       END IF
       ITERLID=0
       DO I = 1, Mesh%NPanels
@@ -123,12 +123,12 @@ CONTAINS
           IF (Env%depth == INFINITE_DEPTH) THEN
             CALL VNSINFD                          &
             ( wavenumber, Mesh%XM(:, I), J, Mesh, &
-              SP, SM, VSP, VSM                    &
+              SP, SM, VSP, VSM, IGreen            &
               )
           ELSE
             CALL VNSFD                                       &
             ( wavenumber, Mesh%XM(:, I), J, Mesh, Env%depth, &
-              SP, SM, VSP, VSM                               &
+              SP, SM, VSP, VSM, IGreen                        &
               )
           END IF
 

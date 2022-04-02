@@ -54,13 +54,13 @@ PROGRAM Main
   TYPE(TBodyConditions) :: BodyConditions ! Physical conditions on the floating body
   TYPE(TEnvironment)    :: Env            ! Physical conditions of the environment
   TYPE(TSolver)         :: SolverOpt      ! Solver Option, specified by user in input_solver.txt 
-
+  
   INTEGER                            :: i_problem          ! Index of the current problem
   REAL                               :: omega, wavenumber  ! Wave frequency and wavenumber
   COMPLEX, DIMENSION(:), ALLOCATABLE :: ZIGB, ZIGS         ! Computed source distribution
   COMPLEX, DIMENSION(:), ALLOCATABLE :: Potential          ! Computed potential
 
-  TYPE(TGREEN)                       ::IGreen              ! Initial Green variables
+  TYPE(TGREEN)                       :: IGreen              ! Initial Green variables
   
   REAL                               :: tcpu_start
   CHARACTER(LEN=1000)                :: LogTextToBeWritten
@@ -156,7 +156,7 @@ PROGRAM Main
     IF (BodyConditions%Switch_FreeSurface(i_problem) == 1) THEN
       CALL COMPUTE_AND_WRITE_FREE_SURFACE_ELEVATION                  &
       !============================================
-      ( TRIM(wd)//'/mesh/Freesurface.dat',                           &
+      ( TRIM(wd)//'/mesh/Freesurface.dat', IGreen,                   &
         Mesh, Env, omega, wavenumber, ZIGB, ZIGS,                    &
         TRIM(wd)//'/results/freesurface.'//string(i_problem)//'.dat' &
         )

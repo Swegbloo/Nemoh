@@ -28,21 +28,22 @@ MODULE M_INITIALIZE_GREEN
   INTEGER, PARAMETER      :: NPINTE = 251
   INTEGER, PARAMETER      :: IR = 328
   INTEGER, PARAMETER      :: JZ = 46
-  REAL, DIMENSION(IR)     :: XR
-  REAL, DIMENSION(JZ)     :: XZ
-  REAL, DIMENSION(IR, JZ) :: APD1X, APD1Z, APD2X, APD2Z
+  !REAL, DIMENSION(IR)     :: XR
+  !REAL, DIMENSION(JZ)     :: XZ
+  !REAL, DIMENSION(IR, JZ) :: APD1X, APD1Z, APD2X, APD2Z
 
-  ! Dependant of Omega
-  INTEGER                 :: NEXP
-  REAL, DIMENSION(31)     :: AMBDA, AR
-
+  
  !Init Green var
   TYPE TGREEN
+     ! Independent of Omega, computed in INITIALIZE_GREEN
      REAL,DIMENSION(:,:)  ,ALLOCATABLE :: FSP1,FSM1  !First term green function
      REAL,DIMENSION(:,:,:),ALLOCATABLE :: VSP1,VSM1  !First term gradient of the green function
-    ! INTEGER                 :: IR,JZ                      !for Green2
-    ! REAL,ALLOCATABLE(:)     :: XR,XZ                      !for Green2
-    ! REAL,ALLOCATABLE(:,:)   :: APD1X, APD1Z, APD2X, APD2Z ! for Green2
+     INTEGER                           :: IR,JZ                      !for Green2
+     REAL,DIMENSION(:)    ,ALLOCATABLE :: XR,XZ                      !for Green2
+     REAL,DIMENSION(:,:)  ,ALLOCATABLE :: APD1X, APD1Z, APD2X, APD2Z ! for Green2
+    ! Dependant of Omega, computed in LISC in SOLVE_BEM_DIRECT
+     INTEGER                 :: NEXP
+     REAL, DIMENSION(31)     :: AMBDA, AR
   END TYPE TGREEN
 
 CONTAINS
@@ -58,14 +59,15 @@ CONTAINS
   !LOCAL
   INTEGER       :: I,J
 
-  !IGREEN%IR=IR
-  !IGREEN%JZ=JZ
+  IGREEN%IR=IR
+  IGREEN%JZ=JZ
   ALLOCATE(IGREEN%FSP1(Mesh%Npanels,Mesh%Npanels))
   ALLOCATE(IGREEN%FSM1(Mesh%Npanels,Mesh%Npanels))
   ALLOCATE(IGREEN%VSP1(Mesh%Npanels,Mesh%Npanels,3))
   ALLOCATE(IGREEN%VSM1(Mesh%Npanels,Mesh%Npanels,3))
- ! ALLOCATE(IGREEN%APD1X(IR,JZ),IGREEN%APD2X(IR,JZ))
- ! ALLOCATE(IGREEN%APD1Z(IR,JZ),IGREEN%APD2Z(IR,JZ))
+  ALLOCATE(IGREEN%XR(IR),IGREEN%XZ(JZ))
+  ALLOCATE(IGREEN%APD1X(IR,JZ),IGREEN%APD2X(IR,JZ))
+  ALLOCATE(IGREEN%APD1Z(IR,JZ),IGREEN%APD2Z(IR,JZ))
 
 
   !First term of Green function
@@ -82,34 +84,39 @@ CONTAINS
    END DO
 
   !Initialization of the second green function
-  CALL INITIALIZE_GREEN2()
+  CALL INITIALIZE_GREEN2(IGreen)
 
   END SUBROUTINE
 
-  SUBROUTINE INITIALIZE_GREEN2()
+  SUBROUTINE INITIALIZE_GREEN2(IGreen)
     ! Initialize XR, XZ, APD1X, APD2X, APD1Z, APD2Z
     ! Those parameters are independent of the depth and the frequency.
     ! Thus, they are initialized only once at the beginning of the execution of the code.
     ! Other parameters are initialized in LISC below.
 
+    TYPE(TGREEN),                 INTENT(INOUT) :: IGreen  
+
     ! Local variables
-    INTEGER :: I, J, K
+    INTEGER :: I, J, K,JZ,IR
     REAL :: QQT(NPINTE), CQT(NPINTE)
     REAL :: CT
     COMPLEX :: C1, C2, ZIK, CEX
 
+    JZ=IGreen%JZ
+    IR=IGreen%IR
+
     ! Initialize XZ
     DO J = 1, JZ
-      XZ(J) = -AMIN1(10**(J/5.0-6), 10**(J/8.0-4.5), 16.)
+      IGreen%XZ(J) = -AMIN1(10**(J/5.0-6), 10**(J/8.0-4.5), 16.)
     END DO
 
     ! Initialize XR
-    XR(1) = 0.0
+    IGreen%XR(1) = 0.0
     DO I = 2, IR
       IF (I < 40) THEN
-        XR(I) = AMIN1(10**((I-1.0)/5-6), 4.0/3.0 + ABS(I-32)/3.0)
+        IGreen%XR(I) = AMIN1(10**((I-1.0)/5-6), 4.0/3.0 + ABS(I-32)/3.0)
       ELSE
-        XR(I) = 4.0/3.0 + ABS(I-32)/3.0
+        IGreen%XR(I) = 4.0/3.0 + ABS(I-32)/3.0
       ENDIF
     END DO
 
@@ -126,15 +133,15 @@ CONTAINS
     ENDDO
 
     ! Initialize APD..
-    APD1X(:, :) = 0.0
-    APD1Z(:, :) = 0.0
-    APD2X(:, :) = 0.0
-    APD2Z(:, :) = 0.0
+    IGreen%APD1X(:, :) = 0.0
+    IGreen%APD1Z(:, :) = 0.0
+    IGreen%APD2X(:, :) = 0.0
+    IGreen%APD2Z(:, :) = 0.0
     DO J = 1, JZ
       DO I = 1, IR
         DO K = 1, NPINTE
           CT = COS(QQT(K))
-          ZIK = XZ(J) + II*XR(I)*CT
+          ZIK = IGreen%XZ(J) + II*IGreen%XR(I)*CT
           IF (REAL(ZIK) <= -30.0) THEN
             CEX = (0.0, 0.0)
           ELSE
@@ -142,10 +149,10 @@ CONTAINS
           ENDIF
           C1 = CQT(K)*(GG(ZIK, CEX) - 1.0/ZIK)
           C2 = CQT(K)*CEX
-          APD1X(I, J) = APD1X(I, J) + CT*AIMAG(C1)
-          APD1Z(I, J) = APD1Z(I, J) + REAL(C1)
-          APD2X(I, J) = APD2X(I, J) + CT*AIMAG(C2)
-          APD2Z(I, J) = APD2Z(I, J) + REAL(C2)
+          IGreen%APD1X(I, J) = IGreen%APD1X(I, J) + CT*AIMAG(C1)
+          IGreen%APD1Z(I, J) = IGreen%APD1Z(I, J) + REAL(C1)
+          IGreen%APD2X(I, J) = IGreen%APD2X(I, J) + CT*AIMAG(C2)
+          IGreen%APD2Z(I, J) = IGreen%APD2Z(I, J) + REAL(C2)
         END DO
       END DO
     END DO
@@ -160,11 +167,16 @@ CONTAINS
 ! This part of the code is still in old-fashionned style.
 ! TODO: clean that up.
 
-  SUBROUTINE LISC(AK0,wavenumber)
+  SUBROUTINE LISC(AK0,wavenumber,IGreen)
     ! Compute AMBDA and AR
 
+    !INPUT/OUTPUT
+    TYPE(TGREEN),                 INTENT(INOUT) :: IGreen  
+    REAL,                         INTENT(IN)    :: AK0,wavenumber
+   
+    REAL, DIMENSION(31)     :: AMBDA, AR
+
     INTEGER :: I,J,NJ,NPP, NM
-    REAL:: AK0,wavenumber
     REAL:: POL(31),A,B,depth
     REAL:: S(4*(31-1),31+1),XT(4*(31-1)+1),YT(4*(31-1)+1)
     REAL:: SC(31),VR(31),VC(31)
@@ -238,7 +250,9 @@ CONTAINS
       END DO
     END IF
 
-    NEXP=NM
+    IGreen%NEXP  = NM
+    IGreen%AMBDA = AMBDA
+    IGreen%AR    = AR
 
     RETURN
 
@@ -248,7 +262,7 @@ CONTAINS
 
   SUBROUTINE EXPORS(XT,YT,NJ,NM,VCOM,NMAX,S,SC,VR,VC,COM,POL,AR)
 
-    INTEGER::NJ,NM,NMAX
+    INTEGER::NJ,NM,NMAX,NEXP
     REAL:: VCOM(31),POL(31),AR(31),SC(31),VR(31),VC(31)
     REAL:: S(4*(31-1),31+1),XT(4*(31-1)+1),YT(4*(31-1)+1)
     COMPLEX:: COM(31)
@@ -312,15 +326,15 @@ CONTAINS
   300 CONTINUE
       NEXP=J
       NM=NEXP
-      CALL MCAS(VCOM,XT,YT,NPP,AR,S,NMAX)
+      CALL MCAS(VCOM,XT,YT,NPP,AR,S,NMAX,NEXP)
 
     RETURN
   END SUBROUTINE EXPORS
 !----------------------------------------------------------------------------
 
-  SUBROUTINE MCAS(TEXP,XT,YT,NPP,AR,A,NMAX)
+  SUBROUTINE MCAS(TEXP,XT,YT,NPP,AR,A,NMAX,NEXP)
 
-    INTEGER:: NPP,NMAX
+    INTEGER:: NPP,NMAX,NEXP
     REAL::XT(4*(31-1)+1),YT(4*(31-1)+1),A(4*(31-1),31+1),AR(31),TEXP(31)
     INTEGER::I,J,L,M,N
     REAL::S,TT,TTT,EPS
