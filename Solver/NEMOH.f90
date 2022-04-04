@@ -36,6 +36,7 @@ PROGRAM Main
   USE M_Solver,             ONLY: TSolver,         ReadTSolver, ID_GMRES
   USE MLogFile              !ID 
   ! Preprocessing and initialization
+  USE MFace,                ONLY: TVFace, Prepare_FaceMesh
   USE M_INITIALIZE_GREEN,   ONLY: TGREEN, INITIALIZE_GREEN
   USE Elementary_functions, ONLY: X0
 
@@ -60,7 +61,8 @@ PROGRAM Main
   COMPLEX, DIMENSION(:), ALLOCATABLE :: ZIGB, ZIGS         ! Computed source distribution
   COMPLEX, DIMENSION(:), ALLOCATABLE :: Potential          ! Computed potential
 
-  TYPE(TGREEN)                       :: IGreen              ! Initial Green variables
+  TYPE(TVFACE)                       :: VFace              ! Face Mesh structure variable                   
+  TYPE(TGREEN)                       :: IGreen             ! Initial Green variables
   
   REAL                               :: tcpu_start
   CHARACTER(LEN=1000)                :: LogTextToBeWritten
@@ -89,7 +91,9 @@ PROGRAM Main
 
   CALL ReadTEnvironment(Env, file=TRIM(wd)//'/Nemoh.cal')
 
-  call INITIALIZE_GREEN(Mesh,Env%depth,IGreen)
+  CALL Prepare_FaceMesh(Mesh,VFace)
+
+  CALL INITIALIZE_GREEN(VFace,Mesh,Env%depth,IGreen)
 
   WRITE(*, *) '. Done !'
   WRITE(*, *) ' '
@@ -119,7 +123,7 @@ PROGRAM Main
     !===============
       CALL SOLVE_POTENTIAL_DIRECT                                              &
       !==========================
-      ( Mesh, Env, omega, wavenumber,IGreen,                                   &
+      ( VFace, Mesh, Env, omega, wavenumber,IGreen,                            &
         BodyConditions%NormalVelocity(1:Mesh%Npanels*2**Mesh%Isym, i_problem), &
         ZIGB, ZIGS,                                                            &
         Potential(:),SolverOpt,trim(wd))
@@ -156,7 +160,7 @@ PROGRAM Main
     IF (BodyConditions%Switch_FreeSurface(i_problem) == 1) THEN
       CALL COMPUTE_AND_WRITE_FREE_SURFACE_ELEVATION                  &
       !============================================
-      ( TRIM(wd)//'/mesh/Freesurface.dat', IGreen,                   &
+      ( TRIM(wd)//'/mesh/Freesurface.dat', IGreen,VFace,             &
         Mesh, Env, omega, wavenumber, ZIGB, ZIGS,                    &
         TRIM(wd)//'/results/freesurface.'//string(i_problem)//'.dat' &
         )

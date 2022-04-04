@@ -8,7 +8,7 @@ MODULE M_INITIALIZE_GREEN
   USE Elementary_functions, ONLY: GG
   USE GREEN_1,              ONLY: VAV
   USE MMesh,                ONLY: TMesh
-
+  USE MFace,                ONLY: TVFace
   IMPLICIT NONE
 
 
@@ -48,10 +48,11 @@ MODULE M_INITIALIZE_GREEN
 
 CONTAINS
 
-  SUBROUTINE INITIALIZE_GREEN(Mesh,Depth,IGreen)
+  SUBROUTINE INITIALIZE_GREEN(VFace,Mesh,Depth,IGreen)
 
   !INPUT/OUTPUT
-  TYPE(TMESH),                  INTENT(IN)  :: Mesh
+  TYPE(TVFace),                 INTENT(IN)  :: VFace         
+  TYPE(TMesh),                  INTENT(IN)  :: Mesh
   REAL,                         INTENT(IN)  :: Depth
   
   TYPE(TGREEN),                 INTENT(OUT) :: IGreen  
@@ -75,8 +76,8 @@ CONTAINS
         DO J = 1, Mesh%NPanels
           ! First part of the Green function
           ! These output are independent of omega and computed only once.
-          CALL VAV                                       &
-          ( I, Mesh%XM(:, I), J, Mesh, Depth,            &
+          CALL VAV                                 &
+          ( I, Mesh%XM(:, I), J,VFace,Mesh, Depth, &
             IGreen%FSP1(I,J), IGreen%FSM1(I,J),    &
             IGreen%VSP1(I,J,:), IGreen%VSM1(I,J,:) &
             )

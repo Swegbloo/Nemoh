@@ -27,7 +27,7 @@ MODULE FREESURFACE
   USE Constants
   USE MMesh,                     ONLY: TMesh, CreateTMesh
   USE MEnvironment,              ONLY: TEnvironment
-
+  USE MFace,                     ONLY: TVFace
   ! Green functions
   USE M_INITIALIZE_GREEN,        ONLY: TGreen
   USE GREEN_1,                   ONLY: VAV
@@ -49,13 +49,14 @@ CONTAINS
 
   SUBROUTINE COMPUTE_AND_WRITE_FREE_SURFACE_ELEVATION  &
     ! Main subroutine of the module. Called in NEMOH.f90.
-    ( parameters_file,  IGreen,                        &
+    ( parameters_file,  IGreen, VFace,                 &
       Mesh, Env, omega, wavenumber, ZIGB, ZIGS,        &
       output_file                                      &
       )
 
     CHARACTER(LEN=*),                 INTENT(IN) :: parameters_file, output_file
     TYPE(TMesh),                      INTENT(IN) :: Mesh
+    TYPE(TVFace),                     INTENT(IN) :: VFace
     TYPE(TEnvironment),               INTENT(IN) :: Env
     REAL,                             INTENT(IN) :: omega, wavenumber
     COMPLEX, DIMENSION(Mesh%NPanels), INTENT(IN) :: ZIGB, ZIGS ! Sources
@@ -76,7 +77,7 @@ CONTAINS
       !==============================
       ( Mesh, Env, omega, wavenumber, ZIGB, ZIGS, &
         MeshFS%X(1, j), MeshFS%X(2, j), 0.0,      &
-        PHI, IGreen                               &
+        PHI, IGreen,VFace                         &
         )
 
       ! Get elevation ETA from potential PHI
@@ -128,13 +129,14 @@ CONTAINS
   SUBROUTINE COMPUTE_POTENTIAL_AT_POINT         &
     ( Mesh, Env, omega, wavenumber, ZIGB, ZIGS, &
       XC, YC, ZC,                               &
-      PHI,IGreen                                &
+      PHI,IGreen,VFace                          &
       )
     ! Compute the potential PHI at the given coordinate (XC, YC, ZC) using the
     ! source distributions ZIGB abd ZIGS.
 
     ! Inputs
     TYPE(TMesh),                      INTENT(IN) :: Mesh ! Mesh of the floating body
+    TYPE(TVFace),                     INTENT(IN) :: VFace! 
     TYPE(TEnvironment),               INTENT(IN) :: Env
     REAL,                             INTENT(IN) :: omega, wavenumber
     COMPLEX, DIMENSION(Mesh%NPanels), INTENT(IN) :: ZIGB, ZIGS
@@ -159,11 +161,11 @@ CONTAINS
       ! Compute also its gradient although it is not used.
       ! Values could be stored for more efficiency as in SOLVE_BEM.
 
-      CALL VAV(0, (/XC, YC, ZC/), J, Mesh, Env%depth, FSP, FSM, VSXP, VSXM)
+      call vav(0, (/xc, yc, zc/), j,VFace, mesh, env%depth, fsp, fsm, vsxp, vsxm)
       IF ((Env%depth == INFINITE_DEPTH) .OR. (wavenumber*Env%depth >= 20)) THEN
         CALL VNSINFD(wavenumber, (/XC, YC, ZC/), J, Mesh, SP, SM, VSP, VSM, IGreen)
       ELSE
-        CALL VNSFD(wavenumber, (/XC, YC, ZC/), J, Mesh, Env%depth, SP, SM, VSP, VSM, IGreen)
+        CALL VNSFD(wavenumber, (/XC, YC, ZC/), J, VFace,Mesh, Env%depth, SP, SM, VSP, VSM, IGreen)
       ENDIF
 
       ! Compute potential from sources and Green function.

@@ -6,7 +6,7 @@ MODULE GREEN_2
 
   USE Constants
   USE MMesh
-  USE MFace
+  USE MFace,              ONLY:TFace,TVFace,VFace_to_FACE   
   USE Elementary_functions
 
   USE M_INITIALIZE_GREEN, ONLY: TGreen
@@ -86,7 +86,7 @@ CONTAINS
 
   !------------------------------------------------
 
-  SUBROUTINE VNSFD(wavenumber, X0I, J, Mesh, depth, SP, SM, VSP, VSM, IGreen)
+  SUBROUTINE VNSFD(wavenumber, X0I, J, VFace, Mesh, depth, SP, SM, VSP, VSM, IGreen)
     ! Compute the frequency-dependent part of the Green function in the finite depth case.
 
     ! Inputs
@@ -94,6 +94,7 @@ CONTAINS
     REAL, DIMENSION(3),    INTENT(IN)  :: X0I   ! Coordinates of the source point
     INTEGER,               INTENT(IN)  :: J     ! Index of the integration panel
     TYPE(TMesh),           INTENT(IN)  :: Mesh
+    TYPE(TVFace),          INTENT(IN)  :: VFace
     TYPE(TGreen),          INTENT(IN)  :: IGreen ! Initial green variable
 
     ! Outputs
@@ -233,7 +234,7 @@ CONTAINS
     ! Part 2: Integrate (NEXP+1)×4 terms of the form 1/MM'
     !=====================================================
 
-    CALL New_Face_Extracted_From_Mesh(Mesh, J, FaceJ)
+    CALL VFace_to_FACE(VFace,FaceJ,J)    !Extract a face J from the VFace array 
 
     AMBDA(NEXP+1) = 0
     AR(NEXP+1)    = 2

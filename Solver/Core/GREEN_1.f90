@@ -7,7 +7,7 @@ MODULE GREEN_1
 
   USE Constants
   USE MMesh
-  USE MFace
+  USE MFace,                ONLY: TFace,TVFace,VFace_to_Face
   USE Elementary_functions, ONLY: CROSS_PRODUCT
 
   IMPLICIT NONE
@@ -17,7 +17,7 @@ MODULE GREEN_1
 CONTAINS
 
   SUBROUTINE VAV              &
-    ( I, X0I, J, Mesh, depth, &
+    ( I, X0I, J, VFace,Mesh, depth, &
       FSP, FSM, VSP, VSM)
     ! Main subroutine of the module, called in SOLVE_BEM.f90 and FREESURFACE.f90.
 
@@ -25,7 +25,8 @@ CONTAINS
     INTEGER, INTENT(IN)            :: I    ! Index of the source panel.
     REAL, DIMENSION(3), INTENT(IN) :: X0I  ! Coordinates of the source point.
     INTEGER, INTENT(IN)            :: J    ! Index of the integration panel.
-    TYPE(TMesh), INTENT(IN)        :: Mesh
+    TYPE(TMesh) , INTENT(IN)       :: Mesh
+    TYPE(TVFace), INTENT(IN)       :: VFace
     REAL, INTENT(IN)               :: depth
 
     ! Outputs
@@ -50,9 +51,10 @@ CONTAINS
       ! The contribution of the reflected problem is added to the solution of the original problem to ensure
       ! that (∇φ)_z=0 at the sea bottom.
     END IF
-
-    CALL NEW_FACE_EXTRACTED_FROM_MESH(Mesh, J, Face)
     
+
+    CALL VFace_to_Face(VFace,Face,J) !Extract a face J from the VFace array 
+
     XI(:) = X0I(:)
     XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
     

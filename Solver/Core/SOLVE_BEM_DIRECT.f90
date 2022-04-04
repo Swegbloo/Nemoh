@@ -26,6 +26,7 @@ MODULE SOLVE_BEM_DIRECT
 
   USE Constants
   USE MMesh,              ONLY: TMesh
+  USE MFace,              ONLY: TVFace
   USE MEnvironment,       ONLY: TEnvironment
 
   ! Green functions
@@ -48,11 +49,12 @@ MODULE SOLVE_BEM_DIRECT
 
 CONTAINS
   
-  SUBROUTINE SOLVE_POTENTIAL_DIRECT             &
-  ( Mesh, Env, omega, wavenumber, IGreen,       &
+  SUBROUTINE SOLVE_POTENTIAL_DIRECT              &
+  ( VFace, Mesh, Env, omega, wavenumber, IGreen, &
     NVel, ZIGB, ZIGS,Potential,SolverOpt,wd)
 
   ! Input/output
+  TYPE(TVFace),                                   INTENT(IN)    :: VFace
   TYPE(TMesh),                                    INTENT(IN)    :: Mesh
   TYPE(TEnvironment),                             INTENT(IN)    :: Env
   REAL,                                           INTENT(IN)    :: omega, wavenumber
@@ -127,8 +129,8 @@ CONTAINS
               )
           ELSE
             CALL VNSFD                                       &
-            ( wavenumber, Mesh%XM(:, I), J, Mesh, Env%depth, &
-              SP, SM, VSP, VSM, IGreen                        &
+            ( wavenumber, Mesh%XM(:, I), J, VFace,  Mesh,     &
+                Env%depth, SP, SM, VSP, VSM, IGreen          &
               )
           END IF
 
