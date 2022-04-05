@@ -38,7 +38,7 @@ MODULE M_INITIALIZE_GREEN
      ! Independent of Omega, computed in INITIALIZE_GREEN
      REAL,DIMENSION(:,:)  ,ALLOCATABLE :: FSP1,FSM1  !First term green function
      REAL,DIMENSION(:,:,:),ALLOCATABLE :: VSP1,VSM1  !First term gradient of the green function
-     INTEGER                           :: IR,JZ                      !for Green2
+     INTEGER                           :: IR,JZ,NPINTE               !for Green2
      REAL,DIMENSION(:)    ,ALLOCATABLE :: XR,XZ                      !for Green2
      REAL,DIMENSION(:,:)  ,ALLOCATABLE :: APD1X, APD1Z, APD2X, APD2Z ! for Green2
     ! Dependant of Omega, computed in LISC in SOLVE_BEM_DIRECT
@@ -62,6 +62,7 @@ CONTAINS
 
   IGREEN%IR=IR
   IGREEN%JZ=JZ
+  IGREEN%NPINTE=NPINTE
   ALLOCATE(IGREEN%FSP1(Mesh%Npanels,Mesh%Npanels))
   ALLOCATE(IGREEN%FSM1(Mesh%Npanels,Mesh%Npanels))
   ALLOCATE(IGREEN%VSP1(Mesh%Npanels,Mesh%Npanels,3))
@@ -98,13 +99,15 @@ CONTAINS
     TYPE(TGREEN),                 INTENT(INOUT) :: IGreen  
 
     ! Local variables
-    INTEGER :: I, J, K,JZ,IR
-    REAL :: QQT(NPINTE), CQT(NPINTE)
+    INTEGER :: I, J, K,JZ,IR,NPINTE
+    REAL,DIMENSION(:),ALLOCATABLE :: QQT, CQT
     REAL :: CT
     COMPLEX :: C1, C2, ZIK, CEX
 
     JZ=IGreen%JZ
     IR=IGreen%IR
+    NPINTE=IGreen%NPINTE
+    ALLOCATE(QQT(NPINTE),CQT(NPINTE))
 
     ! Initialize XZ
     DO J = 1, JZ
