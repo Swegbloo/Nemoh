@@ -22,9 +22,9 @@ CONTAINS
     ! Main subroutine of the module, called in SOLVE_BEM.f90 and FREESURFACE.f90.
 
     ! Inputs
-    INTEGER, INTENT(IN)            :: I    ! Index of the source panel.
-    REAL, DIMENSION(3), INTENT(IN) :: X0I  ! Coordinates of the source point.
-    INTEGER, INTENT(IN)            :: J    ! Index of the integration panel.
+    INTEGER, INTENT(IN)            :: I    ! Index of the computed flow field  panel.
+    REAL, DIMENSION(3), INTENT(IN) :: X0I  ! Coordinates of the computed flow field point
+    INTEGER, INTENT(IN)            :: J    ! Index of the source integration panel.
     TYPE(TMesh) , INTENT(IN)       :: Mesh
     TYPE(TVFace), INTENT(IN)       :: VFace
     REAL, INTENT(IN)               :: depth
@@ -204,13 +204,12 @@ CONTAINS
 
   !--------------------------------------------------
 
-  SUBROUTINE COMPUTE_ASYMPTOTIC_S0(M, Face, S0, VS0)
+  SUBROUTINE COMPUTE_ASYMPTOTIC_S0(XI, XJ, AJ, S0, VS0)
     ! Same as above, but always use the approximate aymptotic value.
 
     ! Inputs
-    REAL, DIMENSION(3), INTENT(IN) :: M
-    TYPE(TFace),        INTENT(IN) :: Face
-
+    REAL, DIMENSION(3), INTENT(IN) :: XI,XJ
+    REAL                           :: AJ !area of panel J
     ! Outputs
     REAL,               INTENT(OUT) :: S0
     REAL, DIMENSION(3), INTENT(OUT) :: VS0
@@ -218,12 +217,12 @@ CONTAINS
     ! Local variables
     REAL :: RO
 
-    RO = NORM2(M(1:3) - Face%XM(1:3)) ! Distance from M to center of mass
+    RO = NORM2(XI(1:3) - XJ(1:3)) ! Distance from XI to XJ
 
     IF (RO > EPS) THEN
       ! Face far away from M
-      S0       = Face%A/RO
-      VS0(1:3) = (Face%XM(1:3) - M)*S0/RO**2
+      S0       = AJ/RO
+      VS0(1:3) = (XJ(1:3) - XI)*S0/RO**2
     ELSE
       S0 = 0.0
       VS0(1:3) = 0.0
