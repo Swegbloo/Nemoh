@@ -123,14 +123,14 @@ CONTAINS
 
           ! Second part of the Green function
           IF (Env%depth == INFINITE_DEPTH) THEN
-            CALL VNSINFD                          &
-            ( wavenumber, Mesh%XM(:, I), J, Mesh, &
-              SP, SM, VSP, VSM, IGreen            &
+            CALL VNSINFD                                     &
+            ( wavenumber, Mesh%XM(:, I), J, VFace, Mesh,     &
+              IGreen, SP, SM, VSP, VSM                       &
               )
           ELSE
             CALL VNSFD                                       &
-            ( wavenumber, Mesh%XM(:, I), J, VFace,  Mesh,     &
-                Env%depth, SP, SM, VSP, VSM, IGreen          &
+            ( wavenumber, Mesh%XM(:, I), J, VFace,  Mesh,    &
+                IGreen,Env%depth, SP, SM, VSP, VSM           &
               )
           END IF
 

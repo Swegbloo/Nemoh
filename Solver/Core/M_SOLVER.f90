@@ -25,7 +25,6 @@
 !
 !--------------------------------------------------------------------------------------
 MODULE M_SOLVER
-
   IMPLICIT NONE
 
   PUBLIC :: GAUSSZ,LU_INVERS_MATRIX,ReadTSolver,TSolver
@@ -36,6 +35,7 @@ MODULE M_SOLVER
 
   ! Definition of TYPE TSolver
   TYPE TSolver
+    INTEGER       :: NP_GQ   !0= GAUSS, 1=LU, 2=GMRES
     INTEGER       :: ID      !0= GAUSS, 1=LU, 2=GMRES
     INTEGER       :: mRestart,MaxIter
     REAL          :: Tolerance
@@ -52,12 +52,19 @@ MODULE M_SOLVER
    TYPE(TSolver) :: SolverOpt
    CHARACTER(LEN=*) :: wd
    CHARACTER(20) :: SOLVER_NAME 
-   
+   INTEGER       :: NPGQ
    OPEN(10,file=wd//'/input_solver.txt',form='formatted',status='old')
+   READ(10,*) NPGQ
    READ(10,*) SolverOpt%ID 
    IF (SolverOpt%ID == ID_GMRES) READ(10,*) SolverOpt%mRestart, SolverOpt%Tolerance, SolverOpt%MaxIter
    CLOSE(10)    
-
+   IF (NPGQ<1 .OR. NPGQ>4) THEN
+           WRITE(*,*) ''
+           WRITE(*,*) 'Specify N in input_solver.txt for Gauss Quadrature with N in (1,4)'
+       STOP
+   END IF
+   SolverOpt%NP_GQ=NPGQ**2
+   
    IF (SolverOpt%ID == ID_GAUSS ) THEN
             SolverOpt%SNAME='GAUSS ELIMINATION'
    ELSE IF (SolverOpt%ID == ID_LU) THEN

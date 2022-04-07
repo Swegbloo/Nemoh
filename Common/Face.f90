@@ -7,7 +7,6 @@ MODULE MFace
 
   USE MMesh
   USE Elementary_functions, ONLY: CROSS_PRODUCT
- 
   IMPLICIT NONE
 
   PUBLIC        :: Prepare_FaceMesh,VFace_to_Face,New_Face_Extracted_From_Mesh
@@ -19,18 +18,19 @@ MODULE MFace
     REAL, DIMENSION(16,4):: WGQ
   END TYPE
   INTEGER,parameter       :: FLAG_GQ=1
-  INTEGER,parameter       :: NP_GQ=16
+  !INTEGER,parameter       :: NP_GQ=4
 
     ! A single face extracted from the mesh
   TYPE TFace
-    REAL, DIMENSION(3, 5) :: X    ! Vertices coordinates, the 5th is the same as the 1st one.
-    REAL, DIMENSION(3)    :: XM   ! Center of mass
-    REAL, DIMENSION(3)    :: N    ! Normal vector
-    REAL                  :: A    ! Area
-    REAL                  :: tDis ! Maximal radius of the panel
-    INTEGER               :: NP_GQ! Number of point of the Gauss quadrature
-    REAL,DIMENSION(NP_GQ)   :: dXdXG_WGQ_per_A  !a factor dxdXG*WGQ/A for the Gauss Q Integral
-    REAL,DIMENSION(3,NP_GQ) :: XM_GQ            !Gauss Quad. nodes (x,y,z) in a panel
+    REAL, DIMENSION(3,5)    :: X ! Vertices coordinates, the 5th is the same as the 1st one.
+    REAL, DIMENSION(3)      :: XM   ! Center of mass
+    REAL, DIMENSION(3)      :: N    ! Normal vector
+    REAL                    :: A    ! Area
+    REAL                    :: tDis ! Maximal radius of the panel
+    INTEGER                 :: NP_GQ! Number of point of the Gauss quadrature
+    REAL, ALLOCATABLE       :: dXdXG_WGQ_per_A(:) !a factor dxdXG*WGQ/A for the Gauss Q Integral
+    REAL, ALLOCATABLE       :: XM_GQ(:,:)         !Gauss Quad. nodes (x,y,z) in a panel
+                                                  !Those allocatable becase we need input NP_GQ from user input     
   END TYPE TFace
 
   ! A vector of Face with size Npanels x 1
@@ -49,20 +49,23 @@ MODULE MFace
  
 CONTAINS
 
-  SUBROUTINE Prepare_FaceMesh(Mesh,VFace)
+  SUBROUTINE Prepare_FaceMesh(Mesh,NP_GQ, VFace)
 
-    !INPUT/OUTPUT 
+    !INPUT/OUTPUT
+    INTEGER     , INTENT(IN)    :: NP_GQ 
     TYPE(TMesh) , INTENT(IN)    :: Mesh
     TYPE(TVFace), INTENT(INOUT) :: VFace
-
     !Local variables
     INTEGER                     :: I,Npanels
     TYPE(TFace)                 :: Face
     TYPE(TDATGQ)                :: DataGQ       !Data Gauss Quadrature
     Npanels=Mesh%Npanels
     
-    Face%NP_GQ=NP_GQ
-    print*,'NP_GQ=',NP_GQ
+    Face%NP_GQ=NP_GQ 
+   
+    Allocate(Face%dXdXG_WGQ_per_A(NP_GQ))
+    Allocate(Face%XM_GQ(3,NP_GQ))
+
     Allocate(VFace%X(Npanels,3,5),VFace%XM(Npanels,3))
     Allocate(VFace%N(Npanels,3),VFace%A(Npanels),VFace%tDis(Npanels))
     Allocate(VFace%dXdXG_WGQ_per_A(Npanels,NP_GQ))
@@ -75,7 +78,9 @@ CONTAINS
          CALL PREPARE_GAUSS_QUADRATURE_ON_MESH(Mesh,Face,DATAGQ)
          CALL Face_to_VFace(Face,VFace,I)
     END DO
-  
+    DEAllocate(Face%dXdXG_WGQ_per_A)
+    DEAllocate(Face%XM_GQ)
+
     END SUBROUTINE 
 
   SUBROUTINE Face_to_VFace(Face,VFACE,I)
@@ -98,7 +103,7 @@ CONTAINS
     !INPUT/OUTPUT
     INTEGER,        INTENT(IN)  :: I
     TYPE(TVFace),   INTENT(IN)  :: VFace
-    TYPE(TFace),    INTENT(OUT) :: Face
+    TYPE(TFace),    INTENT(INOUT) :: Face
         
     Face%X(:,:)              =VFace%X(I,:,:)  
     Face%XM(:)               =VFace%XM(I,:)

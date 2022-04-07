@@ -34,7 +34,7 @@ PROGRAM Main
   USE MEnvironment,         ONLY: TEnvironment,    ReadTEnvironment
   USE MBodyConditions,      ONLY: TBodyConditions, ReadTBodyConditions
   USE M_Solver,             ONLY: TSolver,         ReadTSolver, ID_GMRES
-  USE MLogFile              !ID 
+  USE MLogFile              ! 
   ! Preprocessing and initialization
   USE MFace,                ONLY: TVFace, Prepare_FaceMesh
   USE M_INITIALIZE_GREEN,   ONLY: TGREEN, INITIALIZE_GREEN
@@ -91,19 +91,22 @@ PROGRAM Main
 
   CALL ReadTEnvironment(Env, file=TRIM(wd)//'/Nemoh.cal')
 
-  CALL Prepare_FaceMesh(Mesh,VFace)
+  CALL ReadTSolver(SolverOpt,TRIM(wd))
+
+  CALL Prepare_FaceMesh(Mesh,SolverOpt%NP_GQ,VFace)
 
   CALL INITIALIZE_GREEN(VFace,Mesh,Env%depth,IGreen)
 
+  WRITE(*, *) ' '
+  WRITE(LogTextToBeWritten,*) 'NP Gauss Quadrature Integ.: ', SolverOpt%NP_GQ
+  CALL WRITE_LOGFILE(trim(wd)//'/logfile.txt',TRIM(LogTextToBeWritten),IdStartLog,IdprintTerm)
   WRITE(*, *) '. Done !'
   WRITE(*, *) ' '
 
   ! Solve BVPs and calculate forces ----------------------------------------------------
-
   WRITE(*, *) ' -> Solve BVPs and calculate forces '
-  CALL ReadTSolver(SolverOpt,TRIM(wd))
   WRITE(LogTextToBeWritten,*) 'Linear Solver: ', SolverOpt%SNAME
-  CALL WRITE_LOGFILE(trim(wd)//'/logfile.txt',TRIM(LogTextToBeWritten),IdStartLog,IdprintTerm)
+  CALL WRITE_LOGFILE(trim(wd)//'/logfile.txt',TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
   CALL START_RECORD_TIME(tcpu_start,trim(wd)//'/logfile.txt',IdAppend)
   WRITE(*, *) ' '
 

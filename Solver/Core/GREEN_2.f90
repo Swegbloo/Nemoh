@@ -21,9 +21,9 @@ CONTAINS
 
   !-------------------------------------------------------------------------------!
 
-  SUBROUTINE VNSINFD             &
-      (wavenumber, X0I, J, Mesh, &
-      SP, SM, VSP, VSM, IGreen)
+  SUBROUTINE VNSINFD                   &
+      (wavenumber, X0I, J, VFace,Mesh, &
+      IGreen,SP, SM, VSP, VSM )
     ! Compute the frequency-dependent part of the Green function in the infinite depth case.
 
     ! Inputs
@@ -32,7 +32,8 @@ CONTAINS
     INTEGER,               INTENT(IN)  :: J     ! Index of the source integration panel
     TYPE(TMesh),           INTENT(IN)  :: Mesh
     TYPE(TGreen),          INTENT(IN)  :: IGreen ! Initial green variable
-   
+    TYPE(TVFace),          INTENT(IN)  :: VFace
+    
     ! Outputs
     COMPLEX,               INTENT(OUT) :: SP, SM   ! Integral of the Green function over the panel.
     COMPLEX, DIMENSION(3), INTENT(OUT) :: VSP, VSM ! Gradient of the integral of the Green function with respect to X0I.
@@ -42,51 +43,69 @@ CONTAINS
     REAL, DIMENSION(3)                 :: XI,XJ
     COMPLEX, DIMENSION(Mesh%ISym+1)    :: FS
     COMPLEX, DIMENSION(3, Mesh%ISym+1) :: VS
+    TYPE(TFace)                        :: FaceJ
+    INTEGER                            :: IGQ !Index Gauss Quadrature Integration point 
+    COMPLEX               :: SP_IGQ, SM_IGQ   ! Integral of the Green function over the panel for Gauss point IGQ.
+    COMPLEX, DIMENSION(3) :: VSP_IGQ, VSM_IGQ ! Gradient of the integral of the Green function
+ 
+    ALLOCATE(FaceJ%dXdXG_WGQ_per_A(VFace%NP_GQ))
+    ALLOCATE(FaceJ%XM_GQ(3,VFace%NP_GQ))
+    
+    CALL VFace_to_FACE(VFace,FaceJ,J)    !Extract a face J from the VFace array 
+    !initialization
+     SP=CZERO
+     SM=CZERO
+     VSP=CZERO
+     VSM=CZERO
+    DO IGQ=1, FaceJ%NP_GQ
+        XI(:) = X0I(:)
+        XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
+        XJ(:) = FaceJ%XM_GQ(:,IGQ)
+        XJ(3) = MIN(XJ(3), -EPS*Mesh%xy_diameter)
+        CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, IGreen, FS(1), VS(:, 1))
 
-    XI(:) = X0I(:)
-    XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
-    XJ(:) = Mesh%XM(:, J)
-    XJ(3) = MIN(XJ(3), -EPS*Mesh%xy_diameter)
-    CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, IGreen, FS(1), VS(:, 1))
+        IF (Mesh%Isym == NO_Y_SYMMETRY) THEN
+          SP_IGQ   = FS(1)
+          VSP_IGQ(1:3) = VS(1:3, 1)
+          SM_IGQ       = CZERO
+          VSM_IGQ      = CZERO
 
-    IF (Mesh%Isym == NO_Y_SYMMETRY) THEN
-      SP       = FS(1)
-      VSP(1:3) = VS(1:3, 1)
-      SM       = CZERO
-      VSM      = CZERO
+        ELSE IF (Mesh%Isym == Y_SYMMETRY) THEN
+          ! Reflect the source point across the (xOz) plane and compute another coefficient
+          XI(2) = -X0I(2)
+          CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, IGreen, FS(2), VS(:, 2))
+          VS(2, 2) = -VS(2, 2) ! Reflection of the output vector
 
-    ELSE IF (Mesh%Isym == Y_SYMMETRY) THEN
-      ! Reflect the source point across the (xOz) plane and compute another coefficient
-      XI(2) = -X0I(2)
-      CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, IGreen, FS(2), VS(:, 2))
-      VS(2, 2) = -VS(2, 2) ! Reflection of the output vector
+          ! Assemble the two results
+          SP_IGQ       = FS(1)      + FS(2)
+          VSP_IGQ(1:3) = VS(1:3, 1) + VS(1:3, 2)
+          SM_IGQ       = FS(1)      - FS(2)
+          VSM_IGQ(1:3) = VS(1:3, 1) - VS(1:3, 2)
+        END IF
 
-      ! Assemble the two results
-      SP       = FS(1)      + FS(2)
-      VSP(1:3) = VS(1:3, 1) + VS(1:3, 2)
-      SM       = FS(1)      - FS(2)
-      VSM(1:3) = VS(1:3, 1) - VS(1:3, 2)
-    END IF
+        ADPI2  = wavenumber*Mesh%A(J)/DPI2   *FaceJ%dXdXG_WGQ_per_A(IGQ)
+        ADPI   = wavenumber*Mesh%A(J)/DPI    *FaceJ%dXdXG_WGQ_per_A(IGQ)
+        AKDPI2 = wavenumber**2*Mesh%A(J)/DPI2*FaceJ%dXdXG_WGQ_per_A(IGQ)
+        AKDPI  = wavenumber**2*Mesh%A(J)/DPI *FaceJ%dXdXG_WGQ_per_A(IGQ)
 
-    ADPI2  = wavenumber*Mesh%A(J)/DPI2
-    ADPI   = wavenumber*Mesh%A(J)/DPI
-    AKDPI2 = wavenumber**2*Mesh%A(J)/DPI2
-    AKDPI  = wavenumber**2*Mesh%A(J)/DPI
+        SP  = SP+CMPLX(REAL(SP_IGQ)*ADPI2,   AIMAG(SP_IGQ)*ADPI)
+        VSP = VSP+CMPLX(REAL(VSP_IGQ)*AKDPI2, AIMAG(VSP_IGQ)*AKDPI)
 
-    SP  = CMPLX(REAL(SP)*ADPI2,   AIMAG(SP)*ADPI)
-    VSP = CMPLX(REAL(VSP)*AKDPI2, AIMAG(VSP)*AKDPI)
+        IF (Mesh%ISym == Y_SYMMETRY) THEN
+          SM  = SM+CMPLX(REAL(SM_IGQ)*ADPI2,   AIMAG(SM_IGQ)*ADPI)
+          VSM = VSM+CMPLX(REAL(VSM_IGQ)*AKDPI2, AIMAG(VSM_IGQ)*AKDPI)
+        END IF
+    ENDDO
 
-    IF (Mesh%ISym == Y_SYMMETRY) THEN
-      SM  = CMPLX(REAL(SM)*ADPI2,   AIMAG(SM)*ADPI)
-      VSM = CMPLX(REAL(VSM)*AKDPI2, AIMAG(VSM)*AKDPI)
-    END IF
+    DEALLOCATE(FaceJ%dXdXG_WGQ_per_A)
+    DEALLOCATE(FaceJ%XM_GQ)
 
     RETURN
   END SUBROUTINE VNSINFD
 
   !------------------------------------------------
 
-  SUBROUTINE VNSFD(wavenumber, X0I, J, VFace, Mesh, depth, SP, SM, VSP, VSM, IGreen)
+  SUBROUTINE VNSFD(wavenumber, X0I, J, VFace, Mesh,IGreen, depth, SP, SM, VSP, VSM)
     ! Compute the frequency-dependent part of the Green function in the finite depth case.
 
     ! Inputs
@@ -119,7 +138,10 @@ CONTAINS
    
     INTEGER                 :: NEXP
     REAL, DIMENSION(31)     :: AMBDA, AR
-
+    
+    ALLOCATE(FaceJ%dXdXG_WGQ_per_A(VFace%NP_GQ))
+    ALLOCATE(FaceJ%XM_GQ(3,VFace%NP_GQ))
+    
     !passing values
     NEXP =IGreen%NEXP
     AMBDA=IGreen%AMBDA(:)
@@ -320,6 +342,9 @@ CONTAINS
           END IF
         END DO
     END DO
+    
+    DEALLOCATE(FaceJ%dXdXG_WGQ_per_A)
+    DEALLOCATE(FaceJ%XM_GQ)
 
     RETURN
   END SUBROUTINE
