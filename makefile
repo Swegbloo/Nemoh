@@ -141,8 +141,8 @@ SRCS=./Common/Constants.f90\
 ./Common/Face.f90\
 ./Solver/Core/OUTPUT.f90\
 ./Solver/Core/M_SOLVER.f90\
-./Solver/Core/INITIALIZE_GREEN.f90\
 ./Solver/Core/GREEN_1.f90\
+./Solver/Core/INITIALIZE_GREEN.f90\
 ./Solver/Core/GREEN_2.f90\
 ./Solver/Core/SOLVE_BEM_DIRECT.f90\
 ./Solver/Core/KOCHIN.f90\
