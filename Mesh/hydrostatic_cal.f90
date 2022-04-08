@@ -64,7 +64,7 @@
 !   --- Initialize and read input datas ----------------------------------------------------------------------------------------
 !
     CALL ReadTID(ID)
-    CALL ReadTMesh(Mesh,ID) 
+    CALL ReadTMesh(Mesh,TRIM(ID%ID)//'/mesh/') 
     CALL ReadTEnvironment(Environment,TRIM(ID%ID)//'/Nemoh.cal')
     RHO=Environment%RHO
     G=Environment%G

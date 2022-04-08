@@ -25,6 +25,7 @@ ifeq ($(itest), ifort)
 	FFLAGS=-c -cpp
 	FFLAGS+= -O2                                    # Optimization level
 	FFLAGS+= -g                                     # Add extra informations for debugging
+	FFLAGS+= -module $(MOD_DIR)                           # Where to put .mod files
 	# FFLAGS+= -r8					# forcing variables to be double precision
 	# if with -r8  change in Common/Constants.f90 ID_DP=1 else ID_DP=0
 endif
@@ -34,9 +35,9 @@ outputdir=./bin
 
 # Default rule: build all
 .PHONY: all clean_all remake
-all:		mesh preProc solver postProc
+all:		mesh preProc solver postProc hydroCal
 
-clean_all:	clean_mesh clean_preProc clean_solver clean_postProc
+clean_all:	clean_mesh clean_preProc clean_solver clean_postProc clean_hydroCal
 			@rm -f $(MOD_DIR)/*.mod
 
 remake:		clean_all all
@@ -89,14 +90,14 @@ SRCHS=./Common/Identification.f90\
 OBJHS=$(SRCHS:.f90=.o)
 
 # Rules to build
-hydroCal:
+hydroCal:	$(OBJHS)
 			@test -d $(outputdir) || mkdir $(outputdir)
 			@$(FC) -o $(outputdir)/hydroCal $(OBJHS)
 			@echo "HydroCal compilation successful!"
 
 clean_hydroCal:
 			@rm -f $(OBJHS)
-
+			@rm -f $(outputdir)/hydroCal
 ###################
 #  Pre-processor  #
 ###################
