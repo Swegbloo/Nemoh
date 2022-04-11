@@ -30,6 +30,7 @@
         INTEGER,DIMENSION(:),ALLOCATABLE :: Switch_Potential
         INTEGER,DIMENSION(:),ALLOCATABLE :: Switch_FreeSurface
         INTEGER,DIMENSION(:),ALLOCATABLE :: Switch_Kochin
+        INTEGER,DIMENSION(:),ALLOCATABLE :: Switch_SourceDistr
         INTEGER,DIMENSION(:),ALLOCATABLE :: Switch_Type
     END TYPE TBodyConditions
 !
@@ -44,7 +45,9 @@
         BodyConditions%Nproblems=Nproblems
         BodyConditions%Npanels=Npanels
         ALLOCATE(BodyConditions%NormalVelocity(Npanels,Nproblems))
-        ALLOCATE(BodyConditions%Omega(Nproblems),BodyConditions%Switch_Potential(Nproblems),BodyConditions%Switch_FreeSurface(Nproblems),BodyConditions%Switch_Kochin(Nproblems),BodyConditions%Switch_Type(Nproblems))
+        ALLOCATE(BodyConditions%Omega(Nproblems),BodyConditions%Switch_Potential(Nproblems),&
+        BodyConditions%Switch_FreeSurface(Nproblems),BodyConditions%Switch_Kochin(Nproblems),&
+        BodyConditions%Switch_SourceDistr(Nproblems),BodyConditions%Switch_Type(Nproblems))
         END SUBROUTINE CreateTBodyConditions
 !       ---
         SUBROUTINE CopyTBodyConditions(BodyConditionsTarget,BodyConditionsSource)
@@ -57,6 +60,7 @@
             BodyConditionsTarget%Switch_Potential(i)=BodyConditionsSource%Switch_Potential(i)
             BodyConditionsTarget%Switch_FreeSurface(i)=BodyConditionsSource%Switch_FreeSurface(i)
             BodyConditionsTarget%Switch_Kochin(i)=BodyConditionsSource%Switch_Kochin(i)
+            BodyConditionsTarget%Switch_SourceDistr(i)=BodyConditionsSource%Switch_SourceDistr(i)
             BodyConditionsTarget%Switch_Type(i)=BodyConditionsSource%Switch_Type(i)
             DO k=1,BodyConditionsTarget%Npanels
                 BodyConditionsTarget%NormalVelocity(k,i)=BodyConditionsSource%NormalVelocity(k,i)
@@ -80,6 +84,7 @@
         READ(10,*) (BodyConditions%Switch_Potential(i),i=1,Nproblems)
         READ(10,*) (BodyConditions%Switch_FreeSurface(i),i=1,Nproblems)
         READ(10,*) (BodyConditions%Switch_Kochin(i),i=1,Nproblems)
+        READ(10,*) (BodyConditions%Switch_SourceDistr(i),i=1,Nproblems)
         DO k=1,Npanels
             READ(10,*) (RBC(i),IBC(i),i=1,Nproblems)
             DO i=1,Nproblems
@@ -93,7 +98,8 @@
         SUBROUTINE DeleteTBodyConditions(BodyConditions)
         IMPLICIT NONE
         TYPE(TBodyConditions) :: BodyConditions
-        DEALLOCATE(BodyConditions%Omega,BodyConditions%Switch_potential,BodyConditions%Switch_FreeSurface,BodyConditions%Switch_Kochin,BodyConditions%Switch_Type)
+        DEALLOCATE(BodyConditions%Omega,BodyConditions%Switch_potential,BodyConditions%Switch_FreeSurface,&
+                BodyConditions%Switch_Kochin,BodyConditions%Switch_SourceDistr,BodyConditions%Switch_Type)
         DEALLOCATE(BodyConditions%NormalVelocity)
         END SUBROUTINE DeleteTBodyConditions
 !       ---

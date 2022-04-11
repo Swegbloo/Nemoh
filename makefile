@@ -107,6 +107,7 @@ SRCP=./Common/Constants.f90\
 ./Common/Elementary_functions.f90\
 ./Common/Identification.f90\
 ./Common/Environment.f90\
+./Common/MNemohCal.f90\
 ./preProcessor/Mesh.f90\
 ./preProcessor/BodyConditions.f90\
 ./preProcessor/Integration.f90\

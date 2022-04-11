@@ -20,7 +20,7 @@
 !
 !   Contributors list:
 !   - A. Babarit  
-!
+!   - R. Kurnia
 !--------------------------------------------------------------------------------------
 !
     PROGRAM Main
@@ -29,6 +29,7 @@
     USE Elementary_functions
     USE MEnvironment
     USE MIdentification
+    USE MNemohCal,              ONLY:TNemCal,READ_TNEMOHCAL,IdFreqHz,IdPeriod
     USE MMesh
     USE BodyConditions
     USE Integration
@@ -37,21 +38,14 @@
 !
     TYPE(TID) :: ID                     ! Calculation identification data
     TYPE(TMesh) :: Mesh                 ! Mesh data
-    TYPE(TEnvironment) :: Environment   ! Environment data   
+    TYPE(TEnvironment) :: Environment   ! Environment data  
+    TYPE(TNemCal)      :: inpNEMOHCAL 
 !   Wave frequencies
     INTEGER :: Nw
     REAL :: wmin,wmax
     REAL,DIMENSION(:),ALLOCATABLE :: w
-!   TYPE TCase
-    TYPE TCase
-        INTEGER :: Body
-        INTEGER :: ICase
-        INTEGER :: Mode
-        REAL,DIMENSION(3) :: Direction,Axis 
-    END TYPE
 !   Radiation cases
     INTEGER :: Nradiation
-    TYPE(TCase),DIMENSION(:),ALLOCATABLE :: RadCase
     COMPLEX,DIMENSION(:),ALLOCATABLE :: NVEL
     COMPLEX,DIMENSION(:,:),ALLOCATABLE :: NormalVelocity
 !   Diffraction cases
@@ -62,7 +56,6 @@
 !   Force integration cases
     INTEGER :: Switch_Potential
     INTEGER :: Nintegration
-    TYPE(TCase),DIMENSION(:),ALLOCATABLE :: IntCase
     REAL,DIMENSION(:),ALLOCATABLE :: NDS
     REAL,DIMENSION(:,:),ALLOCATABLE :: FNDS 
 !   Froude Krylov forces
@@ -78,45 +71,24 @@
     INTEGER :: Switch_Kochin
     INTEGER :: NTheta
     REAL :: Thetamin,Thetamax
+!   Source distribution
+    INTEGER :: Switch_SourceDistr
 !   Other local variables
     INTEGER :: M
-    INTEGER :: i,j,c,k
-    INTEGER :: jrad,jint
+    INTEGER :: i,j,c,k,IdBody,IdMode,indsum
 !
 !   --- Initialize and read input datas ----------------------------------------------------------------------------------------
 !
     CALL ReadTID(ID)
     CALL ReadTMesh(Mesh,ID)  
-    CALL ReadTEnvironment(Environment,TRIM(ID%ID)//'/Nemoh.cal')
-!   Read number of radiation cases, number of force integration cases, range of considered periods and diffraction cases
-!   an directions for Kochin function
-    Nradiation=0
-    Nintegration=0
-    OPEN(10,FILE=TRIM(ID%ID)//'/Nemoh.cal')
-    DO c=1,7
-        READ(10,*)
-    END DO
-    DO c=1,Mesh%Nbodies
-        DO i=1,3
-            READ(10,*)
-        END DO
-        READ(10,*) M
-        Nradiation=Nradiation+M
-        DO i=1,M
-            READ(10,*)
-        END DO
-        READ(10,*) M
-        Nintegration=Nintegration+M
-        DO i=1,M
-            READ(10,*)
-        END DO
-        READ(10,*) M
-        DO i=1,M
-            READ(10,*)
-        END DO
-    END DO
-    READ(10,*)
-    READ(10,*) Nw,wmin,wmax
+    CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
+!   ----------- passing inputs ------------------------------------------
+    Environment =InpNEMOHCAL%Env
+    Nradiation  =InpNEMOHCAL%Nradtot
+    Nintegration=InpNEMOHCAL%Nintegtot
+    Nw          =InpNEMOHCAL%waveinput%NFreq
+    wmin        =InpNEMOHCAL%waveinput%Freq1
+    wmax        =InpNEMOHCAL%waveinput%Freq2
     ALLOCATE(w(Nw))
     IF (Nw.GT.1) THEN
         DO j=1,Nw
@@ -125,7 +97,12 @@
     ELSE
         w(1)=wmin
     END IF
-    READ(10,*) Nbeta,betamin,betamax
+    IF (InpNEMOHCAL%waveinput%FreqType==IdFreqHz) w(:)=2*PI*w(:)
+    IF (InpNEMOHCAL%waveinput%FreqType==IdPeriod) w(:)=2*PI/w(:)
+    
+    Nbeta          =InpNEMOHCAL%waveinput%NBeta
+    betamin        =InpNEMOHCAL%waveinput%Beta1
+    betamax        =InpNEMOHCAL%waveinput%Beta2
     ALLOCATE(beta(Nbeta))
     IF (Nbeta.GT.1) THEN
         DO j=1,Nbeta
@@ -134,55 +111,18 @@
     ELSE
         beta(1)=betamin*PI/180.
     END IF
-    READ(10,*)
-    READ(10,*)
-    READ(10,*) Switch_Potential
-    READ(10,*) Ntheta,thetamin,thetamax
-    IF (NTheta.GT.0) THEN
-        Switch_Kochin=1
-    ELSE
-        Switch_Kochin=0
-    END IF
-    READ(10,*) Nx,Ny,Lx,Ly
-    IF (Nx.GT.0) THEN
-        Switch_FreeSurface=1
-    ELSE
-        Switch_FreeSurface=0
-    END IF
-    CLOSE(10)
-!   re-read input file and store radiation and integration cases
-    ALLOCATE(RadCase(Nradiation))
-    ALLOCATE(IntCase(Nintegration))
-    OPEN(10,FILE=TRIM(ID%ID)//'/Nemoh.cal')
-    DO c=1,7
-        READ(10,*)
-    END DO
-    jrad=0
-    jint=0
-    DO c=1,Mesh%Nbodies
-        DO i=1,3
-            READ(10,*)
-        END DO
-        READ(10,*) M
-        DO i=1,M
-            READ(10,*) RadCase(jrad+i)%ICase,(RadCase(jrad+i)%Direction(j),j=1,3),(RadCase(jrad+i)%Axis(j),j=1,3)
-            RadCase(jrad+i)%Body=c
-            RadCase(jrad+i)%Mode=i
-        END DO
-        jrad=jrad+M
-        READ(10,*) M
-        DO i=1,M
-            READ(10,*) IntCase(jint+i)%ICase,(IntCase(jint+i)%Direction(j),j=1,3),(IntCase(jint+i)%Axis(j),j=1,3)
-            IntCase(jint+i)%Body=c
-            IntCase(jint+i)%Mode=i
-        END DO
-        jint=jint+M
-        READ(10,*) M
-        DO i=1,M
-            READ(10,*)
-        END DO
-    END DO
-    CLOSE(10)
+    Switch_Potential  =InpNEMOHCAL%OptOUTPUT%Switch_POTENTIAL
+    Switch_Kochin     =InpNEMOHCAL%OptOUTPUT%Kochin%Switch
+    Ntheta            =InpNEMOHCAL%OptOUTPUT%Kochin%Ntheta
+    thetamin          =InpNEMOHCAL%OptOUTPUT%Kochin%min_theta
+    thetamax          =InpNEMOHCAL%OptOUTPUT%Kochin%max_theta
+    Switch_FreeSurface=InpNEMOHCAL%OptOUTPUT%Freesurface%Switch
+    Nx                =InpNEMOHCAL%OptOUTPUT%Freesurface%Nx
+    Nx                =InpNEMOHCAL%OptOUTPUT%Freesurface%Ny
+    Lx                =InpNEMOHCAL%OptOUTPUT%Freesurface%Lx
+    Ly                =InpNEMOHCAL%OptOUTPUT%Freesurface%Ly
+    Switch_SourceDistr=InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr
+! ---------------------------------------------------------------------------
 !   Print summary of calculation case
     WRITE(*,*) ' '
     WRITE(*,*) ' Summary of calculation'
@@ -202,10 +142,16 @@
 !
     ALLOCATE(FNDS(Nintegration,Mesh%Npanels*2**Mesh%Isym))
     ALLOCATE(NDS(Mesh%Npanels*2**Mesh%Isym))
-    DO j=1,Nintegration
-        CALL ComputeNDS(Mesh,IntCase(j)%Body,IntCase(j)%Icase,IntCase(j)%Direction,IntCase(j)%Axis,NDS)
-        DO c=1,Mesh%Npanels*2**Mesh%Isym
-            FNDS(j,c)=NDS(c)
+    indsum=1
+    DO IdBody=1,InpNEMOHCAL%Nbodies 
+        DO IdMode=1,InpNEMOHCAL%bodyinput(IdBody)%NIntegration
+        CALL ComputeNDS(Mesh,IdBody,InpNEMOHCAL%bodyinput(IdBody)%IntCase(IdMode)%ICase,&
+                InpNEMOHCAL%bodyinput(IdBody)%IntCase(IdMode)%Direction(1:3),           &
+                InpNEMOHCAL%bodyinput(IdBody)%IntCase(IdMode)%Axis(1:3),NDS)
+                DO c=1,Mesh%Npanels*2**Mesh%Isym
+                FNDS(indsum,c)=NDS(c)
+                END DO
+                indsum=indsum+1
         END DO
     END DO
     DEALLOCATE(NDS)
@@ -236,11 +182,18 @@
                 END DO
             END DO
         END DO
-        DO j=1,Nradiation
-            CALL ComputeRadiationCondition(Mesh,RadCase(j)%Body,RadCase(j)%Icase,RadCase(j)%Direction,RadCase(j)%Axis,NVEL)
-            DO c=1,Mesh%Npanels*2**Mesh%Isym
-                NormalVelocity(c,j+Nbeta+(i-1)*(Nbeta+Nradiation))=NVEL(c)
-            END DO 
+        indsum=1
+        DO IdBody=1,InpNEMOHCAL%Nbodies 
+                DO IdMode=1,InpNEMOHCAL%bodyinput(IdBody)%NRadiation
+                CALL ComputeRadiationCondition(Mesh,IdBody,                     &
+                        InpNEMOHCAL%bodyinput(IdBody)%RadCase(IdMode)%ICase,         &
+                        InpNEMOHCAL%bodyinput(IdBody)%RadCase(IdMode)%Direction(1:3),&
+                        InpNEMOHCAL%bodyinput(IdBody)%RadCase(IdMode)%Axis(1:3),NVEL)
+                     DO c=1,Mesh%Npanels*2**Mesh%Isym
+                        NormalVelocity(c,indsum+Nbeta+(i-1)*(Nbeta+Nradiation))=NVEL(c)
+                     END DO 
+                indsum=indsum+1
+                END DO
         END DO
     END DO
     CLOSE(11)        
@@ -254,10 +207,10 @@
     DO i=1,Nw
       WRITE(11,*) (/ (DIFFRACTION_PROBLEM, j=1,Nbeta), (RADIATION_PROBLEM, j=1,Nradiation) /)
     ENDDO
-    !WRITE(11,*) ( (beta(j),j=1,Nbeta)  ,   (-1.,j=1,Nradiation)  ,  i=1,Nw)
     WRITE(11,*) ((Switch_Potential,j=1,Nbeta+Nradiation),i=1,Nw)
     WRITE(11,*) ((Switch_Freesurface,j=1,Nbeta+Nradiation),i=1,Nw)
     WRITE(11,*) ((Switch_Kochin,j=1,Nbeta+Nradiation),i=1,Nw)
+    WRITE(11,*) ((Switch_SourceDistr,j=1,Nbeta+Nradiation),i=1,Nw)
     DO c=1,Mesh%Npanels*2**Mesh%Isym
         WRITE(11,*) (REAL(NormalVelocity(c,j)),IMAG(NormalVelocity(c,j)),j=1,(Nbeta+Nradiation)*Nw)
     END DO
@@ -268,8 +221,12 @@
 !
     OPEN(10,FILE=TRIM(ID%ID)//'/results/FKForce.tec')
     WRITE(10,'(A)') 'VARIABLES="w (rad/s)"'
-    DO k=1,Nintegration
-        WRITE(10,'(A,I4,I4,A,I4,I4,A)') '"abs(F',IntCase(k)%Body,k,')" "angle(F',IntCase(k)%Body,k,')"'
+    indsum=1
+    DO IdBody=1,InpNEMOHCAL%Nbodies 
+        DO IdMode=1,InpNEMOHCAL%bodyinput(IdBody)%NIntegration
+        WRITE(10,'(A,I4,I4,A,I4,I4,A)') '"abs(F',IdBody,indsum,')" "angle(F',IdBody,indsum,')"'
+        indsum=indsum+1
+        END DO
     END DO
     DO c=1,Nbeta
         WRITE(10,'(A,F7.3,A,I6,A)') 'Zone t="FKforce - beta = ',beta(c)*180./PI,'",I=',Nw,',F=POINT'
@@ -321,13 +278,22 @@
     OPEN(10,FILE=TRIM(ID%ID)//'/results/index.dat')
     WRITE(10,*) Nw,Nbeta,Nradiation,Nintegration,Ntheta
     WRITE(10,*) '--- Force ---'
-    DO k=1,Nintegration
-        WRITE(10,*) k,IntCase(k)%Body,IntCase(k)%Mode
+    indsum=1
+    DO IdBody=1,InpNEMOHCAL%Nbodies 
+        DO IdMode=1,InpNEMOHCAL%bodyinput(IdBody)%NIntegration
+        WRITE(10,*) indsum,IdBody,IdMode
+        indsum=indsum+1
+        END DO
     END DO
     WRITE(10,*) '--- Motion ---'
-    DO k=1,Nradiation
-        WRITE(10,*) k,RadCase(k)%Body,RadCase(k)%Mode
-    END DO 
+    indsum=1
+    DO IdBody=1,InpNEMOHCAL%Nbodies 
+        DO IdMode=1,InpNEMOHCAL%bodyinput(IdBody)%NRadiation
+        WRITE(10,*) indsum,IdBody,IdMode
+        indsum=indsum+1
+        END DO
+    END DO
+
     WRITE(10,*) (Beta(k),k=1,Nbeta)
     WRITE(10,*) (w(k),k=1,Nw)
     WRITE(10,*) ((Thetamin+(Thetamax-Thetamin)*(k-1)/(NTheta-1))*PI/180.,k=1,Ntheta)
@@ -335,6 +301,11 @@
 !
 !   --- Finalize ----------------------------------------------------------------------------------------------------
 ! 
-    DEALLOCATE(RadCase,IntCase,Beta)    
-!
+    DEALLOCATE(w,Beta) 
+    DO IdBody=1,InpNEMOHCAL%Nbodies
+      DEALLOCATE(inpNEMOHCAL%bodyinput(IdBody)%RadCase)
+      DEALLOCATE(inpNEMOHCAL%bodyinput(IdBody)%IntCase)
+    ENDDO
+      DEALLOCATE(inpNEMOHCAL%bodyinput)
+ !
     END PROGRAM Main
