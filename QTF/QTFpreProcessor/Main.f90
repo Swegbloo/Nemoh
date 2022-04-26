@@ -50,8 +50,8 @@ PROGRAM Main
   
   !   --- read input datas -------
 
-  CALL ReadTID(ID,'ID.dat')
-  CALL ReadTMesh(Mesh,ID)                                                 ! read mesh data & construct a structural variable MESH 
+  CALL ReadTID(ID)
+  CALL ReadTMesh(Mesh, TRIM(ID%ID)//'/mesh/')                             ! read mesh data & construct a structural variable MESH 
   CALL ReadTEnvironment(Environment,ID%ID(1:ID%lID)//'/Nemoh.cal')        ! Airy potential, velocity, pressure
   CALL Readwbeta(ID,Mesh%Nbodies,Nw,w,Nbeta,beta,Nradiation,Nintegration) ! define w for given w interval input in NEMOH.Cal
   CALL ReadInertia(ID,Mesh%Nbodies,M)                                     ! Read Mass inertia matrix (NdofxNdof) from NEMOH (preProc)

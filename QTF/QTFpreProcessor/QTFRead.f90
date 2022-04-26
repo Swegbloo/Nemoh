@@ -24,7 +24,7 @@ CONTAINS
     REAL,DIMENSION(:),ALLOCATABLE :: w
     REAL,DIMENSION(:),ALLOCATABLE :: beta
     
-    INTEGER :: M,c,i,j
+    INTEGER :: M,c,i,j, FreqType
 
     Nradiation=0
     Nintegration=0
@@ -54,11 +54,20 @@ CONTAINS
 	END DO
     END DO
     READ(10,*)
-    READ(10,*) Nw,wmin,wmax
+    READ(10,*) FreqType,Nw,wmin,wmax
     READ(10,*) Nbeta,betamin,betamax
 
     CLOSE(10)
-    
+    IF (FreqType.Eq.2) THEN
+        wmin=2*PI*wmin
+        wmax=2*PI*wmax
+
+    ELSEIF (FreqType.Eq.3) THEN
+         WRITE(*,*) 'Input periode is not allow in QTF, please changed in NEMOH.CAL' 
+         STOP
+    END IF
+
+         
   !   ----- Fill w and beta ----------
     
     ALLOCATE(w(Nw))
@@ -416,9 +425,10 @@ CONTAINS
       idiffrad = idiffrad + 1
       Pbnumber = (Nbeta+Nradiation)*(iw-1)+Nbeta+k
     
-      WRITE(str,'(I5)') Pbnumber
+      !WRITE(str,'(I5)') Pbnumber 
+      WRITE(str, '(I0.5)') Pbnumber
       WRITE(*,'(I5,A,I5)') Pbnumber, 'iw=',iw
-      OPEN(11,FILE=ID%ID(1:ID%lID)//'/results/sources.'//str//'.dat')
+      OPEN(11,FILE=ID%ID(1:ID%lID)//'/results/sources/sources.'//str//'.dat')
    
       do i=1,Npanels
 	READ(11,*) RE,IM 
@@ -440,8 +450,9 @@ CONTAINS
       idiffrad = idiffrad + 1
       Pbnumber = (Nbeta+Nradiation)*(iw-1)+k
       
-      WRITE(str,'(I5)') Pbnumber
-      OPEN(11,FILE=ID%ID(1:ID%lID)//'/results/sources.'//str//'.dat')
+      !WRITE(str,'(I5)') Pbnumber
+      WRITE(str, '(I0.5)') Pbnumber
+      OPEN(11,FILE=ID%ID(1:ID%lID)//'/results/sources/sources.'//str//'.dat')
    
       do i=1,IMX
 	READ(11,*) RE,IM 

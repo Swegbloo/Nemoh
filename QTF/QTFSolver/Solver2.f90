@@ -10,14 +10,16 @@
   PROGRAM Solver2
 
   INTEGER :: Nbodies, NP, c,M, contrib,Loutduok,Louthasbo,Louthasfs,NW1,NW2,NW,NDOF,nhaskind,dw,npasr
-  REAL :: trash,RCEREXT, wmin, wmax   ! wmin, wmax added by RK
+  REAL :: trash,RCEREXT, wmin, wmax,PI   ! wmin, wmax added by RK
   CHARACTER*20 ID
   CHARACTER*255 :: EXEDIR
   CHARACTER*255:: CMD
-  INTEGER       :: lengthArg
+  INTEGER       :: lengthArg,FreqType
   logical :: dir_e ! to check if directories exist
   Nbodies = 1 ! Only one body for now
   
+  PI= 4.0*ATAN(1.0)
+
   OPEN(UNIT=7,FILE="ID.dat")
   READ(7,*) lID
   READ(7,*) ID
@@ -61,7 +63,7 @@
 	END DO
     END DO
     READ(10,*)    
-    READ(10,*) NP,wmin,wmax        ! N of wave freq, wmin and wmax
+    READ(10,*) FreqType,NP,wmin,wmax        ! FreqType, N of wave freq, wmin and wmax
     DO I=1,8
       READ(10,*)
     END DO
@@ -80,6 +82,15 @@
       NDOF=0
     endif
   CLOSE(10)
+   IF (FreqType.Eq.2) THEN
+        wmin=2*PI*wmin
+        wmax=2*PI*wmax
+
+    ELSEIF (FreqType.Eq.3) THEN
+         WRITE(*,*) 'Input periode is not allow in QTF, please changed in NEMOH.CAL' 
+         STOP
+    END IF
+
   
   if (NW2 > NW1) then
     NW=NW1
