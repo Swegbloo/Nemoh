@@ -44,14 +44,13 @@ MODULE SOLVE_BEM_DIRECT
   PRIVATE
   ! Those variables will be conserved between calls of the subroutine.
   REAL :: Omega_previous = -1.0
-  COMPLEX, DIMENSION(:,:,:),ALLOCATABLE  :: V,Vinv,S
 
 
 CONTAINS
   
   SUBROUTINE SOLVE_POTENTIAL_DIRECT              &
   ( VFace, Mesh, Env, omega, wavenumber, IGreen, &
-    NVel, ZIGB, ZIGS,Potential,SolverOpt,wd)
+    NVel, S,V,Vinv,ZIGB, ZIGS,Potential,SolverOpt,wd)
 
   ! Input/output
   TYPE(TVFace),                                   INTENT(IN)    :: VFace
@@ -62,6 +61,9 @@ CONTAINS
   TYPE(TSolver),                                  INTENT(IN)    :: SolverOpt                             
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(IN)    :: NVel
   COMPLEX, DIMENSION(Mesh%Npanels),               INTENT(OUT)   :: ZIGB, ZIGS ! Source distribution
+  COMPLEX, DIMENSION(Mesh%Npanels,Mesh%Npanels,2**Mesh%Isym),                     &
+                                                  INTENT(INOUT) :: V,S,Vinv ! Influence Coef
+
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(OUT)   :: Potential
   
   INTEGER :: I, J,FLAG_CAL,ITERLID
@@ -75,15 +77,8 @@ CONTAINS
 
   COMPLEX, DIMENSION(Mesh%NPanels, 2**Mesh%ISym) :: ZOL
   COMPLEX, DIMENSION(Mesh%Npanels) :: RHS ! temporary variable
-
   CHARACTER(LEN=*),                               INTENT(IN)  :: wd
-  REAL line(Mesh%Npanels*2)
-  REAL tempMat(2,2)
-  IF (.NOT. ALLOCATED(Vinv)) THEN
-        ALLOCATE(S   (Mesh%NPanels, Mesh%NPanels, 2**Mesh%ISym))
-        ALLOCATE(V(Mesh%NPanels, Mesh%NPanels, 2**Mesh%ISym))
-        ALLOCATE(Vinv(Mesh%NPanels, Mesh%NPanels, 2**Mesh%ISym))
-  END IF
+  
   ! IF (ABS(Omega) <= 1.E-4) THEN
   !   WRITE(*,*)'ABS(Omega)  = ',ABS(Omega),' < 1.E-4'
   !   STOP
@@ -142,27 +137,10 @@ CONTAINS
             S(I, J, 2) = FSM + SM
             V(I, J, 2) = DOT_PRODUCT(Mesh%N(:, I), VSXM + VSM)
           ENDIF
-                
-
-   !       IF (Mesh%XM(3,I)>=-0.00001) THEN
-   !             V(I, J, 1) = -V(I, J, 1)
-   !             IF (Mesh%ISym == Y_SYMMETRY) V(I, J, 2) = -V(I, J, 2)
-   !       ENDIF 
-   !      line(2*J-1)= REAL(V(I, J, 1)) 
-   !      line(2*J)  =AIMAG(V(I, J, 1)) 
 
         END DO
-    !  WRITE(200,*) (line(J),J=1,2*Mesh%NPanels)
-    !  WRITE(200,*) ''
       END DO
-    !  CLOSE(200)
     END IF
-      !  print*,'---------------------------' 
-      !  DO I=1,Mesh%Npanels
-      !          print*,I,Mesh%XM(3,I),NVEL(I)
-      !  END DO
-      !  READ(*,*)
-      !  print*,'---------------------------' 
   !=========================
   ! Solve the linear problem
   !=========================
@@ -190,9 +168,17 @@ CONTAINS
   ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
     IF (SolverOpt%ID .EQ. ID_GMRES) THEN
         RHS(:)=(NVEL(1:Mesh%NPanels) + NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2
-        CALL GMRES_SOLVER(V(:,:,1),RHS(:),ZOL(:, 1),Mesh%NPanels,SolverOpt)
+        IF (ANY(ABS(RHS)>0.)) THEN
+           CALL GMRES_SOLVER(V(:,:,1),RHS(:),ZOL(:, 1),Mesh%NPanels,SolverOpt)
+        ELSE
+           ZOL(:, 1)=0
+        ENDIF
         RHS(:)=(NVEL(1:Mesh%NPanels) - NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2
-        CALL GMRES_SOLVER(V(:,:,2),RHS(:),ZOL(:, 2),  Mesh%NPanels,SolverOpt)
+        IF (ANY(ABS(RHS)>0.)) THEN 
+           CALL GMRES_SOLVER(V(:,:,2),RHS(:),ZOL(:, 2),  Mesh%NPanels,SolverOpt)
+         ELSE
+           ZOL(:, 2)=0
+        ENDIF
     ELSE
     ZOL(:, 1) = MATMUL(                                              &
       Vinv(:, :,1),                                                  &

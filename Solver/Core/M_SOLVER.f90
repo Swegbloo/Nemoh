@@ -27,7 +27,7 @@
 MODULE M_SOLVER
   IMPLICIT NONE
 
-  PUBLIC :: GAUSSZ,LU_INVERS_MATRIX,ReadTSolver,TSolver
+  PUBLIC :: GAUSSZ,LU_INVERS_MATRIX,GMRES_SOLVER,ReadTSolver,TSolver
 
   INTEGER, PARAMETER, PUBLIC ::  ID_GAUSS=0
   INTEGER, PARAMETER, PUBLIC ::  ID_LU=1
@@ -90,10 +90,11 @@ MODULE M_SOLVER
     ! Local variables
     INTEGER :: I, J, K, L, IL
     COMPLEX :: C, P
-    COMPLEX, DIMENSION(N,2*N) :: WS ! Working matrix
+    COMPLEX, ALLOCATABLE :: WS(:,:) ! Working matrix
     REAL, PARAMETER :: EPS=1E-20
 
     ! Initialize working matrix
+    ALLOCATE(WS(N,2*N))
     WS(:, 1:N)     = A
     WS(:, N+1:2*N) = CMPLX(0., 0.)
     DO I = 1, N
@@ -141,7 +142,7 @@ MODULE M_SOLVER
    
     ! Extract output
      Ainv(:, :) = WS(:, N+1:2*N)
-    
+     DEALLOCATE(WS)
      RETURN
 
   END SUBROUTINE
@@ -198,26 +199,28 @@ MODULE M_SOLVER
        
     END SUBROUTINE
  
-    SUBROUTINE LU_SOLVER(A,B,SOL,M,N)
+    SUBROUTINE LU_SOLVER(A,B,SOL,M,N,NRHS)
     !INPUT
-    INTEGER,                  INTENT(IN)   :: M,N
-    COMPLEX, DIMENSION(M, N), INTENT(IN)   :: A
-    COMPLEX, DIMENSION(M),    INTENT(IN)   :: B
+    INTEGER,                       INTENT(IN)   :: M,N,NRHS
+    COMPLEX, DIMENSION(M, N),      INTENT(IN)   :: A
+    COMPLEX, DIMENSION(M,NRHS),    INTENT(IN)   :: B
     
     !OUTPUT
-    COMPLEX, DIMENSION(M),    INTENT(OUT)   :: SOL
+    COMPLEX, DIMENSION(M,NRHS),    INTENT(OUT)   :: SOL
    
     !Local
-    INTEGER:: I,J,INFO,ID_DP
-    COMPLEX, DIMENSION(M,N)  :: Ainout
-    INTEGER, DIMENSION(M)    :: IPIV
-    COMPLEX, DIMENSION(M)    :: Binout
+    INTEGER:: I,J,INFO,ID_DP,LDA,LDB
+    COMPLEX, ALLOCATABLE,DIMENSION(:,:)  :: Ainout,Binout
+    INTEGER, ALLOCATABLE,DIMENSION(:)    :: IPIV
     
     CALL CHECK_DOUBLE_PRECISION(ID_DP)
 
+    LDA=MAX(1,M)
+    LDB=MAX(1,M)
+    ALLOCATE(Ainout(LDA,N),Binout(LDB,NRHS),IPIV(MIN(M,N)))
     !Initialization
-    Ainout(:,:)=A
-    Binout(:)=B
+    Ainout(1:M,1:N)=A
+    Binout(1:M,1:NRHS)=B
     
     ! ZGETRF is for complex double variable, use CGETRF for complex variable
     ! Note that all of variables in this codes are defined as complex/ real (single precision)
@@ -227,9 +230,9 @@ MODULE M_SOLVER
     ! using partial pivoting with row interchanges.
     
     IF (ID_DP.EQ.1) THEN
-      CALL ZGETRF(M,N,Ainout,M,IPIV,INFO) !LAPACK function
+      CALL ZGETRF(M,N,Ainout,LDA,IPIV,INFO) !LAPACK function
     ELSE
-      CALL CGETRF(M,N,Ainout,M,IPIV,INFO) !LAPACK function
+      CALL CGETRF(M,N,Ainout,LDA,IPIV,INFO) !LAPACK function
     END IF
  
     IF (INFO /= 0) THEN
@@ -241,14 +244,15 @@ MODULE M_SOLVER
     ! computed by ZGETRF.
      
       IF (ID_DP.EQ.1) THEN
-      call ZGETRS('N',M, 1, Ainout, M, IPIV, Binout, M, info)
+      call ZGETRS('N',M, NRHS, Ainout, LDA, IPIV, Binout, LDB, info)
       ELSE
-      call CGETRS('N',M, 1, Ainout, M, IPIV, Binout, M, info)
+      call CGETRS('N',M, NRHS, Ainout, LDA, IPIV, Binout, LDB, info)
       END IF
     IF (INFO /= 0) THEN
          STOP 'Solution procedure failed!'
     END IF
-    SOL(:)=Binout
+    SOL(:,:)=Binout(:,:)
+    DEALLOCATE(Ainout,Binout,IPIV)
     RETURN
        
     END SUBROUTINE
@@ -427,7 +431,7 @@ MODULE M_SOLVER
         write(*,*) ' No convergence after ', icntl(7), ' iterations'
         write(*,*) ' switched to LU decomposition solver'
         write(*,*) ' '
-        CALL LU_SOLVER(A,B,ZOL_GMRES,nD,nD)
+        CALL LU_SOLVER(A,B,ZOL_GMRES,nD,nD,1)
      else if (info(1).eq.-5) then
         write(*,*) ' Type of preconditioner not specified'
      endif

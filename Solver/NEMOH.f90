@@ -58,7 +58,8 @@ PROGRAM Main
   
   INTEGER                            :: i_problem          ! Index of the current problem
   REAL                               :: omega, wavenumber  ! Wave frequency and wavenumber
-  COMPLEX, DIMENSION(:), ALLOCATABLE :: ZIGB, ZIGS         ! Computed source distribution
+  COMPLEX, DIMENSION(:), ALLOCATABLE     :: ZIGB, ZIGS     ! Computed source distribution
+  COMPLEX, DIMENSION(:,:,:), ALLOCATABLE :: V, Vinv,S      ! Influece coefficients
   COMPLEX, DIMENSION(:), ALLOCATABLE :: Potential          ! Computed potential
 
   TYPE(TVFACE)                       :: VFace              ! Face Mesh structure variable                   
@@ -96,6 +97,9 @@ PROGRAM Main
   CALL Prepare_FaceMesh(Mesh,SolverOpt%NP_GQ,VFace)
 
   CALL INITIALIZE_GREEN(VFace,Mesh,Env%depth,IGreen)
+  ALLOCATE(S(Mesh%NPanels,Mesh%NPanels,2**Mesh%Isym))
+  ALLOCATE(V(Mesh%NPanels,Mesh%NPanels,2**Mesh%Isym))
+  ALLOCATE(Vinv(Mesh%NPanels,Mesh%NPanels,2**Mesh%Isym))
 
   WRITE(*, *) ' '
   WRITE(LogTextToBeWritten,*) 'NP Gauss Quadrature Integ.: ', SolverOpt%NP_GQ
@@ -128,7 +132,7 @@ PROGRAM Main
       !==========================
       ( VFace, Mesh, Env, omega, wavenumber,IGreen,                            &
         BodyConditions%NormalVelocity(1:Mesh%Npanels*2**Mesh%Isym, i_problem), &
-        ZIGB, ZIGS,                                                            &
+        S,V,Vinv,ZIGB, ZIGS,                                                   &
         Potential(:),SolverOpt,trim(wd))
 
     !===========================
@@ -180,7 +184,7 @@ PROGRAM Main
   WRITE(*,*) '. Done !'
   ! Finalize ---------------------------------------------------------------------------
 
-  DEALLOCATE(ZIGB, ZIGS, Potential)
+  DEALLOCATE(ZIGB, ZIGS, Potential,S,V,Vinv)
 
 CONTAINS
 
