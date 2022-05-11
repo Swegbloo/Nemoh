@@ -8,6 +8,8 @@ output/
 ./**/*.cal
 ./**/*.log
 ./**/*.exe
+./pythonRoutines/*.pyc
+./pythonRoutines/*.txt
 *.o
 *.mod
 *.swp

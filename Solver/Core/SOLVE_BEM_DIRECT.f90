@@ -117,7 +117,14 @@ CONTAINS
             VSXM=IGreen%VSM1(I,J,:)
 
           ! Second part of the Green function
-          IF (Env%depth == INFINITE_DEPTH) THEN
+          IF ((Env%depth == INFINITE_DEPTH).OR.(omega**2*Env%depth/Env%g.GE.20)) THEN
+            IF (omega**2*Env%depth/Env%g.GE.20) THEN
+            ! First part of the Green function
+            FSP=IGreen%FSP1_INF(I,J)
+            FSM=IGreen%FSM1_INF(I,J)
+            VSXP=IGreen%VSP1_INF(I,J,:)
+            VSXM=IGreen%VSM1_INF(I,J,:)
+            ENDIF
             CALL VNSINFD                                     &
             ( wavenumber, Mesh%XM(:, I), J, VFace, Mesh,     &
               IGreen, SP, SM, VSP, VSM                       &

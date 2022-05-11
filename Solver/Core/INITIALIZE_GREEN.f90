@@ -38,6 +38,9 @@ MODULE M_INITIALIZE_GREEN
      ! Independent of Omega, computed in INITIALIZE_GREEN
      REAL,DIMENSION(:,:)  ,ALLOCATABLE :: FSP1,FSM1  !First term green function
      REAL,DIMENSION(:,:,:),ALLOCATABLE :: VSP1,VSM1  !First term gradient of the green function
+     REAL,DIMENSION(:,:)  ,ALLOCATABLE :: FSP1_INF,FSM1_INF  !First term green function for infinite depth
+     REAL,DIMENSION(:,:,:),ALLOCATABLE :: VSP1_INF,VSM1_INF  !First term gradient of the green function for infinite depth
+
      INTEGER                           :: IR,JZ,NPINTE               !for Green2
      REAL,DIMENSION(:)    ,ALLOCATABLE :: XR,XZ                      !for Green2
      REAL,DIMENSION(:,:)  ,ALLOCATABLE :: APD1X, APD1Z, APD2X, APD2Z ! for Green2
@@ -67,6 +70,11 @@ CONTAINS
   ALLOCATE(IGREEN%FSM1(Mesh%Npanels,Mesh%Npanels))
   ALLOCATE(IGREEN%VSP1(Mesh%Npanels,Mesh%Npanels,3))
   ALLOCATE(IGREEN%VSM1(Mesh%Npanels,Mesh%Npanels,3))
+  ALLOCATE(IGREEN%FSP1_INF(Mesh%Npanels,Mesh%Npanels))
+  ALLOCATE(IGREEN%FSM1_INF(Mesh%Npanels,Mesh%Npanels))
+  ALLOCATE(IGREEN%VSP1_INF(Mesh%Npanels,Mesh%Npanels,3))
+  ALLOCATE(IGREEN%VSM1_INF(Mesh%Npanels,Mesh%Npanels,3))
+
   ALLOCATE(IGREEN%XR(IR),IGREEN%XZ(JZ))
   ALLOCATE(IGREEN%APD1X(IR,JZ),IGREEN%APD2X(IR,JZ))
   ALLOCATE(IGREEN%APD1Z(IR,JZ),IGREEN%APD2Z(IR,JZ))
@@ -82,6 +90,15 @@ CONTAINS
             IGreen%FSP1(I,J), IGreen%FSM1(I,J),    &
             IGreen%VSP1(I,J,:), IGreen%VSM1(I,J,:) &
             )
+           IF (Depth .NE. INFINITE_DEPTH) THEN
+           !preparation in case kD>20
+           CALL VAV                                 &
+          ( I, Mesh%XM(:, I), J,VFace,Mesh, INFINITE_DEPTH, &
+            IGreen%FSP1_INF(I,J), IGreen%FSM1_INF(I,J),    &
+            IGreen%VSP1_INF(I,J,:), IGreen%VSM1_INF(I,J,:) &
+            )
+           ENDIF
+
         END DO
    END DO
 

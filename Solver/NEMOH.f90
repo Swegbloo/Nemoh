@@ -185,6 +185,10 @@ PROGRAM Main
   ! Finalize ---------------------------------------------------------------------------
 
   DEALLOCATE(ZIGB, ZIGS, Potential,S,V,Vinv)
+  DEALLOCATE(IGreen%FSP1,IGreen%FSM1,IGreen%VSP1,IGREEN%VSM1)
+  DEALLOCATE(IGreen%FSP1_INF,IGreen%FSM1_INF,IGreen%VSP1_INF,IGREEN%VSM1_INF)
+  DEALLOCATE(IGreen%XR,IGreen%XZ)
+  DEALLOCATE(IGreen%APD1X,IGREEN%APD2X,IGREEN%APD1Z,IGREEN%APD2Z)
 
 CONTAINS
 
