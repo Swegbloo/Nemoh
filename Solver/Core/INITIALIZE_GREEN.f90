@@ -23,15 +23,7 @@ MODULE M_INITIALIZE_GREEN
   PRIVATE :: HOUSRS ! Called by EXPORS and MCAS
   PRIVATE :: FF     ! Called by LISC
 
-
-  ! Independent of Omega
-  INTEGER, PARAMETER      :: NPINTE = 251
-  INTEGER, PARAMETER      :: IR = 328
-  INTEGER, PARAMETER      :: JZ = 46
-  !REAL, DIMENSION(IR)     :: XR
-  !REAL, DIMENSION(JZ)     :: XZ
-  !REAL, DIMENSION(IR, JZ) :: APD1X, APD1Z, APD2X, APD2Z
-
+  INTEGER,PARAMETER       :: FLAG_IGREEN=2
   
  !Init Green var
   TYPE TGREEN
@@ -44,6 +36,7 @@ MODULE M_INITIALIZE_GREEN
      INTEGER                           :: IR,JZ,NPINTE               !for Green2
      REAL,DIMENSION(:)    ,ALLOCATABLE :: XR,XZ                      !for Green2
      REAL,DIMENSION(:,:)  ,ALLOCATABLE :: APD1X, APD1Z, APD2X, APD2Z ! for Green2
+     REAL                              :: MAX_KR,MIN_KZ
     ! Dependant of Omega, computed in LISC in SOLVE_BEM_DIRECT
      INTEGER                 :: NEXP
      REAL, DIMENSION(31)     :: AMBDA, AR
@@ -63,9 +56,15 @@ CONTAINS
   !LOCAL
   INTEGER       :: I,J
 
-  IGREEN%IR=IR
-  IGREEN%JZ=JZ
-  IGREEN%NPINTE=NPINTE
+  IF (FLAG_IGREEN==1) THEN
+  IGREEN%IR=328
+  IGREEN%JZ=46
+  ELSE
+  IGREEN%IR=676
+  IGREEN%JZ=124
+  ENDIF  
+  IGREEN%NPINTE=251
+  
   ALLOCATE(IGREEN%FSP1(Mesh%Npanels,Mesh%Npanels))
   ALLOCATE(IGREEN%FSM1(Mesh%Npanels,Mesh%Npanels))
   ALLOCATE(IGREEN%VSP1(Mesh%Npanels,Mesh%Npanels,3))
@@ -75,9 +74,9 @@ CONTAINS
   ALLOCATE(IGREEN%VSP1_INF(Mesh%Npanels,Mesh%Npanels,3))
   ALLOCATE(IGREEN%VSM1_INF(Mesh%Npanels,Mesh%Npanels,3))
 
-  ALLOCATE(IGREEN%XR(IR),IGREEN%XZ(JZ))
-  ALLOCATE(IGREEN%APD1X(IR,JZ),IGREEN%APD2X(IR,JZ))
-  ALLOCATE(IGREEN%APD1Z(IR,JZ),IGREEN%APD2Z(IR,JZ))
+  ALLOCATE(IGREEN%XR(IGREEN%IR),IGREEN%XZ(IGREEN%JZ))
+  ALLOCATE(IGREEN%APD1X(IGREEN%IR,IGREEN%JZ),IGREEN%APD2X(IGREEN%IR,IGREEN%JZ))
+  ALLOCATE(IGREEN%APD1Z(IGREEN%IR,IGREEN%JZ),IGREEN%APD2Z(IGREEN%IR,IGREEN%JZ))
 
 
   !First term of Green function
@@ -118,26 +117,41 @@ CONTAINS
     ! Local variables
     INTEGER :: I, J, K,JZ,IR,NPINTE
     REAL,DIMENSION(:),ALLOCATABLE :: QQT, CQT
-    REAL :: CT
+    REAL :: CT, MIN_Z
     COMPLEX :: C1, C2, ZIK, CEX
 
     JZ=IGreen%JZ
     IR=IGreen%IR
     NPINTE=IGreen%NPINTE
     ALLOCATE(QQT(NPINTE),CQT(NPINTE))
-
-    ! Initialize XZ
+       ! Initialize XZ
     DO J = 1, JZ
-      IGreen%XZ(J) = -AMIN1(10**(J/5.0-6), 10**(J/8.0-4.5), 16.)
+      IF (FLAG_IGREEN==1) THEN 
+        MIN_Z=-16.
+        IGreen%XZ(J) = -AMIN1(10**(J/5.0-6), 10**(J/8.0-4.5), -MIN_Z)
+      ELSE
+        MIN_Z=-251.
+        IGreen%XZ(J) = -AMIN1(10**(J/10.-10), -MIN_Z)
+      ENDIF
     END DO
+    IGreen%MAX_KR=99.7
+    IGREEN%MIN_KZ =MIN_Z
 
     ! Initialize XR
     IGreen%XR(1) = 0.0
     DO I = 2, IR
-      IF (I < 40) THEN
-        IGreen%XR(I) = AMIN1(10**((I-1.0)/5-6), 4.0/3.0 + ABS(I-32)/3.0)
+      IF (FLAG_IGREEN==1) THEN
+        IF (I < 40) THEN
+          IGreen%XR(I) = AMIN1(10**((I-1.0)/5-6), 4.0/3.0 + ABS(I-32)/3.0)
+        ELSE
+          IGreen%XR(I) = 4.0/3.0 + ABS(I-32)/3.0
+        ENDIF
       ELSE
-        IGreen%XR(I) = 4.0/3.0 + ABS(I-32)/3.0
+        IF (I < 81) THEN
+          IGreen%XR(I) = 10**((I-1.0)/10-8)
+        ELSE
+          IGreen%XR(I) = ABS(I-75)/6.
+        ENDIF
       ENDIF
     END DO
 

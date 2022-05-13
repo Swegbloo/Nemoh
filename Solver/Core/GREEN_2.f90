@@ -9,7 +9,7 @@ MODULE GREEN_2
   USE MFace,              ONLY:TFace,TVFace,VFace_to_FACE   
   USE Elementary_functions
 
-  USE M_INITIALIZE_GREEN, ONLY: TGreen
+  USE M_INITIALIZE_GREEN, ONLY: TGreen,FLAG_IGREEN
   USE GREEN_1,            ONLY: COMPUTE_ASYMPTOTIC_S0
 
   IMPLICIT NONE
@@ -367,9 +367,14 @@ CONTAINS
     REAL                               :: RRR, AKR, ZZZ, AKZ, DD, PSURR
     REAL                               :: SIK, CSK, SQ, EPZ
     REAL                               :: PD1X, PD2X, PD1Z, PD2Z
-    REAL, DIMENSION(3)                 :: XL, ZL
+    REAL, ALLOCATABLE,DIMENSION(:)     :: XL, ZL
 
-   
+    IF (FLAG_IGREEN==1) THEN
+      ALLOCATE(XL(3),ZL(3))
+     ELSE
+      ALLOCATE(XL(5),ZL(5))
+    ENDIF
+
     RRR = NORM2(XI(1:2) - XJ(1:2))
     AKR = wavenumber*RRR
 
@@ -388,43 +393,74 @@ CONTAINS
     !   WRITE(*,*)'AKZ < -1.5 E-6' ! Not a very explicit warning...
     ! END IF
 
-    IF (AKZ > -16) THEN             !   -16 < AKZ < -1.5e-6
+    IF (AKZ > IGREEN%MIN_KZ) THEN             !   -16 < AKZ < -1.5e-6
 
       !================================================
       ! Evaluate PDnX and PDnZ depending on AKZ and AKR
       !================================================
 
-      IF (AKR < 99.7) THEN          !     0 < AKR < 99.7
+      IF (AKR < IGREEN%MAX_KR) THEN          !     0 < AKR < 99.7
+        IF (FLAG_IGREEN==1) THEN
+                IF (AKZ < -1e-2) THEN       !   -16 < AKZ < -1e-2
+                  KJ = INT(8*(ALOG10(-AKZ)+4.5))
+                ELSE                        ! -1e-2 < AKZ < -1.5e-6
+                  KJ = INT(5*(ALOG10(-AKZ)+6))
+                ENDIF
+                KJ = MAX(MIN(KJ, 45), 2)
 
-        IF (AKZ < -1e-2) THEN       !   -16 < AKZ < -1e-2
-          KJ = INT(8*(ALOG10(-AKZ)+4.5))
-        ELSE                        ! -1e-2 < AKZ < -1.5e-6
-          KJ = INT(5*(ALOG10(-AKZ)+6))
+                IF (AKR < 1) THEN           !     0 < AKR < 1
+                  KI = INT(5*(ALOG10(AKR+1e-20)+6)+1)
+                ELSE                        !     1 < AKR < 99.7
+                  KI = INT(3*AKR+28)
+                ENDIF
+                KI = MAX(MIN(KI, 327), 2)
+
+                XL(1) = PL2(IGreen%XR(KI),   IGreen%XR(KI+1), IGreen%XR(KI-1), AKR)
+                XL(2) = PL2(IGreen%XR(KI+1), IGreen%XR(KI-1), IGreen%XR(KI),   AKR)
+                XL(3) = PL2(IGreen%XR(KI-1), IGreen%XR(KI),   IGreen%XR(KI+1), AKR)
+                ZL(1) = PL2(IGreen%XZ(KJ),   IGreen%XZ(KJ+1), IGreen%XZ(KJ-1), AKZ)
+                ZL(2) = PL2(IGreen%XZ(KJ+1), IGreen%XZ(KJ-1), IGreen%XZ(KJ),   AKZ)
+                ZL(3) = PL2(IGreen%XZ(KJ-1), IGreen%XZ(KJ),   IGreen%XZ(KJ+1), AKZ)
+
+                PD1Z = DOT_PRODUCT(XL, MATMUL(IGreen%APD1Z(KI-1:KI+1, KJ-1:KJ+1), ZL))
+                PD2Z = DOT_PRODUCT(XL, MATMUL(IGreen%APD2Z(KI-1:KI+1, KJ-1:KJ+1), ZL))
+
+                IF (RRR > EPS) THEN
+                  PD1X = DOT_PRODUCT(XL, MATMUL(IGreen%APD1X(KI-1:KI+1, KJ-1:KJ+1), ZL))
+                  PD2X = DOT_PRODUCT(XL, MATMUL(IGreen%APD2X(KI-1:KI+1, KJ-1:KJ+1), ZL))
+                END IF
+        ELSE
+                KJ=10*(ALOG10(-AKZ)+10.)
+                KJ=MAX(KJ,3)
+                KJ=MIN(KJ,IGREEN%JZ-2)
+
+                IF(AKR.LT.1.)THEN
+                  KI=10*(ALOG10(AKR+1.E-10)+8)+1
+                ELSE
+                  KI=6*AKR+75
+                ENDIF
+                KI=MAX(KI,3)
+                KI=MIN(KI,674)
+
+                XL(1)=PL5(IGreen%XR(KI+2),IGreen%XR(KI-1),IGreen%XR(KI  ),IGreen%XR(KI+1),IGreen%XR(KI-2),AKR)
+                XL(2)=PL5(IGreen%XR(KI-2),IGreen%XR(KI  ),IGreen%XR(KI+1),IGreen%XR(KI+2),IGreen%XR(KI-1),AKR)
+                XL(3)=PL5(IGreen%XR(KI-1),IGreen%XR(KI+1),IGreen%XR(KI+2),IGreen%XR(KI-2),IGreen%XR(KI  ),AKR)
+                XL(4)=PL5(IGreen%XR(KI  ),IGreen%XR(KI+2),IGreen%XR(KI-2),IGreen%XR(KI-1),IGreen%XR(KI+1),AKR)
+                XL(5)=PL5(IGreen%XR(KI+1),IGreen%XR(KI-2),IGreen%XR(KI-1),IGreen%XR(KI  ),IGreen%XR(KI+2),AKR)
+                ZL(1)=PL5(IGreen%XZ(KJ+2),IGreen%XZ(KJ-1),IGreen%XZ(KJ  ),IGreen%XZ(KJ+1),IGreen%XZ(KJ-2),AKZ)
+                ZL(2)=PL5(IGreen%XZ(KJ-2),IGreen%XZ(KJ  ),IGreen%XZ(KJ+1),IGreen%XZ(KJ+2),IGreen%XZ(KJ-1),AKZ)
+                ZL(3)=PL5(IGreen%XZ(KJ-1),IGreen%XZ(KJ+1),IGreen%XZ(KJ+2),IGreen%XZ(KJ-2),IGreen%XZ(KJ  ),AKZ)
+                ZL(4)=PL5(IGreen%XZ(KJ  ),IGreen%XZ(KJ+2),IGreen%XZ(KJ-2),IGreen%XZ(KJ-1),IGreen%XZ(KJ+1),AKZ)
+                ZL(5)=PL5(IGreen%XZ(KJ+1),IGreen%XZ(KJ-2),IGreen%XZ(KJ-1),IGreen%XZ(KJ  ),IGreen%XZ(KJ+2),AKZ)
+ 
+                PD1Z = DOT_PRODUCT(XL, MATMUL(IGreen%APD1Z(KI-2:KI+2, KJ-2:KJ+2), ZL))
+                PD2Z = DOT_PRODUCT(XL, MATMUL(IGreen%APD2Z(KI-2:KI+2, KJ-2:KJ+2), ZL))
+
+                IF (RRR > EPS) THEN
+                  PD1X = DOT_PRODUCT(XL, MATMUL(IGreen%APD1X(KI-2:KI+2, KJ-2:KJ+2), ZL))
+                  PD2X = DOT_PRODUCT(XL, MATMUL(IGreen%APD2X(KI-2:KI+2, KJ-2:KJ+2), ZL))
+                END IF
         ENDIF
-        KJ = MAX(MIN(KJ, 45), 2)
-
-        IF (AKR < 1) THEN           !     0 < AKR < 1
-          KI = INT(5*(ALOG10(AKR+1e-20)+6)+1)
-        ELSE                        !     1 < AKR < 99.7
-          KI = INT(3*AKR+28)
-        ENDIF
-        KI = MAX(MIN(KI, 327), 2)
-
-        XL(1) = PL2(IGreen%XR(KI),   IGreen%XR(KI+1), IGreen%XR(KI-1), AKR)
-        XL(2) = PL2(IGreen%XR(KI+1), IGreen%XR(KI-1), IGreen%XR(KI),   AKR)
-        XL(3) = PL2(IGreen%XR(KI-1), IGreen%XR(KI),   IGreen%XR(KI+1), AKR)
-        ZL(1) = PL2(IGreen%XZ(KJ),   IGreen%XZ(KJ+1), IGreen%XZ(KJ-1), AKZ)
-        ZL(2) = PL2(IGreen%XZ(KJ+1), IGreen%XZ(KJ-1), IGreen%XZ(KJ),   AKZ)
-        ZL(3) = PL2(IGreen%XZ(KJ-1), IGreen%XZ(KJ),   IGreen%XZ(KJ+1), AKZ)
-
-        PD1Z = DOT_PRODUCT(XL, MATMUL(IGreen%APD1Z(KI-1:KI+1, KJ-1:KJ+1), ZL))
-        PD2Z = DOT_PRODUCT(XL, MATMUL(IGreen%APD2Z(KI-1:KI+1, KJ-1:KJ+1), ZL))
-
-        IF (RRR > EPS) THEN
-          PD1X = DOT_PRODUCT(XL, MATMUL(IGreen%APD1X(KI-1:KI+1, KJ-1:KJ+1), ZL))
-          PD2X = DOT_PRODUCT(XL, MATMUL(IGreen%APD2X(KI-1:KI+1, KJ-1:KJ+1), ZL))
-        END IF
-
       ELSE  ! 99.7 < AKR
 
         EPZ  = EXP(AKZ)
@@ -470,7 +506,8 @@ CONTAINS
       FS      = CMPLX(-PSURR*AKZ, 0.0)
       VS(1:3) = CZERO
     ENDIF
-
+      
+      DEALLOCATE(XL,ZL)
     RETURN
   END SUBROUTINE COMPUTE_S2
 
