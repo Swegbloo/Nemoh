@@ -246,11 +246,11 @@ def generate_mesh(nemohpath,NPASTH, Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
 
 if __name__ == '__main__':
 
-    NPASTH = 50		# nombre de points othoradiaux
+    NPASTH = 30		# nombre de points othoradiaux
     RCEREXT = 50.		# distance jusqu'a laquelle la surface est maillee
     Lligne = False		# prise en compte de la ligne?
     RLIGNE = 10000.		# pour visualisation
-    RM = 6			# distance minimale (a 10cm de la ligne de flottaison)
+    RM = 5.6			# distance minimale (a 10cm de la ligne de flottaison)
     f = open('workdir.txt', 'r')
     nemohpath=f.read()
     generate_mesh(nemohpath,NPASTH, Lligne, RM, RCEREXT, RLIGNE)

@@ -283,10 +283,12 @@ def read_Nemoh_cal(Npath):
             ncal.readline()
     ncal.readline()
     wcal = ncal.readline().strip().split()
-    nw = int(wcal[0])
-    Wmin = float(wcal[1])
-    Wmax = float(wcal[2])
-    w = np.linspace(Wmin, Wmax, nw)  # pulsations
+   
+    wtype= int(wcal[0])
+    nw   = int(wcal[1])
+    Wmin = float(wcal[2])
+    Wmax = float(wcal[3])
+    w = np.linspace(Wmin, Wmax, nw)    # pulsations
     bcal = ncal.readline().strip().split()
     nbeta = int(bcal[0])
     bmin = float(bcal[1]) * np.pi / 180

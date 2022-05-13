@@ -1,1 +1,1 @@
-./../output/2022_OMAE_TESTCASES/OC5_semisubmersible/OC5_config1_QTF/mesh1970_Floating/
+./../../output/SOFTWIND/SOFTWIND_gmshmesh_half_1872-QTF-KD_check_FS/
