@@ -70,10 +70,10 @@ CONTAINS
     WH=DPI/T
     AK0=WH**2/G
     
-    IF(H.LT.0.9E20)THEN
-	AM0=X0(AK0*H)/H     
+    IF(H.EQ.0.OR.AK0*H.GT.20)THEN
+        AM0=AK0 
     ELSE
-	AM0=AK0     
+	AM0=X0(AK0*H)/H     
     ENDIF
     
     AKK=(8.*ATAN(1.)/T)**2/G            !wave number
@@ -124,7 +124,7 @@ CONTAINS
     ! OPEN(99,FILE=ID%ID(1:ID%lID)//'/QTF/QTFper'//strIMIN//'.dat') ! checking the coef compared with in NEMOH1
     ! CALCUL DES COEFFICIENTS D'INFLUENCE POTENTIEL ET VITESSES
     ! CALCULATION OF POTENTIAL INFLUENCE COEFFICIENTS AND SPEEDS    
-    IF(H.LE.0.OR.H.GT.0.9E20)THEN       ! deep water case
+    IF(H.EQ.0.OR.AK0*H.GT.20)THEN       ! deep water case
 	H=0.
 	CALL VAV(1,0.,ZER)              !S^0_ij, K^0_ij
 	WRITE(LE,7800)T
