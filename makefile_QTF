@@ -30,7 +30,7 @@ SRCQPRE=./Common/Identification.f90\
 OBJQPRE=$(SRCQPRE:.f90=.o)
 
 ################
-build: bin qtfpre qtfsol
+build: bin qtfpre qtfsol QTFpostproc
 
 bin:
 	mkdir -p $(outputdir)
@@ -69,6 +69,25 @@ asymp: ./QTF/QTFSolver/hasfsasymp.f90 ./QTF/QTFSolver/para.o
 QTFSolver: ./QTF/QTFSolver/Solver2.f90 ./QTF/QTFSolver/para.o
 		$(FC) $(FFLAGS2) ./QTF/QTFSolver/Solver2.f90 -o QTFSolver
 
+#SOURCES FORTRAN QTFpostproc (post processing module)
+SRCQPOST=./Common/Identification.f90\
+./Common/MNemohCal.f90\
+./Common/Constants.f90\
+./QTF/QTFpostproc/MQpostproc.f90\
+./QTF/QTFpostproc/Main.f90\
+
+OBJPOST=$(SRCQPOST:.f90=.o)
+
+# Rules to build
+QTFpostproc:		$(OBJPOST)
+			@test -d $(outputdir) || mkdir $(outputdir)
+			@$(FC) -o $(outputdir)/QTFpostproc $(OBJPOST)
+			@echo "QTF post-processing tool compilation successful!"
+
+clean_QTFpostproc:
+			@rm -f $(OBJPOST)
+			@rm -f $(outputdir)/QTFpostproc
+
 
 # rules for object files
 .f.o:
@@ -76,16 +95,15 @@ QTFSolver: ./QTF/QTFSolver/Solver2.f90 ./QTF/QTFSolver/para.o
 %.o::	%.f90
 	$(FC) $(FFLAGS) $< -o $@
 	
-	
 # # #Copy to local bin directory
 install : build
-	mv QTFpreProc duokap hasbo hasfs hasfscalc asymp QTFSolver $(outputdir)
+	mv QTFpreProc duokap hasbo hasfs hasfscalc asymp QTFSolver  $(outputdir)
 
 # Remove *.o and main executable
  clean:	
 	rm -f *.mod *.o
 
- cleanall:
+ cleanall: clean_QTFpostproc
 	rm ./Common/*.o
 	rm ./QTF/QTFpreProcessor/*.o
 	rm ./QTF/QTFSolver/*.o

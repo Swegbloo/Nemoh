@@ -73,6 +73,15 @@
                TYPE(TBCase),ALLOCATABLE :: RadCase(:)
                TYPE(TBCase),ALLOCATABLE :: IntCase(:)
           END TYPE Tbodyinput
+          
+          TYPE Tqtfinput
+              INTEGER  :: switch_qtfp       !LQTFP
+              INTEGER  :: NContrib          !Contrib     
+              INTEGER  :: switch_qtfduok    !Loutduok   
+              INTEGER  :: switch_qtfhasbo   !Louthasbo
+              INTEGER  :: switch_qtfhasfs   !Louthasgs
+              INTEGER  :: qtfhasfs_print(3) !Nw1,Nw2,NDOF
+          END TYPE Tqtfinput
 
           TYPE TNemCal
               TYPE(Tenvironment)           :: Env
@@ -80,6 +89,7 @@
               TYPE(Tbodyinput),ALLOCATABLE :: bodyinput(:)
               TYPE(Twaveinput)             :: waveinput
               TYPE(TOptOutput)             :: OptOUTPUT
+              TYPE(Tqtfinput)              :: qtfinput
           END TYPE TNemCal
 
         CONTAINS
@@ -169,6 +179,16 @@
              ENDIF
              READ(ufile,*)! ---QTF----
              READ(ufile,*)InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr
+             READ(ufile,*)InpNEMOHCAL%qtfinput%switch_QTFP
+             READ(ufile,*)InpNEMOHCAL%qtfinput%Ncontrib
+             READ(ufile,*)!0
+             READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfduok
+             READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfhasbo
+             READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfhasfs
+             IF (InpNEMOHCAL%qtfinput%switch_qtfhasfs==1)              &
+                READ(ufile,*)InpNEMOHCAL%qtfinput%qtfhasfs_print(1),   &
+                              InpNEMOHCAL%qtfinput%qtfhasfs_print(2),  &
+                              InpNEMOHCAL%qtfinput%qtfhasfs_print(3)   
           CLOSE(ufile)
         
           IF(InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr==1) THEN
