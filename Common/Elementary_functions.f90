@@ -111,6 +111,38 @@ CONTAINS
 
   !-------------------------------------------------------------------------------!
 
+  FUNCTION CIH_Vect(AK,Z,H,NZ) result(CIHV)
+    INTEGER           , INTENT(IN) :: NZ
+    REAL              , INTENT(IN) :: AK,H
+    REAL,DIMENSION(NZ), INTENT(IN) :: Z  
+    REAL,DIMENSION(NZ)             :: CIHV
+
+    IF((AK*H.LE.20).AND.(AK*H.GT.0.))THEN
+      CIHV=COSH(AK*(Z+H))/COSH(AK*H)
+    ELSE
+      CIHV=EXP(AK*Z)
+    ENDIF
+    RETURN
+  END FUNCTION
+
+  !-------------------------------------------------------------------------------!
+
+   FUNCTION SIH_Vect(AK,Z,H,NZ) result(SIHV)
+    INTEGER           , INTENT(IN) :: NZ
+    REAL              , INTENT(IN) :: AK,H
+    REAL,DIMENSION(NZ), INTENT(IN) :: Z  
+    REAL,DIMENSION(NZ)             :: SIHV
+
+    IF((AK*H.LE.20).AND.(AK*H.GT.0.))THEN
+      SIHV=SINH(AK*(Z+H))/COSH(AK*H)
+    ELSE
+      SIHV=EXP(AK*Z)
+    ENDIF
+    RETURN
+  END FUNCTION
+
+  !-------------------------------------------------------------------------------!
+
   FUNCTION CROSS_PRODUCT(A, B)
     REAL, DIMENSION(3) :: CROSS_PRODUCT
     REAL, DIMENSION(3), INTENT(IN) :: A, B
@@ -119,6 +151,15 @@ CONTAINS
     CROSS_PRODUCT(2) = A(3)*B(1) - A(1)*B(3)
     CROSS_PRODUCT(3) = A(1)*B(2) - A(2)*B(1)
   END FUNCTION CROSS_PRODUCT
+
+  FUNCTION CROSS_PRODUCT_COMPLEX(A, B) RESULT(CROSS_PRODUCT)
+    COMPLEX, DIMENSION(3) :: CROSS_PRODUCT
+    COMPLEX, DIMENSION(3), INTENT(IN) :: A, B
+
+    CROSS_PRODUCT(1) = A(2)*B(3) - A(3)*B(2)
+    CROSS_PRODUCT(2) = A(3)*B(1) - A(1)*B(3)
+    CROSS_PRODUCT(3) = A(1)*B(2) - A(2)*B(1)
+  END FUNCTION CROSS_PRODUCT_COMPLEX
 
   !-------------------------------------------------------------------------------!
 
@@ -167,6 +208,44 @@ CONTAINS
     PL5=((XU-U1)*(XU-U2)*(XU-U3)*(XU-U4))/&
       ((U5-U1)*(U5-U2)*(U5-U3)*(U5-U4))
     RETURN
+  END FUNCTION
+
+  FUNCTION Fun_closest(N,w,wobs) result(Iwobs)
+    INTEGER, INTENT(IN):: N
+    REAL, INTENT(IN)   :: w(N),wobs
+    INTEGER            :: Iwobs,Iw,Nw
+    REAL               :: mindist,mindistN
+    
+    mindist=w(N)-w(1)
+    DO Iw=1,N
+        IF (abs(w(Iw)-wobs)<=mindist)THEN
+                Iwobs=Iw
+                mindist=abs(w(Iw)-wobs)
+        ENDIF
+    ENDDO
+    RETURN     
+  END FUNCTION
+
+  FUNCTION Fun_MIN(N,vect) result(minvalue)
+    INTEGER,            INTENT(IN):: N
+    REAL,DIMENSION(N),  INTENT(IN):: vect
+    REAL                          :: minvalue
+    INTEGER                       ::I
+    minvalue=vect(1)
+    DO I=1,N
+    minvalue=MIN(vect(I),minvalue)
+    ENDDO    
+  END FUNCTION
+
+  FUNCTION Fun_MAX(N,vect) result(maxvalue)
+    INTEGER,            INTENT(IN):: N
+    REAL,DIMENSION(N),  INTENT(IN):: vect
+    REAL                          :: maxvalue
+    INTEGER                       :: I
+    maxvalue=vect(1)
+    DO I=1,N
+    maxvalue=MAX(vect(I),maxvalue)
+    ENDDO    
   END FUNCTION
 
   !-------------------------------------------------------------------------------!

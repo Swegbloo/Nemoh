@@ -74,6 +74,7 @@ CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
       INTEGER :: NR1,NR3,NJ,KNC,N,ITEST,NN2,NM,N1,N2,N3,N4,IJK,I1,I,J,K
       INTEGER :: NHASKIND,NPL,Louthasbo,OUT1
       REAL :: CB,SB,XL,AD
+      REAL ::dnPHIM_R,dnPHIM_I,PHIM_R,PHIM_I
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       NAN=0.
       NAN=NAN/NAN
@@ -329,7 +330,7 @@ c~         NR2=NFAC*2*NJ*2
 C ON IMPORTE LES DONNEES POUR LA PULSATION DELTA I MOUVEMENT IJ
           IF(N3.NE.0)THEN ! QTF-
             NM=(N3-1)*6+IJ  !POUR LA SORTIE DE L'ENREGISTREMENT CORRESPONDANT A LA PULSATION N3 ET LE DOF IJ.
-            
+                            
             ! CF QTFinit.f90 
             ! TPE     : PERIODE
             ! BETA    : DIRECTION 
@@ -455,11 +456,16 @@ C --------------------------------------------------------------
             DO IP=1,4
               PRO4(1,IP)=PRO2(1,IP)
             END DO
-            CALL PRODTN(PRO3,PRO4,PRO1,PRO2,FP,FM,1) ! not this products include conjugation for QTF- , RK
+            CALL PRODTN(PRO3,PRO4,PRO1,PRO2,FP,FM,1) ! not this products include conjugation for QTF- , RK 
             EFWPS(1,IJ)=EFWPS(1,IJ)+FP(1)*AIRE(II)
             EFWPS(1,IJ6)=EFWPS(1,IJ6)+FP(2)*AIRE(II)
             EFWMN(1,IJ)=EFWMN(1,IJ)+FM(1)*AIRE(II)  !ON CALCULE LA CONTRIBUTION A L'EFFORT SUIVANT X (RE) EN AJOUTANT POUR CHAQUE FACE CE QUE L'ON A CALCULE
             EFWMN(1,IJ6)=EFWMN(1,IJ6)+FM(2)*AIRE(II)
+            !IF (IJ==1) THEN
+            !    PRINT*,II,FM(1),FM(2)
+            !    PRINT*,II,FP(1),FP(2)
+            !ENDIF
+
           END DO
           END DO
           EFP=EFWPS(1,IJ)
@@ -539,6 +545,11 @@ C --------------------------------------------------------------
             EFWPS(2,IJ6)=EFWPS(2,IJ6)+FP(2)*AIRE(II)
             EFWMN(2,IJ)=EFWMN(2,IJ)+FM(1)*AIRE(II)  !ON CALCULE LA CONTRIBUTION A L'EFFORT SUIVANT X (RE) EN AJOUTANT POUR CHAQUE FACE CE QUE L'ON A CALCULE
             EFWMN(2,IJ6)=EFWMN(2,IJ6)+FM(2)*AIRE(II)
+C            IF (IJ==1) THEN
+C                PRINT*,II,FM(1),FM(2)
+C                PRINT*,II,FP(1),FP(2)
+C            ENDIF
+
           END DO
           END DO
           EFP=EFWPS(2,IJ)
@@ -694,14 +705,25 @@ C LE CONTOUR EST ORIENTE VERS L'EXTERIEUR DU CORPS (INVERSE DE Z!)
      1 -FM(2)*PMM(JJ,II))                            ! ON FAIT TERME 4LIGNES PLUS HAUT *PSI_K ET ON INTEGRE
             EFWMN(3,IJ6)=EFWMN(3,IJ6)+GAMMA0*(FM(1)*PMM(JJ,II)
      1 +FM(2)*PRM(JJ,II))
+            IF (IJ==1 .AND. JJ==2) THEN
+!                PRINT*,II-NFAC,GAMMA0*(FM(1)*PRM(JJ,II)
+!     1 -FM(2)*PMM(JJ,II)), GAMMA0*(FM(1)*PMM(JJ,II)
+!     1 +FM(2)*PRM(JJ,II)) 
+!                PRINT*,II-NFAC,RHO*WM*GAMMA0*(FM(1)*PMM(JJ,II)
+!     1 +FM(2)*PRM(JJ,II)), 
+!     1   -RHO*WM*GAMMA0*(FM(1)*PRM(JJ,II)
+!     1 -FM(2)*PMM(JJ,II)) 
+!               PRINT*,II-NFAC,FM(1)*GAMMA0,FM(2)*GAMMA0
+            ENDIF
+
           END DO
           END DO
           EFP=EFWPS(3,IJ)
           EFM=EFWMN(3,IJ)
-          EFWPS(3,IJ)=-EFWPS(3,IJ6)*RHO*WP
+          EFWPS(3,IJ) =-EFWPS(3,IJ6)*RHO*WP
           EFWPS(3,IJ6)=EFP*RHO*WP
-          EFWMN(3,IJ)=-EFWMN(3,IJ6)*RHO*WM            !ON MULTIPLIE PAR IWM RHO
-          EFWMN(3,IJ6)=EFM*RHO*WM
+          EFWMN(3,IJ) =-EFWMN(3,IJ6)*RHO*WM            !ON MULTIPLIE PAR IWM RHO
+          EFWMN(3,IJ6)=EFM*RHO*WM                  
 C
 C
 C ** INTEGRALE D'HASKIND SUR LE CORPS **
@@ -752,6 +774,7 @@ C --------------------------------------------------------------
               PRO1(5,IP)=PRO1(3,IP)
               PRO1(6,IP)=PRO1(1,IP)
             END DO
+            
             PRO2(1,1)=-A1(6)*CN1                        !! R.N
             PRO2(1,2)=-A1(12)*CN1
             PRO2(1,3)=-A2(6)*CN1
@@ -781,8 +804,8 @@ C --------------------------------------------------------------
             PRO2(6,2)=A1(10)*CN3
             PRO2(6,3)=A2(4)*CN3
             PRO2(6,4)=A2(10)*CN3
-
-            CALL PRODTN(PRO1,PRO2,PRO1,PRO2,FP,FM,6)
+            !edited by RK 220712 to be same as in the eqs
+            CALL PRODTN(PRO1,PRO2,PRO1,-PRO2,FP,FM,6)  !-PRO2 to be consistent (RK) 
             AIR=AIRE(II)
             EFWPS(4,IJ)=EFWPS(4,IJ)+AIR*(FP(1)*PRP(JJ,II)
      1 -FP(2)*PMP(JJ,II))                                   !MULTIPLICATION PAR PSI
@@ -792,6 +815,10 @@ C --------------------------------------------------------------
      1 -FM(2)*PMM(JJ,II))
             EFWMN(4,IJ6)=EFWMN(4,IJ6)+AIR*(FM(1)*PMM(JJ,II)
      1 +FM(2)*PRM(JJ,II))
+            !IF (IJ==1) THEN
+            !    PRINT*,II,FM(1),FM(2)
+            !    PRINT*,II,FP(1),FP(2)
+            !ENDIF
           END DO
           END DO
           EFP=EFWPS(4,IJ)
@@ -845,6 +872,15 @@ C         ENDIF
             AZCHP=CH(AKPP,ZM(II),HII)
             AZSHM=SH(AKMM,ZM(II),HII)
             AZSHP=SH(AKPP,ZM(II),HII)
+            PHIM_R=-PHIM*AZCHM*SIN(COEFM)
+            PHIM_I=PHIM*AZCHM*COS(COEFM)
+            dnPHIM_R=(-AKMM*CB*PHIM_I)*CN1+(-AKMM*SB*PHIM_I)*CN2+
+     1               AKMM*TANH(AKMM*(HII+ZM(II)))*PHIM_R*CN3 
+            dnPHIM_I=(AKMM*CB*PHIM_R)*CN1+(AKMM*SB*PHIM_R)*CN2+
+     1               AKMM*TANH(AKMM*(HII+ZM(II)))*PHIM_I*CN3  
+
+
+
             ACQM=AIRE(II)*PHIM*AKMM
             DFRM=-AZCHM*(CN1*CB+CN2*SB)*COS(COEFM)-AZSHM*CN3*SIN(COEFM)
             DFMM=-AZCHM*(CN1*CB+CN2*SB)*SIN(COEFM)+AZSHM*CN3*COS(COEFM)
@@ -860,7 +896,20 @@ C         ENDIF
      1 -DFMM*PMM(JJ,II))
             EFWMN(5,IJ6)=EFWMN(5,IJ6)+ACQM*(DFRM*PMM(JJ,II)
      1 +DFMM*PRM(JJ,II))
-             ENDIF
+C             IF (IJ==1) THEN
+C             print*,II,(-AKMM*CB*PHIM_I),(AKMM*CB*PHIM_R)
+C             print*,II,(-AKMM*SB*PHIM_I),(AKMM*SB*PHIM_R)
+C             print*,II,AKMM*TANH(AKMM*(HII+ZM(II)))*PHIM_R,
+C     1                 AKMM*TANH(AKMM*(HII+ZM(II)))*PHIM_I
+
+C              print*,II,dnPHIM_R,dnPHIM_I
+C              print*,II,PRM(JJ,II),PMM(JJ,II)
+C               print*,II,ACQM*(DFRM*PRM(JJ,II)
+C     1 -DFMM*PMM(JJ,II)),ACQM*(DFRM*PMM(JJ,II)
+C     1 +DFMM*PRM(JJ,II))
+C              ENDIF
+
+            ENDIF
           END DO
           END DO
           EFP=EFWPS(5,IJ)
@@ -869,6 +918,7 @@ C         ENDIF
           EFWPS(5,IJ6)=EFP*RHO*WP
           EFWMN(5,IJ)=-EFWMN(5,IJ6)*RHO*WM
           EFWMN(5,IJ6)=EFM*RHO*WM
+             
 C FIN DE LA SOMMATION SUR LES 6 MOUVEMENTS
         END DO
         

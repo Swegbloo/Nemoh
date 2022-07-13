@@ -44,17 +44,20 @@ MODULE M_INITIALIZE_GREEN
 
 CONTAINS
 
-  SUBROUTINE INITIALIZE_GREEN(VFace,Mesh,Depth,IGreen)
+  SUBROUTINE INITIALIZE_GREEN(VFace,Mesh,Depth,XM_add,NP_add,IGreen)
 
   !INPUT/OUTPUT
   TYPE(TVFace),                 INTENT(IN)  :: VFace         
   TYPE(TMesh),                  INTENT(IN)  :: Mesh
   REAL,                         INTENT(IN)  :: Depth
-  
+  INTEGER,                      INTENT(IN)  :: NP_add !addition calc point
+  REAL,DIMENSION(NP_add,3),     INTENT(IN)  :: XM_add !ie on waterline
+                                                      !used in QPreprocessor
   TYPE(TGREEN),                 INTENT(OUT) :: IGreen  
 
   !LOCAL
   INTEGER       :: I,J
+  REAL          :: XM_I(3)
 
   IF (FLAG_IGREEN==1) THEN
   IGREEN%IR=328
@@ -65,14 +68,14 @@ CONTAINS
   ENDIF  
   IGREEN%NPINTE=251
   
-  ALLOCATE(IGREEN%FSP1(Mesh%Npanels,Mesh%Npanels))
-  ALLOCATE(IGREEN%FSM1(Mesh%Npanels,Mesh%Npanels))
-  ALLOCATE(IGREEN%VSP1(Mesh%Npanels,Mesh%Npanels,3))
-  ALLOCATE(IGREEN%VSM1(Mesh%Npanels,Mesh%Npanels,3))
-  ALLOCATE(IGREEN%FSP1_INF(Mesh%Npanels,Mesh%Npanels))
-  ALLOCATE(IGREEN%FSM1_INF(Mesh%Npanels,Mesh%Npanels))
-  ALLOCATE(IGREEN%VSP1_INF(Mesh%Npanels,Mesh%Npanels,3))
-  ALLOCATE(IGREEN%VSM1_INF(Mesh%Npanels,Mesh%Npanels,3))
+  ALLOCATE(IGREEN%FSP1(Mesh%Npanels+NP_add,Mesh%Npanels))
+  ALLOCATE(IGREEN%FSM1(Mesh%Npanels+NP_add,Mesh%Npanels))
+  ALLOCATE(IGREEN%VSP1(Mesh%Npanels+NP_add,Mesh%Npanels,3))
+  ALLOCATE(IGREEN%VSM1(Mesh%Npanels+NP_add,Mesh%Npanels,3))
+  ALLOCATE(IGREEN%FSP1_INF(Mesh%Npanels+NP_add,Mesh%Npanels))
+  ALLOCATE(IGREEN%FSM1_INF(Mesh%Npanels+NP_add,Mesh%Npanels))
+  ALLOCATE(IGREEN%VSP1_INF(Mesh%Npanels+NP_add,Mesh%Npanels,3))
+  ALLOCATE(IGREEN%VSM1_INF(Mesh%Npanels+NP_add,Mesh%Npanels,3))
 
   ALLOCATE(IGREEN%XR(IGREEN%IR),IGREEN%XZ(IGREEN%JZ))
   ALLOCATE(IGREEN%APD1X(IGREEN%IR,IGREEN%JZ),IGREEN%APD2X(IGREEN%IR,IGREEN%JZ))
@@ -80,19 +83,25 @@ CONTAINS
 
 
   !First term of Green function
-   DO I = 1, Mesh%NPanels
+   DO I = 1, Mesh%NPanels+NP_add
+        IF (I<=Mesh%NPanels) THEN
+             XM_I=VFace%XM(I,:)
+        ELSE
+             XM_I=XM_add(I-Mesh%NPanels,:)
+        ENDIF
+
         DO J = 1, Mesh%NPanels
           ! First part of the Green function
           ! These output are independent of omega and computed only once.
           CALL VAV                                 &
-          ( I, Mesh%XM(:, I), J,VFace,Mesh, Depth, &
+          ( I, XM_I, J,VFace,Mesh, Depth, &
             IGreen%FSP1(I,J), IGreen%FSM1(I,J),    &
             IGreen%VSP1(I,J,:), IGreen%VSM1(I,J,:) &
             )
            IF (Depth .NE. INFINITE_DEPTH) THEN
            !preparation in case kD>20
            CALL VAV                                 &
-          ( I, Mesh%XM(:, I), J,VFace,Mesh, INFINITE_DEPTH, &
+          ( I, XM_I, J,VFace,Mesh, INFINITE_DEPTH, &
             IGreen%FSP1_INF(I,J), IGreen%FSM1_INF(I,J),    &
             IGreen%VSP1_INF(I,J,:), IGreen%VSM1_INF(I,J,:) &
             )

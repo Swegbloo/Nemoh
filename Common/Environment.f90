@@ -20,7 +20,7 @@
 !--------------------------------------------------------------------------------------
 MODULE MEnvironment
 
-  USE Elementary_functions, ONLY: CIH, SIH
+  USE Elementary_functions, ONLY: CIH, SIH,X0,CIH_Vect,SIH_Vect
 
   IMPLICIT NONE  
 
@@ -98,6 +98,53 @@ CONTAINS
     END IF
   END FUNCTION Wavenumber
 
+  FUNCTION Fun_Dispersion(k,D,g)  result(ww)
+        REAL, INTENT(IN) :: k,D,g
+        REAL ww
+        IF ((D == 0.) .OR. (k*D >= 20)) THEN
+        ww=SQRT(g*k)
+        ELSE
+        ww=SQRT(g*k*tanh(k*D))
+        ENDIF
+  END FUNCTION
+
+  FUNCTION Fun_inverseDispersion(w,D,g) result(wavenumber)
+        !inverse of dispersion relation
+        !should be same as the Wavenumber function above
+
+        REAL, INTENT(IN) :: w,D,g
+        REAL             :: wavenumber
+
+        IF ((D == 0.) .OR. (w**2*D/g >= 20)) THEN
+          wavenumber = w**2/g
+        ELSE
+          wavenumber = X0(w**2*D/g)/D
+          ! X0(y) returns the solution of y = x * tanh(x)
+        END IF
+        RETURN
+  END Function
+
+  FUNCTION FunVect_inverseDispersion(Nw,w,D,g) result(wavenumber)
+        !inverse of dispersion relation
+        !should be same as the Wavenumber function above
+
+        INTEGER,            INTENT(IN) :: Nw
+        REAL,               INTENT(IN) :: D,g
+        REAL,DIMENSION(Nw), INTENT(IN) :: w
+        INTEGER                        :: Iw
+        REAL,DIMENSION(Nw)             :: wavenumber
+        DO Iw=1,Nw
+             IF ((D == 0.) .OR. (w(Iw)**2*D/g >= 20)) THEN
+               wavenumber(Iw) = w(Iw)**2/g
+             ELSE
+               wavenumber(Iw) = X0(w(Iw)**2*D/g)/D
+               ! X0(y) returns the solution of y = x * tanh(x)
+             END IF
+        ENDDO
+        RETURN
+  END Function
+
+
   SUBROUTINE Compute_Wave(k,w,beta,x,y,z,Phi,p,Vx,Vy,Vz,Environment)
     ! Calculate the complex potential, pressure and fluid velocities for a regular wave eta=sin(k*wbar-wt)
 
@@ -114,5 +161,47 @@ CONTAINS
     Vy=Environment%g/w*k*SIN(beta)*CIH(k,z,Environment%Depth)*CEXP(II*k*wbar)
     Vz=-II*Environment%g/w*k*SIH(k,z,Environment%Depth)*CEXP(II*k*wbar)
   END SUBROUTINE Compute_wave
+
+  SUBROUTINE COMPUTE_INC_POTENTIAL_VELOCITY(k,w,beta,                         &
+                                  XM,Npanels,XM_ADD,NP_Add,                   &
+                                  Environment,Isym,Potential,Velocity)
+    ! Calculate the complex potential, and fluid velocities for a regular wave eta=sin(k*wbar-wt)
+    ! INPUT/OUTPUT
+    REAL,                                INTENT(IN) :: k,w,beta
+    TYPE(TEnvironment),                  INTENT(IN) :: Environment
+    INTEGER,                             INTENT(IN) :: Npanels,NP_Add
+    INTEGER,                             INTENT(IN) :: Isym             !1=symmetry
+    REAL,DIMENSION(Npanels,3),           INTENT(IN) :: XM
+    REAL,DIMENSION(NP_Add,3),            INTENT(IN) :: XM_Add
+        COMPLEX,DIMENSION((Npanels+NP_Add)*2**Isym),   INTENT(OUT):: Potential
+    COMPLEX,DIMENSION((Npanels+NP_Add)*2**Isym,3), INTENT(OUT):: Velocity
+    !Local var
+    INTEGER                             :: NPTOT
+    REAL,DIMENSION(Npanels+NP_Add)      :: wbar,QZ,dzQZ
+    REAL,DIMENSION(Npanels+NP_Add,3)    :: XM_ALL
+    COMPLEX,PARAMETER                   :: II=CMPLX(0.,1.)
+    NPTOT=Npanels+NP_Add
+    XM_ALL(1:Npanels,:)=XM
+    IF (NP_Add>0)  THEN
+    XM_ALL(Npanels+1:NPanels+NP_Add,:)=XM_Add  
+    ENDIF
+    QZ=CIH_Vect(k,XM_ALL(:,3),Environment%Depth,Npanels+NP_Add)
+    dzQZ=k*SIH_Vect(k,XM_ALL(:,3),Environment%Depth,Npanels+NP_Add)
+
+    wbar=(XM_ALL(:,1)-Environment%XEFF)*COS(beta)+(XM_ALL(:,2)-Environment%YEFF)*SIN(beta)
+    Potential(1:NPTOT)=-II*Environment%g/w*QZ*CEXP(II*k*wbar)
+
+    Velocity(1:NPTOT,1)=Environment%g/w*k*COS(beta)*QZ*CEXP(II*k*wbar)
+    Velocity(1:NPTOT,2)=Environment%g/w*k*SIN(beta)*QZ**CEXP(II*k*wbar)
+    Velocity(1:NPTOT,3)=-II*Environment%g/w*dzQZ*CEXP(II*k*wbar)
+    IF (ISYM==1)THEN
+    wbar=(XM_ALL(:,1)-Environment%XEFF)*COS(beta)-(XM_ALL(:,2)-Environment%YEFF)*SIN(beta)
+    Potential(NPTOT+1:2*NPTOT)=-II*Environment%g/w*QZ*CEXP(II*k*wbar)
+    Velocity(NPTOT+1:2*NPTOT,1)=Environment%g/w*k*COS(beta)*QZ*CEXP(II*k*wbar)
+    Velocity(NPTOT+1:2*NPTOT,2)=Environment%g/w*k*SIN(beta)*QZ**CEXP(II*k*wbar)
+    Velocity(NPTOT+1:2*NPTOT,3)=-II*Environment%g/w*dzQZ*CEXP(II*k*wbar)
+    ENDIF
+
+  END SUBROUTINE COMPUTE_INC_POTENTIAL_VELOCITY
 
 END MODULE 

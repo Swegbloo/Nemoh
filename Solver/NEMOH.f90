@@ -61,7 +61,7 @@ PROGRAM Main
   COMPLEX, DIMENSION(:), ALLOCATABLE     :: ZIGB, ZIGS     ! Computed source distribution
   COMPLEX, DIMENSION(:,:,:), ALLOCATABLE :: V, Vinv,S      ! Influece coefficients
   COMPLEX, DIMENSION(:), ALLOCATABLE :: Potential          ! Computed potential
-
+  REAL,DIMENSION(3)                  :: NOINPUT             ! unused but has to be declared
   TYPE(TVFACE)                       :: VFace              ! Face Mesh structure variable                   
   TYPE(TGREEN)                       :: IGreen             ! Initial Green variables
   
@@ -96,7 +96,7 @@ PROGRAM Main
 
   CALL Prepare_FaceMesh(Mesh,SolverOpt%NP_GQ,VFace)
 
-  CALL INITIALIZE_GREEN(VFace,Mesh,Env%depth,IGreen)
+  CALL INITIALIZE_GREEN(VFace,Mesh,Env%depth,NOINPUT,0,IGreen)
   ALLOCATE(S(Mesh%NPanels,Mesh%NPanels,2**Mesh%Isym))
   ALLOCATE(V(Mesh%NPanels,Mesh%NPanels,2**Mesh%Isym))
   ALLOCATE(Vinv(Mesh%NPanels,Mesh%NPanels,2**Mesh%Isym))

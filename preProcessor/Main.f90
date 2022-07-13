@@ -80,7 +80,7 @@
 !   --- Initialize and read input datas ----------------------------------------------------------------------------------------
 !
     CALL ReadTID(ID)
-    CALL ReadTMesh(Mesh,ID)  
+    CALL ReadTMesh(Mesh,ID) 
     CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
 !   ----------- passing inputs ------------------------------------------
     Environment =InpNEMOHCAL%Env

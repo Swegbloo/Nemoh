@@ -620,11 +620,19 @@ C -------------------------------------------------
                   EFWPS(1,J+6,KNC)=EFWPS(1,J+6,KNC)+FP(2)*ACQ           !!
                   EFWMN(1,J,KNC)=EFWMN(1,J,KNC)+FM(1)*ACQ               !!
                   EFWMN(1,J+6,KNC)=EFWMN(1,J+6,KNC)+FM(2)*ACQ           !!
+
+               !IF (J==1) THEN
+                !print*,II,AIRE(II)*CN(II,J)*(((-1.)**(J+1))**(JJ+1))
+               ! print*,II,FM*ACQ,FP*ACQ
+               !ENDIF
             END DO
+                   !print*,II,FM,FP
       END DO
       END DO
       Q1(1,I1,I2)=EFWMN(1,3,KNC)/2
       Q1(2,I1,I2)=EFWMN(1,9,KNC)/2
+      !print*,NMI,NMA
+      !print*,I1,I2,EFWMN(1,1,KNC),EFWMN(1,7,KNC)
 C
 C *** CONTRIBUTION DUE AU PRODUIT DU GRADIENT DE PRESSION ET
 C                                                    DU MOUVEMENT ***
@@ -670,11 +678,17 @@ C -------------------------------------------------------------------
                   EFWPS(2,J+6,KNC)=EFWPS(2,J+6,KNC)+FP(2)*ACQ
                   EFWMN(2,J,KNC)=EFWMN(2,J,KNC)+FM(1)*ACQ
                   EFWMN(2,J+6,KNC)=EFWMN(2,J+6,KNC)+FM(2)*ACQ
+               !IF (J==1) THEN
+               !print*,II,AIRE(II)*CN(II,J)*(((-1.)**(J+1))**(JJ+1))
+               !print*,II,FM*ACQ,FP*ACQ
+               !ENDIF
             END DO
       END DO
       END DO
       Q2(1,I1,I2)=EFWMN(2,3,KNC)/2
       Q2(2,I1,I2)=EFWMN(2,9,KNC)/2
+
+C     print*,I1,I2,EFWMN(2,1,KNC),EFWMN(2,7,KNC)
 C
 C *** CONTRIBUTION DE LA VITESSE D'AVANCE DANS LE PRODUIT
 C                               GRADIENT DE VITESSE ET MOUVEMENT ***
@@ -826,6 +840,7 @@ c~       CALL FORINE(AINTINERTIEM,A1,FINT2)
             EFWPS(3,J+6,KNC)=FP(2)
             EFWMN(3,J,KNC)=FM(1)
             EFWMN(3,J+6,KNC)=FM(2)
+           ! IF (J==1) print*,FM(1),FM(2),FP(1),FP(2)
       END DO
       Q3(1,I1,I2)=EFWMN(3,3,KNC)/2
       Q3(2,I1,I2)=EFWMN(3,9,KNC)/2
@@ -866,12 +881,18 @@ c~      1 /COST      ! attention cos(theta)
                         EFWPS(4,J+6,KNC)=EFWPS(4,J+6,KNC)-FP(2)*ACQ
                         EFWMN(4,J,KNC)=EFWMN(4,J,KNC)-FM(1)*ACQ
                         EFWMN(4,J+6,KNC)=EFWMN(4,J+6,KNC)-FM(2)*ACQ
+                    !IF (J==1) THEN
+                    !print*,II,AIRE(II)*CN(II,J)*(((-1.)**(J+1))**(JJ+1))
+                    !print*,II,-FM*ACQ,-FP*ACQ
+                    !ENDIF
                   END DO
             ENDIF
       END DO 
       END DO
       Q4(1,I1,I2)=EFWMN(4,3,KNC)/2
       Q4(2,I1,I2)=EFWMN(4,9,KNC)/2
+
+!      print*,I1,I2,EFWMN(4,1,KNC),EFWMN(4,7,KNC)
 C
 C *** CONTRIBUTION COMPLEMENTAIRE HYDROSTATIQUE ***
 CC *** ADDITIONAL HYDROSTATIC CONTRIBUTION ***

@@ -4,12 +4,13 @@
 
 MODULE MFace
   ! A single face from a mesh.
-
+  USE CONSTANTS
   USE MMesh
   USE Elementary_functions, ONLY: CROSS_PRODUCT
   IMPLICIT NONE
 
-  PUBLIC        :: Prepare_FaceMesh,VFace_to_Face,New_Face_Extracted_From_Mesh
+  PUBLIC        :: Prepare_FaceMesh,VFace_to_Face,New_Face_Extracted_From_Mesh, &
+                   Prepare_Waterline
   PRIVATE       :: Face_to_VFACE,PREPARE_GAUSS_QUADRATURE_ON_MESH
 
   TYPE TDATGQ
@@ -43,9 +44,15 @@ MODULE MFace
     INTEGER                             :: NP_GQ! Number of point of the Gauss quadrature
     REAL,DIMENSION(:,:)  ,ALLOCATABLE   :: dXdXG_WGQ_per_A  !a factor dxdXG*WGQ/A for the Gauss Q Integral
     REAL,DIMENSION(:,:,:),ALLOCATABLE   :: XM_GQ            !Gauss Quad. nodes (x,y,z) in a panel
-
   END TYPE
 
+  ! A vector of waterline segments
+  TYPE TWLine
+    REAL, DIMENSION(:,:),ALLOCATABLE    :: XM             ! Centroid of Waterline segment
+    REAL, DIMENSION(:), ALLOCATABLE     :: SegLength      ! Segment length
+    INTEGER, DIMENSION(:), ALLOCATABLE  :: IndexPanel     ! Index of panel where the
+    INTEGER                             :: NWlineseg      ! Number of waterline segments
+  END TYPE
  
 CONTAINS
 
@@ -241,6 +248,48 @@ CONTAINS
   DATAGQ%YGQ=YGQ(:,:)
   DATAGQ%WGQ=WGQ(:,:)
    
+  END SUBROUTINE
+
+  SUBROUTINE Prepare_Waterline(VFace,BodyDiameter,Npanels,WLine)
+     !Input/output
+     TYPE(TVFace), INTENT(IN)    :: VFace
+     REAL,         INTENT(IN)    :: BodyDiameter
+     INTEGER,      INTENT(IN)    :: Npanels
+     TYPE(TWLine), INTENT(OUT)   :: WLine
+     !Local
+     REAL,DIMENSION(Npanels,3)     :: XM_WLine
+     REAL,DIMENSION(Npanels)       :: SegLength
+     INTEGER, DIMENSION(Npanels)   :: IndexPanel
+     INTEGER                       :: IlineSeg,I,J
+     REAL                          :: Distance,ZER
+     
+     IlineSeg=0
+     ZER=-EPS*BodyDiameter
+     DO I=1,Npanels
+        ! restrict to body panels, not the lid panels
+        IF(VFace%XM(I,3).LT.ZER) THEN
+          DO J=1,4 !Nodes index in the panel-I
+            DISTANCE=NORM2(VFace%X(I,:,J+1)-VFace%X(I,:,J))
+            IF (DISTANCE.GT.EPS) THEN
+               ! restrict to Z nodes on the waterline
+               IF (VFace%X(I,3,J+1)+VFace%X(I,3,J).GE.ZER) THEN
+                  IlineSeg=IlineSeg+1
+                  XM_WLine(IlineSeg,1:2)=(VFace%X(I,1:2,J+1)+VFace%X(I,1:2,J))*0.5 &
+                                          +VFace%N(I,1:2)*0.01*DISTANCE
+                  XM_WLine(IlineSeg,3)=ZER
+                  SegLength(IlineSeg)=DISTANCE
+                  IndexPanel(IlineSeg)=I
+               ENDIF
+            ENDIF
+          ENDDO 
+        ENDIF
+     ENDDO
+    ALLOCATE(WLine%XM(IlineSeg,3),WLine%SegLength(IlineSeg))
+    ALLOCATE(WLine%IndexPanel(IlineSeg))
+    WLine%NWlineseg=IlineSeg
+    Wline%XM(1:IlineSeg,1:3)=XM_WLine(1:IlineSeg,1:3)
+    Wline%SegLength(1:IlineSeg)=SegLength(1:IlineSeg)
+    Wline%IndexPanel(1:IlineSeg)=IndexPanel(1:IlineSeg)
   END SUBROUTINE
 
   ! SUBROUTINE Reflect_Face_Around_XZ_Plane(Face)

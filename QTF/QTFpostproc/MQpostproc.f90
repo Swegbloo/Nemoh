@@ -132,10 +132,12 @@ CONTAINS
                                       QTFtotR(J),QTFtotI(J)
                     END DO
                 END DO
-                CLOSE(u1R)
-                CLOSE(u1I)
-                CLOSE(u2R)
-                CLOSE(u3I)
+                IF (IDCONTRIB(1)==1) CLOSE(u1R)
+                IF (IDCONTRIB(1)==1) CLOSE(u1I)
+                IF (IDCONTRIB(2)==1) CLOSE(u2R)
+                IF (IDCONTRIB(2)==1) CLOSE(u2I)
+                IF (IDCONTRIB(3)==1) CLOSE(u3R)
+                IF (IDCONTRIB(3)==1) CLOSE(u3I)
               ENDIF
               DEALLOCATE(QTFtotR,QTFtotI,w)
               DEALLOCATE(lineDUOKR,lineHASBOR,lineHASFSR,lineASYMPR)

@@ -246,7 +246,7 @@ def generate_mesh(nemohpath,NPASTH, Lligne, RM=0.10, RCEREXT=300, RLIGNE=10000):
 
 if __name__ == '__main__':
 
-    NPASTH = 30		# nombre de points othoradiaux
+    NPASTH = 60		# nombre de points othoradiaux
     RCEREXT = 50.		# distance jusqu'a laquelle la surface est maillee
     Lligne = False		# prise en compte de la ligne?
     RLIGNE = 10000.		# pour visualisation

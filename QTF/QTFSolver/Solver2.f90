@@ -67,6 +67,7 @@
     DO I=1,8
       READ(10,*)
     END DO
+    READ(10,*) !NP,wmin,wmax  !for an updated input file NEMOH.CAL
     READ(10,*) LQTFP
 ! ! 	read what contrib to compute
     READ(10,*) contrib
