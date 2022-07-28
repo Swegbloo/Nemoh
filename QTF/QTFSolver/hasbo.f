@@ -461,10 +461,9 @@ C --------------------------------------------------------------
             EFWPS(1,IJ6)=EFWPS(1,IJ6)+FP(2)*AIRE(II)
             EFWMN(1,IJ)=EFWMN(1,IJ)+FM(1)*AIRE(II)  !ON CALCULE LA CONTRIBUTION A L'EFFORT SUIVANT X (RE) EN AJOUTANT POUR CHAQUE FACE CE QUE L'ON A CALCULE
             EFWMN(1,IJ6)=EFWMN(1,IJ6)+FM(2)*AIRE(II)
-            !IF (IJ==1) THEN
-            !    PRINT*,II,FM(1),FM(2)
-            !    PRINT*,II,FP(1),FP(2)
-            !ENDIF
+           ! IF (IJ==1.AND. JJ==1) THEN
+           !     PRINT*,II,FM(1),FM(2),FP(1),FP(2)
+           ! ENDIF
 
           END DO
           END DO
@@ -475,13 +474,13 @@ C --------------------------------------------------------------
           EFWMN(1,IJ)=-EFWMN(1,IJ6)*RHO*WM             
           EFWMN(1,IJ6)=EFM*RHO*WM
 
-
 C ** INTEGRALE D'HASKIND SUR LE CORPS **
 C                             TERME:   -(GRAD(PHI).N) (GRAD(PSI).MOM)
 C HVN by RK
 C --------------------------------------------------------------
+          
           DO JJ=1,NJ
-          DO II=1,NFAC
+            DO II=1,NFAC
             XOII=XM(II)-XEFF
             YOII=YM(II)*(-1.)**(JJ+1)-YEFF
             ZOII=ZM(II)-ZEFF
@@ -545,10 +544,13 @@ C --------------------------------------------------------------
             EFWPS(2,IJ6)=EFWPS(2,IJ6)+FP(2)*AIRE(II)
             EFWMN(2,IJ)=EFWMN(2,IJ)+FM(1)*AIRE(II)  !ON CALCULE LA CONTRIBUTION A L'EFFORT SUIVANT X (RE) EN AJOUTANT POUR CHAQUE FACE CE QUE L'ON A CALCULE
             EFWMN(2,IJ6)=EFWMN(2,IJ6)+FM(2)*AIRE(II)
-C            IF (IJ==1) THEN
-C                PRINT*,II,FM(1),FM(2)
-C                PRINT*,II,FP(1),FP(2)
-C            ENDIF
+           ! IF (IJ==1.AND. II.LE.100) THEN
+           !     !PRINT*,II,AIRE(II)
+           !     PRINT*,JJ,II,FM(1),FM(2),FP(1),FP(2)
+           !     PRINT*,II,VXR1(JJ,II),VYR1(JJ,II),VZR1(JJ,II)
+           !     PRINT*,II,VXM1(JJ,II),VYM1(JJ,II),VZM1(JJ,II)
+           !    ! PRINT*,JJ,II,EFWMN(2,IJ),EFWMN(2,IJ6)
+           ! ENDIF
 
           END DO
           END DO
@@ -558,7 +560,8 @@ C            ENDIF
           EFWPS(2,IJ6)=-EFP*RHO*WP
           EFWMN(2,IJ)=EFWMN(2,IJ6)*RHO*WM             
           EFWMN(2,IJ6)=-EFM*RHO*WM
-
+                
+       !  print*,EFWMN(2,IJ),EFWMN(2,IJ6)
 
 
 CC ** INTEGRALE D'HASKIND SUR LE CORPS **
@@ -693,7 +696,7 @@ C LE CONTOUR EST ORIENTE VERS L'EXTERIEUR DU CORPS (INVERSE DE Z!)
             PRO2(4,2)=VXM1(JJ,II)
             PRO2(4,3)=VXR2(JJ,II)
             PRO2(4,4)=VXM2(JJ,II)
-           
+           ! curl(gradPhi,MOM) 
             CALL PRODTN(PRO1,PRO2,PRO1,PRO2,FP,FM,4)!NORMALEMENT VERIFIE, C'EST OK ON OBTIENT BIEN LES BONS SIGNES:(POUR FM) +1/2 DL/|DL|.(\NABLA PHI_1 ^ MOM_2*   + \NABLA PHI_2* ^ MOM_1)
             AIR=AIRE(II)
            ! print*,GAMMA0,AIR  !GAMMA0=AIR for II>NFAC 
@@ -723,7 +726,7 @@ C LE CONTOUR EST ORIENTE VERS L'EXTERIEUR DU CORPS (INVERSE DE Z!)
           EFWPS(3,IJ) =-EFWPS(3,IJ6)*RHO*WP
           EFWPS(3,IJ6)=EFP*RHO*WP
           EFWMN(3,IJ) =-EFWMN(3,IJ6)*RHO*WM            !ON MULTIPLIE PAR IWM RHO
-          EFWMN(3,IJ6)=EFM*RHO*WM                  
+          EFWMN(3,IJ6)=EFM*RHO*WM                 
 C
 C
 C ** INTEGRALE D'HASKIND SUR LE CORPS **

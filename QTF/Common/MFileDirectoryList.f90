@@ -15,4 +15,24 @@ CHARACTER(LEN=*), PARAMETER      ::TotVelFILE='TotalVelocityBodyWLine.bin'
 CHARACTER(LEN=*), PARAMETER      ::RadPotFILE='RadiationPotentialBodyWLine.bin'
 CHARACTER(LEN=*), PARAMETER      ::RadVelFILE='RadiationVelocityBodyWLine.bin'
 
+
+CHARACTER(LEN=*), PARAMETER      ::  OutQTFDir ='/results/QTF/'
+CHARACTER(LEN=*), PARAMETER      ::  OutFileDM ='QTFM_DUOK.dat'
+CHARACTER(LEN=*), PARAMETER      ::  OutFileDP ='QTFP_DUOK.dat'
+CHARACTER(LEN=*), PARAMETER      ::  OutFileHBM='QTFM_HASBO.dat'
+CHARACTER(LEN=*), PARAMETER      ::  OutFileHBP='QTFP_HASBO.dat'
+  !Output variables
+  !DUOK      : Quadratic QTF
+  !HASBO     : Potential QTF-Haskind on Body term
+  !HASFS     : Potential QTF-Haskind on Free-Surface in Finite domain
+  !HASFS_ASYM: Potential QTF-Haskind on Free-Surface in Asymptotic domain
+CONTAINS
+   SUBROUTINE  make_directory(dirname)
+          CHARACTER(LEN=*),       INTENT(IN) ::dirname
+          LOGICAL                            ::existdir
+          INQUIRE (DIRECTORY=dirname, EXIST=existdir)       
+          IF (.NOT.existdir) CALL SYSTEM('mkdir '//dirname)
+   END SUBROUTINE
+
+
 END MODULE

@@ -549,6 +549,16 @@ C *** INITIALISATION DES EFFORTS ***
       W2=WR2+VA*AM2*COS(BETA2)
       C2=AM2**2*COS(BETA2)/W2
       T2=2*PI/W2
+C      DO I=1,NFFL
+C        print*,I,VGR1(1,I),VGM1(1,I)
+C        print*,I,VGR1(2,I),VGM1(2,I)
+C      ENDDO
+C      DO I=1,IXX
+C        print*,I,VXR1(1,I),VXM1(1,I),VXR1(2,I),VXM1(2,I)
+C        print*,I,VYR1(1,I),VYM1(1,I),VYR1(2,I),VYM1(2,I)
+C        print*,I,VZR1(1,I),VZM1(1,I),VZR1(2,I),VZM1(2,I)
+C      ENDDO
+
 C
 C *** ITERATION SUR LE NOMBRE DE CORPS INDEPENDANTS DECRITS ***
 C -------------------------------------------------------------
@@ -621,10 +631,10 @@ C -------------------------------------------------
                   EFWMN(1,J,KNC)=EFWMN(1,J,KNC)+FM(1)*ACQ               !!
                   EFWMN(1,J+6,KNC)=EFWMN(1,J+6,KNC)+FM(2)*ACQ           !!
 
-               !IF (J==1) THEN
-                !print*,II,AIRE(II)*CN(II,J)*(((-1.)**(J+1))**(JJ+1))
-               ! print*,II,FM*ACQ,FP*ACQ
-               !ENDIF
+              ! IF (J==1) THEN
+              ! !print*,II,AIRE(II)*CN(II,J)*(((-1.)**(J+1))**(JJ+1))
+              !  print*,II,FM*ACQ,FP*ACQ
+              ! ENDIF
             END DO
                    !print*,II,FM,FP
       END DO
@@ -678,10 +688,10 @@ C -------------------------------------------------------------------
                   EFWPS(2,J+6,KNC)=EFWPS(2,J+6,KNC)+FP(2)*ACQ
                   EFWMN(2,J,KNC)=EFWMN(2,J,KNC)+FM(1)*ACQ
                   EFWMN(2,J+6,KNC)=EFWMN(2,J+6,KNC)+FM(2)*ACQ
-               !IF (J==1) THEN
-               !print*,II,AIRE(II)*CN(II,J)*(((-1.)**(J+1))**(JJ+1))
-               !print*,II,FM*ACQ,FP*ACQ
-               !ENDIF
+              ! IF (J==1) THEN
+              ! !print*,II,AIRE(II)*CN(II,J)*(((-1.)**(J+1))**(JJ+1))
+              ! print*,II,FM*ACQ,FP*ACQ
+              ! ENDIF
             END DO
       END DO
       END DO
@@ -819,8 +829,14 @@ c~       CALL FORINE(AINTINERTIEM,A1,FINT2)
             PRO2(J,1)=FHY1(J)
             PRO2(J,2)=FHY1(J+6)
             PRO2(J,3)=FHY2(J)
-            PRO2(J,4)=FHY2(J+6)              
+            PRO2(J,4)=FHY2(J+6)    
+            !print*,A1(J),A1(J+6)
+            ! print*,FOR1(J,KNC)        
+            !print*,PRO2(J,1),PRO2(J,2),PRO2(J,3),PRO2(J,4) 
+            !print*, (AINTR1(J,IK),IK=1,6)
+            !WRITE(*,'(6(X,F12.8))') (AINTM1(J,IK),IK=1,6)
       END DO
+      
       DO J=1,6
             DO J1=1,6
             DO J2=1,4
@@ -840,7 +856,13 @@ c~       CALL FORINE(AINTINERTIEM,A1,FINT2)
             EFWPS(3,J+6,KNC)=FP(2)
             EFWMN(3,J,KNC)=FM(1)
             EFWMN(3,J+6,KNC)=FM(2)
-           ! IF (J==1) print*,FM(1),FM(2),FP(1),FP(2)
+          !  print*,J 
+          !  print*,K1(J),PRO1(K1(J),1),PRO1(K1(J),2)
+          !  print*,K2(J),PRO1(K2(J),1),PRO1(K2(J),2)
+          !  print*,K1(J),PRO1(K1(J),3),PRO1(K1(J),4)
+          !  print*,K2(J),PRO1(K2(J),3),PRO1(K2(J),4)
+
+          !  print*,FM(1),FM(2),FP(1),FP(2)
       END DO
       Q3(1,I1,I2)=EFWMN(3,3,KNC)/2
       Q3(2,I1,I2)=EFWMN(3,9,KNC)/2
@@ -881,10 +903,12 @@ c~      1 /COST      ! attention cos(theta)
                         EFWPS(4,J+6,KNC)=EFWPS(4,J+6,KNC)-FP(2)*ACQ
                         EFWMN(4,J,KNC)=EFWMN(4,J,KNC)-FM(1)*ACQ
                         EFWMN(4,J+6,KNC)=EFWMN(4,J+6,KNC)-FM(2)*ACQ
-                    !IF (J==1) THEN
-                    !print*,II,AIRE(II)*CN(II,J)*(((-1.)**(J+1))**(JJ+1))
-                    !print*,II,-FM*ACQ,-FP*ACQ
-                    !ENDIF
+                    !IF (J==1.AND.JJ==1) THEN
+                    !!print*,II,AIRE(II)*CN(II,J)*(((-1.)**(J+1))**(JJ+1))
+                    ! print*,II-IMX,-FM*ACQ,-FP*ACQ
+                    !!print*,II-IMX,FM(1),FM(2),FP(1),FP(2)
+                    !! print*,II-IMX,VGR1(JJ,II1),VGM1(JJ,II1)
+                    !  ENDIF
                   END DO
             ENDIF
       END DO 
@@ -921,7 +945,7 @@ C -------------------------------------------------
                   EFWMN(5,J1,KNC)=EFWMN(5,J1,KNC)+
      1 ACQ*ASH(J1,K7(J),KNC)*FM(1)
                   EFWMN(5,J1+6,KNC)=EFWMN(5,J1+6,KNC)+
-     1 ACQ*ASH(J1,K7(J),KNC)*FM(2)
+     1 ACQ*ASH(J1,K7(J),KNC)*FM(2)       
             END DO 
       END DO
       Q5(1,I1,I2)=EFWMN(5,3,KNC)/2
@@ -945,6 +969,7 @@ C _________________________________________________
             PRO2(J,3)=FHY2(J)
             PRO2(J,4)=FHY2(J+6)
       END DO
+
       DO J=1,3
             DO J1=1,6
             DO J2=1,4
@@ -964,10 +989,14 @@ C _________________________________________________
             EFWPS(8,J+9,KNC)=FP(2)
             EFWMN(8,J+3,KNC)=FM(1)
             EFWMN(8,J+9,KNC)=FM(2)
+            !IF (I1==30.AND.I2==39) THEN
+            !IF (J==1)  print*,I1,I2
+            !print*,J+3,FM(1),FM(2),FP(1),FP(2)
+            !STOP
+            !ENDIF
       END DO
       Q8(1,I1,I2)=EFWMN(8,3,KNC)
       Q8(2,I1,I2)=EFWMN(8,7,KNC)
-
 C
 C *** SOMMATION DES EFFORTS ***
 C -----------------------------

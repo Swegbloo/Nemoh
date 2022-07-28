@@ -269,11 +269,12 @@ SUBROUTINE PREPARE_INERTIA_FORCES(MechCoef,Motion,Nw,Nbeta,Nradiation,Nintegrati
         COMPLEX,DIMENSION(Nw,Nintegration)       ::InertiaForce
         REAL,DIMENSION(Nradiation,Nradiation)    ::StiffMat
         REAL,DIMENSION(Nradiation,Nradiation)    ::AddedMass,DampCoef
+        COMPLEX,DIMENSION(Nradiation,Nradiation)    ::MATHyd
         COMPLEX,DIMENSION(Nintegration)          ::ExcitForce
         COMPLEX,DIMENSION(Nintegration)          ::Xi,ddXidt2,dXidt
         INTEGER                                  ::Iw,Ibeta,Iinteg,iflag
         REAL,DIMENSION(Qfreq%NwQ)                ::InForceR,InForceI
-        INTEGER                                  ::Iw1,Iw2,IwQ 
+        INTEGER                                  ::Iw1,Iw2,IwQ,J
         Type(linear_interp_1d)                   :: interpIF_R,interpIF_I
             
         StiffMat=MechCoef%StiffMat+MechCoef%StiffMat_EXT
@@ -287,11 +288,21 @@ SUBROUTINE PREPARE_INERTIA_FORCES(MechCoef,Motion,Nw,Nbeta,Nradiation,Nintegrati
            Xi           = Motion(Iw,Ibeta,:)
            ddXidt2      = -w(Iw)*w(Iw)*Xi
            dXidt        = -II*w(Iw)*Xi
-           HydrodynForce= ExcitForce                                           &
-                          +MATMUL(CMPLX(AddedMass,0.),ddXidt2)                 &
-                          +MATMUL(CMPLX(DampCoef,0.),dXidt)                    
-           HydroStatForce=-MATMUL(CMPLX(StiffMat,0.),Xi)
+           !MATHyd       =-w(Iw)*w(Iw)*AddedMass-II*w(Iw)*DampCoef+StiffMat
+
+           HydrodynForce= ExcitForce                            &
+                          +MATMUL(-AddedMass,ddXidt2)           &
+                          +MATMUL(-DampCoef,dXidt)                    
+           HydroStatForce=-MATMUL(StiffMat,Xi)
            InertiaForce(Iw,:)=HydroDynForce+HydroStatForce
+           !InertiaForce(Iw,:)=ExcitForce-MATMUL(MATHyd,Xi)
+               ! DO Iinteg=1,Nintegration
+                !print*,Iw,Xi(Iinteg)
+                !print*,Iw,(REAL(MATHyd(Iinteg,J)),J=1,6)
+                !WRITE(*,'(I3,6(X,F12.8))'),Iw,(AIMAG(MATHyd(Iinteg,J)),J=1,6)
+                !print*,Iw,ExcitForce(Iinteg)
+                !print*,Iw,InertiaForce(Iw,Iinteg)
+               ! ENDDO
            ENDDO
             !Interpolation
             IF(Qfreq%InterpPotSwitch(Ibeta)==0) THEN
@@ -330,40 +341,83 @@ SUBROUTINE PREPARE_ROTATION_ANGLES(Motion,Nw,Nbeta,Nradiation,&
                                         INTENT(OUT)::RotAnglesQ
         !local 
         INTEGER                                  ::Iw,Ibeta,Iinteg,iflag
-        INTEGER                                  ::Itheta0,Itheta,Ibody
+        INTEGER                                  ::Itheta06,Itheta03,Itheta,Ibody
         REAL,DIMENSION(Qfreq%NwQ)                ::RotAngleR,RotAngleI
         INTEGER                                  ::Iw1,Iw2,IwQ 
         Type(linear_interp_1d)                   ::interpROT_R,interpROT_I
-        COMPLEX,DIMENSION(Nw,3)                  ::vect_Theta
             
         DO Ibody=1,Nbodies
            DO Ibeta=1,Nbeta
-              Itheta0=6*(Ibody-1)
-              DO Iw=1,Nw
-              vect_Theta(Iw,:)=Motion(Iw,Ibeta,Itheta0+4:Itheta0+6)
-              ENDDO
-              Itheta0=3*(Ibody-1)
+              Itheta06=6*(Ibody-1)
+              Itheta03=3*(Ibody-1)
               !Interpolation
               IF(Qfreq%InterpPotSwitch(Ibeta)==0) THEN
                 IF(Qfreq%NwQ.NE.Nw) THEN
                  Iw1=Fun_closest(Nw,w,Qfreq%wQ(1,Ibeta))
                  Iw2=Fun_closest(Nw,w,Qfreq%wQ(Qfreq%NwQ,Ibeta))
-                 RotAnglesQ(:,Ibeta,Itheta0+1:Itheta0+3)=vect_Theta(Iw1:Iw2,:)
+                 RotAnglesQ(:,Ibeta,Itheta03+1:Itheta03+3)=Motion(Iw1:Iw2,Ibeta,Itheta06+4:Itheta06+6)
                 ELSE
-                 RotAnglesQ(:,Ibeta,Itheta0+1:Itheta0+3)=vect_Theta(:,:)
+                 RotAnglesQ(:,Ibeta,Itheta03+1:Itheta03+3)=Motion(:,Ibeta,Itheta06+4:Itheta06+6)
                 ENDIF 
                ELSE
                !interpolating displacement for the wQ rad. frequencies
                 DO Itheta=1,3 !theta_x,theta_y,theta_z
-                CALL interpROT_R%initialize(w ,REAL(vect_Theta(:,Itheta)),iflag)
-                CALL interpROT_I%initialize(w ,AIMAG(vect_Theta(:,Itheta)),iflag)
+                CALL interpROT_R%initialize(w ,REAL(Motion(:,Ibeta,Itheta06+3+Itheta)),iflag)
+                CALL interpROT_I%initialize(w ,AIMAG(Motion(:,Ibeta,Itheta06+3+Itheta)),iflag)
                  DO IwQ=1,Qfreq%NwQ
                   CALL interpROT_R%evaluate(Qfreq%wQ(IwQ,Ibeta),RotAngleR(IwQ))
                   CALL interpROT_I%evaluate(Qfreq%wQ(IwQ,Ibeta),RotAngleI(IwQ))
                  ENDDO
-                RotAnglesQ(:,Ibeta,Itheta0+Itheta)=CMPLX(RotAngleR,RotAngleI)
+                RotAnglesQ(:,Ibeta,Itheta03+Itheta)=CMPLX(RotAngleR,RotAngleI)
                 CALL interpROT_R%destroy()
                 CALL interpROT_I%destroy()
+                ENDDO
+              ENDIF
+           ENDDO
+        ENDDO
+END SUBROUTINE
+
+SUBROUTINE PREPARE_TRANSLATION_MOTION(Motion,Nw,Nbeta,Nradiation,&
+                Nbodies,w,Qfreq,TRANSMOTQ)
+        INTEGER,                        INTENT(IN):: Nradiation
+        INTEGER,                        INTENT(IN):: Nw,Nbeta,Nbodies
+        REAL,DIMENSION(Nw),             INTENT(IN):: w
+        TYPE(TQfreq),                   INTENT(IN):: Qfreq
+        COMPLEX,DIMENSION(Nw,Nbeta,Nradiation),INTENT(IN)::Motion       !RAO
+        COMPLEX,DIMENSION(Qfreq%NwQ,Nbeta,3*Nbodies),                    &
+                                        INTENT(OUT)::TRANSMOTQ
+        !local 
+        INTEGER                                  ::Iw,Ibeta,Iinteg,iflag
+        INTEGER                                  ::Ind06,Ind03,Ind,Ibody
+        REAL,DIMENSION(Qfreq%NwQ)                ::TransMotR,TransMotI
+        INTEGER                                  ::Iw1,Iw2,IwQ 
+        Type(linear_interp_1d)                   ::interp_R,interp_I
+            
+        DO Ibody=1,Nbodies
+           DO Ibeta=1,Nbeta
+               Ind06=6*(Ibody-1)
+               Ind03=3*(Ibody-1)
+              !Interpolation
+              IF(Qfreq%InterpPotSwitch(Ibeta)==0) THEN
+                IF(Qfreq%NwQ.NE.Nw) THEN
+                 Iw1=Fun_closest(Nw,w,Qfreq%wQ(1,Ibeta))
+                 Iw2=Fun_closest(Nw,w,Qfreq%wQ(Qfreq%NwQ,Ibeta))
+                 TRANSMOTQ(:,Ibeta,Ind03+1:Ind03+3)=Motion(Iw1:Iw2,Ibeta,Ind06+1:Ind06+3)
+                ELSE
+                 TRANSMOTQ(:,Ibeta,Ind03+1:Ind03+3)=Motion(:,Ibeta,Ind06+1:Ind06+3)
+                ENDIF 
+               ELSE
+               !interpolating displacement for the wQ rad. frequencies
+                DO Ind=1,3 !theta_x,theta_y,theta_z
+                CALL interp_R%initialize(w ,REAL(Motion(:,Ibeta,Ind06+Ind)),iflag)
+                CALL interp_I%initialize(w ,AIMAG(Motion(:,Ibeta,Ind06+Ind)),iflag)
+                 DO IwQ=1,Qfreq%NwQ
+                  CALL interp_R%evaluate(Qfreq%wQ(IwQ,Ibeta),TransMotR(IwQ))
+                  CALL interp_I%evaluate(Qfreq%wQ(IwQ,Ibeta),TransMotI(IwQ))
+                 ENDDO
+                TRANSMOTQ(:,Ibeta,Ind03+Ind)=CMPLX(TransMotR,TransMotI)
+                CALL interp_R%destroy()
+                CALL interp_I%destroy()
                 ENDDO
               ENDIF
            ENDDO
@@ -565,4 +619,17 @@ SUBROUTINE WRITE_QTFSOLVERLOGFILE(wd,Nbeta,beta,Qfreq)
        CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
 END SUBROUTINE
 
+FUNCTION MATMUL_COMPLEX(Mat,Vect,Nv) RESULT(Vres)
+        INTEGER,                 INTENT(IN):: Nv
+        COMPLEX,DIMENSION(Nv,Nv),INTENT(IN):: Mat
+        COMPLEX,DIMENSION(Nv),   INTENT(IN):: Vect
+        COMPLEX,DIMENSION(Nv)              :: Vres
+        INTEGER                            :: I,J
+        DO I=1,Nv
+              Vres(I)=CMPLX(0.,0.)
+              DO J=1,Nv
+              Vres(I)=Vres(I)+Mat(I,J)*Vect(J)
+              ENDDO
+        ENDDO       
+END FUNCTION 
 END MODULE

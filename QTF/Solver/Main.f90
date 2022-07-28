@@ -13,7 +13,7 @@
 PROGRAM MAIN
 !
 USE MIdentification
-USE MNemohCal,          ONLY:TNemCal,READ_TNEMOHCAL
+USE MNemohCal,          ONLY:TNemCal,READ_TNEMOHCAL,IntegrationAXIS_FROM_MNEMOHCAL
 USE MMesh
 USE MFace,              ONLY:TVFace, Prepare_FaceMesh,TWLine,Prepare_Waterline
 USE MReadInputFiles,    ONLY:Read_NP_GaussQuad,Read_Mechanical_Coefs,TMech,  &
@@ -60,14 +60,16 @@ IMPLICIT NONE
                                                            ! time the area of the panel
         REAL,ALLOCATABLE,DIMENSION(:,:)         :: genNormalWLine_dGamma! generalized Normal 
                                                    !on wLine segment time the segm. length
+        REAL,ALLOCATABLE,DIMENSION(:,:)         :: IntegAxis,StiffMat
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:,:)  :: BDisplaceQ!Body displacement
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:)    :: InertiaForceQ
-        COMPLEX,ALLOCATABLE,DIMENSION(:,:,:)    :: RotAnglesQ
+        COMPLEX,ALLOCATABLE,DIMENSION(:,:,:)    :: RotAnglesQ,TransMotionQ
         !freq related variables For QTF computation
         TYPE(TQfreq)                            :: Qfreq
         REAL                                    :: winputQ(3), BForwardSpeed,delwiter
         INTEGER                                 :: NwQ    ! Number of wave freq
         !---------
+        INTEGER                                 :: SwitchQuadHM 
         COMPLEX, ALLOCATABLE,DIMENSION(:,:)   :: QTF_DUOK ,QTF_HASBO   
         COMPLEX, ALLOCATABLE,DIMENSION(:,:)   :: QTF_HASFS,QTF_HASFS_ASYMP
         !
@@ -86,9 +88,11 @@ IMPLICIT NONE
         Nintegration =InpNEMOHCAL%Nintegtot
         Nradiation   =InpNEMOHCAL%Nradtot
         winputQ      =InpNEMOHCAL%qtfinput%omega
+        SwitchQuadHM =InpNEMOHCAL%qtfinput%switch_quadHM
         NwQ          =winputQ(1)
         BForwardSpeed=InpNEMOHCAL%qtfinput%body_forward_speed
         NP_GQ        =Read_NP_GaussQuad(TRIM(ID%ID)) 
+       
         !
         CALL Prepare_FaceMesh(Mesh,NP_GQ,VFace)
         CALL Prepare_Waterline(VFace,Mesh%xy_diameter,Mesh%Npanels,WLine)
@@ -96,6 +100,8 @@ IMPLICIT NONE
         NPFlow   =(Mesh%Npanels+WLine%NWLineSeg)*2**Mesh%Isym !Number of flow point
         !
         !Dynamic Memory allocation
+        ALLOCATE(IntegAxis(3,Nintegration))
+        ALLOCATE(StiffMat(Nintegration,Nintegration))
         ALLOCATE(Motion(Nw,Nradiation,Nbeta))
         ALLOCATE(datPotVel%TotPot(NPFlow,Nbeta,Nw))
         ALLOCATE(datPotVel%TotVel(NPFlow,3,Nbeta,Nw))
@@ -107,11 +113,15 @@ IMPLICIT NONE
         ALLOCATE(genNormalWLine_dGamma(Nintegration,Wline%NWLineseg*2**Mesh%Isym))
         ALLOCATE(InertiaForceQ(NwQ,Nbeta,Nintegration))
         ALLOCATE(RotAnglesQ(NwQ,Nbeta,3*Nbodies))
+        ALLOCATE(TransMotionQ(NwQ,Nbeta,Nradiation))
         ALLOCATE(QTF_DUOK(Nintegration,2))!2 is for QTF- and QTF+
         ALLOCATE(QTF_HASBO(Nintegration,2))
         !
+        IntegAxis=IntegrationAXIS_FROM_MNEMOHCAL(InpNEMOHCAL)
         !
         CALL Read_Mechanical_Coefs(TRIM(ID%ID),Nradiation,MechCoef)
+        StiffMat=MechCoef%StiffMat+MechCoef%StiffMat_EXT
+        !
         CALL Read_FirstOrderLoad(TRIM(ID%ID),Nw,Nbeta,Nintegration,Nradiation,Forces1)
         CALL Read_Motion(TRIM(ID%ID),Nw,Nbeta,Nradiation,Motion)!Complex RAO
         CALL READ_POTENTIALS_VELOCITIES_BODYWLINE(TRIM(ID%ID),Nw,Nbeta,NRadiation,       &
@@ -137,10 +147,14 @@ IMPLICIT NONE
                                         w,Qfreq,Forces1,InertiaForceQ)
         CALL PREPARE_ROTATION_ANGLES(Motion,Nw,Nbeta,Nradiation,Nbodies,                 &
                                         w,Qfreq,RotAnglesQ)
-        !DO Ipanel=1,Mesh%Npanels+WLine%NWLineSeg
-        !print*,Ipanel,datPotVelQ%TotPot(Ipanel,1,1)
-        !ENDDO
-        ! COMPUTE QTF
+        CALL PREPARE_TRANSLATION_MOTION(Motion,Nw,Nbeta,Nradiation,Nbodies,                 &
+                                        w,Qfreq,TransMotionQ)
+
+
+       ! DO Ipanel=1,Mesh%Npanels+WLine%NWLineSeg
+       ! print*,Ipanel,datPotVelQ%TotPot(Ipanel,1,1)
+       ! ENDDO
+       !  COMPUTE QTF
         CALL  INITIALIZE_OUTPUT_FILES(TRIM(ID%ID))
         DO Ibeta1=1,Nbeta
            DO Ibeta2=1,Nbeta
@@ -164,16 +178,19 @@ IMPLICIT NONE
                             WRITE(*,'(A,F7.3,A)'),'w1-w2=',delwiter, ', w1+w2= --NA-- [rad/s]'
                           ENDIF
                         ENDIF
-
+                        IF (InpNEMOHCAL%qtfinput%Ncontrib.GE.1) THEN 
                         CALL COMPUTATION_QTF_QUADRATIC(Iw1,Iw2,Ibeta1,Ibeta2,Nintegration,&
                                 Mesh,VFace,WLine,NwQ,Nbeta,NPFlow,Nbodies,Env%rho,Env%g,  &
                                 datPotVelQ,BdisplaceQ,genNormal_dS,genNormalWLine_dGamma, &
-                                Qfreq%wQ,beta,InertiaForceQ,RotAnglesQ,QTF_DUOK(:,:))
+                                Qfreq%wQ,beta,InertiaForceQ,RotAnglesQ,IntegAxis,         &
+                                StiffMat,TransMotionQ,SwitchQuadHM,QTF_DUOK(:,:))
 
                         CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileDM,OutFileDP,Nintegration, &
                                 Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
                                 beta(Ibeta1),beta(Ibeta2), QTF_DUOK(:,:))
+                        ENDIF
 
+                        IF (InpNEMOHCAL%qtfinput%Ncontrib.GE.2) THEN 
                         CALL COMPUTATION_QTF_POTENTIAL_BODYFORCE(Iw1,Iw2,Ibeta1,Ibeta2,   &
                                 Nintegration,Mesh,VFace,WLine,NwQ,Nbeta,NPFlow,Nbodies,   &
                                 Env, datPotVelQ,BdisplaceQ,genNormal_dS,                  &
@@ -183,6 +200,7 @@ IMPLICIT NONE
                         CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHBM,OutFileHBP,Nintegration,&
                                 Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
                                 beta(Ibeta1),beta(Ibeta2), QTF_HASBO(:,:))
+                        ENDIF
                     ENDDO
                 ENDDO
            ENDDO
@@ -197,8 +215,8 @@ IMPLICIT NONE
                 DEALLOCATE(inpNEMOHCAL%bodyinput(I)%RadCase)
                 DEALLOCATE(inpNEMOHCAL%bodyinput(I)%IntCase)
         ENDDO
-        DEALLOCATE(inpNEMOHCAL%bodyinput)
-        DEALLOCATE(Motion)
+        DEALLOCATE(inpNEMOHCAL%bodyinput,IntegAxis)
+        DEALLOCATE(Motion,StiffMat,TransMotionQ,RotAnglesQ)
         DEALLOCATE(VFace%X,VFace%XM,VFace%N,VFace%A,VFace%tDis)
         DEALLOCATE(VFace%dXdXG_WGQ_per_A,VFace%XM_GQ)
         DEALLOCATE(datPotVelQ%TotPot,datPotVelQ%TotVel) 

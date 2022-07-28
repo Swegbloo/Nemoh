@@ -79,11 +79,12 @@
               INTEGER  :: switch_qtfp       !LQTFP
               REAL,DIMENSION(3) :: omega    !rad freq [Nw,wmin,wmax]
               REAL     :: body_forward_speed!body forward-speed
-              INTEGER  :: NContrib          !Contrib     
+              INTEGER  :: NContrib          !Contrib   
+              INTEGER  :: switch_quadHM     !quadratic hydrostatic and moment terms  
               INTEGER  :: switch_qtfduok    !Loutduok   
               INTEGER  :: switch_qtfhasbo   !Louthasbo
               INTEGER  :: switch_qtfhasfs   !Louthasgs
-              INTEGER,DIMENSION(3):: qtfhasfs_print(3) !Nw1,Nw2,NDOF
+              INTEGER,DIMENSION(3):: qtfhasfs_print !Nw1,Nw2,NDOF
           END TYPE Tqtfinput
 
           TYPE TNemCal
@@ -187,10 +188,11 @@
                InpNEMOHCAL%qtfinput%body_forward_speed=0 ! for now 0
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_QTFP
                READ(ufile,*)InpNEMOHCAL%qtfinput%Ncontrib
-               READ(ufile,*)!0
+               READ(ufile,*)InpNEMOHCAL%qtfinput%switch_quadHM
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfduok
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfhasbo
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfhasfs
+
                IF (InpNEMOHCAL%qtfinput%switch_qtfhasfs==1) THEN      
                   READ(ufile,*)(InpNEMOHCAL%qtfinput%qtfhasfs_print(K),&
                                 K=1,3)
@@ -205,6 +207,22 @@
                                                     '/results/sources')
           END IF
          END SUBROUTINE
+
+         FUNCTION IntegrationAXIS_FROM_MNEMOHCAL(InpNEMOHCAL)          &
+                                                       result(IntegAxis)
+          TYPE(TNemCal),       INTENT(IN)     :: InpNEMOHCAL
+          REAL,DIMENSION(3,InpNEMOHCAL%Nintegtot)::IntegAxis
+          INTEGER       :: I,J,Iinteg
+          Iinteg=1
+          DO I=1,InpNEMOHCAL%Nbodies
+              DO J=1,InpNEMOHCAL%bodyinput(I)%NIntegration
+              IntegAxis(:,Iinteg)=      &
+                InpNEMOHCAL%bodyinput(I)%IntCase(J)%Axis(1:3)
+                Iinteg=Iinteg+1
+             END DO
+          END DO
+
+         END FUNCTION
 
          SUBROUTINE Discretized_Omega_and_Beta(IDQTF,waveinp,Nw,Nbeta, &
                                                 w,beta)

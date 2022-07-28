@@ -1,35 +1,28 @@
 MODULE MQSolverOutputFiles
 
+USE  MFileDirectoryList, ONLY:OutQTFDir,OutFileDM,OutFileDP,OutFileHBM,&
+                              OutFileHBP,make_directory 
 IMPLICIT NONE
-CHARACTER(LEN=*),PARAMETER ::  OutFileDM='/results/QTF/QTFM_DUOK.dat'
-CHARACTER(LEN=*),PARAMETER ::  OutFileDP='/results/QTF/QTFP_DUOK.dat'
-CHARACTER(LEN=*),PARAMETER ::  OutFileHBM='/results/QTF/QTFM_HASBO.dat'
-CHARACTER(LEN=*),PARAMETER ::  OutFileHBP='/results/QTF/QTFP_HASBO.dat'
-  !Output variables
-  !DUOK      : Quadratic QTF
-  !HASBO     : Potential QTF-Haskind on Body term
-  !HASFS     : Potential QTF-Haskind on Free-Surface in Finite domain
-  !HASFS_ASYM: Potential QTF-Haskind on Free-Surface in Asymptotic domain
 
 CONTAINS
 
         SUBROUTINE INITIALIZE_OUTPUT_FILES(workdir)
              CHARACTER(len=*)   ::workdir
              INTEGER            :: u
-
-             OPEN(NEWUNIT=u,FILE=workdir//OutFileDM, ACTION='WRITE')
+             CALL make_directory(workdir//OutQTFDir)
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDM, ACTION='WRITE')
              WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
                                   'DOF','Re(QTF)','Im(QTF)'
              CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutFileDP, ACTION='WRITE') 
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDP, ACTION='WRITE') 
              WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
                                   'DOF','Re(QTF)','Im(QTF)'
              CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutFileHBM, ACTION='WRITE') 
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBM, ACTION='WRITE') 
              WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
                                   'DOF','Re(QTF)','Im(QTF)'
              CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutFileHBP, ACTION='WRITE') 
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBP, ACTION='WRITE') 
              WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
                                   'DOF','Re(QTF)','Im(QTF)'
              CLOSE(u)
@@ -42,8 +35,8 @@ CONTAINS
           COMPLEX,DIMENSION(Ninteg,2),INTENT(IN):: QTFdat
           Integer :: Iinteg,u1,u2
 
-          OPEN(NEWUNIT=u1, FILE=wd//FileM, ACTION='WRITE',POSITION='APPEND')
-          OPEN(NEWUNIT=u2, FILE=wd//FileP, ACTION='WRITE',POSITION='APPEND')
+          OPEN(NEWUNIT=u1, FILE=wd//OutQTFDir//FileM, ACTION='WRITE',POSITION='APPEND')
+          OPEN(NEWUNIT=u2, FILE=wd//OutQTFDir//FileP, ACTION='WRITE',POSITION='APPEND')
 
           DO Iinteg=1,Ninteg
              WRITE(u1,'(4(F10.3,X),I3,2(X,E14.7))')               & 

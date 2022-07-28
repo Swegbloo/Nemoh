@@ -2,7 +2,7 @@ Module MQSolver
 USE MFace,               ONLY:TVFace,TWLine
 USE MMesh
 USE MQSolverPreparation, ONLY:TPotVel,TQfreq
-USE CONSTANTS          , ONLY:II
+USE CONSTANTS          , ONLY:II,CZERO
 USE Elementary_functions,ONLY:CROSS_PRODUCT_COMPLEX,Fun_closest,CIH
 USE MEnvironment,        ONLY:Fun_Dispersion,TEnvironment
 USE linear_interpolation_module
@@ -12,7 +12,8 @@ CONTAINS
                                        Mesh,VFace,WLine,NwQ,Nbeta,NPFlow,Nbodies,&
                                        rho,g,datPotVelQ,BdisplaceQ,genNormal_dS, &
                                        genNormalWLine_dGamma,wQ,beta,            &
-                                       InertiaForceQ,RotAnglesQ,QTFDuok)
+                                       InertiaForceQ,RotAnglesQ,IntegAxis,       &
+                                       StiffMat,TransMotionQ,SwitchQuadHM,QTFDuok)
           !Input/output
           INTEGER,                              INTENT(IN) :: Iw1,Iw2,Ibeta1,Ibeta2
           INTEGER,                              INTENT(IN) :: Nintegration,NPFlow
@@ -31,18 +32,26 @@ CONTAINS
           REAL,DIMENSION(Nbeta),                INTENT(IN) :: beta
           COMPLEX,DIMENSION(NwQ,Nbeta,Nintegration),                              &
                                                 INTENT(IN) :: InertiaForceQ
-          COMPLEX,DIMENSION(NwQ,Nbeta,3*Nbodies),INTENT(IN):: RotAnglesQ        
+          COMPLEX,DIMENSION(NwQ,Nbeta,3*Nbodies),INTENT(IN):: RotAnglesQ   
+          COMPLEX,DIMENSION(NwQ,Nbeta,3*Nbodies),INTENT(IN):: TransMotionQ        
+          REAL,DIMENSION(3,Nintegration),       INTENT(IN) :: IntegAxis    
+          REAL,DIMENSION(Nintegration,Nintegration),                              &
+                                                INTENT(IN) ::StiffMat
+          INTEGER,                              INTENT(IN) :: SwitchQuadHM 
           COMPLEX,DIMENSION(Nintegration,2),    INTENT(OUT):: QTFDuok
           !Local
-          COMPLEX,DIMENSION(NPFlow)           ::TotPot_Iw1,TotPot_Iw2
-          COMPLEX,DIMENSION(NPFlow,3)         ::TotVel_Iw1,TotVel_Iw2
-          COMPLEX,DIMENSION(NPFlow,3)         ::Bdisplace_Iw1,Bdisplace_Iw2
+          COMPLEX                             ::TotPot_Iw1,TotPot_Iw2
+          COMPLEX,DIMENSION(3)                ::TotVel_Iw1,TotVel_Iw2
+          COMPLEX,DIMENSION(3)                ::Bdisplace_Iw1,Bdisplace_Iw2
           COMPLEX,DIMENSION(Nintegration)     ::InertiaForce_Iw1,InertiaForce_Iw2
+          COMPLEX,DIMENSION(Nintegration)     ::XiTilde_M,XiTilde_P
           COMPLEX,DIMENSION(3*Nbodies)        ::RotAngles_Iw1,RotAngles_Iw2
+          COMPLEX,DIMENSION(3*Nbodies)        ::TransMotion_Iw1,TransMotion_Iw2
           COMPLEX                             ::eta_Iw1,eta_Iw2,zeta_Iw1,zeta_Iw2
           INTEGER                             ::Npanels,Ipanel,Iinteg,NpanWLin
           COMPLEX                             ::quad_M,quad_P
           REAL                                ::w1,w2
+          REAL                                ::r3
           INTEGER                             ::Iwline,Ibody,Itheta0
           INTEGER                             ::Isym
           INTEGER,DIMENSION(2)                ::Ipanelinit,Iwlineinit
@@ -50,24 +59,30 @@ CONTAINS
           w1=wQ(Iw1,Ibeta1)
           w2=wQ(Iw2,Ibeta2)
 
-          TotPot_Iw1=datPotVelQ%TotPot(1:NPFlow,Ibeta1,Iw1)
-          TotVel_Iw1=datPotVelQ%TotVel(1:NPFlow,1:3,Ibeta1,Iw1)
-  
-          TotPot_Iw2=datPotVelQ%TotPot(:,Ibeta2,Iw2)
-          TotVel_Iw2=datPotVelQ%TotVel(1:NPFlow,1:3,Ibeta1,Iw2)
-
-          Bdisplace_Iw1=BdisplaceQ(Iw1,Ibeta1,1:NPFlow,1:3)
-          Bdisplace_Iw2=BdisplaceQ(Iw2,Ibeta2,1:NPFlow,1:3)
-                
+                         
           InertiaForce_Iw1=InertiaForceQ(Iw1,Ibeta1,:)
           InertiaForce_Iw2=InertiaForceQ(Iw2,Ibeta2,:)
 
           RotAngles_Iw1=RotAnglesQ(Iw1,Ibeta1,:)
           RotAngles_Iw2=RotAnglesQ(Iw2,Ibeta2,:)
+          
+          TransMotion_Iw1=TransMotionQ(Iw1,Ibeta1,:)
+          TransMotion_Iw2=TransMotionQ(Iw2,Ibeta2,:)
 
           Npanels=Mesh%Npanels
           NpanWlin=Npanels+WLine%NWLineSeg
-          Ipanelinit=0
+
+          !DO Ipanel=1,WLine%NWLineSeg
+          !  print*,Ipanel,TotPot_Iw1(Npanels+Ipanel)
+          !  print*,Ipanel,TotPot_Iw1(2*Npanels+WLine%NWLineSeg+Ipanel)
+          !ENDDO
+          
+         ! DO Ipanel=1,NpanWlin
+         !   print*,Ipanel,TotVel_Iw1(Ipanel,1),TotVel_Iw1(NpanWlin+Ipanel,1)
+         !   print*,Ipanel,TotVel_Iw1(Ipanel,2),TotVel_Iw1(NpanWlin+Ipanel,2)
+         !   print*,Ipanel,TotVel_Iw1(Ipanel,3),TotVel_Iw1(NpanWlin+Ipanel,3)
+         ! ENDDO
+
           DO Iinteg=1,Nintegration
            QTFDuok(Iinteg,1)=0
            QTFDuok(Iinteg,2)=0
@@ -76,108 +91,186 @@ CONTAINS
             IF (Mesh%XM(3, Ipanel)<0.) THEN      !dont compute at lid panels
               DO Isym=1,1+Mesh%Isym
                 Ipanelinit=Function_SymIpanel(NpanWlin,Npanels,Isym)
+                !prepare variables Iw1,Iw2
+                TotPot_Iw1=datPotVelQ%TotPot(Ipanelinit(1)+Ipanel,Ibeta1,Iw1)
+                TotVel_Iw1=datPotVelQ%TotVel(Ipanelinit(1)+Ipanel,1:3,Ibeta1,Iw1)
+  
+                TotPot_Iw2=datPotVelQ%TotPot(Ipanelinit(1)+Ipanel,Ibeta2,Iw2)
+                TotVel_Iw2=datPotVelQ%TotVel(Ipanelinit(1)+Ipanel,1:3,Ibeta2,Iw2)
+
+                Bdisplace_Iw1=BdisplaceQ(Iw1,Ibeta1,Ipanelinit(1)+Ipanel,1:3)
+                Bdisplace_Iw2=BdisplaceQ(Iw2,Ibeta2,Ipanelinit(1)+Ipanel,1:3)
+
                 ! term: product(grad_phi_1,grad_phi2)
                 quad_M=DOT_PRODUCT_DIFF_BIHARM(                                 &
-                  TotVel_Iw1(Ipanelinit(1)+Ipanel,:),                           &
-                  TotVel_Iw2(Ipanelinit(1)+Ipanel,:),                           &
-                  TotVel_Iw1(Ipanelinit(1)+Ipanel,:),                           &
-                  TotVel_Iw2(Ipanelinit(1)+Ipanel,:),3)
+                                   TotVel_Iw1,TotVel_Iw2,TotVel_Iw1,TotVel_Iw2,3)
                 quad_P=DOT_PRODUCT_SUM_BIHARM(                                  &
-                  TotVel_Iw1(Ipanelinit(1)+Ipanel,:),                           &
-                  TotVel_Iw2(Ipanelinit(1)+Ipanel,:),                           &
-                  TotVel_Iw1(Ipanelinit(1)+Ipanel,:),                           &
-                  TotVel_Iw2(Ipanelinit(1)+Ipanel,:),3)
-
+                                   TotVel_Iw1,TotVel_Iw2,TotVel_Iw1,TotVel_Iw2,3)
+               
                 QTFDuok(Iinteg,1)=QTFDuok(Iinteg,1)+0.5*rho*                    &
                                 quad_M*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
                 QTFDuok(Iinteg,2)=QTFDuok(Iinteg,2)+0.5*rho*                    &
                                 quad_P*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
-              !  ! term: product(displacement,dtgradPhi)
-              !  quad_M=DOT_PRODUCT_DIFF_BIHARM(                                 &
-              !          Bdisplace_Iw1(Ipanelinit(1)+Ipanel,:),                  &
-              !          Bdisplace_Iw2(Ipanelinit(1)+Ipanel,:),                  &
-              !          -II*w1*TotVel_Iw1(Ipanelinit(1)+Ipanel,:),              &
-              !          -II*w2*TotVel_Iw2(Ipanelinit(1)+Ipanel,:),3)
-              !  quad_P=DOT_PRODUCT_SUM_BIHARM(                                  &
-              !          Bdisplace_Iw1(Ipanelinit(1)+Ipanel,:),                  &
-              !          Bdisplace_Iw2(Ipanelinit(1)+Ipanel,:),                  &
-              !          -II*w1*TotVel_Iw1(Ipanelinit(1)+Ipanel,:),              &
-              !          -II*w2*TotVel_Iw2(Ipanelinit(1)+Ipanel,:),3)
-              !  QTFDuok(Iinteg,1)=QTFDuok(Iinteg,1)+rho*                        &
-              !                  quad_M*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
-              !  QTFDuok(Iinteg,2)=QTFDuok(Iinteg,2)+rho*                        &
-              !                  quad_P*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
-                ! IF (Iinteg==1) THEN
-                ! print*,Ipanel,quad_M*genNormal_dS(Iinteg,Ipanel)*rho,              &
-                !                    quad_P*genNormal_dS(Iinteg,Ipanel)*rho
-                ! ENDIF
+                !IF (Iinteg==1) THEN
+                !print*,Ipanel,0.5*quad_M*genNormal_dS(Iinteg,Ipanel)*rho,              &
+                !                 0.5*quad_P*genNormal_dS(Iinteg,Ipanel)*rho
+                !ENDIF
+        
+                ! term: product(displacement,dtgradPhi)
+                quad_M=DOT_PRODUCT_DIFF_BIHARM(                                 &
+                        Bdisplace_Iw1,Bdisplace_Iw2,                            &
+                        -II*w1*TotVel_Iw1,-II*w2*TotVel_Iw2,3)
+                quad_P=DOT_PRODUCT_SUM_BIHARM(                                  &
+                        Bdisplace_Iw1,Bdisplace_Iw2,                            &
+                        -II*w1*TotVel_Iw1,-II*w2*TotVel_Iw2,3)
+                QTFDuok(Iinteg,1)=QTFDuok(Iinteg,1)+rho*                        &
+                                quad_M*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
+                QTFDuok(Iinteg,2)=QTFDuok(Iinteg,2)+rho*                        &
+                                quad_P*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
+                 !IF (Iinteg==1) THEN
+                 !print*,Ipanel,quad_M*genNormal_dS(Iinteg,Ipanel)*rho,              &
+                 !                   quad_P*genNormal_dS(Iinteg,Ipanel)*rho
+                 !ENDIF
               ENDDO
             ENDIF
            ENDDO
            !integration over waterline segments
-          ! DO Iwline=1,WLine%NWLineSeg
-          !     DO Isym=1,1+Mesh%Isym
-          !      Iwlineinit=Function_SymIwline(NpanWlin,Npanels,WLine%NWLineSeg,Isym)
-          !      !term: [eta-zeta]^2
-          !      zeta_Iw1=Bdisplace_Iw1(Iwlineinit(1)+Iwline,3)    !vertical Waterline displ.
-          !      zeta_Iw2=Bdisplace_Iw2(Iwlineinit(1)+Iwline,3)  
-          !      eta_Iw1 =II*w1*TotPot_Iw1(Iwlineinit(1)+Iwline)/g !wave elevation
-          !      eta_Iw2 =II*w2*TotPot_Iw2(Iwlineinit(1)+Iwline)/g
-          !      quad_M=DOT_PRODUCT_DIFF_BIHARM(                                    &
-          !           eta_Iw1-zeta_Iw1,eta_Iw2-zeta_Iw2,                            &
-          !           eta_Iw1-zeta_Iw1,eta_Iw2-zeta_Iw2,1)                 
-          !      quad_P=DOT_PRODUCT_SUM_BIHARM(                                     &
-          !           eta_Iw1-zeta_Iw1,eta_Iw2-zeta_Iw2,                            &
-          !           eta_Iw1-zeta_Iw1,eta_Iw2-zeta_Iw2,1)    
-          !      QTFDuok(Iinteg,1)=QTFDuok(Iinteg,1)-0.5*rho*g*quad_M               &
-          !                      *genNormalWLine_dGamma(Iinteg,Iwlineinit(2)+Iwline)
-          !      QTFDuok(Iinteg,2)=QTFDuok(Iinteg,2)-0.5*rho*g*quad_P               &
-          !                      *genNormalWLine_dGamma(Iinteg,Iwlineinit(2)+Iwline)
-          ! !    IF (Iinteg==1) THEN
-          ! !    print*,Iwline,-0.5*rho*g*quad_M*genNormalWLine_dGamma(Iinteg,Iwline),&
-          ! !            -0.5*rho*g*quad_P*genNormalWLine_dGamma(Iinteg,Iwline)
-          ! !    ENDIF
-          !    ENDDO
-          ! ENDDO
+           DO Iwline=1,WLine%NWLineSeg
+               DO Isym=1,1+Mesh%Isym
+                Iwlineinit=Function_SymIwline(NpanWlin,Npanels,WLine%NWLineSeg,Isym)
+                !preparation var in Iw1 and Iw2
+                Bdisplace_Iw1=BdisplaceQ(Iw1,Ibeta1,Iwlineinit(1)+Iwline,1:3)
+                Bdisplace_Iw2=BdisplaceQ(Iw2,Ibeta2,Iwlineinit(1)+Iwline,1:3)
+                TotPot_Iw1=datPotVelQ%TotPot(Iwlineinit(1)+Iwline,Ibeta1,Iw1)
+                TotPot_Iw2=datPotVelQ%TotPot(Iwlineinit(1)+Iwline,Ibeta2,Iw2)
+                !term: [eta-zeta]^2
+                zeta_Iw1=Bdisplace_Iw1(3)    !vertical Waterline displ.
+                zeta_Iw2=Bdisplace_Iw2(3)  
+                eta_Iw1 =II*w1*TotPot_Iw1/g !wave elevation
+                eta_Iw2 =II*w2*TotPot_Iw2/g
+                quad_M=DOT_PRODUCT_DIFF_BIHARM(                                    &
+                     eta_Iw1-zeta_Iw1,eta_Iw2-zeta_Iw2,                            &
+                     eta_Iw1-zeta_Iw1,eta_Iw2-zeta_Iw2,1)                 
+                quad_P=DOT_PRODUCT_SUM_BIHARM(                                     &
+                     eta_Iw1-zeta_Iw1,eta_Iw2-zeta_Iw2,                            &
+                     eta_Iw1-zeta_Iw1,eta_Iw2-zeta_Iw2,1)    
+                QTFDuok(Iinteg,1)=QTFDuok(Iinteg,1)-0.5*rho*g*quad_M               &
+                                *genNormalWLine_dGamma(Iinteg,Iwlineinit(2)+Iwline)
+                QTFDuok(Iinteg,2)=QTFDuok(Iinteg,2)-0.5*rho*g*quad_P               &
+                                *genNormalWLine_dGamma(Iinteg,Iwlineinit(2)+Iwline)
+              ! IF (Iinteg==1.AND.Isym==1) THEN
+              !  ! print*,Iwline,TotPot_Iw1(Iwlineinit(1)+Iwline)
+              !   ! print*,Iwline,quad_M,quad_P
+              !  print*,Iwline,-0.5*rho*g*quad_M*genNormalWLine_dGamma(Iinteg,Iwline),&
+              !          -0.5*rho*g*quad_P*genNormalWLine_dGamma(Iinteg,Iwline)
+              !  ENDIF
+              ENDDO
+           ENDDO
          ENDDO
 
-        !   ! print*,Iw1,Iw2,QTFDuok(1,1)
-        ! !term: Matrix product Rotation matrix and  Inertia Force
-        !  DO Ibody=1,Nbodies
-        !     Itheta0=3*(Ibody-1)
-        !     Iinteg=6*(Ibody-1)
-        !     !For diff freq
-        !     !R(F_I) for translation modes (1,2,3) of FI
-        !     QTFDuok(Iinteg+1:Iinteg+3,1)= QTFDuok(Iinteg+1:Iinteg+3,1)+      &
-        !              CROSS_PRODUCT_DIFF_BIHARM(                              &
-        !              RotAngles_Iw1(Itheta0+1:Itheta0+3),                     &
-        !              RotAngles_Iw2(Itheta0+1:Itheta0+3),                     &
-        !              InertiaForce_Iw1(Iinteg+1:Iinteg+3),                    &
-        !              InertiaForce_Iw2(Iinteg+1:Iinteg+3))                  
-        !     !R(F_I) for rotation modes (4,5,6) of FI
-        !     QTFDuok(Iinteg+4:Iinteg+6,1)=QTFDuok(Iinteg+4:Iinteg+6,1)+       &
-        !              CROSS_PRODUCT_DIFF_BIHARM(                              &
-        !              RotAngles_Iw1(Itheta0+1:Itheta0+3),                     &
-        !              RotAngles_Iw2(Itheta0+1:Itheta0+3),                     &
-        !              InertiaForce_Iw1(Iinteg+4:Iinteg+6),                    &
-        !              InertiaForce_Iw2(Iinteg+4:Iinteg+6))                           
-        !     !For sum freq
-        !     !R(F_I) for translation modes (1,2,3) of FI
-        !     QTFDuok(Iinteg+1:Iinteg+3,2)=QTFDuok(Iinteg+1:Iinteg+3,2)+       &
-        !              CROSS_PRODUCT_SUM_BIHARM(                               &
-        !              RotAngles_Iw1(Itheta0+1:Itheta0+3),                     &
-        !              RotAngles_Iw2(Itheta0+1:Itheta0+3),                     &
-        !              InertiaForce_Iw1(Iinteg+1:Iinteg+3),                    &
-        !              InertiaForce_Iw2(Iinteg+1:Iinteg+3))                   
-        !     !R(F_I) for rotation modes (4,5,6) of FI
-        !     QTFDuok(Iinteg+4:Iinteg+6,2)=QTFDuok(Iinteg+4:Iinteg+6,2)+       &
-        !              CROSS_PRODUCT_SUM_BIHARM(                               &
-        !              RotAngles_Iw1(Itheta0+1:Itheta0+3),                     &
-        !              RotAngles_Iw2(Itheta0+1:Itheta0+3),                     &
-        !              InertiaForce_Iw1(Iinteg+4:Iinteg+6),                    &
-        !              InertiaForce_Iw2(Iinteg+4:Iinteg+6))   
-        !    ! print*, QTFDuok(1,1),QTFDuok(1,2)
-        !  ENDDO
+          DO Ibody=1,Nbodies
+             Itheta0=3*(Ibody-1)
+             Iinteg=6*(Ibody-1)
+
+             !term: Matrix product Rotation matrix and  Inertia Force
+             !For diff freq
+             !R(F_I) for translation modes (1,2,3) of FI
+             QTFDuok(Iinteg+1:Iinteg+3,1)=QTFDuok(Iinteg+1:Iinteg+3,1)+       &
+                      CROSS_PRODUCT_DIFF_BIHARM(                              &
+                      RotAngles_Iw1(Itheta0+1:Itheta0+3),                     &
+                      RotAngles_Iw2(Itheta0+1:Itheta0+3),                     &
+                      InertiaForce_Iw1(Iinteg+1:Iinteg+3),                    &
+                      InertiaForce_Iw2(Iinteg+1:Iinteg+3))                  
+             !R(F_I) for rotation modes (4,5,6) of FI
+             QTFDuok(Iinteg+4:Iinteg+6,1)=QTFDuok(Iinteg+4:Iinteg+6,1)+       &
+                      CROSS_PRODUCT_DIFF_BIHARM(                              &
+                      RotAngles_Iw1(Itheta0+1:Itheta0+3),                     &
+                      RotAngles_Iw2(Itheta0+1:Itheta0+3),                     &
+                      InertiaForce_Iw1(Iinteg+4:Iinteg+6),                    &
+                      InertiaForce_Iw2(Iinteg+4:Iinteg+6))                           
+             !For sum freq
+             !R(F_I) for translation modes (1,2,3) of FI
+             QTFDuok(Iinteg+1:Iinteg+3,2)=QTFDuok(Iinteg+1:Iinteg+3,2)+       &
+                      CROSS_PRODUCT_SUM_BIHARM(                               &
+                      RotAngles_Iw1(Itheta0+1:Itheta0+3),                     &
+                      RotAngles_Iw2(Itheta0+1:Itheta0+3),                     &
+                      InertiaForce_Iw1(Iinteg+1:Iinteg+3),                    &
+                      InertiaForce_Iw2(Iinteg+1:Iinteg+3))                   
+             !R(F_I) for rotation modes (4,5,6) of FI
+             QTFDuok(Iinteg+4:Iinteg+6,2)=QTFDuok(Iinteg+4:Iinteg+6,2)+       &
+                      CROSS_PRODUCT_SUM_BIHARM(                               &
+                      RotAngles_Iw1(Itheta0+1:Itheta0+3),                     &
+                      RotAngles_Iw2(Itheta0+1:Itheta0+3),                     &
+                      InertiaForce_Iw1(Iinteg+4:Iinteg+6),                    &
+                      InertiaForce_Iw2(Iinteg+4:Iinteg+6)) 
+             IF (SwitchQuadHM==1) THEN
+              !Addition term for Moment on displaced(translation) position
+              !For diff freq
+              !CrossProduct(X,F_I)
+              QTFDuok(Iinteg+4:Iinteg+6,1)= QTFDuok(Iinteg+4:Iinteg+6,1)+      &
+                       CROSS_PRODUCT_DIFF_BIHARM(                              &
+                       TransMotion_Iw1(Itheta0+1:Itheta0+3),                   &
+                       TransMotion_Iw2(Itheta0+1:Itheta0+3),                   &
+                       InertiaForce_Iw1(Iinteg+1:Iinteg+3),                    &
+                       InertiaForce_Iw2(Iinteg+1:Iinteg+3))       
+              !For sum freq
+              QTFDuok(Iinteg+4:Iinteg+6,2)= QTFDuok(Iinteg+4:Iinteg+6,2)+      &
+                       CROSS_PRODUCT_SUM_BIHARM(                               &
+                       TransMotion_Iw1(Itheta0+1:Itheta0+3),                   &
+                       TransMotion_Iw2(Itheta0+1:Itheta0+3),                   &
+                       InertiaForce_Iw1(Iinteg+1:Iinteg+3),                    &
+                       InertiaForce_Iw2(Iinteg+1:Iinteg+3))
+                 
+              !IF(Iw1==30) Then
+              !print*,Iw1,Iw2
+              !print*,'4',QTFDuok(Iinteg+4,1), QTFDuok(Iinteg+4,2)
+              !print*,'5',QTFDuok(Iinteg+5,1), QTFDuok(Iinteg+5,2)
+              !print*,'6',QTFDuok(Iinteg+6,1), QTFDuok(Iinteg+6,2)
+              !ENDIF
+              ! DO Iinteg=1,6  
+              ! print*, InertiaForce_Iw1(Iinteg),InertiaForce_Iw2(Iinteg)
+              ! ENDDO
+
+              ! DO Iinteg=1,6
+              !  print*, QTFDuok(Iinteg,1),QTFDuok(Iinteg,2)
+              ! ENDDO
+
+              !term: quadratic term of second order excitation force=-[K]*Xi_Tilde
+              r3=-IntegAxis(3,Iinteg+4)!r3=Zm-ZCOG, ZM=0
+              XiTilde_M(Iinteg+1:Iinteg+6)=CZERO
+              XiTilde_P(Iinteg+1:Iinteg+6)=CZERO
+              XiTilde_M(Iinteg+3)=-0.5*r3*(DOT_PRODUCT_DIFF_BIHARM(             &
+                      RotAngles_Iw1(Itheta0+1),RotAngles_Iw2(Itheta0+1),        &
+                      RotAngles_Iw1(Itheta0+1),RotAngles_Iw2(Itheta0+1),1)      &
+                      +DOT_PRODUCT_DIFF_BIHARM(                                 &
+                      RotAngles_Iw1(Itheta0+2),RotAngles_Iw2(Itheta0+2),        &
+                      RotAngles_Iw1(Itheta0+2),RotAngles_Iw2(Itheta0+2),1)) 
+              XiTilde_M(Iinteg+4)=0.5*DOT_PRODUCT_DIFF_BIHARM(                  &
+                      RotAngles_Iw1(Itheta0+2),RotAngles_Iw2(Itheta0+2),        &
+                      RotAngles_Iw1(Itheta0+3),RotAngles_Iw2(Itheta0+3),1)  
+              XiTilde_M(Iinteg+5)=-0.5*DOT_PRODUCT_DIFF_BIHARM(                 &
+                      RotAngles_Iw1(Itheta0+3),RotAngles_Iw2(Itheta0+3),        &
+                      RotAngles_Iw1(Itheta0+1),RotAngles_Iw2(Itheta0+1),1)    
+              XiTilde_P(Iinteg+3)=-0.5*r3*(DOT_PRODUCT_SUM_BIHARM(              &
+                      RotAngles_Iw1(Itheta0+1),RotAngles_Iw2(Itheta0+1),        &
+                      RotAngles_Iw1(Itheta0+1),RotAngles_Iw2(Itheta0+1),1)      &
+                      +DOT_PRODUCT_SUM_BIHARM(                                  &
+                      RotAngles_Iw1(Itheta0+2),RotAngles_Iw2(Itheta0+2),        &
+                      RotAngles_Iw1(Itheta0+2),RotAngles_Iw2(Itheta0+2),1)) 
+              XiTilde_P(Iinteg+4)=0.5*DOT_PRODUCT_SUM_BIHARM(                   &
+                      RotAngles_Iw1(Itheta0+2),RotAngles_Iw2(Itheta0+2),        &
+                      RotAngles_Iw1(Itheta0+3),RotAngles_Iw2(Itheta0+3),1)      
+              XiTilde_P(Iinteg+5)=-0.5*DOT_PRODUCT_SUM_BIHARM(                  &
+                      RotAngles_Iw1(Itheta0+3),RotAngles_Iw2(Itheta0+3),        &
+                      RotAngles_Iw1(Itheta0+1),RotAngles_Iw2(Itheta0+1),1)
+            ENDIF
+          ENDDO
+
+            IF (SwitchQuadHM==1) THEN
+              !term: quadratic term of second order excitation force=-[K]*Xi_Tilde
+              QTFDuok(:,1)=QTFDuok(:,1)-MATMUL(StiffMat,XiTilde_M)
+              QTFDuok(:,2)=QTFDuok(:,2)-MATMUL(StiffMat,XiTilde_P)
+            ENDIF
         QTFDuok(:,:)=QTFDuok(:,:)/2 !TRANSFER FUNCTION = BICHROMATIC FORCES / 2?
   END SUBROUTINE
  
@@ -205,10 +298,10 @@ CONTAINS
           REAL,DIMENSION(Nbeta),                INTENT(IN) :: beta
           COMPLEX,DIMENSION(Nintegration,2),    INTENT(OUT):: QTFHasbo
           !Local
-          COMPLEX,DIMENSION(NPFlow)           ::TotPot_Iw1,TotPot_Iw2
-          COMPLEX,DIMENSION(NPFlow,3)         ::TotVel_Iw1,TotVel_Iw2
-          COMPLEX,DIMENSION(NPFlow,3)         ::Bdisplace_Iw1,Bdisplace_Iw2
-          COMPLEX,DIMENSION(NPFlow,3)         ::dtBdisplace_Iw1,dtBdisplace_Iw2
+          COMPLEX                             ::TotPot_Iw1,TotPot_Iw2
+          COMPLEX,DIMENSION(3)                ::TotVel_Iw1,TotVel_Iw2
+          COMPLEX,DIMENSION(3)                ::Bdisplace_Iw1,Bdisplace_Iw2
+          COMPLEX,DIMENSION(3)                ::dtBdisplace_Iw1,dtBdisplace_Iw2
           COMPLEX,DIMENSION(3*Nbodies)        ::RotAngles_Iw1,RotAngles_Iw2
           COMPLEX                             ::eta_Iw1,eta_Iw2,zeta_Iw1,zeta_Iw2
           INTEGER                             ::Npanels,Ipanel,Iinteg,NpanWLin
@@ -241,40 +334,44 @@ CONTAINS
           k1=Qfreq%kQ(Iw1,Ibeta1)
           k2=Qfreq%kQ(Iw2,Ibeta2)
 
-          TotPot_Iw1=datPotVelQ%TotPot(1:NPFlow,Ibeta1,Iw1)
-          TotVel_Iw1=datPotVelQ%TotVel(1:NPFlow,1:3,Ibeta1,Iw1)
-  
-          TotPot_Iw2=datPotVelQ%TotPot(:,Ibeta2,Iw2)
-          TotVel_Iw2=datPotVelQ%TotVel(1:NPFlow,1:3,Ibeta1,Iw2)
-
-          Bdisplace_Iw1=BdisplaceQ(Iw1,Ibeta1,1:NPFlow,1:3)
-          Bdisplace_Iw2=BdisplaceQ(Iw2,Ibeta2,1:NPFlow,1:3)
-
-          dtBdisplace_Iw1=-II*w1*Bdisplace_Iw1
-          dtBdisplace_Iw2=-II*w2*Bdisplace_Iw2
-
+          
           RotAngles_Iw1=RotAnglesQ(Iw1,Ibeta1,:)
           RotAngles_Iw2=RotAnglesQ(Iw2,Ibeta2,:)
           
+                   
           InterpSwitch=Qfreq%InterpPotSwitch(Ibeta1)                      &
                         +Qfreq%InterpPotSwitch(Ibeta2)
           
           Npanels=Mesh%Npanels
           NpanWlin=Npanels+WLine%NWLineSeg
           DO Iinteg=1,Nintegration
-           QTFHasbo(Iinteg,1)=0
-           QTFHasbo(Iinteg,2)=0
+           QTFHasbo(Iinteg,1)=CZERO
+           QTFHasbo(Iinteg,2)=CZERO
            !integration over body panels
-           DO Ipanel=1,Npanels
+
+          DO Ipanel=1,Npanels
             IF (Mesh%XM(3, Ipanel)<0.) THEN  !dont compute at lid panels
-            XM=Mesh%XM(1:3, Ipanel)
-            Normal_Vect=Mesh%N(1:3,Ipanel)
-            DO Isym=1,1+Mesh%Isym
+              XM=Mesh%XM(1:3, Ipanel)
+              Normal_Vect=Mesh%N(1:3,Ipanel)
+
+              DO Isym=1,1+Mesh%Isym
               IF (Isym==2) THEN
                  XM(2)=-XM(2)
                  Normal_Vect(2)=-Normal_Vect(2)
               ENDIF
               Ipanelinit=Function_SymIpanel(NpanWlin,Npanels,Isym)
+              !prepare variables Iw1,Iw2
+              TotPot_Iw1=datPotVelQ%TotPot(Ipanelinit(1)+Ipanel,Ibeta1,Iw1)
+              TotVel_Iw1=datPotVelQ%TotVel(Ipanelinit(1)+Ipanel,1:3,Ibeta1,Iw1)
+  
+              TotPot_Iw2=datPotVelQ%TotPot(Ipanelinit(1)+Ipanel,Ibeta2,Iw2)
+              TotVel_Iw2=datPotVelQ%TotVel(Ipanelinit(1)+Ipanel,1:3,Ibeta2,Iw2)
+
+              Bdisplace_Iw1=BdisplaceQ(Iw1,Ibeta1,Ipanelinit(1)+Ipanel,1:3)
+              Bdisplace_Iw2=BdisplaceQ(Iw2,Ibeta2,Ipanelinit(1)+Ipanel,1:3)
+              
+              dtBdisplace_Iw1=-II*w1*Bdisplace_Iw1
+              dtBdisplace_Iw2=-II*w2*Bdisplace_Iw2
 
               !interpolating radpot and radvel at delw and sumw        
               Radpot(1:2)=INTERP_RADIATION_POTENTIAL                       &
@@ -318,10 +415,8 @@ CONTAINS
               RIw2_n0=CROSS_PRODUCT_COMPLEX(                                &
                         RotAngles_Iw2(Itheta0+1:Itheta0+3),                 &
                         CMPLX(Normal_Vect,0.))
-              dtDisp_GradPhi_I_Iw1=dtBdisplace_Iw1(Ipanelinit(1)+Ipanel,:)  &
-                                  -TotVel_Iw1(Ipanel,:)
-              dtDisp_GradPhi_I_Iw2=dtBdisplace_Iw2(Ipanelinit(1)+Ipanel,:)  &
-                                  -TotVel_Iw2(Ipanel,:)
+              dtDisp_GradPhi_I_Iw1=dtBdisplace_Iw1(:)-TotVel_Iw1(:)
+              dtDisp_GradPhi_I_Iw2=dtBdisplace_Iw2(:)-TotVel_Iw2(:)
 
               QB1_M=DOT_PRODUCT_DIFF_BIHARM(                             &
                    dtDisp_GradPhi_I_Iw1,dtDisp_GradPhi_I_Iw2,            &
@@ -334,67 +429,56 @@ CONTAINS
                     -II*delw*rho*QB1_M*Radpot(1)*Mesh%A(Ipanel)
               QTFHasbo(Iinteg,2)=QTFHasbo(Iinteg,2)                      &
                     -II*sumw*rho*QB1_P*Radpot(2)*Mesh%A(Ipanel)
-              !-------------------------------------------------------
+             !-------------------------------------------------------
               ! term: product(Grad_PHI,psi).product(Bdisplace,n0) 
-              QB2_M=DOT_PRODUCT_COMPLEX(COMPLEX_CONJUGATE_VECT(           &
-                     TotVel_Iw2(Ipanelinit(1)+Ipanel,:),3),RadVel(:,1),3) &
-                    *DOT_PRODUCT_COMPLEX(                                 &
-                    Bdisplace_Iw1(Ipanelinit(1)+Ipanel,:),                &
-                    CMPLX(Normal_vect),3)                                 &
-                  +DOT_PRODUCT_COMPLEX(                                   &
-                       TotVel_Iw1(Ipanelinit(1)+Ipanel,:),RadVel(:,1),3)  &
-                    *DOT_PRODUCT_COMPLEX(COMPLEX_CONJUGATE_VECT(          &
-                    Bdisplace_Iw2(Ipanelinit(1)+Ipanel,:),3),             &
-                    CMPLX(Normal_Vect,0.),3)
-              QB2_P=DOT_PRODUCT_COMPLEX(                                  &
-                     TotVel_Iw2(Ipanelinit(1)+Ipanel,:),RadVel(:,2),3)    &
-                    *DOT_PRODUCT_COMPLEX(                                 &
-                    Bdisplace_Iw1(Ipanelinit(1)+Ipanel,:),                &
-                    CMPLX(Normal_vect),3)                                 &
-                  +DOT_PRODUCT_COMPLEX(                                   &
-                       TotVel_Iw1(Ipanelinit(1)+Ipanel,:),RadVel(:,2),3)  &
-                    *DOT_PRODUCT_COMPLEX(                                 &
-                    Bdisplace_Iw2(Ipanelinit(1)+Ipanel,:),                &
-                    CMPLX(Normal_Vect,0.),3) 
-
-              ! term: product(Grad_Psi,Bdisplace).product(gradPhi,n0)
-              QB2_M=QB2_M-DOT_PRODUCT_COMPLEX(COMPLEX_CONJUGATE_VECT(     &
-                     TotVel_Iw2(Ipanelinit(1)+Ipanel,:),3),               &
-                     CMPLX(Normal_vect),3)                                &
-                     *DOT_PRODUCT_COMPLEX(RadVel(:,1),                    &
-                     Bdisplace_Iw1(Ipanelinit(1)+Ipanel,:),3)             &
-                   -DOT_PRODUCT_COMPLEX(                                  &
-                       TotVel_Iw1(Ipanelinit(1)+Ipanel,:),                &
-                       CMPLX(Normal_vect),3)                              &
-                    *DOT_PRODUCT_COMPLEX(COMPLEX_CONJUGATE_VECT(          &
-                    Bdisplace_Iw2(Ipanelinit(1)+Ipanel,:),3),             &
-                    RadVel(:,1),3)
-              QB2_P=QB2_P-DOT_PRODUCT_COMPLEX(                            &
-                     TotVel_Iw2(Ipanelinit(1)+Ipanel,:),                  &
-                     CMPLX(Normal_vect),3)                                &
-                     *DOT_PRODUCT_COMPLEX(RadVel(:,2),                    &
-                     Bdisplace_Iw1(Ipanelinit(1)+Ipanel,:),3)             &
-                   -DOT_PRODUCT_COMPLEX(                                  &
-                       TotVel_Iw1(Ipanelinit(1)+Ipanel,:),                &
-                       CMPLX(Normal_vect),3)                              &
-                    *DOT_PRODUCT_COMPLEX(                                 &
-                    Bdisplace_Iw2(Ipanelinit(1)+Ipanel,:),                &
-                    RadVel(:,2),3)
-
+              QB2_M=DOT_PRODUCT_COMPLEX(                                 &
+                    COMPLEX_CONJUGATE_VECT(TotVel_Iw2,3),RadVel(:,1),3)  &
+                    *DOT_PRODUCT_COMPLEX(Bdisplace_Iw1,                  &
+                                        CMPLX(Normal_vect,0),3)          &
+                  +DOT_PRODUCT_COMPLEX(TotVel_Iw1(:),RadVel(:,1),3)      &
+                    *DOT_PRODUCT_COMPLEX(COMPLEX_CONJUGATE_VECT(         &
+                    Bdisplace_Iw2(:),3),CMPLX(Normal_Vect,0.),3)
+              QB2_P=DOT_PRODUCT_COMPLEX(TotVel_Iw2,RadVel(:,2),3)        &
+                    *DOT_PRODUCT_COMPLEX(Bdisplace_Iw1,                  &
+                                        CMPLX(Normal_vect,0),3)          &
+                  +DOT_PRODUCT_COMPLEX(TotVel_Iw1,RadVel(:,2),3)         &
+                    *DOT_PRODUCT_COMPLEX(Bdisplace_Iw2,                  &
+                                        CMPLX(Normal_Vect,0.),3) 
               QTFHasbo(Iinteg,1)=QTFHasbo(Iinteg,1)                      &
                     +II*delw*rho*(QB2_M/2)*Mesh%A(Ipanel)
               QTFHasbo(Iinteg,2)=QTFHasbo(Iinteg,2)                      &
                     +II*sumw*rho*(QB2_P/2)*Mesh%A(Ipanel)
 
-              !------------------------------------------------------
+              ! term: product(Grad_Psi,Bdisplace).product(gradPhi,n0)
+              QB2_M=DOT_PRODUCT_COMPLEX(                                  &
+                      COMPLEX_CONJUGATE_VECT(TotVel_Iw2,3),               &
+                                        CMPLX(Normal_Vect,0.),3)          &
+                     *DOT_PRODUCT_COMPLEX(RadVel(:,1),Bdisplace_Iw1,3)    &
+                   +DOT_PRODUCT_COMPLEX(                                  &
+                       TotVel_Iw1,CMPLX(Normal_Vect,0),3)                 &
+                    *DOT_PRODUCT_COMPLEX(                                 &
+                    COMPLEX_CONJUGATE_VECT(Bdisplace_Iw2,3),RadVel(:,1),3)
+              QB2_P=DOT_PRODUCT_COMPLEX(TotVel_Iw2,CMPLX(Normal_Vect,0),3)&
+                     *DOT_PRODUCT_COMPLEX(RadVel(:,2),Bdisplace_Iw1,3)    &
+                   +DOT_PRODUCT_COMPLEX(TotVel_Iw1,CMPLX(Normal_Vect,0),3)&
+                    *DOT_PRODUCT_COMPLEX(Bdisplace_Iw2,RadVel(:,2),3)
+
+              QTFHasbo(Iinteg,1)=QTFHasbo(Iinteg,1)                      &
+                    -II*delw*rho*(QB2_M/2)*Mesh%A(Ipanel)
+              QTFHasbo(Iinteg,2)=QTFHasbo(Iinteg,2)                      &
+                    -II*sumw*rho*(QB2_P/2)*Mesh%A(Ipanel)
+           
+            !  !------------------------------------------------------
               !IF (Iinteg==1) THEN
               !  print*,Ipanel,-rho*Pressure_I(1)*genNormal_dS(Iinteg,Ipanel)
               !ENDIF
               !IF (Iinteg==1 .AND. Isym==2) THEN
               !    print*,Ipanel,dnPhi_I(1)*Radpot(1)*Mesh%A(Ipanel)
               !ENDIF
-              !IF (Iinteg==1) THEN
-              !    print*,Ipanel,QB2_M/2,QB2_P/2
+              !IF (Iinteg==1.AND.Ipanel.LE.100) THEN
+              !    !print*,Ipanel,Mesh%A(Ipanel)
+              !    print*,Isym,Ipanel,TotVel_Iw1(Ipanelinit(1)+Ipanel,:)
+              !    !  print*,Isym,Ipanel,QTFHasbo(Iinteg,1)  
               !ENDIF
               !  IF (Iinteg==1 .AND. Isym==2) THEN
               !      print*,Ipanel,QB1_M
@@ -403,53 +487,53 @@ CONTAINS
             ENDDO
             ENDIF
            ENDDO
+           !   print*,QTFHasbo(Iinteg,1)
+           DO Iwline=1,Wline%NWLineSeg
+             Normal_Vect=Mesh%N(1:3,Wline%IndexPanel(Iwline))
+            DO Isym=1,1+Mesh%Isym
+             Iwlineinit=Function_SymIwline(NpanWlin,Npanels,WLine%NWLineSeg,Isym)
+             !preparation var in Iw1 and Iw2
+                Bdisplace_Iw1=BdisplaceQ(Iw1,Ibeta1,Iwlineinit(1)+Iwline,1:3)
+                Bdisplace_Iw2=BdisplaceQ(Iw2,Ibeta2,Iwlineinit(1)+Iwline,1:3)
+                TotVel_Iw1=datPotVelQ%TotVel(Iwlineinit(1)+Iwline,1:3,Ibeta1,Iw1)
+                TotVel_Iw2=datPotVelQ%TotVel(Iwlineinit(1)+Iwline,1:3,Ibeta2,Iw2)
+             !
+             IF (Isym==2) THEN
+                  Normal_Vect(2)=-Normal_Vect(2)
+             ENDIF
 
-          ! DO Iwline=1,Wline%NWLineSeg
-          !   Normal_Vect=Mesh%N(1:3,Wline%IndexPanel(Iwline))
-          !  DO Isym=1,1+Mesh%Isym
-          !   Iwlineinit=Function_SymIwline(NpanWlin,Npanels,WLine%NWLineSeg,Isym)
-          !   
-          !   IF (Isym==2) THEN
-          !        Normal_Vect(2)=-Normal_Vect(2)
-          !   ENDIF
+             dGAMMA_Vect(1)=CMPLX( Normal_Vect(2),0.)
+             dGAMMA_Vect(2)=CMPLX(-Normal_Vect(1),0.)
+             dGAMMA_Vect(3)=CMPLX( 0.,0.)
+             dGAMMA_Vect=dGAMMA_Vect*Wline%SegLength(Iwline)
 
-          !   dGAMMA_Vect(1)=CMPLX(-Normal_Vect(2),0.)
-          !   dGAMMA_Vect(2)=CMPLX( Normal_Vect(1),0.)
-          !   dGAMMA_Vect(3)=CMPLX( 0.,0.)
-          !   dGAMMA_Vect=dGAMMA_Vect*Wline%SegLength(Iwline)
+             !interpolating radpot and radvel at delw and sumw        
+             Radpot(1:2)=INTERP_RADIATION_POTENTIAL                       &
+                    (Nw,w,datPotVelQ%RadPot(Iwlineinit(1)+Iwline,Iinteg,:),&
+                        InterpSwitch,delw,sumw)
+             !-----------------------------------------------------
+               QB2V_M=CROSS_PRODUCT_COMPLEX(Radpot(1)*Bdisplace_Iw1    &
+                                ,COMPLEX_CONJUGATE_VECT( TotVel_Iw2,3))&
+                     +CROSS_PRODUCT_COMPLEX(Radpot(1)*                 &
+                      COMPLEX_CONJUGATE_VECT(Bdisplace_Iw2,3)          &
+                                ,TotVel_Iw1)
+               QB2V_P=CROSS_PRODUCT_COMPLEX(Radpot(2)*Bdisplace_Iw1    &
+                     ,TotVel_Iw2)              &
+                     +CROSS_PRODUCT_COMPLEX(Radpot(2)*Bdisplace_Iw2    &
+                     ,TotVel_Iw1)
 
-          !   !interpolating radpot and radvel at delw and sumw        
-          !   Radpot(1:2)=INTERP_RADIATION_POTENTIAL                       &
-          !          (Nw,w,datPotVelQ%RadPot(Iwlineinit(1)+Iwline,Iinteg,:),&
-          !              InterpSwitch,delw,sumw)
-          !   !-----------------------------------------------------
-          !     QB2V_M=CROSS_PRODUCT_COMPLEX(Radpot(1)*                 &
-          !            Bdisplace_Iw1(Iwlineinit(1)+Iwline,:)            &
-          !           ,COMPLEX_CONJUGATE_VECT(                          &
-          !            TotVel_Iw2(Iwlineinit(1)+Iwline,:),3))           &
-          !           +CROSS_PRODUCT_COMPLEX(Radpot(1)*                 &
-          !            COMPLEX_CONJUGATE_VECT(                          &
-          !            Bdisplace_Iw2(Iwlineinit(1)+Iwline,:),3)         &
-          !           ,TotVel_Iw1(Iwlineinit(1)+Iwline,:))
-          !     QB2V_P=CROSS_PRODUCT_COMPLEX(Radpot(2)*                 &
-          !            Bdisplace_Iw1(Iwlineinit(1)+Iwline,:)            &
-          !           ,TotVel_Iw2(Iwlineinit(1)+Iwline,:))              &
-          !           +CROSS_PRODUCT_COMPLEX(Radpot(2)*                 &
-          !            Bdisplace_Iw2(Iwlineinit(1)+Iwline,:)            &
-          !           ,TotVel_Iw1(Iwlineinit(1)+Iwline,:))
-
-          !    QTFHasbo(Iinteg,1)=QTFHasbo(Iinteg,1)                    &
-          !           -0.5*II*delw*rho                                  &
-          !           *DOT_PRODUCT_COMPLEX(QB2V_M,dGAMMA_Vect,3)  
-          !    QTFHasbo(Iinteg,2)=QTFHasbo(Iinteg,2)                    &
-          !           -0.5*II*sumw*rho                                  &
-          !           *DOT_PRODUCT_COMPLEX(QB2V_P,dGAMMA_Vect,3)
-          !    !----------------------------------------------------
-          !    !IF (Iinteg==1 .AND. Isym==2) THEN
-          !    !   print*,Iwline,-0.5*II*delw*rho*DOT_PRODUCT_COMPLEX(QB2V_M,dGAMMA_Vect,3)
-          !    !ENDIF
-          !  ENDDO
-          ! ENDDO
+              QTFHasbo(Iinteg,1)=QTFHasbo(Iinteg,1)                    &
+                     -0.5*II*delw*rho                                  &
+                     *DOT_PRODUCT_COMPLEX(QB2V_M,dGAMMA_Vect,3)  
+              QTFHasbo(Iinteg,2)=QTFHasbo(Iinteg,2)                    &
+                     -0.5*II*sumw*rho                                  &
+                     *DOT_PRODUCT_COMPLEX(QB2V_P,dGAMMA_Vect,3)
+              !----------------------------------------------------
+              !IF (Iinteg==1 .AND. Isym==2) THEN
+              !   print*,Iwline,-0.5*II*delw*rho*DOT_PRODUCT_COMPLEX(QB2V_M,dGAMMA_Vect,3)
+              !ENDIF
+            ENDDO
+           ENDDO
           ENDDO
           !TRANSFER FUNCTION = BICHROMATIC FORCES / 2?
           QTFHasbo(:,:)=QTFHasbo(:,:)/2 

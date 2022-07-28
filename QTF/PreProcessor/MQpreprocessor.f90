@@ -19,7 +19,7 @@ USE Elementary_functions,       ONLY: X0 !invers of disp. relation
 USE M_INITIALIZE_GREEN,         ONLY: TGREEN
 USE MInfluenceMatrix,           ONLY: CONSTRUCT_INFLUENCE_MATRIX
 !
-USE MFileDirectoryList 
+USE MFileDirectoryList          
 USE MLogFile 
 !
 IMPLICIT NONE
@@ -117,9 +117,9 @@ CONTAINS
                 Velocity(1:NPFLOW,2)=Velocity(1:NPFLOW,2)+                                      &
                    MATMUL(gradS(:, :, 2, 1) + gradS(:, :, 2, 2), ZPGB(:,Ibeta))/2               &
                    +MATMUL(gradS(:, :, 2, 1) - gradS(:, :, 2, 2), ZPGS(:,Ibeta))/2
-                 Velocity(NPFLOW+1:2*NPFLOW,2) =Velocity(NPFLOW+1:2*NPFLOW,2)+                  &
+                 Velocity(NPFLOW+1:2*NPFLOW,2) =Velocity(NPFLOW+1:2*NPFLOW,2)-                 &
                    MATMUL(gradS(:, :, 2, 1) - gradS(:, :, 2, 2), ZPGB(:,Ibeta))/2               &
-                   +MATMUL(gradS(:, :, 2, 1) + gradS(:, :, 2, 2), ZPGS(:,Ibeta))/2
+                   -MATMUL(gradS(:, :, 2, 1) + gradS(:, :, 2, 2), ZPGS(:,Ibeta))/2
                 !Vz 
                 Velocity(1:NPFLOW,3)=Velocity(1:NPFLOW,3)+                                      &
                    MATMUL(gradS(:, :, 3, 1) + gradS(:, :, 3, 2), ZPGB(:,Ibeta))/2               &
@@ -127,7 +127,10 @@ CONTAINS
                  Velocity(NPFLOW+1:2*NPFLOW,3) =Velocity(NPFLOW+1:2*NPFLOW,3)+                  &
                    MATMUL(gradS(:, :, 3, 1) - gradS(:, :, 3, 2), ZPGB(:,Ibeta))/2               &
                    +MATMUL(gradS(:, :, 3, 1) + gradS(:, :, 3, 2), ZPGS(:,Ibeta))/2
-
+               ! DO Ipanel=1,NPFLOW
+               !         print*,Ipanel,Potential(Ipanel)
+               ! ENDDO
+               ! STOP
               ENDIF
               
               OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotPotFILE,              &
@@ -187,8 +190,8 @@ CONTAINS
                    MATMUL(gradS(:, :, 2, 1) + gradS(:, :, 2, 2), SourceDistr%ZIGB(:,Irad))/2    &
                    +MATMUL(gradS(:, :, 2, 1) - gradS(:, :, 2, 2),SourceDistr%ZIGS(:,Irad))/2
                 RadVelocity(NPFLOW+1:2*NPFLOW,2) =                                              &
-                   MATMUL(gradS(:, :, 2, 1) - gradS(:, :, 2, 2), SourceDistr%ZIGB(:,Irad))/2    &
-                   +MATMUL(gradS(:, :, 2, 1) + gradS(:, :, 2, 2),SourceDistr%ZIGS(:,Irad))/2
+                   -MATMUL(gradS(:, :, 2, 1) - gradS(:, :, 2, 2), SourceDistr%ZIGB(:,Irad))/2   &
+                   -MATMUL(gradS(:, :, 2, 1) + gradS(:, :, 2, 2),SourceDistr%ZIGS(:,Irad))/2
                 !Vz 
                 RadVelocity(1:NPFLOW,3)=                                                        &
                    MATMUL(gradS(:, :, 3, 1) + gradS(:, :, 3, 2), SourceDistr%ZIGB(:,Irad))/2    &
@@ -264,11 +267,5 @@ CONTAINS
 
   END SUBROUTINE
 
-  SUBROUTINE  make_directory(dirname)
-          CHARACTER(LEN=*),       INTENT(IN) ::dirname
-          LOGICAL                            ::existdir
-          INQUIRE (DIRECTORY=dirname, EXIST=existdir)       
-          IF (.NOT.existdir) CALL SYSTEM('mkdir '//dirname)
-   END SUBROUTINE
-
+ 
 END MODULE
