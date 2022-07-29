@@ -39,6 +39,7 @@ MODULE M_SOLVER
     INTEGER       :: ID      !0= GAUSS, 1=LU, 2=GMRES
     INTEGER       :: mRestart,MaxIter
     REAL          :: Tolerance
+    REAL          :: eps_zmin
     CHARACTER(20) :: SNAME
   END TYPE TSolver
 
@@ -55,6 +56,7 @@ MODULE M_SOLVER
    INTEGER       :: NPGQ
    OPEN(10,file=wd//'/input_solver.txt',form='formatted',status='old')
    READ(10,*) NPGQ
+   READ(10,*) SolverOpt%eps_zmin
    READ(10,*) SolverOpt%ID 
    IF (SolverOpt%ID == ID_GMRES) READ(10,*) SolverOpt%mRestart, SolverOpt%Tolerance, SolverOpt%MaxIter
    CLOSE(10)    

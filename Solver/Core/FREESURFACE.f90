@@ -161,7 +161,7 @@ CONTAINS
       ! Compute also its gradient although it is not used.
       ! Values could be stored for more efficiency as in SOLVE_BEM.
 
-      call vav(0, (/xc, yc, zc/), j,VFace, mesh, env%depth, fsp, fsm, vsxp, vsxm)
+      call vav(0, (/xc, yc, zc/), j,VFace, mesh, env%depth,IGREEN%EPS_ZMIN, fsp, fsm, vsxp, vsxm)
       IF ((Env%depth == INFINITE_DEPTH) .OR. (wavenumber*Env%depth >= 20)) THEN
         CALL VNSINFD(wavenumber, (/XC, YC, ZC/), J, VFace, Mesh, IGreen, SP, SM, VSP, VSM)
       ELSE

@@ -64,7 +64,6 @@ PROGRAM Main
   REAL,DIMENSION(3)                  :: NOINPUT             ! unused but has to be declared
   TYPE(TVFACE)                       :: VFace              ! Face Mesh structure variable                   
   TYPE(TGREEN)                       :: IGreen             ! Initial Green variables
-  
   REAL                               :: tcpu_start
   CHARACTER(LEN=1000)                :: LogTextToBeWritten
 
@@ -96,7 +95,7 @@ PROGRAM Main
 
   CALL Prepare_FaceMesh(Mesh,SolverOpt%NP_GQ,VFace)
 
-  CALL INITIALIZE_GREEN(VFace,Mesh,Env%depth,NOINPUT,0,IGreen)
+  CALL INITIALIZE_GREEN(VFace,Mesh,Env%depth,NOINPUT,0,SolverOpt%eps_zmin,IGreen)
   ALLOCATE(S(Mesh%NPanels,Mesh%NPanels,2**Mesh%Isym))
   ALLOCATE(V(Mesh%NPanels,Mesh%NPanels,2**Mesh%Isym))
   ALLOCATE(Vinv(Mesh%NPanels,Mesh%NPanels,2**Mesh%Isym))
@@ -104,6 +103,9 @@ PROGRAM Main
   WRITE(*, *) ' '
   WRITE(LogTextToBeWritten,*) 'NP Gauss Quadrature Integ.: ', SolverOpt%NP_GQ
   CALL WRITE_LOGFILE(trim(wd)//'/logfile.txt',TRIM(LogTextToBeWritten),IdStartLog,IdprintTerm)
+  WRITE(LogTextToBeWritten,*) 'EPS min z                 : ', SolverOpt%eps_zmin
+  CALL WRITE_LOGFILE(trim(wd)//'/logfile.txt',TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
+
   WRITE(*, *) '. Done !'
   WRITE(*, *) ' '
 

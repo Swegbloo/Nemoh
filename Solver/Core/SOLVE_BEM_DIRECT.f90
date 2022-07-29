@@ -141,7 +141,7 @@ CONTAINS
           V(I, J, 1) = DOT_PRODUCT(Mesh%N(:, I), VSXP + VSP) ! Gradient of the Green function
           
            IF (I == J) THEN
-             IF (Mesh%XM(3, I)>= -EPS*Mesh%xy_diameter) THEN
+             IF (Mesh%XM(3, I)>= -IGREEN%EPS_ZMIN*Mesh%xy_diameter) THEN
                 V(I, J, 1)  = V(I, J, 1) - 0.5          !for the lid panels, different sign
              ELSE
                 V(I, J, 1)  = V(I, J, 1) + 0.5          !add 0.5 for I=J as in the system of Eqs
@@ -152,7 +152,7 @@ CONTAINS
             S(I, J, 2) = FSM + SM
             V(I, J, 2) = DOT_PRODUCT(Mesh%N(:, I), VSXM + VSM)
             IF (I == J) THEN
-              IF (Mesh%XM(3, I)>= -EPS*Mesh%xy_diameter) THEN
+              IF (Mesh%XM(3, I)>= -IGREEN%EPS_ZMIN*Mesh%xy_diameter) THEN
                  V(I, J, 2)  = V(I, J, 2) - 0.5          !for the lid panels, different sign
               ELSE
                  V(I, J, 2)  = V(I, J, 2) + 0.5          !add 0.5 for I=J as in the system of Eqs

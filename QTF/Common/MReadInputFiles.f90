@@ -14,7 +14,7 @@ USE MFileDirectoryList
 
 IMPLICIT NONE
 PUBLIC:: Read_NP_GaussQuad,Read_Mechanical_Coefs,Read_FirstOrderLoad,Read_Motion, &
-         Read_SourceDistribution
+         Read_SourceDistribution,Read_Eps_Zmin
 !
 TYPE TMech
     REAL,ALLOCATABLE,DIMENSION(:,:) :: MassMat          !Mass-Inertia Matrix
@@ -41,7 +41,18 @@ CONTAINS
            CLOSE(10)
            Read_NP_GaussQuad=NPGQ**2
            RETURN
+        END FUNCTION
+
+        FUNCTION Read_Eps_Zmin(wd) result(EPS_ZMIN)
+           CHARACTER(LEN=*) :: wd
+           REAL       :: EPS_ZMIN
+           OPEN(10,file=wd//'/input_solver.txt',form='formatted',status='old')
+           READ(10,*)
+           READ(10,*) EPS_ZMIN
+           CLOSE(10)
+           RETURN
         END FUNCTION 
+
 
         SUBROUTINE Read_Mechanical_Coefs(wd,Nradiation,MechCoef)
            !input/output

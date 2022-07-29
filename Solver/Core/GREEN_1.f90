@@ -17,7 +17,7 @@ MODULE GREEN_1
 CONTAINS
 
   SUBROUTINE VAV              &
-    ( I, X0I, J, VFace,Mesh, depth, &
+    ( I, X0I, J, VFace,Mesh, depth,eps_zmin, &
       FSP, FSM, VSP, VSM)
     ! Main subroutine of the module, called in SOLVE_BEM.f90 and FREESURFACE.f90.
 
@@ -28,6 +28,7 @@ CONTAINS
     TYPE(TMesh) , INTENT(IN)       :: Mesh
     TYPE(TVFace), INTENT(IN)       :: VFace
     REAL, INTENT(IN)               :: depth
+    REAL, INTENT(IN)               :: eps_zmin
 
     ! Outputs
     REAL, INTENT(OUT)               :: FSP, FSM ! Integral of the Green function over the panel.
@@ -56,7 +57,7 @@ CONTAINS
     CALL VFace_to_Face(VFace,Face,J) !Extract a face J from the VFace array 
 
     XI(:) = X0I(:)
-    XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
+    XI(3) = MIN(X0I(3), -eps_zmin*Mesh%xy_diameter)
     
     CALL COMPUTE_S0(XI, Face, S0, VS0)
 
@@ -196,12 +197,13 @@ CONTAINS
 
   !--------------------------------------------------
 
-  SUBROUTINE COMPUTE_ASYMPTOTIC_S0(XI, XJ, AJ, S0, VS0)
+  SUBROUTINE COMPUTE_ASYMPTOTIC_S0(XI, XJ, AJ,EPS, S0, VS0)
     ! Same as above, but always use the approximate aymptotic value.
 
     ! Inputs
     REAL, DIMENSION(3), INTENT(IN) :: XI,XJ
     REAL                           :: AJ !area of panel J
+    REAL,               INTENT(IN) :: EPS
     ! Outputs
     REAL,               INTENT(OUT) :: S0
     REAL, DIMENSION(3), INTENT(OUT) :: VS0

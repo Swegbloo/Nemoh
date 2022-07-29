@@ -19,7 +19,7 @@ USE MFace,              ONLY:TVFace, Prepare_FaceMesh,TWLine,Prepare_Waterline
 USE MReadInputFiles,    ONLY:Read_NP_GaussQuad,Read_Mechanical_Coefs,TMech,  &
                              Read_FirstOrderLoad,TLoad1,Read_Motion,TSource, &
                              READ_POTENTIALS_VELOCITIES_BODYWLINE,           &
-                             READ_GENERALIZED_NORMAL_BODY_dAREA
+                             READ_GENERALIZED_NORMAL_BODY_dAREA,Read_Eps_Zmin
 USE MEnvironment,       ONLY: TEnvironment,FunVect_inverseDispersion
 USE MLogFile
 USE MQSolverPreparation !CONTAINS:TQfreq,TpotVel,PREPARE_POTENTIAL_VELOCITIES
@@ -70,6 +70,7 @@ IMPLICIT NONE
         INTEGER                                 :: NwQ    ! Number of wave freq
         !---------
         INTEGER                                 :: SwitchQuadHM 
+        REAL                                    :: EPS_ZMIN
         COMPLEX, ALLOCATABLE,DIMENSION(:,:)   :: QTF_DUOK ,QTF_HASBO   
         COMPLEX, ALLOCATABLE,DIMENSION(:,:)   :: QTF_HASFS,QTF_HASFS_ASYMP
         !
@@ -92,10 +93,10 @@ IMPLICIT NONE
         NwQ          =winputQ(1)
         BForwardSpeed=InpNEMOHCAL%qtfinput%body_forward_speed
         NP_GQ        =Read_NP_GaussQuad(TRIM(ID%ID)) 
-       
+        EPS_ZMIN     =Read_Eps_Zmin(TRIM(ID%ID)) 
         !
         CALL Prepare_FaceMesh(Mesh,NP_GQ,VFace)
-        CALL Prepare_Waterline(VFace,Mesh%xy_diameter,Mesh%Npanels,WLine)
+        CALL Prepare_Waterline(VFace,EPS_ZMIN,Mesh%xy_diameter,Mesh%Npanels,WLine)
         !
         NPFlow   =(Mesh%Npanels+WLine%NWLineSeg)*2**Mesh%Isym !Number of flow point
         !

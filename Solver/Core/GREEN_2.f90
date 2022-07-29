@@ -39,6 +39,7 @@ CONTAINS
     COMPLEX, DIMENSION(3), INTENT(OUT) :: VSP, VSM ! Gradient of the integral of the Green function with respect to X0I.
 
     ! Local variables
+    REAL                               :: EPS
     REAL                               :: ADPI, ADPI2, AKDPI, AKDPI2
     REAL, DIMENSION(3)                 :: XI,XJ
     COMPLEX, DIMENSION(Mesh%ISym+1)    :: FS
@@ -50,7 +51,7 @@ CONTAINS
  
     ALLOCATE(FaceJ%dXdXG_WGQ_per_A(VFace%NP_GQ))
     ALLOCATE(FaceJ%XM_GQ(3,VFace%NP_GQ))
-    
+    EPS=IGREEN%EPS_ZMIN 
     CALL VFace_to_FACE(VFace,FaceJ,J)    !Extract a face J from the VFace array 
     !initialization
      SP=CZERO
@@ -138,7 +139,7 @@ CONTAINS
    
     INTEGER                 :: NEXP
     REAL, DIMENSION(31)     :: AMBDA, AR
-    
+    REAL                    :: EPS 
     ALLOCATE(FaceJ%dXdXG_WGQ_per_A(VFace%NP_GQ))
     ALLOCATE(FaceJ%XM_GQ(3,VFace%NP_GQ))
     
@@ -146,7 +147,7 @@ CONTAINS
     NEXP =IGreen%NEXP
     AMBDA=IGreen%AMBDA(:)
     AR   =IGreen%AR(:)
-
+    EPS  =IGREEN%EPS_ZMIN 
     CALL VFace_to_FACE(VFace,FaceJ,J)    !Extract a face J from the VFace array 
     !initialization
      SP=CZERO
@@ -285,21 +286,21 @@ CONTAINS
 
           ! 2.a Shift observation point and compute integral
           XI(3) =  X0I(3) + depth*AMBDA(KE) - 2*depth
-          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, FTS(1, 1), VTS(:, 1, 1))
+          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(1, 1), VTS(:, 1, 1))
 
           ! 2.b Shift and reflect observation point and compute integral
           XI(3) = -X0I(3) - depth*AMBDA(KE)
-          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, FTS(2, 1), VTS(:, 2, 1))
+          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(2, 1), VTS(:, 2, 1))
           VTS(3, 2, 1) = -VTS(3, 2, 1) ! Reflection of the output vector
 
           ! 2.c Shift and reflect observation point and compute integral
           XI(3) = -X0I(3) + depth*AMBDA(KE) - 4*depth
-          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, FTS(3, 1), VTS(:, 3, 1))
+          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(3, 1), VTS(:, 3, 1))
           VTS(3, 3, 1) = -VTS(3, 3, 1) ! Reflection of the output vector
 
           ! 2.d Shift observation point and compute integral
           XI(3) =  X0I(3) - depth*AMBDA(KE) + 2*depth
-          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, FTS(4, 1), VTS(:, 4, 1))
+          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(4, 1), VTS(:, 4, 1))
 
           AQT = -AR(KE)/(8*PI)
 
@@ -315,21 +316,21 @@ CONTAINS
             XI(2) = -X0I(2)
             ! 2.a' Shift observation point and compute integral
             XI(3) =  X0I(3) + depth*AMBDA(KE) - 2*depth
-            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, FTS(1, 2), VTS(:, 1, 2))
+            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(1, 2), VTS(:, 1, 2))
 
             ! 2.b' Shift and reflect observation point and compute integral
             XI(3) = -X0I(3) - depth*AMBDA(KE)
-            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, FTS(2, 2), VTS(:, 2, 2))
+            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(2, 2), VTS(:, 2, 2))
             VTS(3, 2, 2) = -VTS(3, 2, 2) ! Reflection of the output vector
 
             ! 2.c' Shift and reflect observation point and compute integral
             XI(3) = -X0I(3) + depth*AMBDA(KE) - 4*depth
-            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, FTS(3, 2), VTS(:, 3, 2))
+            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(3, 2), VTS(:, 3, 2))
             VTS(3, 3, 2) = -VTS(3, 3, 2) ! Reflection of the output vector
 
             ! 2.d' Shift observation point and compute integral
             XI(3) =  X0I(3) - depth*AMBDA(KE) + 2*depth
-            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, FTS(4, 2), VTS(:, 4, 2))
+            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(4, 2), VTS(:, 4, 2))
 
             ! Reflection of the output vector around the xOz plane
             VTS(2, 1:4, 2) = -VTS(2, 1:4, 2)
@@ -368,6 +369,9 @@ CONTAINS
     REAL                               :: SIK, CSK, SQ, EPZ
     REAL                               :: PD1X, PD2X, PD1Z, PD2Z
     REAL, ALLOCATABLE,DIMENSION(:)     :: XL, ZL
+    REAL                               :: EPS
+
+    EPS=IGREEN%EPS_ZMIN
 
     IF (FLAG_IGREEN==1) THEN
       ALLOCATE(XL(3),ZL(3))

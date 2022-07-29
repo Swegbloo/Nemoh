@@ -32,19 +32,20 @@ MODULE M_INITIALIZE_GREEN
      REAL,DIMENSION(:,:,:),ALLOCATABLE :: VSP1,VSM1  !First term gradient of the green function
      REAL,DIMENSION(:,:)  ,ALLOCATABLE :: FSP1_INF,FSM1_INF  !First term green function for infinite depth
      REAL,DIMENSION(:,:,:),ALLOCATABLE :: VSP1_INF,VSM1_INF  !First term gradient of the green function for infinite depth
-
+    
      INTEGER                           :: IR,JZ,NPINTE               !for Green2
      REAL,DIMENSION(:)    ,ALLOCATABLE :: XR,XZ                      !for Green2
      REAL,DIMENSION(:,:)  ,ALLOCATABLE :: APD1X, APD1Z, APD2X, APD2Z ! for Green2
      REAL                              :: MAX_KR,MIN_KZ
-    ! Dependant of Omega, computed in LISC in SOLVE_BEM_DIRECT
+     REAL                              :: EPS_ZMIN                   !factor for minimum z
+     ! Dependant of Omega, computed in LISC in SOLVE_BEM_DIRECT
      INTEGER                 :: NEXP
      REAL, DIMENSION(31)     :: AMBDA, AR
   END TYPE TGREEN
 
 CONTAINS
 
-  SUBROUTINE INITIALIZE_GREEN(VFace,Mesh,Depth,XM_add,NP_add,IGreen)
+  SUBROUTINE INITIALIZE_GREEN(VFace,Mesh,Depth,XM_add,NP_add,eps_zmin,IGreen)
 
   !INPUT/OUTPUT
   TYPE(TVFace),                 INTENT(IN)  :: VFace         
@@ -53,6 +54,7 @@ CONTAINS
   INTEGER,                      INTENT(IN)  :: NP_add !addition calc point
   REAL,DIMENSION(NP_add,3),     INTENT(IN)  :: XM_add !ie on waterline
                                                       !used in QPreprocessor
+  REAL,                         INTENT(IN)  :: eps_zmin! factor for minimum z
   TYPE(TGREEN),                 INTENT(OUT) :: IGreen  
 
   !LOCAL
@@ -67,6 +69,7 @@ CONTAINS
   IGREEN%JZ=124
   ENDIF  
   IGREEN%NPINTE=251
+  IGREEN%EPS_ZMIN=eps_zmin
   
   ALLOCATE(IGREEN%FSP1(Mesh%Npanels+NP_add,Mesh%Npanels))
   ALLOCATE(IGREEN%FSM1(Mesh%Npanels+NP_add,Mesh%Npanels))
@@ -94,14 +97,14 @@ CONTAINS
           ! First part of the Green function
           ! These output are independent of omega and computed only once.
           CALL VAV                                 &
-          ( I, XM_I, J,VFace,Mesh, Depth, &
+          ( I, XM_I, J,VFace,Mesh, Depth,eps_zmin, &
             IGreen%FSP1(I,J), IGreen%FSM1(I,J),    &
             IGreen%VSP1(I,J,:), IGreen%VSM1(I,J,:) &
             )
            IF (Depth .NE. INFINITE_DEPTH) THEN
            !preparation in case kD>20
-           CALL VAV                                 &
-          ( I, XM_I, J,VFace,Mesh, INFINITE_DEPTH, &
+           CALL VAV                                        &
+          ( I, XM_I, J,VFace,Mesh, INFINITE_DEPTH,eps_zmin,&
             IGreen%FSP1_INF(I,J), IGreen%FSM1_INF(I,J),    &
             IGreen%VSP1_INF(I,J,:), IGreen%VSM1_INF(I,J,:) &
             )

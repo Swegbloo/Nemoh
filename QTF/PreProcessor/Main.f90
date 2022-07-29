@@ -16,7 +16,7 @@ USE MMesh
 USE MFace,              ONLY:TVFace, Prepare_FaceMesh,TWLine,Prepare_Waterline
 USE MReadInputFiles,    ONLY:Read_NP_GaussQuad,Read_Mechanical_Coefs,TMech,  &
                              Read_FirstOrderLoad,TLoad1,Read_Motion,TSource, &
-                             Read_SourceDistribution
+                             Read_SourceDistribution,Read_Eps_Zmin
 USE M_INITIALIZE_GREEN, ONLY: TGREEN, INITIALIZE_GREEN
 USE MQpreprocessor
 USE MLogFile               
@@ -42,6 +42,7 @@ IMPLICIT NONE
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: Motion
         TYPE(TSource) :: SOURCEDISTR                            !First order NEMOH solution
         TYPE(TGREEN)                         :: IGreen          ! Initial Green variables
+        REAL                                 :: EPS_ZMIN
         INTEGER       :: I,J,uFile
         CHARACTER(LEN=1000)                :: LogTextToBeWritten
         REAL                               :: tcpu_start
@@ -64,13 +65,14 @@ IMPLICIT NONE
         ALLOCATE(w(Nw),beta(Nbeta))
         CALL Discretized_Omega_and_Beta(1,InpNEMOHCAL%waveinput,Nw,Nbeta,w,beta)
 !        
-        NP_GQ=Read_NP_GaussQuad(TRIM(ID%ID)) 
+        NP_GQ=Read_NP_GaussQuad(TRIM(ID%ID))
+        EPS_ZMIN=Read_Eps_Zmin(TRIM(ID%ID))
 !
         CALL Prepare_FaceMesh(Mesh,NP_GQ,VFace)
-        CALL Prepare_Waterline(VFace,Mesh%xy_diameter,Mesh%Npanels,WLine)
+        CALL Prepare_Waterline(VFace,EPS_ZMIN,Mesh%xy_diameter,Mesh%Npanels,WLine)
 !
         CALL INITIALIZE_GREEN(VFace,Mesh,InpNEMOHCAL%Env%depth, &
-                              WLine%XM,WLine%NWlineseg,IGreen)
+                              WLine%XM,WLine%NWlineseg,EPS_ZMIN,IGreen)
 
 !
         CALL WRITE_QTFLOGFILE(TRIM(ID%ID),beta,Nbeta,w,Nw,NP_GQ,                        &

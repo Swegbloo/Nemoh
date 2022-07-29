@@ -250,9 +250,10 @@ CONTAINS
    
   END SUBROUTINE
 
-  SUBROUTINE Prepare_Waterline(VFace,BodyDiameter,Npanels,WLine)
+  SUBROUTINE Prepare_Waterline(VFace,EPS,BodyDiameter,Npanels,WLine)
      !Input/output
      TYPE(TVFace), INTENT(IN)    :: VFace
+     REAL,         INTENT(IN)    :: EPS
      REAL,         INTENT(IN)    :: BodyDiameter
      INTEGER,      INTENT(IN)    :: Npanels
      TYPE(TWLine), INTENT(OUT)   :: WLine
