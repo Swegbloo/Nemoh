@@ -167,6 +167,11 @@ clean_solver:
 ####################
 #  Post-processor  #
 ####################
+SRCOEXT=./Solver/Core/cPackgmres.f\
+./Solver/Core/zPackgmres.f\
+./Solver/Core/blas_rot.f
+
+OBJOEXT=$(SRCOEXT:.f=.o)
 
 # Sources
 SRCO=./Common/Constants.f90\
@@ -175,7 +180,9 @@ SRCO=./Common/Constants.f90\
 ./Common/Environment.f90\
 ./Common/Results.f90\
 ./Common/Mesh.f90\
-./postProcessor/Compute_RAOs.f90\
+./Solver/Core/M_SOLVER.f90\
+./postProcessor/MPP_ReadInputFiles.f90\
+./postProcessor/MPP_Compute_RAOs.f90\
 ./postProcessor/IRF.f90\
 ./postProcessor/Plot_WaveElevation.f90\
 ./postProcessor/Main.f90
@@ -183,13 +190,13 @@ SRCO=./Common/Constants.f90\
 OBJO=$(SRCO:.f90=.o)
 
 # Rules to build
-postProc:	$(OBJO)
+postProc:	$(OBJOEXT) $(OBJO)
 			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -o $(outputdir)/postProc $(OBJO)
+			@$(FC) -llapack -lblas -o $(outputdir)/postProc $(OBJOEXT) $(OBJO)
 			@echo "Postprocessor compilation succesful!"
 
 clean_postProc:
-			@rm -f $(OBJO)
+			@rm -f $(OBJO) $(OBJOEXT)
 			@rm -f $(outputdir)/postProc
 
 ################

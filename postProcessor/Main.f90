@@ -29,6 +29,8 @@
     USE MEnvironment
     USE MResults
     USE MIRF
+    USE MPP_ReadInputFiles,     ONLY:Read_Mechanical_Coefs,TMech
+    USE MPP_Compute_RAOs
 #ifndef GNUFORT
     USE iflport
 #endif
@@ -42,6 +44,8 @@
     TYPE(TResults) :: Results
 !   IRFs
     TYPE(TIRF) :: IRF
+!   Mechanical Coef: Mass_Mat,Stiffness,... 
+    TYPE(TMech)   :: MechCoef       
 !   RAOs
     COMPLEX,DIMENSION(:,:,:),ALLOCATABLE :: RAOs
 !   Plot Wave elevation
@@ -73,8 +77,13 @@
 !
 !   --- Compute RAOs -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 !
-    ALLOCATE(RAOs(Results%Nintegration,Results%Nw,Results%Nbeta))
-    CALL Compute_RAOs(RAOs,Results)
+    CALL Read_Mechanical_Coefs(TRIM(ID%ID),Results%Nradiation,MechCoef)
+ 
+    ALLOCATE(RAOs(Results%Nradiation,Results%Nw,Results%Nbeta))
+    CALL Compute_RAOs(RAOs,Results,MechCoef)
+    CALL SAVE_RAO(RAOs,Results%w,Results%beta,Results%Nintegration,Results%Nw,Results%Nbeta,&
+            Results%IndxForce(:,3),TRIM(ID%ID)//'/Motion/','RAO.dat')
+
 !
 !   --- Save results -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 !
