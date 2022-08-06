@@ -192,13 +192,13 @@ CONTAINS
     Potential(1:NPTOT)=-II*Environment%g/w*QZ*CEXP(II*k*wbar)
 
     Velocity(1:NPTOT,1)=Environment%g/w*k*COS(beta)*QZ*CEXP(II*k*wbar)
-    Velocity(1:NPTOT,2)=Environment%g/w*k*SIN(beta)*QZ**CEXP(II*k*wbar)
+    Velocity(1:NPTOT,2)=Environment%g/w*k*SIN(beta)*QZ*CEXP(II*k*wbar)
     Velocity(1:NPTOT,3)=-II*Environment%g/w*dzQZ*CEXP(II*k*wbar)
     IF (ISYM==1)THEN
-    wbar=(XM_ALL(:,1)-Environment%XEFF)*COS(beta)-(XM_ALL(:,2)-Environment%YEFF)*SIN(beta)
+    wbar=(XM_ALL(:,1)-Environment%XEFF)*COS(beta)+(-XM_ALL(:,2)-Environment%YEFF)*SIN(beta)
     Potential(NPTOT+1:2*NPTOT)=-II*Environment%g/w*QZ*CEXP(II*k*wbar)
     Velocity(NPTOT+1:2*NPTOT,1)=Environment%g/w*k*COS(beta)*QZ*CEXP(II*k*wbar)
-    Velocity(NPTOT+1:2*NPTOT,2)=Environment%g/w*k*SIN(beta)*QZ**CEXP(II*k*wbar)
+    Velocity(NPTOT+1:2*NPTOT,2)=Environment%g/w*k*SIN(beta)*QZ*CEXP(II*k*wbar)
     Velocity(NPTOT+1:2*NPTOT,3)=-II*Environment%g/w*dzQZ*CEXP(II*k*wbar)
     ENDIF
 

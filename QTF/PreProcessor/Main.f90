@@ -73,9 +73,8 @@ IMPLICIT NONE
 !
         CALL INITIALIZE_GREEN(VFace,Mesh,InpNEMOHCAL%Env%depth, &
                               WLine%XM,WLine%NWlineseg,EPS_ZMIN,IGreen)
-
 !
-        CALL WRITE_QTFLOGFILE(TRIM(ID%ID),beta,Nbeta,w,Nw,NP_GQ,                        &
+        CALL WRITE_QTFLOGFILE(TRIM(ID%ID),beta,Nbeta,w,Nw,NP_GQ,EPS_ZMIN,                      &
                 InpNEMOHCAL%Nbodies,InpNEMOHCAL%Env%depth) 
         CALL START_RECORD_TIME(tcpu_start,TRIM(ID%ID)//'/'//LogFILE,IdAppend)
         WRITE(LogTextToBeWritten,*) '-------'

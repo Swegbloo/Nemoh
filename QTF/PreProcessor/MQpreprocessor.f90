@@ -69,7 +69,7 @@ CONTAINS
            !CONSTRUCT PERTURBATION(Diff+Rad) SINGULAR DISTRIBUTION FOR EACH WAVE DIRECTION
            !assign the diffraction singular source distribution for all panels
            ZPGB(1:Mesh%Npanels,Ibeta)=SourceDistr%ZIGB(1:Mesh%Npanels,Nradiation+Ibeta)   
-           ZPGS(1:Mesh%Npanels,Ibeta)=SourceDistr%ZIGB(1:Mesh%Npanels,Nradiation+Ibeta) 
+           ZPGS(1:Mesh%Npanels,Ibeta)=SourceDistr%ZIGS(1:Mesh%Npanels,Nradiation+Ibeta) 
               !sum the diffraction + radiation singular source distribution for all panels
               DO Irad=1,Nradiation  
               ZPGB(1:Mesh%Npanels,Ibeta)=ZPGB(1:Mesh%Npanels,Ibeta)                             &
@@ -233,12 +233,12 @@ CONTAINS
         DEALLOCATE(S,GradS)        
   END SUBROUTINE
 
-  SUBROUTINE WRITE_QTFLOGFILE(wd,beta,Nbeta,w,Nw,NP_GQ,Nbodies,depth)
+  SUBROUTINE WRITE_QTFLOGFILE(wd,beta,Nbeta,w,Nw,NP_GQ,eps_zmin,Nbodies,depth)
         CHARACTER(LEN=*),             INTENT(IN)::wd
         INTEGER,                      INTENT(IN)::Nbeta,Nw,NP_GQ,Nbodies
         REAL, DIMENSION(Nbeta),       INTENT(IN)::beta
         REAL, DIMENSION(Nw),          INTENT(IN)::w
-        REAL,                         INTENT(IN)::depth
+        REAL,                         INTENT(IN)::depth,eps_zmin
         CHARACTER(LEN=1000)                     ::LogTextToBeWritten
 
 
@@ -264,6 +264,8 @@ CONTAINS
         CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
          WRITE(LogTextToBeWritten,'(A,I3)') ' NP Gauss Quadrature Integ.: ', NP_GQ
         CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
+        WRITE(LogTextToBeWritten,*) 'EPS min z                 : ', eps_zmin
+         CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
 
   END SUBROUTINE
 

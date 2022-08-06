@@ -607,8 +607,6 @@ CONTAINS
           !dyPHI
           GradPhi(2,1)=II*(k1*sin(beta1)-k2*sin(beta2))*PHI_I(1)
           GradPhi(2,2)=II*(k1*sin(beta1)+k2*sin(beta2))*PHI_I(2)
-          GradPhi(2,1)=II*sin(beta1)*PHI_I(1)
-          GradPhi(2,2)=II*sin(beta1)*PHI_I(2)
           !dzPHI
           abs_delk=SQRT(k1**2+k2**2-2*k1*k2*cos(beta1-beta2))
           abs_sumk=SQRT(k1**2+k2**2+2*k1*k2*cos(beta1-beta2))

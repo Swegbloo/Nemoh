@@ -128,7 +128,7 @@ IMPLICIT NONE
         CALL READ_POTENTIALS_VELOCITIES_BODYWLINE(TRIM(ID%ID),Nw,Nbeta,NRadiation,       &
                 NPFlow,datPotVel%TotPot,datPotVel%TotVel,                                &
                 datPotVel%RadPot,datPotVel%RadVel,w,kw,beta)
-
+        
         CALL READ_GENERALIZED_NORMAL_BODY_dAREA(TRIM(ID%ID),Mesh%Npanels*2**Mesh%Isym,   &
                                                           Nintegration,genNormal_dS)
         CALL CALC_GENERALIZED_NORMAL_WATERLINE_dSEGMENT(Mesh,Nintegration,WLine,         &
@@ -150,15 +150,30 @@ IMPLICIT NONE
                                         w,Qfreq,RotAnglesQ)
         CALL PREPARE_TRANSLATION_MOTION(Motion,Nw,Nbeta,Nradiation,Nbodies,                 &
                                         w,Qfreq,TransMotionQ)
-
-
-       ! DO Ipanel=1,Mesh%Npanels+WLine%NWLineSeg
-       ! print*,Ipanel,datPotVelQ%TotPot(Ipanel,1,1)
+       ! print*,WLine%NWLineSeg
+       ! DO Ibeta1=1,Nbeta
+       !   print*,'------------------------------'
+       !   print*,beta(Ibeta1)
+       !  ! DO Iw1=1,Nw
+       !  ! DO I=1,Nradiation
+       !  !    print*,Iw1,I,Motion(Iw1,I,Ibeta1)
+       !  ! ENDDO
+       !  ! ENDDO
+       !   DO Ipanel=1,Mesh%Npanels!+WLine%NWLineSeg
+       !    print*,Ipanel,datPotVelQ%TotVel(Ipanel,1,Ibeta1,6),&
+       !            datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),1,Ibeta1,6)
+       !    print*,Ipanel,datPotVelQ%TotVel(Ipanel,2,Ibeta1,6),&
+       !            datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),2,Ibeta1,6)
+       !    print*,Ipanel,datPotVelQ%TotVel(Ipanel,3,Ibeta1,6),&
+       !            datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),3,Ibeta1,6)
+       !          ! print*,Ipanel,BdisplaceQ(8,Ibeta1,Ipanel,:)
+       !   ENDDO
        ! ENDDO
+       ! STOP
        !  COMPUTE QTF
         CALL  INITIALIZE_OUTPUT_FILES(TRIM(ID%ID))
         DO Ibeta1=1,Nbeta
-           DO Ibeta2=1,Nbeta
+           DO Ibeta2=Ibeta1,Nbeta
                 WRITE(*,'(A,F7.3,A,F7.3,A)'),'beta1=', beta(Ibeta1)*180/PI,&
                         ', beta2=', beta(Ibeta2)*180/PI, ' [deg]'
                 DO IwQ=0,NwQ-1

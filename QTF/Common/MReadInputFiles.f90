@@ -158,7 +158,7 @@ CONTAINS
                  READ(u1,*) w0,(Amp(J),J=1,Nradiation),(Phase(J),J=1,Nradiation)
                  DO J=1,Nradiation
                      Phase(J)=Phase(J)*PI/180.0
-                     IF (MODULO(J,6)>3) Amp(J)=Amp(J)*PI/180.0
+                     IF (MODULO(J,6)>3.OR.MODULO(J,6)==0) Amp(J)=Amp(J)*PI/180.0
                      Motion(I,J,K)=Amp(J)*CEXP(II*Phase(J))
                  ENDDO
               ENDDO  

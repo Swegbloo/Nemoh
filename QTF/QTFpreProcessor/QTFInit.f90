@@ -208,7 +208,7 @@ CONTAINS
     C1=-G/WH
     AKAD=C1*AM0
     KKK=NIN
-    BETA=AIND(KKK)*DRAD
+    !BETA=AIND(KKK)*DRAD
     CB=COS(BETA)
     SB=SIN(BETA)
     HH=H
@@ -239,7 +239,7 @@ CONTAINS
 	    ZVZB(I)=ZI*CR*CMPLX(CIB,SIB)
 	    ZPB(I)=ZI*C1*CCIH*CMPLX(CIB,SIB)
 	    IF(NSYMY.EQ.1)THEN
-		COEFS=AM0*((XM(I)-XEFF)*CB-(YM(I)-YEFF)*SB)
+		COEFS=AM0*((XM(I)-XEFF)*CB+(-YM(I)-YEFF)*SB)
 		CIS=COS(COEFS)
 		SIS=SIN(COEFS)
 		ZVXS(I)=ZI*CP*CB*CMPLX(-SIS,CIS)
@@ -247,6 +247,11 @@ CONTAINS
 		ZVZS(I)=ZI*CR*CMPLX(CIS,SIS)
 		ZPS(I)=ZI*C1*CCIH*CMPLX(CIS,SIS)
 	    ENDIF
+                 !   print*,I,ZPB(I),ZPS(I)
+                 !   print*,I,ZVXB(I),ZVXS(I)
+                 !   print*,I,ZVYB(I),ZVYS(I)
+                 !   print*,I,ZVZB(I),ZVZS(I)
+
 	    DO J=1,IMX
 		! ATTENTION, 1 ET 2 NE FONT PAS REFERENCE AUX PULSATION 1 ET 2
 		ZPB(I)=ZPB(I)+0.5*(ZTGB(J)*CMPLX(SP1(J)+SM1(J),SP2(J)+SM2(J))+ZTGS(J)*CMPLX(SP1(J)-SM1(J),SP2(J)-SM2(J)))
@@ -261,6 +266,12 @@ CONTAINS
 		ZVZB(I)=ZVZB(I)+0.5*(ZTGB(J)*CMPLX(VSZP1(J)+VSZM1(J), VSZP2(J)+VSZM2(J))+ZTGS(J)*CMPLX(VSZP1(J)-VSZM1(J), VSZP2(J)-VSZM2(J)))
 		ZVZS(I)=ZVZS(I)+0.5*(ZTGS(J)*CMPLX(VSZP1(J)+VSZM1(J), VSZP2(J)+VSZM2(J))+ZTGB(J)*CMPLX(VSZP1(J)-VSZM1(J), VSZP2(J)-VSZM2(J)))
 	    END DO
+               ! print*,I,ZPB(I),ZPS(I)
+               ! print*,I,ZVXB(I),ZVXS(I)
+               ! print*,I,ZVYB(I),ZVYS(I)
+               ! print*,I,ZVZB(I),ZVZS(I)
+
+
 	ELSE
 	    ZVXB(I)=(0.,0.)
 	    ZVYB(I)=(0.,0.)
@@ -279,6 +290,7 @@ CONTAINS
             & ,REAL(ZVZB(I)),AIMAG(ZVZB(I)),REAL(ZVZS(I)),AIMAG(ZVZS(I)) 
         ENDIF 
     END DO
+    !STOP
     !
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!CC
     !                                                                     !

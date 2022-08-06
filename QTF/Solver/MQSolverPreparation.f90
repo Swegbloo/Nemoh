@@ -119,7 +119,7 @@ SUBROUTINE PREPARE_BODY_DISPLACEMENT(Qfreq,Nw,w,Nbeta,Nradiation,NPFlow,Nbodies,
         TYPE(TWLine),                          INTENT(IN)::WLine
         TYPE(TNemCal),                         INTENT(IN)::InpNEMOHCAL
 
-        COMPLEX,DIMENSION(Nw,Nbeta,Nradiation),INTENT(IN)::Motion       !RAO
+        COMPLEX,DIMENSION(Nw,Nradiation,Nbeta),INTENT(IN)::Motion       !RAO
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:,:),INTENT(INOUT):: BdisplaceQ
         !Local
         INTEGER                     :: Ibeta,IdB,Isegline,Iw,Ipanel,iflag
@@ -134,7 +134,6 @@ SUBROUTINE PREPARE_BODY_DISPLACEMENT(Qfreq,Nw,w,Nbeta,Nradiation,NPFlow,Nbodies,
         Type(linear_interp_1d)      :: interpBdispXsym_I,interpBdispYsym_I,interpBdispZsym_I
         ALLOCATE(BdisplaceQ(Qfreq%NwQ,Nbeta,NPFlow,3))
         ALLOCATE(Bdisplace(Nw,Nbeta,NPFlow,3))
-
         NpanWL=Mesh%Npanels+WLine%NWLineseg
            
         DO Ipanel=1,Mesh%Npanels+WLine%NWLineseg
@@ -162,12 +161,12 @@ SUBROUTINE PREPARE_BODY_DISPLACEMENT(Qfreq,Nw,w,Nbeta,Nradiation,NPFlow,Nbodies,
 
                 DO Ibeta=1,Nbeta
                    DO Iw=1,Nw
-                       vect_Theta=Motion(Iw,Ibeta,IdB+4:IdB+6)
-                       Bdisplace(Iw,Ibeta,Ipanel,1:3)=Motion(Iw,Ibeta,IdB+1:IdB+3)              &
+                       vect_Theta=Motion(Iw,IdB+4:IdB+6,Ibeta)
+                       Bdisplace(Iw,Ibeta,Ipanel,1:3)=Motion(Iw,IdB+1:IdB+3,Ibeta)              &
                             + CROSS_PRODUCT_COMPLEX(vect_Theta,CMPLX(vect_R,0))
                         IF (Mesh%iSym.EQ.1) THEN
                            Bdisplace(Iw,Ibeta,NpanWL+Ipanel,1:3)=                               &
-                                   Motion(Iw,Ibeta,IdB+1:IdB+3)                                 &
+                                   Motion(Iw,IdB+1:IdB+3,Ibeta)                                 &
                                    + CROSS_PRODUCT_COMPLEX(vect_Theta,CMPLX(vect_Rsym,0))
                         ENDIF
                    ENDDO
@@ -245,7 +244,6 @@ SUBROUTINE PREPARE_BODY_DISPLACEMENT(Qfreq,Nw,w,Nbeta,Nradiation,NPFlow,Nbodies,
                          CALL interpBdispZsym_I%destroy()
                          ENDIF 
                    ENDIF
-   
                 ENDDO
         ENDDO
         DEALLOCATE(Bdisplace)
@@ -261,7 +259,7 @@ SUBROUTINE PREPARE_INERTIA_FORCES(MechCoef,Motion,Nw,Nbeta,Nradiation,Nintegrati
         TYPE(TMech),                    INTENT(IN):: MechCoef
         REAL,DIMENSION(Nw),             INTENT(IN):: w
         TYPE(TQfreq),                   INTENT(IN):: Qfreq
-        COMPLEX,DIMENSION(Nw,Nbeta,Nradiation),INTENT(IN)::Motion       !RAO
+        COMPLEX,DIMENSION(Nw,Nradiation,Nbeta),INTENT(IN)::Motion       !RAO
         COMPLEX,DIMENSION(Qfreq%NwQ,Nbeta,Nintegration),                          &
                                         INTENT(OUT)::InertiaForceQ
         !local 
@@ -285,7 +283,7 @@ SUBROUTINE PREPARE_INERTIA_FORCES(MechCoef,Motion,Nw,Nbeta,Nradiation,Nintegrati
            ExcitForce   = Forces1%excitation(Iw,:,Ibeta)
            DampCoef     = MechCoef%DampCoefMat_EXT+Forces1%dampcoef(Iw,:,:)
            AddedMass    = Forces1%addedmass(Iw,:,:)
-           Xi           = Motion(Iw,Ibeta,:)
+           Xi           = Motion(Iw,:,Ibeta)
            ddXidt2      = -w(Iw)*w(Iw)*Xi
            dXidt        = -II*w(Iw)*Xi
            !MATHyd       =-w(Iw)*w(Iw)*AddedMass-II*w(Iw)*DampCoef+StiffMat
@@ -336,7 +334,7 @@ SUBROUTINE PREPARE_ROTATION_ANGLES(Motion,Nw,Nbeta,Nradiation,&
         INTEGER,                        INTENT(IN):: Nw,Nbeta,Nbodies
         REAL,DIMENSION(Nw),             INTENT(IN):: w
         TYPE(TQfreq),                   INTENT(IN):: Qfreq
-        COMPLEX,DIMENSION(Nw,Nbeta,Nradiation),INTENT(IN)::Motion       !RAO
+        COMPLEX,DIMENSION(Nw,Nradiation,Nbeta),INTENT(IN)::Motion       !RAO
         COMPLEX,DIMENSION(Qfreq%NwQ,Nbeta,3*Nbodies),                    &
                                         INTENT(OUT)::RotAnglesQ
         !local 
@@ -355,15 +353,15 @@ SUBROUTINE PREPARE_ROTATION_ANGLES(Motion,Nw,Nbeta,Nradiation,&
                 IF(Qfreq%NwQ.NE.Nw) THEN
                  Iw1=Fun_closest(Nw,w,Qfreq%wQ(1,Ibeta))
                  Iw2=Fun_closest(Nw,w,Qfreq%wQ(Qfreq%NwQ,Ibeta))
-                 RotAnglesQ(:,Ibeta,Itheta03+1:Itheta03+3)=Motion(Iw1:Iw2,Ibeta,Itheta06+4:Itheta06+6)
+                 RotAnglesQ(:,Ibeta,Itheta03+1:Itheta03+3)=Motion(Iw1:Iw2,Itheta06+4:Itheta06+6,Ibeta)
                 ELSE
-                 RotAnglesQ(:,Ibeta,Itheta03+1:Itheta03+3)=Motion(:,Ibeta,Itheta06+4:Itheta06+6)
+                 RotAnglesQ(:,Ibeta,Itheta03+1:Itheta03+3)=Motion(:,Itheta06+4:Itheta06+6,Ibeta)
                 ENDIF 
                ELSE
                !interpolating displacement for the wQ rad. frequencies
                 DO Itheta=1,3 !theta_x,theta_y,theta_z
-                CALL interpROT_R%initialize(w ,REAL(Motion(:,Ibeta,Itheta06+3+Itheta)),iflag)
-                CALL interpROT_I%initialize(w ,AIMAG(Motion(:,Ibeta,Itheta06+3+Itheta)),iflag)
+                CALL interpROT_R%initialize(w ,REAL(Motion(:,Itheta06+3+Itheta,Ibeta)),iflag)
+                CALL interpROT_I%initialize(w ,AIMAG(Motion(:,Itheta06+3+Itheta,Ibeta)),iflag)
                  DO IwQ=1,Qfreq%NwQ
                   CALL interpROT_R%evaluate(Qfreq%wQ(IwQ,Ibeta),RotAngleR(IwQ))
                   CALL interpROT_I%evaluate(Qfreq%wQ(IwQ,Ibeta),RotAngleI(IwQ))
@@ -383,7 +381,7 @@ SUBROUTINE PREPARE_TRANSLATION_MOTION(Motion,Nw,Nbeta,Nradiation,&
         INTEGER,                        INTENT(IN):: Nw,Nbeta,Nbodies
         REAL,DIMENSION(Nw),             INTENT(IN):: w
         TYPE(TQfreq),                   INTENT(IN):: Qfreq
-        COMPLEX,DIMENSION(Nw,Nbeta,Nradiation),INTENT(IN)::Motion       !RAO
+        COMPLEX,DIMENSION(Nw,Nradiation,Nbeta),INTENT(IN)::Motion       !RAO
         COMPLEX,DIMENSION(Qfreq%NwQ,Nbeta,3*Nbodies),                    &
                                         INTENT(OUT)::TRANSMOTQ
         !local 
@@ -402,15 +400,15 @@ SUBROUTINE PREPARE_TRANSLATION_MOTION(Motion,Nw,Nbeta,Nradiation,&
                 IF(Qfreq%NwQ.NE.Nw) THEN
                  Iw1=Fun_closest(Nw,w,Qfreq%wQ(1,Ibeta))
                  Iw2=Fun_closest(Nw,w,Qfreq%wQ(Qfreq%NwQ,Ibeta))
-                 TRANSMOTQ(:,Ibeta,Ind03+1:Ind03+3)=Motion(Iw1:Iw2,Ibeta,Ind06+1:Ind06+3)
+                 TRANSMOTQ(:,Ibeta,Ind03+1:Ind03+3)=Motion(Iw1:Iw2,Ind06+1:Ind06+3,Ibeta)
                 ELSE
-                 TRANSMOTQ(:,Ibeta,Ind03+1:Ind03+3)=Motion(:,Ibeta,Ind06+1:Ind06+3)
+                 TRANSMOTQ(:,Ibeta,Ind03+1:Ind03+3)=Motion(:,Ind06+1:Ind06+3,Ibeta)
                 ENDIF 
                ELSE
                !interpolating displacement for the wQ rad. frequencies
                 DO Ind=1,3 !theta_x,theta_y,theta_z
-                CALL interp_R%initialize(w ,REAL(Motion(:,Ibeta,Ind06+Ind)),iflag)
-                CALL interp_I%initialize(w ,AIMAG(Motion(:,Ibeta,Ind06+Ind)),iflag)
+                CALL interp_R%initialize(w ,REAL(Motion(:,Ind06+Ind,Ibeta)),iflag)
+                CALL interp_I%initialize(w ,AIMAG(Motion(:,Ind06+Ind,Ibeta)),iflag)
                  DO IwQ=1,Qfreq%NwQ
                   CALL interp_R%evaluate(Qfreq%wQ(IwQ,Ibeta),TransMotR(IwQ))
                   CALL interp_I%evaluate(Qfreq%wQ(IwQ,Ibeta),TransMotI(IwQ))
@@ -491,7 +489,7 @@ SUBROUTINE Discretized_omega_wavenumber_for_QTF               &
                     print*,'INPUT ERROR: Min. diff. rad freq < w(1) in QTFpreproc data!'
                     STOP
              ENDIF
-             IF (Fun_MAX(NwQ,Qfreq%sumwQ(1:NwQ-1,Ibeta))>w(Nw)) THEN
+             IF (Fun_MAX(NwQ-1,Qfreq%sumwQ(1:NwQ-1,Ibeta))>w(Nw)) THEN
                     print*,'INPUT ERROR: Max. sum rad freq > w(Nw) in QTFpreproc data!'
                     STOP
              ENDIF
