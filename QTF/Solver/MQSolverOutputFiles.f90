@@ -1,7 +1,7 @@
 MODULE MQSolverOutputFiles
 
-USE  MFileDirectoryList, ONLY:OutQTFDir,OutFileDM,OutFileDP,OutFileHBM,&
-                              OutFileHBP,make_directory 
+USE  MFileDirectoryList!, ONLY:OutQTFDir,OutFileDM,OutFileDP,OutFileHBM,&
+                       !       OutFileHBP,make_directory 
 IMPLICIT NONE
 
 CONTAINS
@@ -26,6 +26,43 @@ CONTAINS
              WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
                                   'DOF','Re(QTF)','Im(QTF)'
              CLOSE(u)
+
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDM_temp1, ACTION='WRITE') 
+             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
+                                  'DOF','Re(QTF)','Im(QTF)'
+             CLOSE(u)
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDP_temp1, ACTION='WRITE') 
+             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
+                                  'DOF','Re(QTF)','Im(QTF)'
+             CLOSE(u)
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDM_temp2, ACTION='WRITE') 
+             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
+                                  'DOF','Re(QTF)','Im(QTF)'
+             CLOSE(u)
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDP_temp2, ACTION='WRITE') 
+             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
+                                  'DOF','Re(QTF)','Im(QTF)'
+             CLOSE(u)
+
+              OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBM_temp1, ACTION='WRITE') 
+             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
+                                  'DOF','Re(QTF)','Im(QTF)'
+             CLOSE(u)
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBP_temp1, ACTION='WRITE') 
+             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
+                                  'DOF','Re(QTF)','Im(QTF)'
+             CLOSE(u)
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBM_temp2, ACTION='WRITE') 
+             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
+                                  'DOF','Re(QTF)','Im(QTF)'
+             CLOSE(u)
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBP_temp2, ACTION='WRITE') 
+             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
+                                  'DOF','Re(QTF)','Im(QTF)'
+             CLOSE(u)
+
+
+
        END
 
        SUBROUTINE WRITE_QTF_DATA(wd,FileM,FileP,Ninteg,w1,w2,beta1,beta2,QTFdat)

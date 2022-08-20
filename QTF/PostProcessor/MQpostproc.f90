@@ -86,7 +86,7 @@ CONTAINS
 
                
                 DO Ibeta1=1,Nbeta
-                    DO Ibeta2=Ibeta1,Nbeta
+                    DO Ibeta2=1,Nbeta
                     ALLOCATE(w(NwQ))
                     ALLOCATE(QTFtotR(NwQ,NwQ))
                     ALLOCATE(QTFtotI(NwQ,NwQ))

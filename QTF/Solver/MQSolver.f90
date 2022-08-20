@@ -13,7 +13,8 @@ CONTAINS
                                        rho,g,datPotVelQ,BdisplaceQ,genNormal_dS, &
                                        genNormalWLine_dGamma,wQ,beta,            &
                                        InertiaForceQ,RotAnglesQ,IntegAxis,       &
-                                       StiffMat,TransMotionQ,SwitchQuadHM,QTFDuok)
+                                       StiffMat,TransMotionQ,SwitchQuadHM,       &
+                                       QTFDuok_temp,QTFDuok)
           !Input/output
           INTEGER,                              INTENT(IN) :: Iw1,Iw2,Ibeta1,Ibeta2
           INTEGER,                              INTENT(IN) :: Nintegration,NPFlow
@@ -38,6 +39,7 @@ CONTAINS
           REAL,DIMENSION(Nintegration,Nintegration),                              &
                                                 INTENT(IN) ::StiffMat
           INTEGER,                              INTENT(IN) :: SwitchQuadHM 
+          COMPLEX,DIMENSION(Nintegration,2,2),  INTENT(OUT):: QTFDuok_temp
           COMPLEX,DIMENSION(Nintegration,2),    INTENT(OUT):: QTFDuok
           !Local
           COMPLEX                             ::TotPot_Iw1,TotPot_Iw2
@@ -111,6 +113,12 @@ CONTAINS
                                 quad_M*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
                 QTFDuok(Iinteg,2)=QTFDuok(Iinteg,2)+0.5*rho*                    &
                                 quad_P*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
+
+                QTFDuok_temp(Iinteg,1,2)=QTFDuok_temp(Iinteg,1,2)+0.5*rho*      &
+                                quad_M*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
+                QTFDuok_temp(Iinteg,2,2)=QTFDuok_temp(Iinteg,2,2)+0.5*rho*      &
+                                quad_P*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
+
                 !IF (Iinteg==1) THEN
                 !print*,Ipanel,0.5*quad_M*genNormal_dS(Iinteg,Ipanel)*rho,              &
                 !                 0.5*quad_P*genNormal_dS(Iinteg,Ipanel)*rho
@@ -158,6 +166,12 @@ CONTAINS
                                 *genNormalWLine_dGamma(Iinteg,Iwlineinit(2)+Iwline)
                 QTFDuok(Iinteg,2)=QTFDuok(Iinteg,2)-0.5*rho*g*quad_P               &
                                 *genNormalWLine_dGamma(Iinteg,Iwlineinit(2)+Iwline)
+
+                QTFDuok_temp(Iinteg,1,1)=QTFDuok_temp(Iinteg,1,1)-0.5*rho*g*quad_M &
+                                *genNormalWLine_dGamma(Iinteg,Iwlineinit(2)+Iwline)
+                QTFDuok_temp(Iinteg,2,1)=QTFDuok_temp(Iinteg,2,1)-0.5*rho*g*quad_P &
+                                *genNormalWLine_dGamma(Iinteg,Iwlineinit(2)+Iwline)
+        
               ! IF (Iinteg==1.AND.Isym==1) THEN
               !  ! print*,Iwline,TotPot_Iw1(Iwlineinit(1)+Iwline)
               !   ! print*,Iwline,quad_M,quad_P
@@ -278,7 +292,7 @@ CONTAINS
                                    (Iw1,Iw2,Ibeta1,Ibeta2,Nintegration,       &
                                     Mesh,VFace,WLine,NwQ,Nbeta,NPFlow,Nbodies,&
                                     env,datPotVelQ,BdisplaceQ,genNormal_dS,   &
-                                    Nw,w,Qfreq,beta,RotAnglesQ,               &
+                                    Nw,w,Qfreq,beta,RotAnglesQ,QTFHasbo_temp, &
                                     QTFHasbo)
           !Input/output
           INTEGER,                              INTENT(IN) :: Iw1,Iw2,Ibeta1,Ibeta2
@@ -296,6 +310,7 @@ CONTAINS
                                                 INTENT(IN) :: genNormal_dS
           REAL,DIMENSION(Nw),                   INTENT(IN) :: w
           REAL,DIMENSION(Nbeta),                INTENT(IN) :: beta
+          COMPLEX,DIMENSION(Nintegration,2,2),  INTENT(OUT):: QTFHasbo_temp
           COMPLEX,DIMENSION(Nintegration,2),    INTENT(OUT):: QTFHasbo
           !Local
           COMPLEX                             ::TotPot_Iw1,TotPot_Iw2
@@ -391,6 +406,12 @@ CONTAINS
                  -rho*Pressure_I(1)*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
               QTFHasbo(Iinteg,2)=QTFHasbo(Iinteg,2)                         &
                  -rho*Pressure_I(2)*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
+
+              QTFHasbo_temp(Iinteg,1,1)=QTFHasbo_temp(Iinteg,1,1)&
+                 -rho*Pressure_I(1)*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
+              QTFHasbo_temp(Iinteg,2,1)=QTFHasbo_temp(Iinteg,2,1)&
+                 -rho*Pressure_I(1)*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
+
               !------------------------------------------------------
               !Compute second order diffraction force: body force contrib
               !-----------------------------------------------------
@@ -406,6 +427,12 @@ CONTAINS
                     +II*delw*rho*dnPhi_I(1)*Radpot(1)*Mesh%A(Ipanel)
               QTFHasbo(Iinteg,2)=QTFHasbo(Iinteg,2)                         &
                     +II*sumw*rho*dnPhi_I(2)*Radpot(2)*Mesh%A(Ipanel)
+
+              QTFHasbo_temp(Iinteg,1,2)=QTFHasbo_temp(Iinteg,1,2)&
+                    +II*delw*rho*dnPhi_I(1)*Radpot(1)*Mesh%A(Ipanel)
+              QTFHasbo_temp(Iinteg,2,2)=QTFHasbo_temp(Iinteg,2,2)&
+                    +II*sumw*rho*dnPhi_I(2)*Radpot(2)*Mesh%A(Ipanel)
+
               !-------------------------------------------------------
               ! term: product(dtBdisplace-grad_Phi,R(n0))*Psi
               ITheta0= INT((Iinteg-1)/6)*3
@@ -470,8 +497,18 @@ CONTAINS
            
             !  !------------------------------------------------------
               !IF (Iinteg==1) THEN
-              !  print*,Ipanel,-rho*Pressure_I(1)*genNormal_dS(Iinteg,Ipanel)
+              !  print*,Ipanel,Phi_I
               !ENDIF
+
+             ! IF (Iinteg==2) THEN
+             !   print*,Ipanel,-rho*Pressure_I(1)*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
+             ! ENDIF
+             ! IF (Iinteg==2.AND.Ipanel<=200) THEN
+             !  ! print*,XM,Pressure_I(1)
+             !   print*,Ipanelinit(2)+Ipanel,-rho*Pressure_I(1)*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel),&
+             !           QTFHasbo_temp(Iinteg,1,1)
+             ! ENDIF
+
               !IF (Iinteg==1 .AND. Isym==2) THEN
               !    print*,Ipanel,dnPhi_I(1)*Radpot(1)*Mesh%A(Ipanel)
               !ENDIF
@@ -549,7 +586,7 @@ CONTAINS
           REAL                  ::delw,sumw,OM_M,OM_P,OM_1,OM_2
           REAL,DIMENSION(2)     ::delk_vect,sumk_vect
           REAL,DIMENSION(2)     ::k1_vect,k2_vect
-          REAL,DIMENSION(2)     ::XM
+          REAL,DIMENSION(3)     ::XM
           REAL                  ::abs_delk,abs_sumk
           REAL                  ::g,D          
           COMPLEX,DIMENSION(2)  ::Phi_I
@@ -565,12 +602,12 @@ CONTAINS
           k2_vect(1)=k2*cos(beta2)
           k2_vect(2)=k2*sin(beta2)
           
-          delk_vect(1:2)=k1_vect-k2_vect
-          sumk_vect(1:2)=k1_vect+k2_vect
+          delk_vect=k1_vect-k2_vect
+          sumk_vect=k1_vect+k2_vect
           
           OM_1=FUN_DISPERSION(k1,D,g)
           OM_2=FUN_DISPERSION(k2,D,g)
-
+          
           QFI_M=II*g*g*exp(II*DOT_PRODUCT(delk_vect,XM(1:2)))*          &
              ( delw/w1/w2*                                              &
              (DOT_PRODUCT(k1_vect,k2_vect)+OM_1**2/g*OM_2**2/g)         &
