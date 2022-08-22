@@ -72,10 +72,11 @@ IMPLICIT NONE
         !---------
         INTEGER                                 :: SwitchQuadHM 
         REAL                                    :: EPS_ZMIN
-        COMPLEX, ALLOCATABLE,DIMENSION(:,:)   :: QTF_DUOK ,QTF_HASBO   
-        COMPLEX, ALLOCATABLE,DIMENSION(:,:)   :: QTF_HASFS,QTF_HASFS_ASYMP
+        COMPLEX, ALLOCATABLE,DIMENSION(:,:,:)   :: QTF_DUOK ,QTF_HASBO   
+        COMPLEX, ALLOCATABLE,DIMENSION(:,:)     :: QTF_HASFS,QTF_HASFS_ASYMP
+        INTEGER                                 :: Iterm
+        CHARACTER(LEN=1)                        :: strI
         !
-        COMPLEX, ALLOCATABLE,DIMENSION(:,:,:)   :: QTF_DUOK_temp,QTF_HASBO_temp   
 
 !
 !   --- Initialize and read input datas -----------------------------------------------
@@ -117,10 +118,8 @@ IMPLICIT NONE
         ALLOCATE(InertiaForceQ(NwQ,Nbeta,Nintegration))
         ALLOCATE(RotAnglesQ(NwQ,Nbeta,3*Nbodies))
         ALLOCATE(TransMotionQ(NwQ,Nbeta,Nradiation))
-        ALLOCATE(QTF_DUOK(Nintegration,2))!2 is for QTF- and QTF+
-        ALLOCATE(QTF_DUOK_temp(Nintegration,2,2))
-        ALLOCATE(QTF_HASBO(Nintegration,2))
-        ALLOCATE(QTF_HASBO_temp(Nintegration,2,2))
+        ALLOCATE(QTF_DUOK(Nintegration,2,7))!2 is for QTF- and QTF+, 7 for all the terms
+        ALLOCATE(QTF_HASBO(Nintegration,2,7))
         !
         IntegAxis=IntegrationAXIS_FROM_MNEMOHCAL(InpNEMOHCAL)
         !
@@ -199,50 +198,41 @@ IMPLICIT NONE
                           ENDIF
                         ENDIF
                         
-                        QTF_DUOK(:,:)=CZERO
-                        QTF_DUOK_temp(:,:,:)=CZERO
-                
                         IF (InpNEMOHCAL%qtfinput%Ncontrib.GE.1) THEN 
                         CALL COMPUTATION_QTF_QUADRATIC(Iw1,Iw2,Ibeta1,Ibeta2,Nintegration,&
                                 Mesh,VFace,WLine,NwQ,Nbeta,NPFlow,Nbodies,Env%rho,Env%g,  &
                                 datPotVelQ,BdisplaceQ,genNormal_dS,genNormalWLine_dGamma, &
                                 Qfreq%wQ,beta,InertiaForceQ,RotAnglesQ,IntegAxis,         &
-                                StiffMat,TransMotionQ,SwitchQuadHM,QTF_DUOK_temp(:,:,:),  &
-                                QTF_DUOK(:,:))
+                                StiffMat,TransMotionQ,SwitchQuadHM,QTF_DUOK)
 
                         CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileDM,OutFileDP,Nintegration, &
                                 Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
-                                beta(Ibeta1),beta(Ibeta2), QTF_DUOK(:,:))
-                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileDM_temp1,OutFileDP_temp1,  &
-                                Nintegration,Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),   &
-                                beta(Ibeta1),beta(Ibeta2), QTF_DUOK_temp(:,:,1))
-                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileDM_temp2,OutFileDP_temp2,  &
-                                Nintegration,Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),   &
-                                beta(Ibeta1),beta(Ibeta2), QTF_DUOK_temp(:,:,2))
-
+                                beta(Ibeta1),beta(Ibeta2), QTF_DUOK(:,:,7))
+                        DO Iterm=1,6
+                        WRITE(strI,'(I0.1)') Iterm
+                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileDM_term//strI//'.dat',     &
+                                OutFileDP_term//strI//'.dat',Nintegration,                &
+                                Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2), beta(Ibeta1),  &
+                                beta(Ibeta2),QTF_DUOK(:,:,Iterm))
+                        ENDDO 
                         ENDIF
                         
-                        QTF_HASBO(:,:)=CZERO
-                        QTF_HASBO_temp(:,:,:)=CZERO
-
                         IF (InpNEMOHCAL%qtfinput%Ncontrib.GE.2) THEN 
                         CALL COMPUTATION_QTF_POTENTIAL_BODYFORCE(Iw1,Iw2,Ibeta1,Ibeta2,   &
                                 Nintegration,Mesh,VFace,WLine,NwQ,Nbeta,NPFlow,Nbodies,   &
                                 Env, datPotVelQ,BdisplaceQ,genNormal_dS,                  &
-                                Nw, w,Qfreq,beta,RotAnglesQ, QTF_HASBO_temp(:,:,:),        &
-                                QTF_HASBO(:,:))      
+                                Nw, w,Qfreq,beta,RotAnglesQ,QTF_HASBO)      
                         
                         CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHBM,OutFileHBP,Nintegration,&
                                 Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
-                                beta(Ibeta1),beta(Ibeta2), QTF_HASBO(:,:))
-                        
-                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHBM_temp1,OutFileHBP_temp1,&
-                                Nintegration,Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),   &
-                                beta(Ibeta1),beta(Ibeta2), QTF_HASBO_temp(:,:,1))
-                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHBM_temp2,OutFileHBP_temp2,&
-                                Nintegration,Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),   &
-                                beta(Ibeta1),beta(Ibeta2), QTF_HASBO_temp(:,:,2))
-
+                                beta(Ibeta1),beta(Ibeta2), QTF_HASBO(:,:,7))
+                        DO Iterm=1,6
+                        WRITE(strI,'(I0.1)') Iterm
+                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHBM_term//strI//'.dat',    &
+                                OutFileHBP_term//strI//'.dat',Nintegration,               &
+                                Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
+                                beta(Ibeta1),beta(Ibeta2),QTF_HASBO(:,:,Iterm))
+                        ENDDO 
 
                         ENDIF
                     ENDDO

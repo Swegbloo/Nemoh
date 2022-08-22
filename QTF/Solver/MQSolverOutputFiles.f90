@@ -7,8 +7,10 @@ IMPLICIT NONE
 CONTAINS
 
         SUBROUTINE INITIALIZE_OUTPUT_FILES(workdir)
-             CHARACTER(len=*)   ::workdir
-             INTEGER            :: u
+             CHARACTER(len=*)   :: workdir
+             INTEGER            :: u,Iterm
+             CHARACTER(len=1)   :: strT
+             
              CALL make_directory(workdir//OutQTFDir)
              OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDM, ACTION='WRITE')
              WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
@@ -26,43 +28,30 @@ CONTAINS
              WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
                                   'DOF','Re(QTF)','Im(QTF)'
              CLOSE(u)
-
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDM_temp1, ACTION='WRITE') 
+             DO Iterm=1,6
+             WRITE(strT,'(I0.1)') Iterm
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDM_term//strT//'.dat', &
+                     ACTION='WRITE') 
              WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
                                   'DOF','Re(QTF)','Im(QTF)'
              CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDP_temp1, ACTION='WRITE') 
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDP_term//strT//'.dat', &
+                     ACTION='WRITE') 
              WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
                                   'DOF','Re(QTF)','Im(QTF)'
              CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDM_temp2, ACTION='WRITE') 
+             
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBM_term//strT//'.dat', &
+                     ACTION='WRITE') 
              WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
                                   'DOF','Re(QTF)','Im(QTF)'
              CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDP_temp2, ACTION='WRITE') 
+             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBP_term//strT//'.dat', &
+                     ACTION='WRITE') 
              WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
                                   'DOF','Re(QTF)','Im(QTF)'
              CLOSE(u)
-
-              OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBM_temp1, ACTION='WRITE') 
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBP_temp1, ACTION='WRITE') 
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBM_temp2, ACTION='WRITE') 
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBP_temp2, ACTION='WRITE') 
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
-
-
-
+             ENDDO
        END
 
        SUBROUTINE WRITE_QTF_DATA(wd,FileM,FileP,Ninteg,w1,w2,beta1,beta2,QTFdat)
