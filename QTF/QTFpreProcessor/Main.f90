@@ -110,7 +110,8 @@ PROGRAM Main
   XEFF = Environment%XEFF      ! coord of point where incident wave is measured
   YEFF = Environment%YEFF      ! the coord is userdefined in NEMOH.cal
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ZEFF = -71.6 ! it was always 0, this value should be read in NEMOH.cal !Centre of Gravity
+  !ZEFF = -71.6 ! it was always 0, this value should be read in NEMOH.cal !Centre of Gravity
+  ZEFF = 0 ! it was always 0, this value should be read in NEMOH.cal !Centre of Gravity
                ! this is treated as COG for the QTF Calculation 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   NC = 1 ! 1 body

@@ -309,7 +309,6 @@ PROGRAM HASFSASYMP
 	ALLOCATE(IRCER(NRCER))
 	READ(LL,*) (IRCER(I),I=1,NRCER)
 
-	
 !!!!!!!!!!!!!! version matrice carre pour les QTF+!!!!!!!!!!!!!!!!!!!!!!
 !~        IF (LHASK>1 .AND. LQTFP==1) THEN                               
 ! SI LES QTF+ SONT CALCULES, IL FAUT REDUIRE LE NOMBRE DE PULSATION
@@ -939,7 +938,8 @@ PRINT*, 'NPRINTW1 =',NPRINTW1,'NPRINTW2 =',NPRINTW2,'DOF_PRINT =',IJPRINT
 !~ 	DO 500 NW1=1,NHASKIND						! version matrice carre pour les QTF+
 	DO 500 NW1=1,N							! version matrice antitriangulaire sup pour les QTF+ (0 ailleurs)
             DO 500 NW2=1,NW1
-!		WRITE(*,1987,ADVANCE="NO") NW1,NW2,1,0.,CHAR(13)
+	!	WRITE(*,*,ADVANCE="NO") NW1,NW2,1,0.,CHAR(13)
+                WRITE(*,'(A,I5,A,I5,A,A,$)') ' w1= ',NW1,' w2= ',NW2,' ',CHAR(13)
 
                 BETA=0.
                 W1=TABW(NW1)

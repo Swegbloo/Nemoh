@@ -58,7 +58,8 @@
       COMMON/JAC/XJAC(16,NFA),XGA(16,NFA),YGA(16,NFA),ZGA(16,NFA),NG
       COMMON/FIC/XR(700),XZ(130),APD1X(700,130),APD1Z(700,130),
      &APD2X(700,130),APD2Z(700,130)
-      CHARACTER*10 ID,IDEN,FMT9
+      CHARACTER*10 ID,IDEN
+      CHARACTER*5 FMT9
       INTEGER :: lID
       COMMON/CAR/IDEN
       DIMENSION XSL(NFASL),YSL(NFASL)
@@ -73,7 +74,8 @@
      & AIRESL(NFASL)
       LOGICAL :: FICHEY
       REAL :: PTPROCHE(2)
-      CHARACTER(20) :: NOMF4,file8,file9
+      CHARACTER(20) :: NOMF4,file8
+      ChARACTER(21) :: file9
       CHARACTER(16) :: NOMB1,NOMB2,NOMB3,NOMB4,NOMB5
       CHARACTER(16) :: NOMH0,NOMH1,NOMH2,NOMH3,NOMH4,NOMH5
       COMPLEX S1(6),S2(6),S3(6),S4(6),S5(6),S6(6),S7(6),
@@ -364,8 +366,8 @@ c~       K=-1
 !$OMP& YMSL,YEFF,NSYMY,lID,ID,NT)
       DO IJK=1,N
         UNIT9=IJK+4000
-        WRITE(FMT9,'(I2.2)') IJK
-        file9=ID(1:lID)//'/QTF/sliper'//TRIM(FMT9)//'.wat'
+        WRITE(FMT9,'(I0.5)') IJK
+        file9=ID(1:lID)//'/QTF/sliper'//FMT9//'.wat'
         ! check if dir exists
         inquire( file=file9, exist=dir_e )
         if ( dir_e ) then

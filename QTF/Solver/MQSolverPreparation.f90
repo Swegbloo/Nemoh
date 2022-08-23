@@ -485,11 +485,11 @@ SUBROUTINE Discretized_omega_wavenumber_for_QTF               &
              Qfreq%diffwQ(2:NwQ,Ibeta)=Qfreq%wQ(2:NwQ,Ibeta)-Qfreq%wQ(1,Ibeta)
              Qfreq%sumwQ(1:NwQ-1,Ibeta)=Qfreq%wQ(1:NwQ-1,Ibeta)+Qfreq%wQ(1,Ibeta)
              Qfreq%NwQ=NwQ
-             IF (Fun_MIN(NwQ-1,Qfreq%diffwQ(2:NwQ,Ibeta))<w(1)) THEN
+             IF ((Fun_MIN(NwQ-1,Qfreq%diffwQ(2:NwQ,Ibeta))-w(1))<-0.0001) THEN
                     print*,'INPUT ERROR: Min. diff. rad freq < w(1) in QTFpreproc data!'
                     STOP
              ENDIF
-             IF (Fun_MAX(NwQ-1,Qfreq%sumwQ(1:NwQ-1,Ibeta))>w(Nw)) THEN
+             IF ((Fun_MAX(NwQ-1,Qfreq%sumwQ(1:NwQ-1,Ibeta))-w(Nw))>0.0001) THEN
                     print*,'INPUT ERROR: Max. sum rad freq > w(Nw) in QTFpreproc data!'
                     STOP
              ENDIF
