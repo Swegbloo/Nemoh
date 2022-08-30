@@ -8,51 +8,39 @@ CONTAINS
 
         SUBROUTINE INITIALIZE_OUTPUT_FILES(workdir)
              CHARACTER(len=*)   :: workdir
-             INTEGER            :: u,Iterm
+             INTEGER            :: Iterm
              CHARACTER(len=1)   :: strT
              
              CALL make_directory(workdir//OutQTFDir)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDM, ACTION='WRITE')
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDP, ACTION='WRITE') 
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBM, ACTION='WRITE') 
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBP, ACTION='WRITE') 
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
-             DO Iterm=1,6
-             WRITE(strT,'(I0.1)') Iterm
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDM_term//strT//'.dat', &
-                     ACTION='WRITE') 
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileDP_term//strT//'.dat', &
-                     ACTION='WRITE') 
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
+             CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDM)
+             CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDP)
+             CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBM)
+             CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBP)
+
+             CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSM)
+             CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSP)
              
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBM_term//strT//'.dat', &
-                     ACTION='WRITE') 
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
-             OPEN(NEWUNIT=u,FILE=workdir//OutQTFDir//OutFileHBP_term//strT//'.dat', &
-                     ACTION='WRITE') 
-             WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
-                                  'DOF','Re(QTF)','Im(QTF)'
-             CLOSE(u)
+             DO Iterm=1,6
+                WRITE(strT,'(I0.1)') Iterm
+                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDM_term//strT//'.dat')
+                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDP_term//strT//'.dat')
+                
+                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBM_term//strT//'.dat')
+                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBP_term//strT//'.dat')
+                
+                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSM_term//strT//'.dat')
+                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSP_term//strT//'.dat')
              ENDDO
        END
+
+       SUBROUTINE WRITE_INIT_QTF_FILE(FileName)
+        CHARACTER(LEN=*) ::filename
+        INTEGER ::u
+        OPEN(NEWUNIT=u,FILE=filename, ACTION='WRITE')
+        WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
+                                  'DOF','Re(QTF)','Im(QTF)'
+        CLOSE(u)
+       END SUBROUTINE
 
        SUBROUTINE WRITE_QTF_DATA(wd,FileM,FileP,Ninteg,w1,w2,beta1,beta2,QTFdat)
           CHARACTER(LEN=*),    INTENT(IN)::wd,FileM,FileP

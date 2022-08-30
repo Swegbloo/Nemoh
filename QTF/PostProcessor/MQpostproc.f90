@@ -78,9 +78,9 @@ CONTAINS
                   OPEN(NEWUNIT=u3, FILE=TRIM(wd)//'/results/QTF/QTF'//str_MP(ID_MP)//'_HASFS.dat',&
                           STATUS='UNKNOWN', ACTION='READ')
                   READ(u3,*)
-                  OPEN(NEWUNIT=u4, FILE=TRIM(wd)//'/results/QTF/QTF'//str_MP(ID_MP)//'_ASYMP.dat',&
-                          STATUS='UNKNOWN', ACTION='READ')
-                  READ(u4,*)
+                 ! OPEN(NEWUNIT=u4, FILE=TRIM(wd)//'/results/QTF/QTF'//str_MP(ID_MP)//'_ASYMP.dat',&
+                 !         STATUS='UNKNOWN', ACTION='READ')
+                 ! READ(u4,*)
                   IDCONTRIB(3)=1
                 ENDIF
 
@@ -115,20 +115,20 @@ CONTAINS
                              ENDIF
                              IF (IDCONTRIB(3)==1) THEN
                                READ(u3,*) lineHASFS(:)
-                               READ(u4,*) lineASYMP(:)
+                            !   READ(u4,*) lineASYMP(:)
                                w(Iw1)=lineHASFS(1)
                                betai=lineHASFS(3)*180/PI
                                betaj=lineHASFS(4)*180/PI
                                QTFtotR(Iw1,Iw2)=QtFtotR(Iw1,Iw2)+lineHASFS(6)
                                QTFtotI(Iw1,Iw2)=QtFtotI(Iw1,Iw2)+lineHASFS(7)
-                               QTFtotR(Iw1,Iw2)=QtFtotR(Iw1,Iw2)+lineASYMP(6)
-                               QTFtotI(Iw1,Iw2)=QtFtotI(Iw1,Iw2)+lineASYMP(7)
+                            !   QTFtotR(Iw1,Iw2)=QtFtotR(Iw1,Iw2)+lineASYMP(6)
+                            !   QTFtotI(Iw1,Iw2)=QtFtotI(Iw1,Iw2)+lineASYMP(7)
                              ENDIF
                             ELSE
                                IF (IDCONTRIB(1)==1) READ(u1,*)
                                IF (IDCONTRIB(2)==1) READ(u2,*)
                                IF (IDCONTRIB(3)==1) READ(u3,*)
-                               IF (IDCONTRIB(3)==1) READ(u4,*)
+                            !   IF (IDCONTRIB(3)==1) READ(u4,*)
                             ENDIF
                            ENDDO
                           ENDDO
@@ -154,7 +154,7 @@ CONTAINS
                 IF (IDCONTRIB(1)==1) CLOSE(u1)
                 IF (IDCONTRIB(2)==1) CLOSE(u2)
                 IF (IDCONTRIB(3)==1) CLOSE(u3)
-                IF (IDCONTRIB(3)==1) CLOSE(u4)
+              !  IF (IDCONTRIB(3)==1) CLOSE(u4)
 
             END DO
             print*,'results/OUT_QTF',str_MP(ID_MP),'.dat saved!'

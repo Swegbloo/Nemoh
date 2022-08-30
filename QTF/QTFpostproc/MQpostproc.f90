@@ -128,7 +128,7 @@ CONTAINS
                     QTFtotI=QTFtotI/inpNEMCAL%Env%RHO/inpNEMCAL%Env%G
                     DO J=I**STORE_HALF_DIAGONAL,Nw
                             WRITE(uo_m,'(4(F10.3,X),I2,4(X,E14.7))') w(I),w(J), 0.,0.,IDDOF,         &
-                               SQRT(QTFtotR(J)**2+QTFtotI(J)**2),ATAN(QTFtotI(J)/QTFtotR(J))*180/PI, &
+                               SQRT(QTFtotR(J)**2+QTFtotI(J)**2),ATAN2(QTFtotI(J),QTFtotR(J))*180/PI, &
                                       QTFtotR(J),QTFtotI(J)
                     END DO
                 END DO

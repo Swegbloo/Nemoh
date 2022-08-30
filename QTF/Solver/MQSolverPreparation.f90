@@ -10,8 +10,11 @@ USE linear_interpolation_module
 USE MMesh,                      ONLY: Tmesh
 USE MFace,                      ONLY: TVFace,TWLine
 USE MNemohCal,                  ONLY: TNemCal
-USE MReadInputFiles,            ONLY: TMech,TLoad1
+USE MReadInputFiles,            ONLY: TMech,TLoad1,TpotVel
+USE MCallInterp,                ONLY: FUN_INTERP1_COMPLEX
+
 IMPLICIT NONE
+
 TYPE TQfreq
      INTEGER                          :: NwQ
      REAL, ALLOCATABLE,DIMENSION(:,:) :: wQ,kQ          !freq for QTF comp
@@ -19,85 +22,76 @@ TYPE TQfreq
      INTEGER, ALLOCATABLE,DIMENSION(:)  :: InterpPotSwitch  
 END TYPE
 
-TYPE TPotVel
-        COMPLEX,ALLOCATABLE,DIMENSION(:,:,:)    :: TotPot,RadPot ! Total&radiation pot
-        COMPLEX,ALLOCATABLE,DIMENSION(:,:,:,:)  :: TotVel,RadVel ! Total&radiation vel
-END TYPE
-
 CONTAINS
 
 
 
 SUBROUTINE PREPARE_POTENTIAL_VELOCITIES(Qfreq,Nw,w,Nbeta,beta, &
-                                        NPFlow,Nradiation,datPotVel,datPotVelQ)
+                                        NPFlow,Nradiation,datPotVel,datPotVelQ,ID_DATA)
         !input/output
         TYPE(TQfreq),                   INTENT(IN)   ::Qfreq
         INTEGER,                        INTENT(IN)   ::Nw,Nbeta
         INTEGER,                        INTENT(IN)   ::NPFlow,Nradiation
         REAL, DIMENSION(Nw),            INTENT(IN)   ::w 
         REAL, DIMENSION(Nbeta),         INTENT(IN)   ::beta 
+        INTEGER,                        INTENT(IN)   ::ID_DATA
         TYPE(TPotVel),                  INTENT(INOUT)::datPotVel
         TYPE(TPotVel),                  INTENT(INOUT)::datPotVelQ
 
         !Local
-        INTEGER                    :: Ibeta,Iw1,Iw2,Ipanel,iflag,IwQ
-        Type(linear_interp_1d)     :: interpPR,interpVxR,interpVyR,interpVzR
-        Type(linear_interp_1d)     :: interpPI,interpVxI,interpVyI,interpVzI
-        REAL,DIMENSION(Qfreq%NwQ)  :: TotPotR,TotPotI
-        REAL,DIMENSION(3,Qfreq%NwQ):: TotVelR,TotVelI
+        INTEGER                    :: Ibeta,Iw1,Iw2,Ipanel,iflag,IwQ,Ixyz
         
         ALLOCATE(datPotVelQ%TotPot(NPFlow,  Nbeta     ,Qfreq%NwQ))
         ALLOCATE(datPotVelQ%TotVel(NPFlow,3,Nbeta     ,Qfreq%NwQ))
         ALLOCATE(datPotVelQ%RadPot(NPFlow,  Nradiation,Nw))
         ALLOCATE(datPotVelQ%RadVel(NPFlow,3,Nradiation,Nw))
-
+        IF (ID_DATA==ID_FREESURFACE) THEN
+        ALLOCATE(datPotVelQ%IncPot(NPFlow,  Nbeta     ,Qfreq%NwQ))
+        ALLOCATE(datPotVelQ%IncVel(NPFlow,3,Nbeta     ,Qfreq%NwQ))
+        END IF
         
         DO Ibeta=1,Nbeta
-               IF(Qfreq%InterpPotSwitch(Ibeta)==0) THEN
-                   IF(Qfreq%NwQ.NE.Nw) THEN
-                        Iw1=Fun_closest(Nw,w,Qfreq%wQ(1,Ibeta))
-                        Iw2=Fun_closest(Nw,w,Qfreq%wQ(Qfreq%NwQ,Ibeta))
-                        datPotVelQ%TotPot(:,   Ibeta,:)=datPotVel%TotPot(:,Ibeta,Iw1:Iw2)
-                        datPotVelQ%TotVel(:,:, Ibeta,:)=datPotVel%TotVel(:,:,Ibeta,Iw1:Iw2)
-                    ELSE
-                        datPotVelQ%TotPot(:,  Ibeta,:)=datPotVel%TotPot(:,Ibeta,:)
-                        datPotVelQ%TotVel(:,:,Ibeta,:)=datPotVel%TotVel(:,:,Ibeta,:)
-                    ENDIF 
+           IF(Qfreq%InterpPotSwitch(Ibeta)==0) THEN
+               IF(Qfreq%NwQ.NE.Nw) THEN
+                    Iw1=Fun_closest(Nw,w,Qfreq%wQ(1,Ibeta))
+                    Iw2=Fun_closest(Nw,w,Qfreq%wQ(Qfreq%NwQ,Ibeta))
+                    datPotVelQ%TotPot(:,   Ibeta,:)=datPotVel%TotPot(:,Ibeta,Iw1:Iw2)
+                    datPotVelQ%TotVel(:,:, Ibeta,:)=datPotVel%TotVel(:,:,Ibeta,Iw1:Iw2)
+                    IF (ID_DATA==ID_FREESURFACE) THEN
+                    datPotVelQ%IncPot(:,   Ibeta,:)=datPotVel%IncPot(:,Ibeta,Iw1:Iw2)
+                    datPotVelQ%IncVel(:,:, Ibeta,:)=datPotVel%IncVel(:,:,Ibeta,Iw1:Iw2)
+                    ENDIF
                 ELSE
-                   DO Ipanel=1,NPFlow
-                   !interpolating potential for the wQ rad. frequencies
-                   CALL interpPR%initialize(w ,REAL(datPotVel%TotPot(Ipanel,Ibeta,:)),iflag)
-                   CALL interpVxR%initialize(w,REAL(datPotVel%TotVel(Ipanel,1,Ibeta,:)),iflag)
-                   CALL interpVyR%initialize(w,REAL(datPotVel%TotVel(Ipanel,2,Ibeta,:)),iflag)
-                   CALL interpVzR%initialize(w,REAL(datPotVel%TotVel(Ipanel,3,Ibeta,:)),iflag)
-                   CALL interpPI%initialize(w ,AIMAG(datPotVel%TotPot(Ipanel,Ibeta,:)),iflag)
-                   CALL interpVxI%initialize(w,AIMAG(datPotVel%TotVel(Ipanel,1,Ibeta,:)),iflag)
-                   CALL interpVyI%initialize(w,AIMAG(datPotVel%TotVel(Ipanel,2,Ibeta,:)),iflag)
-                   CALL interpVzI%initialize(w,AIMAG(datPotVel%TotVel(Ipanel,3,Ibeta,:)),iflag)
-                   DO IwQ=1,Qfreq%NwQ
-                         CALL interpPR%evaluate(Qfreq%wQ(IwQ,Ibeta), TotPotR(IwQ))
-                         CALL interpVxR%evaluate(Qfreq%wQ(IwQ,Ibeta),TotVelR(1,IwQ))
-                         CALL interpVyR%evaluate(Qfreq%wQ(IwQ,Ibeta),TotVelR(2,IwQ))
-                         CALL interpVzR%evaluate(Qfreq%wQ(IwQ,Ibeta),TotVelR(3,IwQ))
-                         CALL interpPI%evaluate(Qfreq%wQ(IwQ,Ibeta), TotPotI(IwQ))
-                         CALL interpVxI%evaluate(Qfreq%wQ(IwQ,Ibeta),TotVelI(1,IwQ))
-                         CALL interpVyI%evaluate(Qfreq%wQ(IwQ,Ibeta),TotVelI(2,IwQ))
-                         CALL interpVzI%evaluate(Qfreq%wQ(IwQ,Ibeta),TotVelI(3,IwQ))
-                   ENDDO
-                   datPotVelQ%TotPot(Ipanel,   Ibeta,:)=CMPLX(TotPotR,TotPotI)
-                   datPotVelQ%TotVel(Ipanel,:, Ibeta,:)=CMPLX(TotVelR,TotVelI)
-
-                   CALL interpPR%destroy() 
-                   CALL interpVxR%destroy()
-                   CALL interpVyR%destroy()
-                   CALL interpVzR%destroy()
-                   CALL interpPI%destroy() 
-                   CALL interpVxI%destroy()
-                   CALL interpVyI%destroy()
-                   CALL interpVzI%destroy()
-
-                   ENDDO
+                    datPotVelQ%TotPot(:,  Ibeta,:)=datPotVel%TotPot(:,Ibeta,:)
+                    datPotVelQ%TotVel(:,:,Ibeta,:)=datPotVel%TotVel(:,:,Ibeta,:)
+                    IF (ID_DATA==ID_FREESURFACE) THEN
+                    datPotVelQ%IncPot(:,  Ibeta,:)=datPotVel%IncPot(:,Ibeta,:)
+                    datPotVelQ%IncVel(:,:,Ibeta,:)=datPotVel%IncVel(:,:,Ibeta,:)
+                    ENDIF
                 ENDIF 
+            ELSE
+               DO Ipanel=1,NPFlow
+                 !interpolating potential for the wQ rad. frequencies
+                 datPotVelQ%TotPot(Ipanel,Ibeta,:)=                                   &
+                         FUN_INTERP1_COMPLEX(w,datPotVel%TotPot(Ipanel,Ibeta,:),      &
+                                      Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ) 
+                 DO Ixyz=1,3 !vx,vy,vz
+                 datPotVelQ%TotVel(Ipanel,Ixyz, Ibeta,:)=                             &
+                         FUN_INTERP1_COMPLEX(w,datPotVel%TotVel(Ipanel,Ixyz,Ibeta,:), &
+                                      Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ)
+                 ENDDO 
+                 IF (ID_DATA==ID_FREESURFACE) THEN
+                    datPotVelQ%IncPot(Ipanel,Ibeta,:)=                                   &
+                            FUN_INTERP1_COMPLEX(w,datPotVel%IncPot(Ipanel,Ibeta,:),      &
+                                         Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ) 
+                    DO Ixyz=1,3 !vx,vy,vz
+                    datPotVelQ%IncVel(Ipanel,Ixyz, Ibeta,:)=                             &
+                            FUN_INTERP1_COMPLEX(w,datPotVel%IncVel(Ipanel,Ixyz,Ibeta,:), &
+                                         Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ)
+                    ENDDO 
+                 ENDIF
+               ENDDO
+           ENDIF 
         ENDDO
         !keep radiation potential as the calculated potential in NEMOH first order
         !will be taken/interpolated for difference and sum frequency later
@@ -107,6 +101,10 @@ SUBROUTINE PREPARE_POTENTIAL_VELOCITIES(Qfreq,Nw,w,Nbeta,beta, &
         !destroy the initial data
         DEALLOCATE(datPotVel%TotPot,datPotVel%TotVel) 
         DEALLOCATE(datPotVel%RadPot,datPotVel%RadVel)
+                
+        IF (ID_DATA==ID_FREESURFACE) THEN
+        DEALLOCATE(datPotVel%IncPot,datPotVel%IncVel) 
+        ENDIF
 END SUBROUTINE
 
 SUBROUTINE PREPARE_BODY_DISPLACEMENT(Qfreq,Nw,w,Nbeta,Nradiation,NPFlow,Nbodies,      &

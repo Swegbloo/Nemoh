@@ -3,12 +3,73 @@ Module MInfluenceMatrix
 USE CONSTANTS
 USE MEnvironment,               ONLY: TEnvironment
 USE M_INITIALIZE_GREEN,         ONLY: TGREEN, LISC
+USE GREEN_1,                    ONLY: VAV
 USE GREEN_2,                    ONLY: VNSINFD, VNSFD
 USE MMesh,                      ONLY: TMesh
 USE MFace,                      ONLY: TVFace
 IMPLICIT NONE
 
 CONTAINS      
+        SUBROUTINE CONSTRUCT_INFLUENCE_MATRIX_FS(omega,wavenumber,Env,IGreen,Mesh,VFace,XM_I,S,gradS)
+        !======================================
+        !Construction of the influence matrix
+        !=====================================
+        !INPUT/OUTPUT
+        REAL,                           INTENT(IN)::omega,wavenumber
+        TYPE(TEnvironment),             INTENT(IN)::Env
+        TYPE(TMesh),                    INTENT(IN)::Mesh
+        TYPE(TVFace),                   INTENT(IN)::VFace
+        TYPE(TGREEN),                   INTENT(INOUT)::IGreen
+        REAL                            ,INTENT(IN):: XM_I(3)
+        COMPLEX,DIMENSION(Mesh%NPanels,2**Mesh%Isym),      &
+                                        INTENT(OUT)::S
+        COMPLEX,DIMENSION(Mesh%NPanels,3,2**Mesh%Isym),      &
+                                        INTENT(OUT)::gradS
+        !LOCAL
+        INTEGER   :: J
+        ! Return of GREEN_1 module
+        REAL :: FSP, FSM
+        REAL, DIMENSION(3) :: VSXP, VSXM
+        ! Return of GREEN_2 module
+        COMPLEX :: SP, SM
+        COMPLEX, DIMENSION(3) :: VSP, VSM
+
+           DO J = 1, Mesh%NPanels
+             IF ((Env%depth == INFINITE_DEPTH).OR.(omega**2*Env%depth/Env%g.GE.20)) THEN
+               ! First part of the Green function
+               ! These output are independent of omega, but always computed here to avoid 
+               ! large memory used for saving the matrix, particularly for the free surface panels
+               CALL VAV                                                     &
+               (0, XM_I, J,VFace,Mesh, INFINITE_DEPTH,IGREEN%EPS_ZMIN,&
+                 FSP, FSM, VSXP, VSXM &
+                 )
+               ! Second part of the Green function      
+               CALL VNSINFD                                            &
+               ( wavenumber,XM_I , J, VFace, Mesh,                     &
+                 IGreen, SP, SM, VSP, VSM                              &
+                 )
+             ELSE
+               CALL VAV                                                &
+               (0, XM_I, J,VFace,Mesh, Env%depth,IGREEN%EPS_ZMIN,&
+                 FSP, FSM, VSXP, VSXM                                  &
+                 )
+               CALL VNSFD                                              &
+               ( wavenumber, XM_I, J, VFace,  Mesh,                    &
+                   IGreen,Env%depth, SP, SM, VSP, VSM                  &
+                 )
+             END IF
+
+             ! Store into influence matrix 'only for row-Ipflow
+             S(J, 1) = FSP + SP                    ! Green function
+             gradS(J,:, 1) = VSXP + VSP            ! Gradient of the Green function
+             !print*,S(J,1)
+             IF (Mesh%ISym == Y_SYMMETRY) THEN
+               S(J, 2)      = FSM + SM
+               gradS(J,:,2) = VSXM + VSM
+             ENDIF
+
+           END DO
+         END SUBROUTINE
 
         SUBROUTINE CONSTRUCT_INFLUENCE_MATRIX(omega,wavenumber,Env,IGreen,Mesh,VFace,XM_add,NP_add,S,gradS)
         !======================================

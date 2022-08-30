@@ -16,19 +16,20 @@ USE MIdentification
 USE MNemohCal,          ONLY:TNemCal,READ_TNEMOHCAL,IntegrationAXIS_FROM_MNEMOHCAL
 USE MMesh
 USE MFace,              ONLY:TVFace, Prepare_FaceMesh,TWLine,Prepare_Waterline
-USE MReadInputFiles,    ONLY:Read_NP_GaussQuad,Read_Mechanical_Coefs,TMech,  &
-                             Read_FirstOrderLoad,TLoad1,Read_Motion,TSource, &
-                             READ_POTENTIALS_VELOCITIES_BODYWLINE,           &
-                             READ_GENERALIZED_NORMAL_BODY_dAREA,Read_Eps_Zmin
+USE MReadInputFiles,    ONLY:Read_NP_GaussQuad,Read_Mechanical_Coefs,TMech,   &
+                             Read_FirstOrderLoad,TLoad1,Read_Motion,TSource,  &
+                             READ_POTENTIALS_VELOCITIES,TpotVel,              &
+                             READ_GENERALIZED_NORMAL_BODY_dAREA,Read_Eps_Zmin,&
+                             TMeshFS,Read_Prepare_FreeSurface_Mesh
 USE MEnvironment,       ONLY: TEnvironment,FunVect_inverseDispersion
 USE MLogFile
 USE Constants,          ONLY: CZERO
-USE MQSolverPreparation !CONTAINS:TQfreq,TpotVel,PREPARE_POTENTIAL_VELOCITIES
+USE MQSolverPreparation !CONTAINS:TQfreq,PREPARE_POTENTIAL_VELOCITIES
                         !PREPARE_BODY_DISPLACEMENT,DISCRETIZED_OMEGA_WAVENUMBER_FOR_QTF
                         !PREPARE_INERTIA_FORCE
                         !CALC_GENERALIZED_NORMAL_WATERLINE_dSEGMENT
                         !WRITE_QTFSOLVERLOGFILE
-USE MQSolver            !CONTAINS:COMPUTATION_QTF_QUADRATIC
+USE MQSolver            !CONTAINS:COMPUTATION_QTF_QUADRATIC,...
 USE MQSolverOutputFiles !CONTAINS: OutFileDM,OutFileDP,...
                         !INITIALIZE_OUTPUT_FILE,WRITE_QTF_DATA
 
@@ -37,6 +38,7 @@ IMPLICIT NONE
 ! ------Declaration variables
         TYPE(TID)                       :: ID
         TYPE(TMesh)                     :: Mesh
+        TYPE(TMeshFS)                   :: MeshFS
         TYPE(TNemCal)                   :: inpNEMOHCAL
         TYPE(TEnvironment)              :: Env
         INTEGER                         :: Nw,Nbeta           ! Number of Freq,direction
@@ -44,7 +46,8 @@ IMPLICIT NONE
                                                               ! wave numbers [rad/m],
                                                               ! direction angle [rad]
         TYPE(TWLine)  :: WLine          ! Waterline 
-        TYPE(TVFace)  :: VFace          ! Face of a panel  
+        TYPE(TVFace)  :: VFace          ! Face of body panel  
+        TYPE(TVFace)  :: VFaceFS        ! Face of free surface panel  
         TYPE(TMech)   :: MechCoef       ! Mechanical Coef 
         TYPE(TLoad1)  :: Forces1        ! First order forces
         INTEGER       :: NP_GQ          ! Number of point for Gauss Quad. Integration
@@ -54,9 +57,13 @@ IMPLICIT NONE
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:)    :: Motion       ! Complex RAO
         TYPE(TPotVel)                           :: datPotVel    ! data Pot & vel
         TYPE(TPotVel)                           :: datPotVelQ    ! data Pot & vel for QTF
+        TYPE(TPotVel)                           :: datPotVelFS   ! data Pot & vel (FreeSurface)
+        TYPE(TPotVel)                           :: datPotVelQFS  ! data Pot & vel for QTF (FreeSurface)
+
         INTEGER                                 :: I,Ibeta1,Ibeta2,Iinteg,Ipanel
         INTEGER                                 :: Iw1,Iw2,IwQ 
         INTEGER                                 :: NPFlow        ! Number of flow points
+        INTEGER                                 :: NPFlowFS      ! Number of flow points (Free-surface)
         REAL,ALLOCATABLE,DIMENSION(:,:)         :: genNormal_dS  ! generalized Normal on panel
                                                            ! time the area of the panel
         REAL,ALLOCATABLE,DIMENSION(:,:)         :: genNormalWLine_dGamma! generalized Normal 
@@ -73,7 +80,7 @@ IMPLICIT NONE
         INTEGER                                 :: SwitchQuadHM 
         REAL                                    :: EPS_ZMIN
         COMPLEX, ALLOCATABLE,DIMENSION(:,:,:)   :: QTF_DUOK ,QTF_HASBO   
-        COMPLEX, ALLOCATABLE,DIMENSION(:,:)     :: QTF_HASFS,QTF_HASFS_ASYMP
+        COMPLEX, ALLOCATABLE,DIMENSION(:,:,:)   :: QTF_HASFS,QTF_HASFS_ASYMP
         INTEGER                                 :: Iterm
         CHARACTER(LEN=1)                        :: strI
         !
@@ -103,15 +110,21 @@ IMPLICIT NONE
         !
         NPFlow   =(Mesh%Npanels+WLine%NWLineSeg)*2**Mesh%Isym !Number of flow point
         !
+!       -------------------------------------                      
+!       Prepare Free-surface mesh
+        IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
+          CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID)//'/mesh',MeshFS)
+          CALL Prepare_FaceMesh(MeshFS%Mesh,NP_GQ,VFaceFS)
+          NPFlowFS   =(MeshFS%Mesh%Npanels+MeshFS%BdyLine%NWLineSeg)*2**MeshFS%Mesh%Isym !Number of flow point
+        ENDIF
+!       --------------------------------------
+
+
         !Dynamic Memory allocation
         ALLOCATE(IntegAxis(3,Nintegration))
         ALLOCATE(StiffMat(Nintegration,Nintegration))
         ALLOCATE(Motion(Nw,Nradiation,Nbeta))
-        ALLOCATE(datPotVel%TotPot(NPFlow,Nbeta,Nw))
-        ALLOCATE(datPotVel%TotVel(NPFlow,3,Nbeta,Nw))
-        ALLOCATE(datPotVel%RadPot(NPFlow,Nradiation,Nw))
-        ALLOCATE(datPotVel%RadVel(NPFlow,3,Nradiation,Nw))
-        
+              
         ALLOCATE(w(Nw),kw(Nw),beta(Nbeta))
         ALLOCATE(genNormal_dS(Nintegration,Mesh%Npanels*2**Mesh%Isym))
         ALLOCATE(genNormalWLine_dGamma(Nintegration,Wline%NWLineseg*2**Mesh%Isym))
@@ -120,6 +133,12 @@ IMPLICIT NONE
         ALLOCATE(TransMotionQ(NwQ,Nbeta,Nradiation))
         ALLOCATE(QTF_DUOK(Nintegration,2,7))!2 is for QTF- and QTF+, 7 for all the terms
         ALLOCATE(QTF_HASBO(Nintegration,2,7))
+
+        IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
+        ALLOCATE(QTF_HASFS(Nintegration,2,10))!2 is for QTF- and QTF+, 7 for all the terms
+        ALLOCATE(QTF_HASFS_ASYMP(Nintegration,2,7))
+        ENDIF 
+
         !
         IntegAxis=IntegrationAXIS_FROM_MNEMOHCAL(InpNEMOHCAL)
         !
@@ -128,22 +147,32 @@ IMPLICIT NONE
         !
         CALL Read_FirstOrderLoad(TRIM(ID%ID),Nw,Nbeta,Nintegration,Nradiation,Forces1)
         CALL Read_Motion(TRIM(ID%ID),Nw,Nbeta,Nradiation,Motion)!Complex RAO
-        CALL READ_POTENTIALS_VELOCITIES_BODYWLINE(TRIM(ID%ID),Nw,Nbeta,NRadiation,       &
-                NPFlow,datPotVel%TotPot,datPotVel%TotVel,                                &
-                datPotVel%RadPot,datPotVel%RadVel,w,kw,beta)
+        CALL READ_POTENTIALS_VELOCITIES(TRIM(ID%ID),Nw,Nbeta,NRadiation,                 &
+                NPFlow,datPotVel,w,kw,beta,ID_BODY)
         
         CALL READ_GENERALIZED_NORMAL_BODY_dAREA(TRIM(ID%ID),Mesh%Npanels*2**Mesh%Isym,   &
                                                           Nintegration,genNormal_dS)
         CALL CALC_GENERALIZED_NORMAL_WATERLINE_dSEGMENT(Mesh,Nintegration,WLine,         &
-                                                InpNEMOHCAL, genNormalWLine_dGamma)
+                                                InpNEMOHCAL, genNormalWLine_dGamma)            
+        !READ Free-surface potentials and velocities
+        IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
+          CALL READ_POTENTIALS_VELOCITIES(TRIM(ID%ID),Nw,Nbeta,NRadiation,               &
+                NPFlowFS,datPotVelFS,w,kw,beta,ID_FREESURFACE)
+        ENDIF
+
         CALL Discretized_omega_wavenumber_for_QTF(Nw,w,kw,NwQ,winputQ(2:3),Nbeta,beta,   &
                                                   BForwardSpeed,Env%depth,Env%g,Qfreq) 
         
         CALL WRITE_QTFSOLVERLOGFILE(TRIM(ID%ID),Nbeta,beta,Qfreq)
 
         CALL PREPARE_POTENTIAL_VELOCITIES(Qfreq,Nw,w,Nbeta,beta,NPFlow,                  &
-                Nradiation,datPotVel,datPotVelQ)
+                Nradiation,datPotVel,datPotVelQ,ID_BODY)
         
+        IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
+         CALL PREPARE_POTENTIAL_VELOCITIES(Qfreq,Nw,w,Nbeta,beta,NPFlowFS,               &
+                Nradiation,datPotVelFS,datPotVelQFS,ID_FREESURFACE)
+        ENDIF
+
         CALL PREPARE_BODY_DISPLACEMENT(Qfreq,Nw,w,Nbeta,Nradiation,NPFlow,Nbodies,       &
                                         Mesh,WLine,InpNEMOHCAL,Motion,BdisplaceQ)
 
@@ -151,7 +180,7 @@ IMPLICIT NONE
                                         w,Qfreq,Forces1,InertiaForceQ)
         CALL PREPARE_ROTATION_ANGLES(Motion,Nw,Nbeta,Nradiation,Nbodies,                 &
                                         w,Qfreq,RotAnglesQ)
-        CALL PREPARE_TRANSLATION_MOTION(Motion,Nw,Nbeta,Nradiation,Nbodies,                 &
+        CALL PREPARE_TRANSLATION_MOTION(Motion,Nw,Nbeta,Nradiation,Nbodies,              &
                                         w,Qfreq,TransMotionQ)
        ! print*,WLine%NWLineSeg
        ! DO Ibeta1=1,Nbeta
@@ -162,14 +191,17 @@ IMPLICIT NONE
        !  !    print*,Iw1,I,Motion(Iw1,I,Ibeta1)
        !  ! ENDDO
        !  ! ENDDO
-       !   DO Ipanel=1,Mesh%Npanels!+WLine%NWLineSeg
-       !    print*,Ipanel,datPotVelQ%TotVel(Ipanel,1,Ibeta1,6),&
-       !            datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),1,Ibeta1,6)
-       !    print*,Ipanel,datPotVelQ%TotVel(Ipanel,2,Ibeta1,6),&
-       !            datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),2,Ibeta1,6)
-       !    print*,Ipanel,datPotVelQ%TotVel(Ipanel,3,Ibeta1,6),&
-       !            datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),3,Ibeta1,6)
-       !          ! print*,Ipanel,BdisplaceQ(8,Ibeta1,Ipanel,:)
+       !  ! DO Ipanel=1,Mesh%Npanels!+WLine%NWLineSeg
+       !  !  print*,Ipanel,datPotVelQ%TotVel(Ipanel,1,Ibeta1,6),&
+       !  !          datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),1,Ibeta1,6)
+       !  !  print*,Ipanel,datPotVelQ%TotVel(Ipanel,2,Ibeta1,6),&
+       !  !          datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),2,Ibeta1,6)
+       !  !  print*,Ipanel,datPotVelQ%TotVel(Ipanel,3,Ibeta1,6),&
+       !  !          datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),3,Ibeta1,6)
+       !  !        ! print*,Ipanel,BdisplaceQ(8,Ibeta1,Ipanel,:)
+       !  ! ENDDO
+       !   DO Ipanel=1,NPFlowFS! MeshFS%Mesh%Npanels
+       !    print*,Ipanel,datPotVelQFS%TotPot(Ipanel,Ibeta1,1),datPotVelQFS%IncPot(Ipanel,Ibeta1,1)
        !   ENDDO
        ! ENDDO
        ! STOP
@@ -233,6 +265,24 @@ IMPLICIT NONE
                                 Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
                                 beta(Ibeta1),beta(Ibeta2),QTF_HASBO(:,:,Iterm))
                         ENDDO 
+                        ENDIF
+
+                        IF (InpNEMOHCAL%qtfinput%Ncontrib.EQ.3) THEN 
+                        CALL COMPUTATION_QTF_POTENTIAL_FREESURFACEFORCE(Iw1,Iw2,Ibeta1,   &
+                                Ibeta2,Nintegration,MeshFS,NwQ,Nbeta,NPFlowFS,Nbodies,    &
+                                Env,datPotVelQFS,Nw,w,Qfreq,beta,QTF_HASFS)      
+                        
+                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHFSM,OutFileHFSP,          &
+                                Nintegration,Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),   &
+                                beta(Ibeta1),beta(Ibeta2), QTF_HASFS(:,:,10))
+                        DO Iterm=1,9
+                        WRITE(strI,'(I0.1)') Iterm
+                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHFSM_term//strI//'.dat',   &
+                                OutFileHFSP_term//strI//'.dat',Nintegration,              &
+                                Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
+                                beta(Ibeta1),beta(Ibeta2),QTF_HASFS(:,:,Iterm))
+                        ENDDO 
+
 
                         ENDIF
                     ENDDO
@@ -262,6 +312,15 @@ IMPLICIT NONE
         DEALLOCATE(BDisplaceQ)
         DEALLOCATE(InertiaForceQ)
         DEALLOCATE(QTF_DUOK,QTF_HASBO)
-       ! DEALLOCATE(QTF_HASFS,QTF_HASFS_ASYMP)
+        IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
+          DEALLOCATE(datPotVelQFS%IncPot)
+          DEALLOCATE(datPotVelQFS%IncVel)
+          DEALLOCATE(datPotVelQFS%TotPot)
+          DEALLOCATE(datPotVelQFS%TotVel)
+          DEALLOCATE(datPotVelQFS%RadPot)
+          DEALLOCATE(datPotVelQFS%RadVel)
+          DEALLOCATE(QTF_HASFS)
+          DEALLOCATE(QTF_HASFS_ASYMP)
+        ENDIF 
 
 END PROGRAM

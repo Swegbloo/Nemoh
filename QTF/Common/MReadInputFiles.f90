@@ -9,7 +9,10 @@
 !--------------------------------------------------------------------------------------
 MODULE MReadInputFiles
 
-USE CONSTANTS,                  ONLY: II, PI
+USE CONSTANTS,                  ONLY: II, PI,ID_BODY,ID_FREESURFACE
+USE MMesh,                      ONLY: TMesh,CreateTMesh
+USE MFace,                      ONLY: TWLine
+USE Elementary_functions,       ONLY: CROSS_PRODUCT
 USE MFileDirectoryList
 
 IMPLICIT NONE
@@ -30,6 +33,27 @@ TYPE TLoad1
 END TYPE
 TYPE TSource
     COMPLEX,ALLOCATABLE,DIMENSION(:,:)   :: ZIGB,ZIGS       !source distribution
+END TYPE
+! Free surface Mesh
+TYPE TVFACEFS
+    REAL, ALLOCATABLE    :: N(:, :)     ! Normal vectors
+    REAL, ALLOCATABLE    :: XM(:, :)    ! Centre of panels
+ENDTYPE
+TYPE TMeshFS
+  TYPE(TMesh)                       :: Mesh
+  TYPE(TWLine)                      :: BdyLine       ! line properties, XM, Length
+  REAL,ALLOCATABLE,DIMENSION(:,:)   :: BdyLineNormal ! normal of the line segment
+  REAL,ALLOCATABLE,DIMENSION(:,:)   :: BdyLineP      ! the line connectivity   
+  TYPE(TVFACEFS)                    :: VFace         ! this transposed version of the variables 
+  REAL                              :: Radius_Ext 
+  INTEGER                           :: NpointsR
+END TYPE TMeshFS
+!Potentials
+TYPE TPotVel
+        COMPLEX,ALLOCATABLE,DIMENSION(:,:,:)    :: TotPot,RadPot ! Total&radiation pot
+        COMPLEX,ALLOCATABLE,DIMENSION(:,:,:,:)  :: TotVel,RadVel ! Total&radiation vel
+        COMPLEX,ALLOCATABLE,DIMENSION(:,:,:)    :: IncPot        ! Incident/incoming Potential
+        COMPLEX,ALLOCATABLE,DIMENSION(:,:,:,:)  :: IncVel        ! Velocity (unperturbed)
 END TYPE
 !
 CONTAINS
@@ -214,30 +238,53 @@ CONTAINS
            ENDDO
         END SUBROUTINE
 
-        SUBROUTINE READ_POTENTIALS_VELOCITIES_BODYWLINE(wd,Nw,Nbeta,NRadiation,NPFlow,      &
-                        TotPot,TotVel,RadPot,RadVel,w,k,beta)
-          CHARACTER(LEN=*),                         INTENT(IN) ::wd
-          INTEGER,                                  INTENT(IN) ::Nw,Nbeta,Nradiation,NPFlow
-          COMPLEX,DIMENSION(NPFlow,Nbeta,Nw),       INTENT(OUT)::TotPot
-          COMPLEX,DIMENSION(NPFlow,3,Nbeta,Nw),     INTENT(OUT)::TotVel
-          COMPLEX,DIMENSION(NPFlow,Nradiation,Nw),  INTENT(OUT)::RadPot
-          COMPLEX,DIMENSION(NPFlow,3,Nradiation,Nw),INTENT(OUT)::RadVel
-          REAL,DIMENSION(Nbeta),                    INTENT(OUT)::beta
-          REAL,DIMENSION(Nw),                       INTENT(OUT)::w,k    !radfreq&wavenumber
+        SUBROUTINE READ_POTENTIALS_VELOCITIES(wd,Nw,Nbeta,NRadiation,NPFlow,      &
+                        datPotVel,w,k,beta,IDDATA)
+          CHARACTER(LEN=*),                         INTENT(IN)    ::wd
+          INTEGER,                                  INTENT(IN)    ::Nw,Nbeta,Nradiation,NPFlow
+          INTEGER,                                  INTENT(IN)    ::IDDATA
+          TYPE(TPotVel),                            INTENT(INOUT) ::datPotVel
+          REAL,DIMENSION(Nbeta),                    INTENT(OUT)   ::beta
+          REAL,DIMENSION(Nw),                       INTENT(OUT)   ::w,k    !radfreq&wavenumber
           INTEGER                     :: Iw, Ibeta, Irad,Ipanel
           REAL, DIMENSION(NPFlow)     :: REALDATA1,IMDATA1,REALDATA2,IMDATA2,               &
                                          REALDATA3,IMDATA3
-          INTEGER                     :: uF1,uF2,uF3,uF4,ILINE
+          INTEGER                     :: uF1,uF2,uF3,uF4,uF5,uF6,ILINE
           REAL,DIMENSION(3)           :: wkbeta,wkIrad
           
-          OPEN(NEWUNIT=uF1, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotPotFILE,                &
-                  STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW)
-          OPEN(NEWUNIT=uF2, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotVelFILE,                &
-                  STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+6*NPFLOW)
-          OPEN(NEWUNIT=uF3, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadPotFILE,                &
-                  STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW)
-          OPEN(NEWUNIT=uF4, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadVelFILE,                &
-                  STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+6*NPFLOW)
+          ALLOCATE(datPotVel%TotPot(NPFlow,Nbeta,Nw))
+          ALLOCATE(datPotVel%TotVel(NPFlow,3,Nbeta,Nw))
+          ALLOCATE(datPotVel%RadPot(NPFlow,Nradiation,Nw))
+          ALLOCATE(datPotVel%RadVel(NPFlow,3,Nradiation,Nw))
+
+          IF (IDDATA==ID_BODY) THEN
+            !body and waterline data 
+            OPEN(NEWUNIT=uF1, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotPotFILE,              &
+                    STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW)
+            OPEN(NEWUNIT=uF2, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotVelFILE,              &
+                    STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+6*NPFLOW)
+            OPEN(NEWUNIT=uF3, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadPotFILE,              &
+                    STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW)
+            OPEN(NEWUNIT=uF4, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadVelFILE,              &
+                    STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+6*NPFLOW)
+          ELSE
+            ALLOCATE(datPotVel%IncPot(NPFlow,Nbeta,Nw))
+            ALLOCATE(datPotVel%IncVel(NPFlow,3,Nbeta,Nw))
+
+            !free-surface data 
+            OPEN(NEWUNIT=uF1, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotPotFILE_FS,           &
+                    STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW)
+            OPEN(NEWUNIT=uF2, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotVelFILE_FS,           &
+                    STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+6*NPFLOW)
+            OPEN(NEWUNIT=uF3, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadPotFILE_FS,           &
+                    STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW)
+            OPEN(NEWUNIT=uF4, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadVelFILE_FS,           &
+                    STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+6*NPFLOW)
+            OPEN(NEWUNIT=uF5, FILE=TRIM(wd)//'/'//PreprocDir//'/'//IncPotFILE_FS,           &
+                    STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW)
+            OPEN(NEWUNIT=uF6, FILE=TRIM(wd)//'/'//PreprocDir//'/'//IncVelFILE_FS,           &
+                    STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+6*NPFLOW)
+          ENDIF
 
           DO Iw=1,Nw
               DO Ibeta=1,Nbeta
@@ -245,7 +292,7 @@ CONTAINS
                  READ(uF1,REC=ILINE) wkbeta,                                                &
                                 (REALDATA1(Ipanel),Ipanel=1,NPFlow),                        &
                                 (IMDATA1(Ipanel),Ipanel=1,NPFlow)
-                 TotPot(:,Ibeta,Iw)=CMPLX(REALDATA1,IMDATA1)
+                 datPotVel%TotPot(:,Ibeta,Iw)=CMPLX(REALDATA1,IMDATA1)
                  READ(uF2,REC=ILINE) wkbeta,                                                &
                                 (REALDATA1(Ipanel),Ipanel=1,NPFlow),                        &
                                 (IMDATA1(Ipanel),Ipanel=1,NPFlow),                          &                       
@@ -253,19 +300,37 @@ CONTAINS
                                 (IMDATA2(Ipanel),Ipanel=1,NPFlow),                          &    
                                 (REALDATA3(Ipanel),Ipanel=1,NPFlow),                        &
                                 (IMDATA3(Ipanel),Ipanel=1,NPFlow)                             
-                 TotVel(:,1,Ibeta,Iw)=CMPLX(REALDATA1,IMDATA1)
-                 TotVel(:,2,Ibeta,Iw)=CMPLX(REALDATA2,IMDATA2)
-                 TotVel(:,3,Ibeta,Iw)=CMPLX(REALDATA3,IMDATA3)
+                 datPotVel%TotVel(:,1,Ibeta,Iw)=CMPLX(REALDATA1,IMDATA1)
+                 datPotVel%TotVel(:,2,Ibeta,Iw)=CMPLX(REALDATA2,IMDATA2)
+                 datPotVel%TotVel(:,3,Ibeta,Iw)=CMPLX(REALDATA3,IMDATA3)
                  IF (Iw==1) beta(Ibeta)=wkbeta(3)
-              ENDDO
                  w(Iw)=wkbeta(1)
                  k(Iw)=wkbeta(2)
+
+                 IF (IDDATA==ID_FREESURFACE) THEN
+                         READ(uF5,REC=ILINE) wkbeta,                                        &
+                                        (REALDATA1(Ipanel),Ipanel=1,NPFlow),                &
+                                        (IMDATA1(Ipanel),Ipanel=1,NPFlow)
+                         datPotVel%IncPot(:,Ibeta,Iw)=CMPLX(REALDATA1,IMDATA1)
+                         READ(uF6,REC=ILINE) wkbeta,                                        &
+                                        (REALDATA1(Ipanel),Ipanel=1,NPFlow),                &
+                                        (IMDATA1(Ipanel),Ipanel=1,NPFlow),                  &                       
+                                        (REALDATA2(Ipanel),Ipanel=1,NPFlow),                &
+                                        (IMDATA2(Ipanel),Ipanel=1,NPFlow),                  &    
+                                        (REALDATA3(Ipanel),Ipanel=1,NPFlow),                &
+                                        (IMDATA3(Ipanel),Ipanel=1,NPFlow)                             
+                         datPotVel%IncVel(:,1,Ibeta,Iw)=CMPLX(REALDATA1,IMDATA1)
+                         datPotVel%IncVel(:,2,Ibeta,Iw)=CMPLX(REALDATA2,IMDATA2)
+                         datPotVel%IncVel(:,3,Ibeta,Iw)=CMPLX(REALDATA3,IMDATA3)
+                 ENDIF
+              ENDDO
+
               DO Irad=1,NRadiation
                  ILINE=(Iw-1)*Nradiation+Irad
                  READ(uF3,REC=ILINE) wkIrad,                                                &
                                 (REALDATA1(Ipanel),Ipanel=1,NPFlow),                        &
                                 (IMDATA1(Ipanel),Ipanel=1,NPFlow)
-                 RadPot(:,Irad,Iw)=CMPLX(REALDATA1,IMDATA1)
+                 datPotVel%RadPot(:,Irad,Iw)=CMPLX(REALDATA1,IMDATA1)
                  READ(uF4,REC=ILINE) wkIrad,                                                &
                                 (REALDATA1(Ipanel),Ipanel=1,NPFlow),                        &
                                 (IMDATA1(Ipanel),Ipanel=1,NPFlow),                          &                       
@@ -273,15 +338,19 @@ CONTAINS
                                 (IMDATA2(Ipanel),Ipanel=1,NPFlow),                          &    
                                 (REALDATA3(Ipanel),Ipanel=1,NPFlow),                        &
                                 (IMDATA3(Ipanel),Ipanel=1,NPFlow)
-                 RadVel(:,1,Irad,Iw)=CMPLX(REALDATA1,IMDATA1)
-                 RadVel(:,2,Irad,Iw)=CMPLX(REALDATA2,IMDATA2)
-                 RadVel(:,3,Irad,Iw)=CMPLX(REALDATA3,IMDATA3)
+                 datPotVel%RadVel(:,1,Irad,Iw)=CMPLX(REALDATA1,IMDATA1)
+                 datPotVel%RadVel(:,2,Irad,Iw)=CMPLX(REALDATA2,IMDATA2)
+                 datPotVel%RadVel(:,3,Irad,Iw)=CMPLX(REALDATA3,IMDATA3)
               ENDDO
           ENDDO
           CLOSE(uF1)
           CLOSE(uF2)
           CLOSE(uF3)
           CLOSE(uF4)
+          IF (IDDATA==ID_FREESURFACE) THEN
+          CLOSE(uF5)
+          CLOSE(uF6)
+          ENDIF
 
         END SUBROUTINE
 
@@ -306,6 +375,118 @@ CONTAINS
           CLOSE(u)
 
         END SUBROUTINE
+
+        
+        SUBROUTINE READ_PREPARE_FREESURFACE_MESH(wd,MeshFS)
+          CHARACTER(LEN=*),                       INTENT(IN):: wd
+          TYPE(TMeshFS),                          INTENT(INOUT):: MeshFS
+          INTEGER           :: u,Ipoint,Ip,J,Ipanel,Iline
+          INTEGER           :: Npoints,Npanels,NbdyLines
+          REAL,DIMENSION(3) :: X1,X2,X3,X4 !panel nodes
+          
+          OPEN(NEWUNIT=u,FILE=TRIM(wd)//'/SF_L12_2_N.dat')
+          READ(u,*) MeshFS%Mesh%ISym,Npoints,Npanels,NbdyLines,MeshFS%Radius_Ext,&
+                    MeshFS%NpointsR
+            
+          !memory allocation 
+          CALL CreateTMesh(MeshFS%Mesh,Npoints,Npanels,1) 
+
+          DO Ipoint=1,Npoints
+             READ(u,*) Ip,(MeshFS%Mesh%X(J,Ipoint),J=1,3)
+          ENDDO
+             READ(u,*)
+          ! Free surface panels   
+          DO Ipanel=1,Npanels
+             READ(u,*) (MeshFS%Mesh%P(J,Ipanel),J=1,4)
+             !Compute Normal Vect, Area and centre of mass of the panel
+             !Quadrilateral Nodes
+             X1=MeshFS%Mesh%X(:,MeshFS%Mesh%P(1,Ipanel))
+             X2=MeshFS%Mesh%X(:,MeshFS%Mesh%P(2,Ipanel))
+             X3=MeshFS%Mesh%X(:,MeshFS%Mesh%P(3,Ipanel))
+             X4=MeshFS%Mesh%X(:,MeshFS%Mesh%P(4,Ipanel))
+
+             CALL CALC_PANEL_PROPERTIES(X1,X2,X3,X4,    &
+                     MeshFS%Mesh%N(:,Ipanel),           &
+                     MeshFS%Mesh%A(Ipanel),             &
+                     MeshFS%Mesh%XM(:,Ipanel) )
+          ENDDO
+
+          !Free surface boundary lines
+          MeshFS%BdyLine%NWlineseg=NbdyLines
+          ALLOCATE(MeshFS%BdyLine%SegLength(NbdyLines))
+          ALLOCATE(MeshFS%BdyLine%XM(NbdyLines,3))
+          ALLOCATE(MeshFS%BdyLineNormal(NbdyLines,2))!only Nx,Ny
+          ALLOCATE(MeshFS%BdyLineP(NbdyLines,2))!only Nx,Ny
+          DO Iline=1,Nbdylines
+             READ(u,*) (MeshFS%BdyLineP(Iline,J),J=1,2)
+             !Compute Normal Vect, Area and centre of mass of the panel
+             !Quadrilateral Nodes
+             X1=MeshFS%Mesh%X(:,MeshFS%BdyLineP(Iline,1))
+             X2=MeshFS%Mesh%X(:,MeshFS%BdyLineP(Iline,2))
+
+             CALL CALC_BDY_LINE_PROPERTIES(X1,X2,MeshFS%Radius_Ext, &
+                     MeshFS%BdyLineNormal(Iline,:),                 &
+                     MeshFS%BdyLine%SegLength(Iline),                  &
+                     MeshFS%BdyLine%XM(Iline,:) )
+          ENDDO
+
+             READ(u,*)
+             CLOSE(u)
+        !transposed version
+        ALLOCATE(MeshFS%VFace%XM(Npanels,3))
+        ALLOCATE(MeshFS%VFace%N(Npanels,3))
+        MeshFS%VFace%XM=TRANSPOSE(MeshFS%Mesh%XM)
+        MeshFS%VFace%N =TRANSPOSE(MeshFS%Mesh%N)
+        END SUBROUTINE
+
+        SUBROUTINE CALC_PANEL_PROPERTIES(X1,X2,X3,X4,N,A,XM) 
+            REAL,DIMENSION(3),INTENT(IN)   :: X1,X2,X3,X4
+            REAL,DIMENSION(3),INTENT(OUT)  :: N,XM
+            REAL             ,INTENT(OUT)  :: A
+
+            REAL,DIMENSION(3)              :: U,V,N1,N2
+            REAL                           :: A1,A2
+            ! Area of 1-2-4 triangle
+            U(:) = X2-X1
+            V(:) = X4-X2
+            N1=CROSS_PRODUCT(U, V)
+            A1=0.5*NORM2(CROSS_PRODUCT(U, V))
+        
+            ! Area of 2-3-4 triangle
+            U(:) = X4-X3
+            V(:) = X2-X3
+            N2=CROSS_PRODUCT(U, V)
+            A2=0.5*NORM2(CROSS_PRODUCT(U, V))
+            
+            N=N1+N2
+            N=N/NORM2(N)
+
+            A=A1+A2
+
+            XM= (X1+X2+X4)/3*A1/A  &
+               +(X2+X3+X4)/3*A2/A
+        END SUBROUTINE
+
+        SUBROUTINE CALC_BDY_LINE_PROPERTIES(X1,X2,Rext,N,L,XM) 
+            REAL,DIMENSION(3),INTENT(IN)   :: X1,X2
+            REAL,             INTENT(IN)   :: Rext
+            REAL,DIMENSION(3),INTENT(OUT)  :: XM
+            REAL,DIMENSION(2),INTENT(OUT)  :: N
+            REAL             ,INTENT(OUT)  :: L
+            REAL                           :: Rcalc 
+            XM=0.5*(X1+X2) !centre point
+            L=NORM2(X2-X1) !length
+            Rcalc=NORM2(XM)!distance to origin (0,0)
+            IF (ABS(Rcalc-Rext).LT.0.01) THEN
+            N(1)=(X2(2)-X1(2))/L
+            N(2)=-(X2(1)-X1(1))/L
+            ELSE
+            N(1)=-(X2(2)-X1(2))/L
+            N(2)=(X2(1)-X1(1))/L
+            ENDIF
+        
+        END SUBROUTINE
+
 
         SUBROUTINE  exist_file(filename)
           CHARACTER(LEN=*),       INTENT(IN) :: filename

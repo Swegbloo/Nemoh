@@ -5,6 +5,7 @@ USE MQSolverPreparation, ONLY:TPotVel,TQfreq
 USE CONSTANTS          , ONLY:II,CZERO
 USE Elementary_functions,ONLY:CROSS_PRODUCT_COMPLEX,Fun_closest,CIH
 USE MEnvironment,        ONLY:Fun_Dispersion,TEnvironment
+USE MReadInputFiles,     ONLY:TMeshFS
 USE linear_interpolation_module
 IMPLICIT NONE
 CONTAINS
@@ -559,6 +560,356 @@ CONTAINS
           QTFHasbo(:,:,7)=QTFHasbo(:,:,7)+QTFHasbo(:,:,Iterm)! Hasbo total
           ENDDO
   END SUBROUTINE
+
+  SUBROUTINE COMPUTATION_QTF_POTENTIAL_FREESURFACEFORCE                       &
+                                   (Iw1,Iw2,Ibeta1,Ibeta2,Nintegration,       &
+                                    MeshFS,NwQ,Nbeta,NPFlow,Nbodies,          &
+                                    env,datPotVelQ,Nw,w,Qfreq,beta,QTFHASFS)
+          !Input/output
+          INTEGER,                              INTENT(IN) :: Iw1,Iw2,Ibeta1,Ibeta2
+          INTEGER,                              INTENT(IN) :: Nintegration,NPFlow
+          INTEGER,                              INTENT(IN) :: NwQ,Nbeta,Nbodies,Nw
+          TYPE(TMeshFS),                        INTENT(IN) :: MeshFS
+          TYPE(TPotVel),                        INTENT(IN) :: datPotVelQ 
+          TYPE(TQfreq),                         INTENT(IN) :: Qfreq
+          TYPE(TEnvironment),                   INTENT(IN) :: Env
+          REAL,DIMENSION(Nw),                   INTENT(IN) :: w
+          REAL,DIMENSION(Nbeta),                INTENT(IN) :: beta
+          COMPLEX,DIMENSION(Nintegration,2,10),  INTENT(OUT):: QTFHASFS
+          !Local
+          COMPLEX                             ::TotPot_Iw1,TotPot_Iw2
+          COMPLEX,DIMENSION(3)                ::TotVel_Iw1,TotVel_Iw2
+          COMPLEX                             ::IncPot_Iw1,IncPot_Iw2
+          COMPLEX,DIMENSION(3)                ::IncVel_Iw1,IncVel_Iw2
+          COMPLEX                             ::PerPot_Iw1,PerPot_Iw2
+          COMPLEX,DIMENSION(3)                ::PerVel_Iw1,PerVel_Iw2
+          COMPLEX,DIMENSION(2)                ::Radpot 
+          COMPLEX,DIMENSION(3,2)              ::Radvel
+          
+          REAL                                ::w1,w2,delw,sumw,k1,k2
+          REAL                                ::rho,depth,g
+          INTEGER                             ::InterpSwitch
+          INTEGER                             ::Npanels,Ipanel,Iinteg,NpanWLin
+          REAL,DIMENSION(3)                   ::XM,Normal_Vect
+          INTEGER                             ::Isym,Iterm
+          INTEGER,DIMENSION(2)                ::Ipanelinit,Iwlineinit
+          COMPLEX                             ::QFD1_M,QFD1_P
+          COMPLEX                             ::QFD2_M,QFD2_P
+          INTEGER                             ::Iwline
+          REAL                                ::dGAMMA
+          
+          InterpSwitch=Qfreq%InterpPotSwitch(Ibeta1)                      &
+                        +Qfreq%InterpPotSwitch(Ibeta2)
+
+          rho=Env%rho
+          depth=Env%depth
+          g=Env%g
+          w1=Qfreq%wQ(Iw1,Ibeta1)
+          w2=Qfreq%wQ(Iw2,Ibeta2)
+          delw=w1-w2
+          sumw=w1+w2
+          k1=Qfreq%kQ(Iw1,Ibeta1)
+          k2=Qfreq%kQ(Iw2,Ibeta2)
+
+          Npanels=MeshFS%Mesh%Npanels
+          NpanWlin=Npanels+MeshFS%BdyLine%NWLineSeg
+
+          DO Iinteg=1,Nintegration
+           QTFHASFS(Iinteg,:,:)=CZERO
+           !integration over body panels
+           DO Ipanel=1,Npanels
+              XM=MeshFS%Mesh%XM(1:3, Ipanel)
+              Normal_Vect=MeshFS%Mesh%N(1:3,Ipanel)
+
+              DO Isym=1,1+MeshFS%Mesh%Isym
+                 IF (Isym==2) THEN
+                    XM(2)=-XM(2)
+                    Normal_Vect(2)=-Normal_Vect(2)
+                 ENDIF
+                 Ipanelinit=Function_SymIpanel(NpanWlin,Npanels,Isym)
+                 !prepare variables Iw1,Iw2
+                 TotPot_Iw1=datPotVelQ%TotPot(Ipanelinit(1)+Ipanel,Ibeta1,Iw1)
+                 TotVel_Iw1=datPotVelQ%TotVel(Ipanelinit(1)+Ipanel,1:3,Ibeta1,Iw1)
+                 TotPot_Iw2=datPotVelQ%TotPot(Ipanelinit(1)+Ipanel,Ibeta2,Iw2)
+                 TotVel_Iw2=datPotVelQ%TotVel(Ipanelinit(1)+Ipanel,1:3,Ibeta2,Iw2)
+                 
+                 IncPot_Iw1=datPotVelQ%IncPot(Ipanelinit(1)+Ipanel,Ibeta1,Iw1)
+                 IncVel_Iw1=datPotVelQ%IncVel(Ipanelinit(1)+Ipanel,1:3,Ibeta1,Iw1)
+                 IncPot_Iw2=datPotVelQ%IncPot(Ipanelinit(1)+Ipanel,Ibeta2,Iw2)
+                 IncVel_Iw2=datPotVelQ%IncVel(Ipanelinit(1)+Ipanel,1:3,Ibeta2,Iw2)
+
+                 PerPot_Iw1=TotPot_Iw1-IncPot_Iw1
+                 PerVel_Iw1=TotVel_Iw1-IncVel_Iw1
+                 PerPot_Iw2=TotPot_Iw2-IncPot_Iw2
+                 PerVel_Iw2=TotVel_Iw2-IncVel_Iw2
+                
+                 !interpolating radpot and radvel at delw and sumw        
+                 Radpot(1:2)=INTERP_RADIATION_POTENTIAL                       &
+                       (Nw,w,datPotVelQ%RadPot(Ipanelinit(1)+Ipanel,Iinteg,:),&
+                           InterpSwitch,delw,sumw)
+                 RadVel(:,1:2)=INTERP_RADIATION_VELOCITY                      &
+                     (Nw,w,datPotVelQ%RadVel(Ipanelinit(1)+Ipanel,:,Iinteg,:),&
+                           InterpSwitch,delw,sumw)
+                 !------------------------------------------------------------
+                 !term QFD1:(gradPhi,gradPhiPer)+(gradPhiPer,GradPhiInc)
+
+                 QFD1_M=II*delw*(                                             &
+                        DOT_PRODUCT_COMPLEX(TotVel_Iw1,CONJG(PerVel_Iw2),3)   &
+                       +DOT_PRODUCT_COMPLEX(PerVel_Iw1,CONJG(IncVel_Iw2),3)   &
+                        ) 
+                 QFD1_P=II*sumw*(                                             &
+                        DOT_PRODUCT_COMPLEX(TotVel_Iw1,PerVel_Iw2,3)          &
+                       +DOT_PRODUCT_COMPLEX(PerVel_Iw1,IncVel_Iw2,3)          &
+                        ) 
+
+                 QTFHASFS(Iinteg,1,1)= QTFHASFS(Iinteg,1,1)+                  &
+                                       II*delw*rho/g*QFD1_M*Radpot(1)         &
+                                       *MeshFS%Mesh%A(Ipanel)
+                 QTFHASFS(Iinteg,2,1)= QTFHASFS(Iinteg,2,1)+                  &
+                                       II*sumw*rho/g*QFD1_P*Radpot(2)         &
+                                       *MeshFS%Mesh%A(Ipanel)
+
+                 !term QFD1:Phi*dttdzPhiPer+PhiPer*dttdzPhiInc
+                 QFD1_M=-II*w1/2/g*(                                          &
+                          TotPot_Iw1*(-w2**2*CONJG(PerVel_Iw2(3)))            &
+                         +PerPot_Iw1*(-w2**2*CONJG(IncVel_Iw2(3)))            &
+                         ) 
+                 QFD1_P=-II*w1/2/g*(                                          &
+                          TotPot_Iw1*(-w2**2*PerVel_Iw2(3))                   &
+                         +PerPot_Iw1*(-w2**2*IncVel_Iw2(3))                   &    
+                         ) 
+
+                 QTFHASFS(Iinteg,1,2)= QTFHASFS(Iinteg,1,2)+                  &
+                                       II*delw*rho/g*QFD1_M*Radpot(1)         &
+                                       *MeshFS%Mesh%A(Ipanel)
+                 QTFHASFS(Iinteg,2,2)= QTFHASFS(Iinteg,2,2)+                  &
+                                       II*sumw*rho/g*QFD1_P*Radpot(2)         &
+                                       *MeshFS%Mesh%A(Ipanel)
+               
+                 QFD1_M= II*w2/2/g*(                                          &
+                         CONJG(TotPot_Iw2)*(-w1**2*PerVel_Iw1(3))             &
+                        +CONJG(PerPot_Iw2)*(-w1**2*IncVel_Iw1(3))             &
+                         ) 
+                 QFD1_P=-II*w2/2/g*(                                          &
+                          TotPot_Iw2*(-w1**2*PerVel_Iw1(3))                   &
+                         +PerPot_Iw2*(-w1**2*IncVel_Iw1(3))                   &
+                         ) 
+
+                 QTFHASFS(Iinteg,1,3)= QTFHASFS(Iinteg,1,3)+                  &
+                                       II*delw*rho/g*QFD1_M*Radpot(1)         &
+                                       *MeshFS%Mesh%A(Ipanel)
+                 QTFHASFS(Iinteg,2,3)= QTFHASFS(Iinteg,2,3)+                  &
+                                       II*sumw*rho/g*QFD1_P*Radpot(2)         &
+                                       *MeshFS%Mesh%A(Ipanel)
+                !term QFD2: direct implementation
+                !dtPhi*dzzPhiPer+dtPhi_Per*dzzPhiInc
+                 QFD2_M= 0.5*(                                                &
+                          (-II*w1*TotPot_Iw1)*k2**2*CONJG(PerPot_Iw2)         &
+                         +(-II*w1*PerPot_Iw1)*k2**2*CONJG(IncPot_Iw2)         &
+                         ) 
+                 QFD2_P= 0.5*(                                                &
+                          (-II*w1*TotPot_Iw1)*k2**2*PerPot_Iw2                &
+                         +(-II*w1*PerPot_Iw1)*k2**2*IncPot_Iw2                &
+                         ) 
+
+                 QTFHASFS(Iinteg,1,4)= QTFHASFS(Iinteg,1,4)+                  &
+                                       II*delw*rho/g*QFD2_M*Radpot(1)         &
+                                       *MeshFS%Mesh%A(Ipanel)
+                 QTFHASFS(Iinteg,2,4)= QTFHASFS(Iinteg,2,4)+                  &
+                                       II*sumw*rho/g*QFD2_P*Radpot(2)         &
+                                       *MeshFS%Mesh%A(Ipanel)
+                 QFD2_M= 0.5*(                                                &
+                          (II*w2*CONJG(TotPot_Iw2))*k1**2*PerPot_Iw1          &
+                         +(II*w2*CONJG(PerPot_Iw2))*k1**2*IncPot_Iw1          &
+                         ) 
+                 QFD2_P= 0.5*(                                                &
+                          (-II*w2*TotPot_Iw2)*k1**2*PerPot_Iw1                &
+                         +(-II*w2*PerPot_Iw2)*k1**2*IncPot_Iw1                &
+                         ) 
+
+                 QTFHASFS(Iinteg,1,5)= QTFHASFS(Iinteg,1,5)+                  &
+                                       II*delw*rho/g*QFD2_M*Radpot(1)         &
+                                       *MeshFS%Mesh%A(Ipanel)
+                 QTFHASFS(Iinteg,2,5)= QTFHASFS(Iinteg,2,5)+                  &
+                                       II*sumw*rho/g*QFD2_P*Radpot(2)         &
+                                       *MeshFS%Mesh%A(Ipanel)
+
+                !term QFD2:dtPhi*dzzPhiPer+dtPhi_Per*dzzPhiInc
+                !Green theorem to express second derivative in
+                !the first derivative only           
+                QFD2_M= 0.5*(                                               &
+                        -II*w1*(                                            &
+                         ( RadVel(1,1)*TotPot_Iw1+RadPot(1)*TotVel_Iw1(1))  &
+                           *CONJG(PerVel_Iw2(1))                            &
+                         +(RadVel(2,1)*TotPot_Iw1+RadPot(1)*TotVel_Iw1(2))  &
+                           *CONJG(PerVel_Iw2(2))                            &
+                              )                                             &
+                        -II*w1*(                                            &
+                         ( RadVel(1,1)*PerPot_Iw1+RadPot(1)*PerVel_Iw1(1))  &
+                           *CONJG(IncVel_Iw2(1))                            &
+                         +(RadVel(2,1)*PerPot_Iw1+RadPot(1)*PerVel_Iw1(2))  &
+                           *CONJG(IncVel_Iw2(2))                            &
+                              )                                             &
+                        ) 
+                QFD2_P= 0.5*(                                               &
+                        -II*w1*(                                            &
+                         ( RadVel(1,2)*TotPot_Iw1+RadPot(2)*TotVel_Iw1(1))  &
+                           *PerVel_Iw2(1)                                   &
+                         +(RadVel(2,2)*TotPot_Iw1+RadPot(2)*TotVel_Iw1(2))  &
+                           *PerVel_Iw2(2)                                   &
+                              )                                             &
+                        -II*w1*(                                            &
+                         ( RadVel(1,2)*PerPot_Iw1+RadPot(2)*PerVel_Iw1(1))  &
+                           *IncVel_Iw2(1)                                   &
+                         +(RadVel(2,2)*PerPot_Iw1+RadPot(2)*PerVel_Iw1(2))  &
+                           *IncVel_Iw2(2)                                   &
+                              )                                             &
+                        ) 
+
+                QTFHASFS(Iinteg,1,6)= QTFHASFS(Iinteg,1,6)+                 &
+                                      II*delw*rho/g*QFD2_M                  &
+                                      *MeshFS%Mesh%A(Ipanel)
+                QTFHASFS(Iinteg,2,6)= QTFHASFS(Iinteg,2,6)+                 &
+                                      II*sumw*rho/g*QFD2_P                  &
+                                      *MeshFS%Mesh%A(Ipanel)
+               
+                 QFD2_M= 0.5*(                                              &
+                        II*w2*(                                             &
+                         ( RadVel(1,1)*CONJG(TotPot_Iw2)+                   &
+                                 RadPot(1)*CONJG(TotVel_Iw2(1)))            &
+                           *PerVel_Iw1(1)                                   &
+                         +(RadVel(2,1)*CONJG(TotPot_Iw2)+                   &
+                                 RadPot(1)*CONJG(TotVel_Iw2(2)))            &
+                           *PerVel_Iw1(2)                                   &
+                              )                                             &
+                        +II*w2*(                                            &
+                         ( RadVel(1,1)*CONJG(PerPot_Iw2)+                   &
+                                 RadPot(1)*CONJG(PerVel_Iw2(1)))            &
+                           *IncVel_Iw1(1)                                   &
+                         +(RadVel(2,1)*CONJG(PerPot_Iw2)+                   &
+                                 RadPot(1)*CONJG(PerVel_Iw2(2)))            &
+                           *IncVel_Iw1(2)                                   &
+                              )                                             &
+                        )                                                   
+                QFD2_P= 0.5*(                                               &
+                        -II*w2*(                                            &
+                         ( RadVel(1,2)*TotPot_Iw2+                          &
+                                 RadPot(2)*TotVel_Iw2(1))                   &
+                           *PerVel_Iw1(1)                                   &
+                         +(RadVel(2,2)*TotPot_Iw2+                          &
+                                 RadPot(2)*TotVel_Iw2(2))                   &
+                           *PerVel_Iw1(2)                                   &
+                              )                                             &
+                        -II*w2*(                                            &
+                         ( RadVel(1,2)*PerPot_Iw2+                          &
+                                 RadPot(2)*PerVel_Iw2(1))                   &
+                           *IncVel_Iw1(1)                                   &
+                         +(RadVel(2,2)*PerPot_Iw2+                          &
+                                 RadPot(2)*PerVel_Iw2(2))                   &
+                           *IncVel_Iw1(2)                                   &
+                              )                                             &
+                        ) 
+
+                QTFHASFS(Iinteg,1,7)= QTFHASFS(Iinteg,1,7)+                 &
+                                      II*delw*rho/g*QFD2_M                  &
+                                      *MeshFS%Mesh%A(Ipanel)
+                QTFHASFS(Iinteg,2,7)= QTFHASFS(Iinteg,2,7)+                 &
+                                      II*sumw*rho/g*QFD2_P                  &
+                                      *MeshFS%Mesh%A(Ipanel)
+
+              ENDDO
+
+           ENDDO
+
+           DO Iwline=1,MeshFS%BdyLine%NWLineSeg
+             Normal_Vect(1:2)=MeshFS%BdyLineNormal(Iwline,:)
+             Normal_Vect(3)=0.
+            DO Isym=1,1+MeshFS%Mesh%Isym
+              IF (Isym==2) THEN
+                  Normal_Vect(2)=-Normal_Vect(2)
+             ENDIF
+             Iwlineinit=Function_SymIwline(NpanWlin,Npanels,                  &
+                                               MeshFS%BdyLine%NWLineSeg,Isym)
+             !preparation var in Iw1 and Iw2
+             TotPot_Iw1=datPotVelQ%TotPot(Iwlineinit(1)+Iwline,Ibeta1,Iw1)
+             TotVel_Iw1=datPotVelQ%TotVel(Iwlineinit(1)+Iwline,1:3,Ibeta1,Iw1)
+             TotPot_Iw2=datPotVelQ%TotPot(Iwlineinit(1)+Iwline,Ibeta2,Iw2)
+             TotVel_Iw2=datPotVelQ%TotVel(Iwlineinit(1)+Iwline,1:3,Ibeta2,Iw2)
+
+             IncPot_Iw1=datPotVelQ%IncPot(Iwlineinit(1)+Iwline,Ibeta1,Iw1)
+             IncVel_Iw1=datPotVelQ%IncVel(Iwlineinit(1)+Iwline,1:3,Ibeta1,Iw1)
+             IncPot_Iw2=datPotVelQ%IncPot(Iwlineinit(1)+Iwline,Ibeta2,Iw2)
+             IncVel_Iw2=datPotVelQ%IncVel(Iwlineinit(1)+Iwline,1:3,Ibeta2,Iw2)
+             
+             PerPot_Iw1=TotPot_Iw1-IncPot_Iw1
+             PerVel_Iw1=TotVel_Iw1-IncVel_Iw1
+             PerPot_Iw2=TotPot_Iw2-IncPot_Iw2
+             PerVel_Iw2=TotVel_Iw2-IncVel_Iw2
+
+             !interpolating radpot and radvel at delw and sumw        
+             Radpot(1:2)=INTERP_RADIATION_POTENTIAL                       &
+                    (Nw,w,datPotVelQ%RadPot(Iwlineinit(1)+Iwline,Iinteg,:),&
+                        InterpSwitch,delw,sumw)
+             !-----------------------------------------------------
+            
+             dGAMMA=MeshFS%BdyLine%SegLength(Iwline)
+
+             QFD2_M=0.5*(-II*w1*TotPot_Iw1*                                      &
+                          (DOT_PRODUCT_COMPLEX(CONJG(PerVel_Iw2),                &
+                                                       CMPLX(Normal_Vect,0.),3)) &
+                          -II*w1*PerPot_Iw1*                                     &
+                          (DOT_PRODUCT_COMPLEX(CONJG(IncVel_Iw2),                &
+                                                       CMPLX(Normal_Vect,0.),3)) &
+                         ) 
+             QFD2_P=0.5*(-II*w1*TotPot_Iw1*                                      &
+                          (DOT_PRODUCT_COMPLEX(PerVel_Iw2,                       &
+                                                       CMPLX(Normal_Vect,0.),3)) &
+                          -II*w1*PerPot_Iw1*                                     &
+                          (DOT_PRODUCT_COMPLEX(IncVel_Iw2,                       &
+                                                       CMPLX(Normal_Vect,0.),3)) &
+                         ) 
+
+             
+             QTFHASFS(Iinteg,1,8)= QTFHASFS(Iinteg,1,8)-                         &
+                                      II*delw*rho/g*QFD2_M*Radpot(1)*dGAMMA     
+             QTFHASFS(Iinteg,2,8)= QTFHASFS(Iinteg,2,8)-                         &
+                                      II*sumw*rho/g*QFD2_P*Radpot(2)*dGAMMA
+            
+             QFD2_M=0.5*( II*w2*CONJG(TotPot_Iw2)*                               &
+                          (DOT_PRODUCT_COMPLEX(PerVel_Iw1,                       &
+                                                       CMPLX(Normal_Vect,0.),3)) &
+                          +II*w2*CONJG(PerPot_Iw2)*                              &
+                          (DOT_PRODUCT_COMPLEX(IncVel_Iw1,                       &
+                                                       CMPLX(Normal_Vect,0.),3)) &
+                         ) 
+             QFD2_P=0.5*(-II*w2*TotPot_Iw2*                                      &
+                          (DOT_PRODUCT_COMPLEX(PerVel_Iw1,                       &
+                                                       CMPLX(Normal_Vect,0.),3)) &
+                          -II*w2*PerPot_Iw2*                                     &
+                          (DOT_PRODUCT_COMPLEX(IncVel_Iw1,                       &
+                                                       CMPLX(Normal_Vect,0.),3)) &
+                         ) 
+             
+             QTFHASFS(Iinteg,1,9)= QTFHASFS(Iinteg,1,9)-                         &
+                                      II*delw*rho/g*QFD2_M*Radpot(1)*dGAMMA     
+             QTFHASFS(Iinteg,2,9)= QTFHASFS(Iinteg,2,9)-                         &
+                                      II*sumw*rho/g*QFD2_P*Radpot(2)*dGAMMA
+
+
+             !----------------------------------------------------
+            ENDDO
+           ENDDO
+          ENDDO
+          DO Iterm=1,9
+             QTFHASFS(:,:,Iterm)=QTFHASFS(:,:,Iterm)/2 !TRANSFER FUNCTION = BICHROMATIC FORCES / 2?
+             IF (Iterm.LE.5) THEN!! uses direct implementation for QFD2
+                 QTFHASFS(:,:,10)=QTFHASFS(:,:,10)+QTFHASFS(:,:,Iterm)! HASFS total
+             ENDIF
+          ENDDO
+
+  END SUBROUTINE
+
+
 
   FUNCTION CALC_SECONDORDER_INCOMING_POTENTIAL                         &
                   (Env,w1,w2,k1,k2,beta1,beta2,XMp) result(Phi_I)

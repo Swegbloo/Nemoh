@@ -268,8 +268,26 @@ c~       WRITE(*,*) 'M3SL,M4SL'
       WRITE(11,REC=6)(M1SL(I),M2SL(I),I=1,NFACSL+NCONT)
       WRITE(11,REC=7)(M3SL(I),M4SL(I),I=1,NFACSL)
       CLOSE(11)
-
-
+      
+      OPEN(99,FILE='SF_L12_2_N.dat',ACTION='WRITE')
+      WRITE(99,*) NSYMY,NOMBPO,NFACSL,NCONT,RCEREXT,NPASR
+      DO I=1,NOMBPO
+       WRITE(99,*)  I,XSL(I),YSL(I), 0.00
+      ENDDO
+       WRITE(99,*)'0. 0. 0. 0.'
+      DO I=1,NFACSL
+       WRITE(99,*)M1SL(I),M2SL(I),M3SL(I),M4SL(I)
+      END DO
+      DO I=NFACSL+1,NFACSL+NCONT
+       WRITE(99,*)M1SL(I),M2SL(I)
+      END DO
+      WRITE(99,*)'0. 0. 0. 0.'
+      CLOSE(99)
+      
+    !  DO I=1,NCONT
+    !    WRITE(*,*) I,XMSL(NFACSL+I),YMSL(NFACSL+I),CNSL(1,NFACSL+I),
+    ! &            CNSL(2,NFACSL+I)
+    !  ENDDO
     !!!!!!!!!!!!!                                           !!!!!!!!!!!!!!!!!
     !!!!!               FIN MAILLAGE                                    !!!!!
     !!!!!!!!!!!!!                                            !!!!!!!!!!!!!!!!!

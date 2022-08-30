@@ -16,7 +16,8 @@ USE MMesh
 USE MFace,              ONLY:TVFace, Prepare_FaceMesh,TWLine,Prepare_Waterline
 USE MReadInputFiles,    ONLY:Read_NP_GaussQuad,Read_Mechanical_Coefs,TMech,  &
                              Read_FirstOrderLoad,TLoad1,Read_Motion,TSource, &
-                             Read_SourceDistribution,Read_Eps_Zmin
+                             Read_SourceDistribution,Read_Eps_Zmin,          &
+                             TMeshFS,Read_Prepare_FreeSurface_Mesh
 USE M_INITIALIZE_GREEN, ONLY: TGREEN, INITIALIZE_GREEN
 USE MQpreprocessor
 USE MLogFile               
@@ -28,12 +29,13 @@ IMPLICIT NONE
 !
         TYPE(TID)                       :: ID
         TYPE(TMesh)                     :: Mesh
+        TYPE(TMeshFS)                   :: MeshFS
         TYPE(TNemCal)                   :: inpNEMOHCAL
         INTEGER                         :: Nw,Nbeta           ! Number of Freq,direction
         REAL, ALLOCATABLE,DIMENSION(:)  :: w,beta             ! vector of freq [rad/s],
                                                               ! direction angle [rad]
         TYPE(TWLine)  :: WLine          ! Waterline 
-        TYPE(TVFace)  :: VFace          ! Face of a panel       
+        TYPE(TVFace)  :: VFace          ! Face of body panel       
         TYPE(TMech)   :: MechCoef       ! MechCoef 
         TYPE(TLoad1)  :: Forces1        ! First order forces
         INTEGER       :: NP_GQ          ! Number of point for Gauss Quad. Integration
@@ -41,7 +43,8 @@ IMPLICIT NONE
         INTEGER       :: Nradiation     ! Number of radiation problem
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: Motion
         TYPE(TSource) :: SOURCEDISTR                            !First order NEMOH solution
-        TYPE(TGREEN)                         :: IGreen          ! Initial Green variables
+        TYPE(TGREEN)                         :: IGreen          ! Initial Green variables for body
+        TYPE(TGREEN)                         :: IGreenFS        ! Initial Green variables for free surface
         REAL                                 :: EPS_ZMIN
         INTEGER       :: I,J,uFile
         CHARACTER(LEN=1000)                :: LogTextToBeWritten
@@ -67,12 +70,19 @@ IMPLICIT NONE
 !        
         NP_GQ=Read_NP_GaussQuad(TRIM(ID%ID))
         EPS_ZMIN=Read_Eps_Zmin(TRIM(ID%ID))
-!
+!       Prepare Body Mesh
         CALL Prepare_FaceMesh(Mesh,NP_GQ,VFace)
         CALL Prepare_Waterline(VFace,EPS_ZMIN,Mesh%xy_diameter,Mesh%Npanels,WLine)
 !
         CALL INITIALIZE_GREEN(VFace,Mesh,InpNEMOHCAL%Env%depth, &
                               WLine%XM,WLine%NWlineseg,EPS_ZMIN,IGreen)
+!       -------------------------------------                      
+!       Prepare Free-surface mesh
+        IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
+          CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID)//'/mesh',MeshFS)
+          CALL INITIALIZE_GREEN_FS(IGreen,IGreenFS)
+        ENDIF
+!       --------------------------------------
 !
         CALL WRITE_QTFLOGFILE(TRIM(ID%ID),beta,Nbeta,w,Nw,NP_GQ,EPS_ZMIN,                      &
                 InpNEMOHCAL%Nbodies,InpNEMOHCAL%Env%depth) 
@@ -89,9 +99,27 @@ IMPLICIT NONE
         DO I=1,Nw
             CALL Read_SourceDistribution(TRIM(ID%ID),I,Nw,Nradiation,Nbeta,                 &
                                          Mesh%Npanels,SourceDistr)
+            ! Calc Body Potentials                     
             CALL COMPUTE_POTENTIALS_AND_VELOCITIES(TRIM(ID%ID),                             &
                                          I,w(I),beta,Nbeta,Nradiation,InpNEMOHCAL%Env,Mesh, &
                                          VFace,WLine,IGreen,SourceDistr,Motion(I,:,:))
+           
+           IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
+            ! Calc Free Surface Potentials
+            CALL COMPUTE_POTENTIALS_AND_VELOCITIES_FS(TRIM(ID%ID),                             &
+                                         I,w(I),beta,Nbeta,Nradiation,InpNEMOHCAL%Env,Mesh, &
+                                         VFace,IGreenFS,SourceDistr,Motion(I,:,:),MeshFS)
+           ENDIF
+
+           IF ((InpNEMOHCAL%Env%depth == INFINITE_DEPTH).OR.                                &
+                   (w(I)**2*InpNEMOHCAL%Env%depth/InpNEMOHCAL%Env%g.GE.20)) THEN
+             WRITE(LogTextToBeWritten,'(A,F7.3,A)') 'Omega= ', w(I),' [rad/s],              &
+                   Green Fun: Infinite-Depth. DONE!'
+           ELSE
+             WRITE(LogTextToBeWritten,'(A,F7.3,A)') 'Omega= ', w(I),' [rad/s],              &
+                   Green Fun: Finite-Depth. DONE!'
+           ENDIF
+           CALL WRITE_LOGFILE(TRIM(ID%ID)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
         ENDDO
         WRITE(LogTextToBeWritten,*) '-------'
         CALL WRITE_LOGFILE(TRIM(ID%ID)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
@@ -116,8 +144,11 @@ IMPLICIT NONE
         DEALLOCATE(Forces1%excitation)
         DEALLOCATE(Motion)
         DEALLOCATE(SOURCEDISTR%ZIGB,SOURCEDISTR%ZIGS)
-        DEALLOCATE(IGreen%FSP1,IGreen%FSM1,IGreen%VSP1,IGREEN%VSM1)
-        DEALLOCATE(IGreen%FSP1_INF,IGreen%FSM1_INF,IGreen%VSP1_INF,IGREEN%VSM1_INF)
+        DEALLOCATE(IGreen%FSP1,IGreen%FSM1,IGreen%VSP1,IGreen%VSM1)
+        DEALLOCATE(IGreen%FSP1_INF,IGreen%FSM1_INF,IGreen%VSP1_INF,IGreen%VSM1_INF)
         DEALLOCATE(IGreen%XR,IGreen%XZ)
-        DEALLOCATE(IGreen%APD1X,IGREEN%APD2X,IGREEN%APD1Z,IGREEN%APD2Z)
+        DEALLOCATE(IGreen%APD1X,IGreen%APD2X,IGreen%APD1Z,IGreen%APD2Z)
+        DEALLOCATE(IGreenFS%XR,IGreenFS%XZ)
+        DEALLOCATE(IGreenFS%APD1X,IGreenFS%APD2X,IGreenFS%APD1Z,IGreenFS%APD2Z)
+
 END PROGRAM Main
