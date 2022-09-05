@@ -6,7 +6,6 @@ USE CONSTANTS          , ONLY:II,CZERO,PI
 USE Elementary_functions,ONLY:CROSS_PRODUCT_COMPLEX,Fun_closest,CIH
 USE MEnvironment,        ONLY:TEnvironment,Fun_inverseDispersion
 USE MReadInputFiles,     ONLY:TMeshFS
-USE linear_interpolation_module
 USE MCallInterp,         ONLY: FUN_INTERP1_COMPLEX
 USE MQSOLVERASYMP
 
@@ -1160,9 +1159,7 @@ CONTAINS
           REAL,                      INTENT(IN)::delw,sumw
           COMPLEX,DIMENSION(Nw),     INTENT(IN)::RadPot
           COMPLEX,DIMENSION(2)                 ::RadPotInterp
-          REAL                                 ::RadPotR,RadPotI
-          Type(linear_interp_1d)     :: interpR,interpI
-          INTEGER                    :: iflag,Iprint
+          INTEGER                    :: Iprint
           IF (InterpSwitch==0) THEN
            IF (delw.GT.0.) THEN
                 RadPotInterp(1)=RadPot(Fun_closest(Nw,w,delw))
@@ -1175,24 +1172,17 @@ CONTAINS
                 RadPotInterp(2)=CMPLX(0.,0.)
            ENDIF
           ELSE
-              CALL interpR%initialize(w ,REAL(RadPot(:)),iflag)
-              CALL interpI%initialize(w ,AIMAG(RadPot(:)),iflag)
+
            IF (delw.GT.0.) THEN
-              CALL interpR%evaluate(delw, RadPotR)
-              CALL interpI%evaluate(delw, RadPotI)
-              RadPotInterp(1)=CMPLX(RadPotR,RadPotI) !for delta omega
+              RadPotInterp(1)=FUN_INTERP1_COMPLEX(w,RadPot(:),Nw,delw) !for delta omega
            ELSE
               RadPotInterp(1)=CMPLX(0.,0.)
            ENDIF
            IF (sumw.LE.w(Nw)) THEN
-              CALL interpR%evaluate(sumw, RadPotR)
-              CALL interpI%evaluate(sumw, RadPotI)
-              RadPotInterp(2)=CMPLX(RadPotR,RadPotI) !for sum omega
+              RadPotInterp(2)=FUN_INTERP1_COMPLEX(w,RadPot(:),Nw,sumw) !for sum omega
               ELSE
               RadPotInterp(2)=CMPLX(0.,0.)
            ENDIF
-           CALL interpR%destroy()
-           CALL interpI%destroy()
           ENDIF
   END FUNCTION
 
@@ -1203,9 +1193,7 @@ CONTAINS
           REAL,                      INTENT(IN)::delw,sumw
           COMPLEX,DIMENSION(3,Nw),   INTENT(IN)::RadVel
           COMPLEX,DIMENSION(3,2)               ::RadVelInterp
-          REAL                                 ::RadVelR,RadVelI
-          Type(linear_interp_1d)     :: interpR,interpI
-          INTEGER                    :: I,iflag
+          INTEGER                    :: I
 
           IF (InterpSwitch==0) THEN
              IF (delw.GT.0.) THEN
@@ -1221,24 +1209,16 @@ CONTAINS
              ENDIF
           ELSE
            DO I=1,3      !for Vx,Vy,Vz
-             CALL interpR%initialize(w ,REAL(RadVel(I,:)),iflag)
-             CALL interpI%initialize(w ,AIMAG(RadVel(I,:)),iflag)
              IF (delw.GT.0.) THEN
-              CALL interpR%evaluate(delw, RadVelR)
-              CALL interpI%evaluate(delw, RadVelI)
-              RadVelInterp(I,1)=CMPLX(RadVelR,RadVelI) !for delta omega
+              RadVelInterp(I,1)=FUN_INTERP1_COMPLEX(w,RadVel(I,:),Nw,delw) !for delta omega
              ELSE
               RadVelInterp(I,1)=CMPLX(0.,0.) !for delta omega
              END IF
              IF (sumw.LE.w(Nw)) THEN
-              CALL interpR%evaluate(sumw, RadVelR)
-              CALL interpI%evaluate(sumw, RadVelI)
-              RadVelInterp(I,2)=CMPLX(RadVelR,RadVelI) !for sum omega
+              RadVelInterp(I,2)=FUN_INTERP1_COMPLEX(w,RadVel(I,:),Nw,sumw) !for sum omega
              ELSE
                 RadVelInterp(I,2)=CMPLX(0.,0.)
              ENDIF
-             CALL interpR%destroy()
-             CALL interpI%destroy()
            ENDDO
           ENDIF
   END FUNCTION

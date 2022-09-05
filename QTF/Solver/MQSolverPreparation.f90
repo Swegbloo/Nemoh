@@ -132,16 +132,11 @@ SUBROUTINE PREPARE_BODY_DISPLACEMENT(Qfreq,Nw,w,Nbeta,Nradiation,NPFlow,Nbodies,
         COMPLEX,DIMENSION(Nw,Nradiation,Nbeta),INTENT(IN)::Motion       !RAO
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:,:),INTENT(INOUT):: BdisplaceQ
         !Local
-        INTEGER                     :: Ibeta,IdB,Isegline,Iw,Ipanel,iflag
+        INTEGER                     :: Ibeta,IdB,Isegline,Iw,Ipanel,Ixyz
         INTEGER                     :: Iw1,Iw2,IwQ,NPanWL
         REAL,DIMENSION(3)           :: vect_R,XCOG,vect_Rsym
-        REAL,DIMENSION(Qfreq%NwQ,3) :: BdispR,BdispI,BdispRsym,BdispIsym
         COMPLEX,DIMENSION(3)        :: vect_Theta     !complex rotation RAO
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:,:)  :: Bdisplace
-        Type(linear_interp_1d)      :: interpBdispX_R,interpBdispY_R,interpBdispZ_R
-        Type(linear_interp_1d)      :: interpBdispX_I,interpBdispY_I,interpBdispZ_I
-        Type(linear_interp_1d)      :: interpBdispXsym_R,interpBdispYsym_R,interpBdispZsym_R
-        Type(linear_interp_1d)      :: interpBdispXsym_I,interpBdispYsym_I,interpBdispZsym_I
         ALLOCATE(BdisplaceQ(Qfreq%NwQ,Nbeta,NPFlow,3))
         ALLOCATE(Bdisplace(Nw,Nbeta,NPFlow,3))
         NpanWL=Mesh%Npanels+WLine%NWLineseg
@@ -198,62 +193,19 @@ SUBROUTINE PREPARE_BODY_DISPLACEMENT(Qfreq,Nw,w,Nbeta,Nradiation,NPFlow,Nbodies,
                       ENDIF 
                    
                     ELSE
-                         !interpolating displacement for the wQ rad. frequencies
-                         CALL interpBdispX_R%initialize(w ,REAL(Bdisplace(:,Ibeta,Ipanel,1)),iflag)
-                         CALL interpBdispY_R%initialize(w ,REAL(Bdisplace(:,Ibeta,Ipanel,2)),iflag)
-                         CALL interpBdispZ_R%initialize(w ,REAL(Bdisplace(:,Ibeta,Ipanel,3)),iflag)
-                         CALL interpBdispX_I%initialize(w ,AIMAG(Bdisplace(:,Ibeta,Ipanel,1)),iflag)
-                         CALL interpBdispY_I%initialize(w ,AIMAG(Bdisplace(:,Ibeta,Ipanel,2)),iflag)
-                         CALL interpBdispZ_I%initialize(w ,AIMAG(Bdisplace(:,Ibeta,Ipanel,3)),iflag)
-      
-                         IF (Mesh%iSym.EQ.1) THEN
-                            CALL interpBdispXsym_R%initialize(w ,REAL(Bdisplace(:,Ibeta,NpanWL+Ipanel,1)),iflag)
-                            CALL interpBdispYsym_R%initialize(w ,REAL(Bdisplace(:,Ibeta,NpanWL+Ipanel,2)),iflag)
-                            CALL interpBdispZsym_R%initialize(w ,REAL(Bdisplace(:,Ibeta,NpanWL+Ipanel,3)),iflag)
-                            CALL interpBdispXsym_I%initialize(w ,AIMAG(Bdisplace(:,Ibeta,NpanWL+Ipanel,1)),iflag)
-                            CALL interpBdispYsym_I%initialize(w ,AIMAG(Bdisplace(:,Ibeta,NpanWL+Ipanel,2)),iflag)
-                            CALL interpBdispZsym_I%initialize(w ,AIMAG(Bdisplace(:,Ibeta,NpanWL+Ipanel,3)),iflag)
-                         ENDIF
+                        DO Ixyz=1,3 !for x,y,z
+                            BdisplaceQ(:,Ibeta,Ipanel,Ixyz)=                                               &
+                                    FUNVECT_INTERP1_COMPLEX(w,Bdisplace(:,Ibeta,Ipanel,Ixyz),              &
+                                         Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ)
+                            IF (Mesh%iSym.EQ.1) THEN
+                            BdisplaceQ(:,Ibeta,NpanWL+Ipanel,Ixyz)=                                        &
+                                    FUNVECT_INTERP1_COMPLEX(w,Bdisplace(:,Ibeta,NpanWL+Ipanel,Ixyz),       &
+                                         Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ)
 
-                         DO IwQ=1,Qfreq%NwQ
-                               CALL interpBdispX_R%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispR(IwQ,1))
-                               CALL interpBdispY_R%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispR(IwQ,2))
-                               CALL interpBdispZ_R%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispR(IwQ,3))
-                               CALL interpBdispX_I%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispI(IwQ,1))
-                               CALL interpBdispY_I%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispI(IwQ,2))
-                               CALL interpBdispZ_I%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispI(IwQ,3))
-                               IF (Mesh%iSym.EQ.1) THEN
-                               CALL interpBdispXsym_R%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispRsym(IwQ,1))
-                               CALL interpBdispYsym_R%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispRsym(IwQ,2))
-                               CALL interpBdispZsym_R%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispRsym(IwQ,3))
-                               CALL interpBdispXsym_I%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispIsym(IwQ,1))
-                               CALL interpBdispYsym_I%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispIsym(IwQ,2))
-                               CALL interpBdispZsym_I%evaluate(Qfreq%wQ(IwQ,Ibeta),BdispIsym(IwQ,3))
-                               ENDIF
+                            ENDIF
                          ENDDO
-                         BdisplaceQ(:,Ibeta,Ipanel,1)=CMPLX(BdispR(:,1),BdispI(:,1))
-                         BdisplaceQ(:,Ibeta,Ipanel,2)=CMPLX(BdispR(:,2),BdispI(:,2))
-                         BdisplaceQ(:,Ibeta,Ipanel,3)=CMPLX(BdispR(:,3),BdispI(:,3))
-                         IF (Mesh%iSym.EQ.1) THEN
-                         BdisplaceQ(:,Ibeta,NpanWL+Ipanel,1)=CMPLX(BdispRsym(:,1),BdispIsym(:,1))
-                         BdisplaceQ(:,Ibeta,NPanWL+Ipanel,2)=CMPLX(BdispRsym(:,2),BdispIsym(:,2))
-                         BdisplaceQ(:,Ibeta,NPanWL+Ipanel,3)=CMPLX(BdispRsym(:,3),BdispIsym(:,3))
-                         ENDIF
-                         CALL interpBdispX_R%destroy()
-                         CALL interpBdispY_R%destroy()
-                         CALL interpBdispZ_R%destroy()
-                         CALL interpBdispX_I%destroy()
-                         CALL interpBdispY_I%destroy()
-                         CALL interpBdispZ_I%destroy()
-                         IF (Mesh%iSym.EQ.1) THEN
-                         CALL interpBdispXsym_R%destroy()
-                         CALL interpBdispYsym_R%destroy()
-                         CALL interpBdispZsym_R%destroy()
-                         CALL interpBdispXsym_I%destroy()
-                         CALL interpBdispYsym_I%destroy()
-                         CALL interpBdispZsym_I%destroy()
-                         ENDIF 
-                   ENDIF
+
+                    ENDIF
                 ENDDO
         ENDDO
         DEALLOCATE(Bdisplace)
@@ -280,10 +232,8 @@ SUBROUTINE PREPARE_INERTIA_FORCES(MechCoef,Motion,Nw,Nbeta,Nradiation,Nintegrati
         COMPLEX,DIMENSION(Nradiation,Nradiation)    ::MATHyd
         COMPLEX,DIMENSION(Nintegration)          ::ExcitForce
         COMPLEX,DIMENSION(Nintegration)          ::Xi,ddXidt2,dXidt
-        INTEGER                                  ::Iw,Ibeta,Iinteg,iflag
-        REAL,DIMENSION(Qfreq%NwQ)                ::InForceR,InForceI
+        INTEGER                                  ::Iw,Ibeta,Iinteg
         INTEGER                                  ::Iw1,Iw2,IwQ,J
-        Type(linear_interp_1d)                   :: interpIF_R,interpIF_I
             
         StiffMat=MechCoef%StiffMat+MechCoef%StiffMat_EXT
         DampCoef=MechCoef%DampCoefMat_EXT
@@ -324,15 +274,9 @@ SUBROUTINE PREPARE_INERTIA_FORCES(MechCoef,Motion,Nw,Nbeta,Nradiation,Nintegrati
              ELSE
              !interpolating displacement for the wQ rad. frequencies
              DO Iinteg=1,Nintegration
-             CALL interpIF_R%initialize(w ,REAL(InertiaForce(:,Iinteg)),iflag)
-             CALL interpIF_I%initialize(w ,AIMAG(InertiaForce(:,Iinteg)),iflag)
-                DO IwQ=1,Qfreq%NwQ
-                       CALL interpIF_R%evaluate(Qfreq%wQ(IwQ,Ibeta),InForceR(IwQ))
-                       CALL interpIF_I%evaluate(Qfreq%wQ(IwQ,Ibeta),InForceI(IwQ))
-                ENDDO
-             InertiaForceQ(:,Ibeta,Iinteg)=CMPLX(InForceR,InForceI)
-             CALL interpIF_R%destroy()
-             CALL interpIF_I%destroy()
+                InertiaForceQ(:,Ibeta,Iinteg)=                                            &
+                                        FUNVECT_INTERP1_COMPLEX(w,InertiaForce(:,Iinteg), &
+                                                        Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ)
              ENDDO
            ENDIF
         ENDDO
@@ -348,11 +292,9 @@ SUBROUTINE PREPARE_ROTATION_ANGLES(Motion,Nw,Nbeta,Nradiation,&
         COMPLEX,DIMENSION(Qfreq%NwQ,Nbeta,3*Nbodies),                    &
                                         INTENT(OUT)::RotAnglesQ
         !local 
-        INTEGER                                  ::Iw,Ibeta,Iinteg,iflag
+        INTEGER                                  ::Iw,Ibeta,Iinteg
         INTEGER                                  ::Itheta06,Itheta03,Itheta,Ibody
-        REAL,DIMENSION(Qfreq%NwQ)                ::RotAngleR,RotAngleI
         INTEGER                                  ::Iw1,Iw2,IwQ 
-        Type(linear_interp_1d)                   ::interpROT_R,interpROT_I
             
         DO Ibody=1,Nbodies
            DO Ibeta=1,Nbeta
@@ -370,15 +312,10 @@ SUBROUTINE PREPARE_ROTATION_ANGLES(Motion,Nw,Nbeta,Nradiation,&
                ELSE
                !interpolating displacement for the wQ rad. frequencies
                 DO Itheta=1,3 !theta_x,theta_y,theta_z
-                CALL interpROT_R%initialize(w ,REAL(Motion(:,Itheta06+3+Itheta,Ibeta)),iflag)
-                CALL interpROT_I%initialize(w ,AIMAG(Motion(:,Itheta06+3+Itheta,Ibeta)),iflag)
-                 DO IwQ=1,Qfreq%NwQ
-                  CALL interpROT_R%evaluate(Qfreq%wQ(IwQ,Ibeta),RotAngleR(IwQ))
-                  CALL interpROT_I%evaluate(Qfreq%wQ(IwQ,Ibeta),RotAngleI(IwQ))
-                 ENDDO
-                RotAnglesQ(:,Ibeta,Itheta03+Itheta)=CMPLX(RotAngleR,RotAngleI)
-                CALL interpROT_R%destroy()
-                CALL interpROT_I%destroy()
+                  RotAnglesQ(:,Ibeta,Itheta03+Itheta)=                                    &
+                             FUNVECT_INTERP1_COMPLEX(w,Motion(:,Itheta06+3+Itheta,Ibeta), &
+                                                        Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ)
+
                 ENDDO
               ENDIF
            ENDDO
@@ -395,11 +332,9 @@ SUBROUTINE PREPARE_TRANSLATION_MOTION(Motion,Nw,Nbeta,Nradiation,&
         COMPLEX,DIMENSION(Qfreq%NwQ,Nbeta,3*Nbodies),                    &
                                         INTENT(OUT)::TRANSMOTQ
         !local 
-        INTEGER                                  ::Iw,Ibeta,Iinteg,iflag
+        INTEGER                                  ::Iw,Ibeta,Iinteg
         INTEGER                                  ::Ind06,Ind03,Ind,Ibody
-        REAL,DIMENSION(Qfreq%NwQ)                ::TransMotR,TransMotI
         INTEGER                                  ::Iw1,Iw2,IwQ 
-        Type(linear_interp_1d)                   ::interp_R,interp_I
             
         DO Ibody=1,Nbodies
            DO Ibeta=1,Nbeta
@@ -417,15 +352,10 @@ SUBROUTINE PREPARE_TRANSLATION_MOTION(Motion,Nw,Nbeta,Nradiation,&
                ELSE
                !interpolating displacement for the wQ rad. frequencies
                 DO Ind=1,3 !theta_x,theta_y,theta_z
-                CALL interp_R%initialize(w ,REAL(Motion(:,Ind06+Ind,Ibeta)),iflag)
-                CALL interp_I%initialize(w ,AIMAG(Motion(:,Ind06+Ind,Ibeta)),iflag)
-                 DO IwQ=1,Qfreq%NwQ
-                  CALL interp_R%evaluate(Qfreq%wQ(IwQ,Ibeta),TransMotR(IwQ))
-                  CALL interp_I%evaluate(Qfreq%wQ(IwQ,Ibeta),TransMotI(IwQ))
-                 ENDDO
-                TRANSMOTQ(:,Ibeta,Ind03+Ind)=CMPLX(TransMotR,TransMotI)
-                CALL interp_R%destroy()
-                CALL interp_I%destroy()
+                TRANSMOTQ(:,Ibeta,Ind03+Ind)=                                     &
+                             FUNVECT_INTERP1_COMPLEX(w,Motion(:,Ind06+Ind,Ibeta), &
+                                                  Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ)
+
                 ENDDO
               ENDIF
            ENDDO

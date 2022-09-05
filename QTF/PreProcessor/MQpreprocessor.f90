@@ -32,6 +32,7 @@ CONTAINS
                                               Env,Mesh,VFace,IGreen,         &
                                               SourceDistr,MotionIw,MeshFS)
         !Potential and velocities on free surface panels
+        !direct computation for each flow point-Ipflow to avoid large memory used
         !INPUT/OUTPUT
         CHARACTER(LEN=*),               INTENT(IN)::wd
         INTEGER,                        INTENT(IN)::Iw,Nbeta,Nradiation
@@ -281,7 +282,8 @@ CONTAINS
    SUBROUTINE COMPUTE_POTENTIALS_AND_VELOCITIES(wd,Iw,omega,Vbeta,Nbeta,Nradiation,&
                                               Env,Mesh,VFace,WLine,IGreen,         &
                                               SourceDistr,MotionIw)
-        !Potential and velocities on free surface panels
+        !Potential and velocities on body panels
+        !Matrix operation, as in NEMOH1
         !INPUT/OUTPUT
         CHARACTER(LEN=*),               INTENT(IN)::wd
         INTEGER,                        INTENT(IN)::Iw,Nbeta,Nradiation
