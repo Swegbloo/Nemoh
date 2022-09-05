@@ -10,16 +10,28 @@ USE linear_interpolation_module
 USE MMesh,                      ONLY: Tmesh
 USE MFace,                      ONLY: TVFace,TWLine
 USE MNemohCal,                  ONLY: TNemCal
-USE MReadInputFiles,            ONLY: TMech,TLoad1,TpotVel
-USE MCallInterp,                ONLY: FUN_INTERP1_COMPLEX
+USE MReadInputFiles,            ONLY: TMech,TLoad1,TpotVel,TSource,              &
+                                      Read_SourceDistribution
+USE MCallInterp,                ONLY: FUNVECT_INTERP1_COMPLEX
 
 IMPLICIT NONE
 
 TYPE TQfreq
-     INTEGER                          :: NwQ
-     REAL, ALLOCATABLE,DIMENSION(:,:) :: wQ,kQ          !freq for QTF comp
-     REAL, ALLOCATABLE,DIMENSION(:,:) :: diffwQ,sumwQ   !diff and sum freq
-     INTEGER, ALLOCATABLE,DIMENSION(:)  :: InterpPotSwitch  
+     INTEGER                           :: NwQ
+     REAL, ALLOCATABLE,DIMENSION(:,:)  :: wQ,kQ          !freq for QTF comp
+     REAL, ALLOCATABLE,DIMENSION(:,:)  :: diffwQ,sumwQ   !diff and sum freq
+     INTEGER, ALLOCATABLE,DIMENSION(:) :: InterpPotSwitch  
+END TYPE
+
+TYPE TASYMP
+     INTEGER                           :: NR,NBESSEL ! Number of points R, Nummber of bessel modes
+     REAL                              :: dR         !Rf(2)-Rf(1)
+     REAL,ALLOCATABLE,DIMENSION(:)     :: Rf         !finite radius of free surface domain
+END TYPE
+
+TYPE TSourceQ
+COMPLEX,ALLOCATABLE,DIMENSION(:,:,:)   :: ZIGB_Per,ZIGS_Per  !Perturbed source distribution
+COMPLEX,ALLOCATABLE,DIMENSION(:,:,:)   :: ZIGB_Rad,ZIGS_Rad  !Radiation source distribution
 END TYPE
 
 CONTAINS
@@ -73,20 +85,20 @@ SUBROUTINE PREPARE_POTENTIAL_VELOCITIES(Qfreq,Nw,w,Nbeta,beta, &
                DO Ipanel=1,NPFlow
                  !interpolating potential for the wQ rad. frequencies
                  datPotVelQ%TotPot(Ipanel,Ibeta,:)=                                   &
-                         FUN_INTERP1_COMPLEX(w,datPotVel%TotPot(Ipanel,Ibeta,:),      &
+                         FUNVECT_INTERP1_COMPLEX(w,datPotVel%TotPot(Ipanel,Ibeta,:),      &
                                       Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ) 
                  DO Ixyz=1,3 !vx,vy,vz
                  datPotVelQ%TotVel(Ipanel,Ixyz, Ibeta,:)=                             &
-                         FUN_INTERP1_COMPLEX(w,datPotVel%TotVel(Ipanel,Ixyz,Ibeta,:), &
+                         FUNVECT_INTERP1_COMPLEX(w,datPotVel%TotVel(Ipanel,Ixyz,Ibeta,:), &
                                       Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ)
                  ENDDO 
                  IF (ID_DATA==ID_FREESURFACE) THEN
                     datPotVelQ%IncPot(Ipanel,Ibeta,:)=                                   &
-                            FUN_INTERP1_COMPLEX(w,datPotVel%IncPot(Ipanel,Ibeta,:),      &
+                            FUNVECT_INTERP1_COMPLEX(w,datPotVel%IncPot(Ipanel,Ibeta,:),      &
                                          Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ) 
                     DO Ixyz=1,3 !vx,vy,vz
                     datPotVelQ%IncVel(Ipanel,Ixyz, Ibeta,:)=                             &
-                            FUN_INTERP1_COMPLEX(w,datPotVel%IncVel(Ipanel,Ixyz,Ibeta,:), &
+                            FUNVECT_INTERP1_COMPLEX(w,datPotVel%IncVel(Ipanel,Ixyz,Ibeta,:), &
                                          Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ)
                     ENDDO 
                  ENDIF
@@ -593,6 +605,116 @@ END SUBROUTINE
     END SELECT
     END SUBROUTINE
 
+SUBROUTINE PREPARE_ASYMP_PARAM(Rext,NR,ASYMP)
+    INTEGER,    INTENT(IN):: NR
+    REAL,       INTENT(IN):: Rext
+    TYPE(TASYMP)          :: ASYMP
+    INTEGER               :: Ir
+    REAL                  ::dR
+    ALLOCATE(ASYMP%Rf(NR))
+    dR=Rext/(NR-1)
+    ASYMP%NBESSEL=50
+    ASYMP%NR=NR
+    ASYMP%dR=dR
+    DO Ir=0,NR-1
+    ASYMP%Rf(Ir+1)=dR*Ir
+    ENDDO
+END SUBROUTINE
+
+SUBROUTINE PREPARE_SOURCE_DISTRIBUTION(wd,Qfreq,Nw,w,Nbeta,beta,Npanels, &
+                                        Nradiation,Motion,SourceDistrQ)
+    !input/output
+    CHARACTER(LEN=*),                      INTENT(IN)   ::wd
+    TYPE(TQfreq),                          INTENT(IN)   ::Qfreq
+    INTEGER,                               INTENT(IN)   ::Nw,Nbeta
+    INTEGER,                               INTENT(IN)   ::NPanels,Nradiation
+    REAL,   DIMENSION(Nw),                 INTENT(IN)   ::w 
+    REAL,   DIMENSION(Nbeta),              INTENT(IN)   ::beta 
+    COMPLEX,DIMENSION(Nw,Nradiation,Nbeta),INTENT(IN)   :: Motion
+    TYPE(TSourceQ),                        INTENT(INOUT)::SourceDistrQ
+    
+    INTEGER                                      ::Iw,Iw1,Iw2,Ibeta,Irad,Ipanel
+    TYPE(TSourceQ)                               ::SourceDistr
+    TYPE(TSource)                                ::SourceDistr_Iw
+
+    ALLOCATE(SourceDistr%ZIGB_Per(Npanels,Nbeta,Nw))
+    ALLOCATE(SourceDistr%ZIGS_Per(Npanels,Nbeta,Nw))
+    ALLOCATE(SourceDistr%ZIGB_Rad(Npanels,Nradiation,Nw))
+    ALLOCATE(SourceDistr%ZIGS_Rad(Npanels,Nradiation,Nw))
+
+    ALLOCATE(SourceDistr_Iw%ZIGB(Npanels,Nradiation+Nbeta))
+    ALLOCATE(SourceDistr_Iw%ZIGS(Npanels,Nradiation+Nbeta))
+    
+    DO Iw=1,Nw
+      CALL Read_SourceDistribution(TRIM(wd),Iw,Nw,Nradiation,Nbeta,                 &
+                                   Npanels,SourceDistr_Iw)
+        DO Ibeta=1,Nbeta
+           !CONSTRUCT PERTURBATION(Diff+Rad) SINGULAR DISTRIBUTION FOR EACH WAVE DIRECTION
+           !assign the diffraction singular source distribution for all panels
+           SourceDistr%ZIGB_Per(1:Npanels,Ibeta,Iw)=                                  &
+                                      SourceDistr_Iw%ZIGB(1:Npanels,Nradiation+Ibeta)   
+           SourceDistr%ZIGS_Per(1:Npanels,Ibeta,Iw)=                                  &
+                                      SourceDistr_Iw%ZIGS(1:Npanels,Nradiation+Ibeta) 
+             !sum the diffraction + radiation singular source distribution for all panels
+             DO Irad=1,Nradiation  
+              SourceDistr%ZIGB_Per(1:Npanels,Ibeta,Iw)                                &
+                      =SourceDistr%ZIGB_Per(1:Npanels,Ibeta,Iw)                       &
+                                 -II*w(Iw)*SourceDistr_Iw%ZIGB(1:Npanels,Irad)        &
+                                  *Motion(Iw,Irad,Ibeta)
+              SourceDistr%ZIGS_Per(1:Npanels,Ibeta,Iw)                                &
+                      =SourceDistr%ZIGS_Per(1:Npanels,Ibeta,Iw)                       &
+                                 -II*w(Iw)*SourceDistr_Iw%ZIGS(1:Npanels,Irad)        &
+                                  *Motion(Iw,Irad,Ibeta)
+              ENDDO
+      ENDDO
+
+      DO Irad=1,Nradiation
+         SourceDistr%ZIGB_Rad(1:Npanels,Irad,Iw)= SourceDistr_Iw%ZIGB(1:Npanels,Irad)   
+         SourceDistr%ZIGS_Rad(1:Npanels,Irad,Iw)= SourceDistr_Iw%ZIGS(1:Npanels,Irad) 
+      ENDDO
+    ENDDO
+    DEALLOCATE(SourceDistr_Iw%ZIGB,SourceDistr_Iw%ZIGS)
+
+    !adjust frequency as user input interval
+    !interpolation applied or not
+    ALLOCATE(SourceDistrQ%ZIGB_Per(Npanels,Nbeta,Qfreq%NwQ))
+    ALLOCATE(SourceDistrQ%ZIGS_Per(Npanels,Nbeta,Qfreq%NwQ))
+    ALLOCATE(SourceDistrQ%ZIGB_Rad(Npanels,Nradiation,Nw))
+    ALLOCATE(SourceDistrQ%ZIGS_Rad(Npanels,Nradiation,Nw))
+    DO Ibeta=1,Nbeta
+      IF(Qfreq%InterpPotSwitch(Ibeta)==0) THEN
+          IF(Qfreq%NwQ.NE.Nw) THEN
+               Iw1=Fun_closest(Nw,w,Qfreq%wQ(1,Ibeta))
+               Iw2=Fun_closest(Nw,w,Qfreq%wQ(Qfreq%NwQ,Ibeta))
+               SourceDistrQ%ZIGB_Per(:,Ibeta,:)=SourceDistr%ZIGB_Per(:,Ibeta,Iw1:Iw2)
+               SourceDistrQ%ZIGS_Per(:,Ibeta,:)=SourceDistr%ZIGS_Per(:,Ibeta,Iw1:Iw2)
+          ELSE
+               SourceDistrQ%ZIGB_Per(:,Ibeta,:)=SourceDistr%ZIGB_Per(:,Ibeta,:)
+               SourceDistrQ%ZIGS_Per(:,Ibeta,:)=SourceDistr%ZIGS_Per(:,Ibeta,:)
+          ENDIF 
+       ELSE
+          DO Ipanel=1,NPanels
+            !interpolating source dirstribution for the wQ rad. frequencies
+            SourceDistrQ%ZIGB_Per(Ipanel,Ibeta,:)=                                   &
+                    FUNVECT_INTERP1_COMPLEX(w,SourceDistr%ZIGB_Per(Ipanel,Ibeta,:),      &
+                                 Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ) 
+            SourceDistrQ%ZIGS_Per(Ipanel,Ibeta,:)=                                   &
+                    FUNVECT_INTERP1_COMPLEX(w,SourceDistr%ZIGS_Per(Ipanel,Ibeta,:),      &
+                                 Nw,Qfreq%wQ(:,Ibeta),Qfreq%NwQ) 
+          ENDDO
+      ENDIF 
+    ENDDO
+    !keep radiation potential as the calculated potential in NEMOH first order
+    !will be taken/interpolated for difference and sum frequency later
+    SourceDistrQ%ZIGB_Rad=SourceDistr%ZIGB_Rad
+    SourceDistrQ%ZIGB_Rad=SourceDistr%ZIGB_Rad
+
+    !destroy the initial data
+    DEALLOCATE(SourceDistr%ZIGB_Per)
+    DEALLOCATE(SourceDistr%ZIGS_Per)
+    DEALLOCATE(SourceDistr%ZIGB_Rad)
+    DEALLOCATE(SourceDistr%ZIGS_Rad)
+END SUBROUTINE
 
 SUBROUTINE WRITE_QTFSOLVERLOGFILE(wd,Nbeta,beta,Qfreq)
        CHARACTER(LEN=*),             INTENT(IN)::wd
@@ -627,5 +749,6 @@ FUNCTION MATMUL_COMPLEX(Mat,Vect,Nv) RESULT(Vres)
               Vres(I)=Vres(I)+Mat(I,J)*Vect(J)
               ENDDO
         ENDDO       
-END FUNCTION 
+END FUNCTION
+
 END MODULE

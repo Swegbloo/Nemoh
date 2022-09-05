@@ -28,6 +28,8 @@ CHARACTER(LEN=*), PARAMETER      ::  OutFileHBM='QTFM_HASBO.dat'
 CHARACTER(LEN=*), PARAMETER      ::  OutFileHBP='QTFP_HASBO.dat'
 CHARACTER(LEN=*), PARAMETER      ::  OutFileHFSM='QTFM_HASFS.dat'
 CHARACTER(LEN=*), PARAMETER      ::  OutFileHFSP='QTFP_HASFS.dat'
+CHARACTER(LEN=*), PARAMETER      ::  OutFileASYM='QTFM_ASYMP.dat'
+CHARACTER(LEN=*), PARAMETER      ::  OutFileASYP='QTFP_ASYMP.dat'
 
 CHARACTER(LEN=*), PARAMETER      ::  OutFileDM_term ='QTFM_DUOK_term_'
 CHARACTER(LEN=*), PARAMETER      ::  OutFileDP_term ='QTFP_DUOK_term_'
@@ -37,6 +39,10 @@ CHARACTER(LEN=*), PARAMETER      ::  OutFileHBP_term='QTFP_HASBO_term_'
 
 CHARACTER(LEN=*), PARAMETER      ::  OutFileHFSM_term='QTFM_HASFS_term_'
 CHARACTER(LEN=*), PARAMETER      ::  OutFileHFSP_term='QTFP_HASFS_term_'
+
+CHARACTER(LEN=*), PARAMETER      ::  OutFileASYM_term='QTFM_ASYMP_term_'
+CHARACTER(LEN=*), PARAMETER      ::  OutFileASYP_term='QTFP_ASYMP_term_'
+
 
 
 !Output variables

@@ -20,7 +20,7 @@ USE MReadInputFiles,    ONLY:Read_NP_GaussQuad,Read_Mechanical_Coefs,TMech,   &
                              Read_FirstOrderLoad,TLoad1,Read_Motion,TSource,  &
                              READ_POTENTIALS_VELOCITIES,TpotVel,              &
                              READ_GENERALIZED_NORMAL_BODY_dAREA,Read_Eps_Zmin,&
-                             TMeshFS,Read_Prepare_FreeSurface_Mesh
+                             TMeshFS,Read_Prepare_FreeSurface_Mesh        
 USE MEnvironment,       ONLY: TEnvironment,FunVect_inverseDispersion
 USE MLogFile
 USE Constants,          ONLY: CZERO
@@ -50,6 +50,8 @@ IMPLICIT NONE
         TYPE(TVFace)  :: VFaceFS        ! Face of free surface panel  
         TYPE(TMech)   :: MechCoef       ! Mechanical Coef 
         TYPE(TLoad1)  :: Forces1        ! First order forces
+        TYPE(TASYMP)  :: ASYMP_PARAM    ! parameters for asymptotic free surface force
+        TYPE(TSourceQ):: SOURCEDISTRQ   ! perturbion and radiation source distribution    
         INTEGER       :: NP_GQ          ! Number of point for Gauss Quad. Integration
         INTEGER       :: Nintegration   ! Number of excitation force integration 
         INTEGER       :: Nradiation     ! Number of radiation problem
@@ -88,6 +90,7 @@ IMPLICIT NONE
 !
 !   --- Initialize and read input datas -----------------------------------------------
 !
+        WRITE(*,*) 'QTF Solver preparation...'
         CALL ReadTID(ID)
         CALL ReadTMesh(Mesh,TRIM(ID%ID)//'/mesh/')  
         CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
@@ -119,7 +122,6 @@ IMPLICIT NONE
         ENDIF
 !       --------------------------------------
 
-
         !Dynamic Memory allocation
         ALLOCATE(IntegAxis(3,Nintegration))
         ALLOCATE(StiffMat(Nintegration,Nintegration))
@@ -136,7 +138,7 @@ IMPLICIT NONE
 
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
         ALLOCATE(QTF_HASFS(Nintegration,2,10))!2 is for QTF- and QTF+, 7 for all the terms
-        ALLOCATE(QTF_HASFS_ASYMP(Nintegration,2,7))
+        ALLOCATE(QTF_HASFS_ASYMP(Nintegration,2,3))
         ENDIF 
 
         !
@@ -163,14 +165,17 @@ IMPLICIT NONE
         CALL Discretized_omega_wavenumber_for_QTF(Nw,w,kw,NwQ,winputQ(2:3),Nbeta,beta,   &
                                                   BForwardSpeed,Env%depth,Env%g,Qfreq) 
         
-        CALL WRITE_QTFSOLVERLOGFILE(TRIM(ID%ID),Nbeta,beta,Qfreq)
-
+        
         CALL PREPARE_POTENTIAL_VELOCITIES(Qfreq,Nw,w,Nbeta,beta,NPFlow,                  &
                 Nradiation,datPotVel,datPotVelQ,ID_BODY)
         
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
+         WRITE(*,*) 'QTF Solver preparation, Free-Surface mesh...'
          CALL PREPARE_POTENTIAL_VELOCITIES(Qfreq,Nw,w,Nbeta,beta,NPFlowFS,               &
                 Nradiation,datPotVelFS,datPotVelQFS,ID_FREESURFACE)
+         CALL PREPARE_ASYMP_PARAM(MeshFS%Radius_Ext,MeshFS%NpointsR,ASYMP_PARAM)
+         CALL PREPARE_SOURCE_DISTRIBUTION(TRIM(ID%ID),Qfreq,Nw,w,Nbeta,beta,             &
+                 Mesh%Npanels,Nradiation,Motion,SOURCEDISTRQ)
         ENDIF
 
         CALL PREPARE_BODY_DISPLACEMENT(Qfreq,Nw,w,Nbeta,Nradiation,NPFlow,Nbodies,       &
@@ -206,7 +211,11 @@ IMPLICIT NONE
        ! ENDDO
        ! STOP
        !  COMPUTE QTF
-        CALL  INITIALIZE_OUTPUT_FILES(TRIM(ID%ID))
+       CALL  INITIALIZE_OUTPUT_FILES(TRIM(ID%ID))
+
+       WRITE(*,*) 'QTF Solver preparation, Done!'
+       CALL WRITE_QTFSOLVERLOGFILE(TRIM(ID%ID),Nbeta,beta,Qfreq)
+
         DO Ibeta1=1,Nbeta
            DO Ibeta2=1,Nbeta
                 WRITE(*,'(A,F7.3,A,F7.3,A)'),'beta1=', beta(Ibeta1)*180/PI,&
@@ -268,6 +277,7 @@ IMPLICIT NONE
                         ENDIF
 
                         IF (InpNEMOHCAL%qtfinput%Ncontrib.EQ.3) THEN 
+                        ! Finite domain Free surface force         
                         CALL COMPUTATION_QTF_POTENTIAL_FREESURFACEFORCE(Iw1,Iw2,Ibeta1,   &
                                 Ibeta2,Nintegration,MeshFS,NwQ,Nbeta,NPFlowFS,Nbodies,    &
                                 Env,datPotVelQFS,Nw,w,Qfreq,beta,QTF_HASFS)      
@@ -282,14 +292,29 @@ IMPLICIT NONE
                                 Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
                                 beta(Ibeta1),beta(Ibeta2),QTF_HASFS(:,:,Iterm))
                         ENDDO 
+                        ! InFinite domain (Asymptotic) Free surface force         
+                        CALL COMPUTATION_QTF_POTENTIAL_FREESURFACEFORCE_ASYMP(Iw1,Iw2,    &
+                                Ibeta1,Ibeta2,Nintegration,NwQ,Nbeta,Env,Nw,w,Qfreq,      &
+                                beta,Mesh,ASYMP_PARAM,SOURCEDISTRQ,QTF_HASFS_ASYMP)      
 
+                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileASYM,OutFileASYP,          &
+                                Nintegration,Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),   &
+                                beta(Ibeta1),beta(Ibeta2),QTF_HASFS_ASYMP(:,:,3))
+                        DO Iterm=1,2
+                        WRITE(strI,'(I0.1)') Iterm
+                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileASYM_term//strI//'.dat',   &
+                                OutFileASYP_term//strI//'.dat',Nintegration,              &
+                                Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
+                                beta(Ibeta1),beta(Ibeta2),QTF_HASFS_ASYMP(:,:,Iterm))
+                        ENDDO 
 
                         ENDIF
                     ENDDO
                 ENDDO
            ENDDO
         ENDDO
-       
+
+        
        ! print*,RadVel(900:1000,1,1,1)
 
 ! ----- Finalize ---------------------------------------------------------------------------
@@ -321,6 +346,10 @@ IMPLICIT NONE
           DEALLOCATE(datPotVelQFS%RadVel)
           DEALLOCATE(QTF_HASFS)
           DEALLOCATE(QTF_HASFS_ASYMP)
+          DEALLOCATE(SOURCEDISTRQ%ZIGB_Per)
+          DEALLOCATE(SOURCEDISTRQ%ZIGS_Per)
+          DEALLOCATE(SOURCEDISTRQ%ZIGB_Rad)
+          DEALLOCATE(SOURCEDISTRQ%ZIGS_Rad)
         ENDIF 
 
 END PROGRAM

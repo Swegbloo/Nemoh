@@ -1,12 +1,15 @@
 Module MQSolver
 USE MFace,               ONLY:TVFace,TWLine
 USE MMesh
-USE MQSolverPreparation, ONLY:TPotVel,TQfreq
-USE CONSTANTS          , ONLY:II,CZERO
+USE MQSolverPreparation, ONLY:TPotVel,TQfreq,TASYMP,TSourceQ
+USE CONSTANTS          , ONLY:II,CZERO,PI
 USE Elementary_functions,ONLY:CROSS_PRODUCT_COMPLEX,Fun_closest,CIH
-USE MEnvironment,        ONLY:Fun_Dispersion,TEnvironment
+USE MEnvironment,        ONLY:TEnvironment,Fun_inverseDispersion
 USE MReadInputFiles,     ONLY:TMeshFS
 USE linear_interpolation_module
+USE MCallInterp,         ONLY: FUN_INTERP1_COMPLEX
+USE MQSOLVERASYMP
+
 IMPLICIT NONE
 CONTAINS
   SUBROUTINE COMPUTATION_QTF_QUADRATIC(Iw1,Iw2,Ibeta1,Ibeta2,Nintegration,       &
@@ -908,9 +911,125 @@ CONTAINS
           ENDDO
 
   END SUBROUTINE
+!!-------------------------- HASFS ASYMPTOTIC --------------------------------
+  SUBROUTINE COMPUTATION_QTF_POTENTIAL_FREESURFACEFORCE_ASYMP                 &
+                                   (Iw1,Iw2,Ibeta1,Ibeta2,Nintegration,       &
+                                    NwQ,Nbeta,env,Nw,w,Qfreq,                 &
+                                    beta,Mesh,ASYMP_PARAM,SourceDistr,        &
+                                    QTFHASFS_ASYMP)
+  !INPUT/OUTPUT 
+  INTEGER,                              INTENT(IN) :: Iw1,Iw2,Ibeta1,Ibeta2
+  INTEGER,                              INTENT(IN) :: Nintegration
+  INTEGER,                              INTENT(IN) :: NwQ,Nbeta,Nw
+  TYPE(TQfreq),                         INTENT(IN) :: Qfreq
+  TYPE(TEnvironment),                   INTENT(IN) :: Env
+  REAL,DIMENSION(Nw),                   INTENT(IN) :: w
+  REAL,DIMENSION(Nbeta),                INTENT(IN) :: beta
+  TYPE(TMesh),                          INTENT(IN) :: Mesh
+  TYPE(TASYMP),                         INTENT(IN) :: ASYMP_PARAM
+  TYPE(TSOURCEQ),                       INTENT(IN) :: SourceDistr
+  COMPLEX,DIMENSION(Nintegration,2,3),  INTENT(OUT):: QTFHASFS_ASYMP
+  !Local
+  INTEGER                             ::Iinteg,Iterm,NRf,Nbessel,Npanels,InterpSwitch
+  INTEGER                             ::Isym,Ipanel,Ibessel 
+  REAL                                ::w1,w2,delw,sumw,k1,k2,delk,sumk
+  REAL                                ::rho,depth,g
+  REAL,DIMENSION(ASYMP_PARAM%NR)      :: Rf !discretized finite domain free surface radius
+  REAL,DIMENSION(2)                   ::DELSUMW
+  COMPLEX,DIMENSION(2)                ::KAPPA1,KAPPA2
+  COMPLEX,DIMENSION(2,2)              ::I_DF
+  COMPLEX,DIMENSION(Mesh%Npanels*2**Mesh%Isym)   :: ZIG_Per_Iw1, ZIG_Per_Iw2
+  COMPLEX,DIMENSION(Mesh%Npanels*2**Mesh%Isym,2) :: ZIG_Rad 
+  COMPLEX,DIMENSION(2,ASYMP_PARAM%NBESSEL+1)       :: CmSmPer_k1,CmSmPer_k2
+  COMPLEX,DIMENSION(2,ASYMP_PARAM%NBESSEL+1)       :: CmSmRad_delk,CmSmRad_sumk
+  COMPLEX,DIMENSION(2,ASYMP_PARAM%NBESSEL+1)       :: IR1l,IR2l
+  COMPLEX,DIMENSION(2,ASYMP_PARAM%NBESSEL+3)       :: Ivartheta1l,Ivartheta2l
 
+  Isym=Mesh%Isym
+  Npanels=Mesh%Npanels
+  Nbessel=ASYMP_PARAM%NBESSEL
+  NRf=ASYMP_PARAM%NR
+  Rf=ASYMP_PARAM%Rf
 
+  rho=Env%rho
+  depth=Env%depth
+  g=Env%g
+  w1=Qfreq%wQ(Iw1,Ibeta1)
+  w2=Qfreq%wQ(Iw2,Ibeta2)
+  delw=w1-w2
+  sumw=w1+w2
+  DELSUMW(1)=delw
+  DELSUMW(2)=sumw
+  k1=Qfreq%kQ(Iw1,Ibeta1)
+  k2=Qfreq%kQ(Iw2,Ibeta2)
+  delk=Fun_inverseDispersion(delw,depth,g)
+  sumk=Fun_inverseDispersion(sumw,depth,g)
+  KAPPA1(1)= II*delw*k1*k2 !for diff freq
+  KAPPA1(2)=-II*sumw*k1*k2  !for sum freq
+  KAPPA2   =Fun_KAPPA2_DIFFSUM(k1,k2,w1,w2,depth,g)
 
+  InterpSwitch=Qfreq%InterpPotSwitch(Ibeta1)                      &
+                        +Qfreq%InterpPotSwitch(Ibeta2)
+
+  !perturbed source distribution
+  ZIG_Per_Iw1(1:Npanels)=SourceDistr%ZIGB_Per(:,ibeta1,iw1)
+  ZIG_Per_Iw2(1:Npanels)=SourceDistr%ZIGB_Per(:,ibeta1,iw2)
+  IF (Isym.EQ.1) THEN !symmetric case
+    ZIG_Per_Iw1(Npanels+1:2*Npanels)=SourceDistr%ZIGS_Per(:,ibeta1,iw1)
+    ZIG_Per_Iw2(Npanels+1:2*Npanels)=SourceDistr%ZIGS_Per(:,ibeta1,iw2)
+  ENDIF
+  !Kochin coefficients for perturbed potential 
+  CmSmPer_k1=PREPARE_KOCHIN_COEFFICIENTS                       &
+          (Isym,Npanels,Mesh%XM,Mesh%A,depth,Nbessel,k1,ZIG_Per_Iw1)
+  CmSmPer_k2=PREPARE_KOCHIN_COEFFICIENTS                       &
+          (Isym,Npanels,Mesh%XM,Mesh%A,depth,Nbessel,k2,ZIG_Per_Iw2)
+  !Prepare Integral over radius of free surface (Rext,Infinity)
+  DO Ibessel=0,Nbessel
+   IR1l(:,Ibessel)=Fun_IR1l(Ibessel,k1,k2,delk,sumk,Rf,NRf) 
+   IR2l(:,Ibessel)=Fun_IR2l(Ibessel,k1,k2,delk,sumk,Rf,NRf)
+   IF (delk.EQ.0)  IR1l(1,Ibessel)=0.
+   IF (delk.EQ.0)  IR2l(1,Ibessel)=0.
+  ENDDO
+
+  DO Iinteg=1,Nintegration
+     QTFHASFS_ASYMP(Iinteg,:,:)=CZERO
+
+     !interpolating rad source distribution  at delw and sumw        
+     ZIG_Rad(:,1:2)=INTERP_RADIATION_SOURCE_DISTRIBUTION                 &
+                    (Nw,w,SourceDistr%ZIGB_Rad(:,Iinteg,:),              &
+                      SourceDistr%ZIGS_Rad(:,Iinteg,:),                  &
+                      Npanels,Mesh%Isym,InterpSwitch,delw,sumw)
+     !Kochin coefficients for radiation potential 
+     CmSmRad_delk=PREPARE_KOCHIN_COEFFICIENTS                           &
+          (Isym,Npanels,Mesh%XM,Mesh%A,depth,Nbessel,delk,ZIG_Rad(:,1))
+     CmSmRad_sumk=PREPARE_KOCHIN_COEFFICIENTS                           &
+          (Isym,Npanels,Mesh%XM,Mesh%A,depth,Nbessel,sumk,ZIG_Rad(:,2))
+     !Prepare Integral over vartheta (0,2pi)
+     DO Ibessel=-1,Nbessel+1
+      Ivartheta1l(:,Ibessel)=Fun_IVartheta1l(Nbessel,beta(Ibeta1),CmSmPer_k2,   &
+                                CmSmRad_delk,CmSmRad_sumk,Ibessel)
+      Ivartheta2l(:,Ibessel)=Fun_IVartheta2l(Nbessel,beta(Ibeta2),CmSmPer_k1,   &
+                                CmSmRad_delk,CmSmRad_sumk,Ibessel)
+    !  print*,Ibessel,Ivartheta1l(:,Ibessel)
+    !  print*,Ibessel,Ivartheta2l(:,Ibessel)
+     ENDDO
+    ! STOP 
+
+     !all the integral terms both for diff and sum freq
+     I_DF=Fun_IDF(w1,w2,k1,k2,delk,sumk,g,depth,Rf,NRf,Nbessel,           &
+                                       Ivartheta1l,Ivartheta2l,IR1l,IR2l)
+     ! !first integral term both for diff and sum freq
+     QTFHASFS_ASYMP(Iinteg,:,1)=II*DELSUMW*rho/g*KAPPA1*I_DF(:,1)!(I_DF11+I_DF12)
+     ! !second integral term both for diff and sum freq
+     QTFHASFS_ASYMP(Iinteg,:,2)=II*DELSUMW*rho/g*KAPPA2*I_DF(:,2)!(I_DF21+I_DF22)
+  ENDDO
+  DO Iterm=1,2
+     QTFHASFS_ASYMP(:,:,Iterm)=QTFHASFS_ASYMP(:,:,Iterm)/2 !TRANSFER FUNCTION = BICHROMATIC FORCES / 2?
+     QTFHASFS_ASYMP(:,:,3)=QTFHASFS_ASYMP(:,:,3)+QTFHASFS_ASYMP(:,:,Iterm)! HASFS_ASYMP total
+  ENDDO
+  END SUBROUTINE
+
+  !!---------------------------------------------------------------------
   FUNCTION CALC_SECONDORDER_INCOMING_POTENTIAL                         &
                   (Env,w1,w2,k1,k2,beta1,beta2,XMp) result(Phi_I)
           !input/output
@@ -963,7 +1082,7 @@ CONTAINS
           ENDIF
           Phi_I(2)=QFI_P*CIH(abs_sumk,XM(3),D)/(-sumw**2+OM_P**2)
   END FUNCTION
-
+  
   FUNCTION CALC_SECONDORDER_INCOMING_VELOCITY                           &
                            (k1,k2,beta1,beta2,D,ZM,PHI_I) result(GradPhi)
           !input/output
@@ -986,6 +1105,53 @@ CONTAINS
           GradPhi(3,2)=abs_sumk*tanh(abs_sumk*(D+ZM))*PHI_I(2)
   END FUNCTION
   
+  FUNCTION INTERP_RADIATION_SOURCE_DISTRIBUTION                                    &
+              (Nw,w,ZIGB,ZIGS,Npanels,Isym,InterpSwitch,delw,sumw) RESULT(ZIG_RAD)
+
+          INTEGER,                       INTENT(IN)::Nw,InterpSwitch
+          INTEGER,                       INTENT(IN)::Npanels,Isym
+          REAL, DIMENSION(Nw),           INTENT(IN)::w
+          REAL,                          INTENT(IN)::delw,sumw
+          COMPLEX,DIMENSION(Npanels,Nw), INTENT(IN)::ZIGB,ZIGS
+          COMPLEX,DIMENSION(Npanels*2**Isym,2)     :: ZIG_RAD
+          INTEGER                                  :: Ipanel
+
+          DO Ipanel=1,Npanels 
+             IF (delw.GT.0.) THEN
+               IF (InterpSwitch==0) THEN
+                 ZIG_RAD(Ipanel,1)=ZIGB(Ipanel,Fun_closest(Nw,w,delw))
+                 IF (Isym.EQ.1) THEN
+                 ZIG_RAD(Npanels+Ipanel,1)=ZIGS(Ipanel,Fun_closest(Nw,w,delw))
+                 ENDIF
+               ELSE
+                 ZIG_RAD(Ipanel,1)=FUN_INTERP1_COMPLEX(w,ZIGB(Ipanel,:),Nw,delw) 
+                 IF (Isym.EQ.1) THEN
+                 ZIG_RAD(Npanels+Ipanel,1)=FUN_INTERP1_COMPLEX(w,ZIGS(Ipanel,:),Nw,delw)
+                 ENDIF
+               ENDIF
+             ELSE
+               ZIG_RAD(Ipanel,1)=CMPLX(0.,0.)
+               IF (Isym.EQ.1) ZIG_RAD(Npanels+Ipanel,1)=CMPLX(0.,0.)
+             ENDIF
+             IF (sumw.LE.w(Nw)) THEN
+               IF (InterpSwitch==0) THEN
+                 ZIG_RAD(Ipanel,2)=ZIGB(Ipanel,Fun_closest(Nw,w,sumw))
+                 IF (Isym.EQ.1) THEN
+                 ZIG_RAD(Npanels+Ipanel,2)=ZIGS(Ipanel,Fun_closest(Nw,w,sumw))
+                 ENDIF
+               ELSE
+                 ZIG_RAD(Ipanel,2)=FUN_INTERP1_COMPLEX(w,ZIGB(Ipanel,:),Nw,sumw) 
+                 IF (Isym.EQ.1) THEN
+                 ZIG_RAD(Npanels+Ipanel,2)=FUN_INTERP1_COMPLEX(w,ZIGS(Ipanel,:),Nw,sumw)
+                 ENDIF
+               ENDIF
+             ELSE
+               ZIG_RAD(Ipanel,2)=CMPLX(0.,0.)
+               IF (Isym.EQ.1) ZIG_RAD(Npanels+Ipanel,2)=CMPLX(0.,0.)
+             ENDIF
+          ENDDO
+  END FUNCTION
+
   FUNCTION INTERP_RADIATION_POTENTIAL                                     &
                 (Nw,w,RadPot,InterpSwitch,delw,sumw) RESULT(RadPotInterp)
 

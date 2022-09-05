@@ -68,6 +68,7 @@ SRCQSOL_N=./Common/Identification.f90\
 ./QTF/Common/MReadInputFiles.f90\
 ./QTF/Solver/MQSolverPreparation.f90\
 ./QTF/Solver/MQSolverOutputFiles.f90\
+./QTF/Solver/MQSolverAsymp.f90\
 ./QTF/Solver/MQSolver.f90\
 ./QTF/Solver/Main.f90\
 
