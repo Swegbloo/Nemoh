@@ -60,6 +60,8 @@
 	REAL,DIMENSION(3) :: Gcoque,CDG
         
         INTEGER         :: i,j,Nsym
+        LOGICAL :: ex
+        INTEGER :: cdir
 !
 !   --- Initialize and read input datas ----------------------------------------------------------------------------------------
 !
@@ -129,6 +131,44 @@
                 WRITE(10,'(3(1X,E14.7))') (Icoque(i,j),j=1,3)
         END DO
         CLOSE(10)
+
+        INQUIRE (DIRECTORY=TRIM(ID%ID)//'/Mechanics', EXIST=ex) 
+        IF (.NOT.ex) cdir=SYSTEM('mkdir '//TRIM(ID%ID)//'/Mechanics')
+
+        OPEN(10,FILE=ID%ID(1:ID%lID)//'/Mechanics/Inertia.dat')
+        WRITE(10,'(6(1X,E14.7))') DEPLACEMENT*RHO,0.,0.,0.,0.,0.
+        WRITE(10,'(6(1X,E14.7))') 0.,DEPLACEMENT*RHO,0.,0.,0.,0.
+        WRITE(10,'(6(1X,E14.7))') 0.,0.,DEPLACEMENT*RHO,0.,0.,0.
+        DO i=1,3
+                WRITE(10,'(6(1X,E14.7))') 0.,0.,0.,(Icoque(i,j),j=1,3)
+        END DO
+        CLOSE(10)
+
+        OPEN(10,FILE=ID%ID(1:ID%lID)//'/Mechanics/Kh.dat')
+        DO i=1,6
+                WRITE(10,'(6(1X,E14.7))') (KH(i,j),j=1,6)
+        END DO
+        CLOSE(10)
+
+        INQUIRE (FILE=TRIM(ID%ID)//'/Mechanics/Badd.dat', EXIST=ex)       
+        IF (.NOT.ex) THEN
+        OPEN(10,FILE=ID%ID(1:ID%lID)//'/Mechanics/Badd.dat')
+        DO i=1,6
+                WRITE(10,'(6(1X,E14.7))') 0., 0., 0., 0., 0., 0.
+        END DO
+        CLOSE(10)
+        ENDIF
+
+        INQUIRE (FILE=TRIM(ID%ID)//'/Mechanics/Km.dat', EXIST=ex)       
+        IF (.NOT.ex) THEN
+        OPEN(10,FILE=ID%ID(1:ID%lID)//'/Mechanics/Km.dat')
+        DO i=1,6
+                WRITE(10,'(6(1X,E14.7))') 0., 0., 0., 0., 0., 0.
+        END DO
+        CLOSE(10)
+        ENDIF
+
+
         WRITE(*,'(A,I3)') '   - Coordinates of buoyancy centre '
         WRITE(*,'(A,F7.3,A)') '     XB = ',XF+xG,'m'
         WRITE(*,'(A,F7.3,A)') '     YB = ',YF+yG,'m'

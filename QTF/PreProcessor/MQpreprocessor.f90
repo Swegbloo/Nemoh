@@ -481,9 +481,10 @@ CONTAINS
         DEALLOCATE(S,GradS)        
   END SUBROUTINE
 
-  SUBROUTINE WRITE_QTFLOGFILE(wd,beta,Nbeta,w,Nw,NP_GQ,eps_zmin,Nbodies,depth)
+  SUBROUTINE WRITE_QTFLOGFILE(wd,beta,Nbeta,w,Nw,NP_GQ,eps_zmin,Nbodies,depth,NPanels,NFSpanels)
         CHARACTER(LEN=*),             INTENT(IN)::wd
         INTEGER,                      INTENT(IN)::Nbeta,Nw,NP_GQ,Nbodies
+        INTEGER,                      INTENT(IN)::Npanels,NFSpanels
         REAL, DIMENSION(Nbeta),       INTENT(IN)::beta
         REAL, DIMENSION(Nw),          INTENT(IN)::w
         REAL,                         INTENT(IN)::depth,eps_zmin
@@ -504,6 +505,11 @@ CONTAINS
         CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
         WRITE(LogTextToBeWritten,'(A,I3,A)') ' NBodies=', Nbodies, ', NDOF=6'
         CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
+        WRITE(LogTextToBeWritten,'(A,I7,A)') ' NPanels (Body)        =', NPanels
+        CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
+        WRITE(LogTextToBeWritten,'(A,I7,A)') ' NPanels (Free Surface)=', NFSPanels
+        CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
+
         IF (depth==INFINITE_DEPTH) THEN
         WRITE(LogTextToBeWritten,*) 'Waterdepth= Infinite'
         ELSE

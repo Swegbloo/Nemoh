@@ -84,8 +84,14 @@ IMPLICIT NONE
         ENDIF
 !       --------------------------------------
 !
+        IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
         CALL WRITE_QTFLOGFILE(TRIM(ID%ID),beta,Nbeta,w,Nw,NP_GQ,EPS_ZMIN,                      &
-                InpNEMOHCAL%Nbodies,InpNEMOHCAL%Env%depth) 
+                InpNEMOHCAL%Nbodies,InpNEMOHCAL%Env%depth,Mesh%Npanels,MeshFS%Mesh%Npanels) 
+        ELSE
+        CALL WRITE_QTFLOGFILE(TRIM(ID%ID),beta,Nbeta,w,Nw,NP_GQ,EPS_ZMIN,                      &
+                InpNEMOHCAL%Nbodies,InpNEMOHCAL%Env%depth,Mesh%Npanels,0) 
+        ENDIF
+        
         CALL START_RECORD_TIME(tcpu_start,TRIM(ID%ID)//'/'//LogFILE,IdAppend)
         WRITE(LogTextToBeWritten,*) '-------'
         CALL WRITE_LOGFILE(TRIM(ID%ID)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
@@ -148,7 +154,8 @@ IMPLICIT NONE
         DEALLOCATE(IGreen%FSP1_INF,IGreen%FSM1_INF,IGreen%VSP1_INF,IGreen%VSM1_INF)
         DEALLOCATE(IGreen%XR,IGreen%XZ)
         DEALLOCATE(IGreen%APD1X,IGreen%APD2X,IGreen%APD1Z,IGreen%APD2Z)
+        IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
         DEALLOCATE(IGreenFS%XR,IGreenFS%XZ)
         DEALLOCATE(IGreenFS%APD1X,IGreenFS%APD2X,IGreenFS%APD1Z,IGreenFS%APD2Z)
-
+        END IF
 END PROGRAM Main

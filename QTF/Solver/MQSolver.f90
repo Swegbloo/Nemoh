@@ -972,10 +972,10 @@ CONTAINS
 
   !perturbed source distribution
   ZIG_Per_Iw1(1:Npanels)=SourceDistr%ZIGB_Per(:,ibeta1,iw1)
-  ZIG_Per_Iw2(1:Npanels)=SourceDistr%ZIGB_Per(:,ibeta1,iw2)
+  ZIG_Per_Iw2(1:Npanels)=SourceDistr%ZIGB_Per(:,ibeta2,iw2)
   IF (Isym.EQ.1) THEN !symmetric case
     ZIG_Per_Iw1(Npanels+1:2*Npanels)=SourceDistr%ZIGS_Per(:,ibeta1,iw1)
-    ZIG_Per_Iw2(Npanels+1:2*Npanels)=SourceDistr%ZIGS_Per(:,ibeta1,iw2)
+    ZIG_Per_Iw2(Npanels+1:2*Npanels)=SourceDistr%ZIGS_Per(:,ibeta2,iw2)
   ENDIF
   !Kochin coefficients for perturbed potential 
   CmSmPer_k1=PREPARE_KOCHIN_COEFFICIENTS                       &
