@@ -132,13 +132,13 @@ CONTAINS
     ENDIF
     29 CONTINUE
     IF(I.EQ.J.AND.JJ.EQ.1)THEN
-    !VXS(1)=VXS(1)-DPI*A3J
-    !VYS(1)=VYS(1)-DPI*A6J
-    !if(zm(i).GT.ZER)then
-    !VZS(1)=VZS(1)+DPI*A9J
-    !ELSE
-    !VZS(1)=VZS(1)-DPI*A9J
-    !ENDIF
+    VXS(1)=VXS(1)-DPI*A3J
+    VYS(1)=VYS(1)-DPI*A6J
+    if(zm(i).GT.ZER)then
+    VZS(1)=VZS(1)+DPI*A9J
+    ELSE
+    VZS(1)=VZS(1)-DPI*A9J
+    ENDIF
 		  ELSE
     AIJS(JJ)=AIJS(JJ)*MJJ                                                     
     VXS(JJ)=VXS(JJ)*MJJ

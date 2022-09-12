@@ -2,11 +2,11 @@ Module MQSolver
 USE MFace,               ONLY:TVFace,TWLine
 USE MMesh
 USE MQSolverPreparation, ONLY:TPotVel,TQfreq,TASYMP,TSourceQ
-USE CONSTANTS          , ONLY:II,CZERO,PI
+USE CONSTANTS          , ONLY:II,CZERO,PI,INFINITE_DEPTH
 USE Elementary_functions,ONLY:CROSS_PRODUCT_COMPLEX,Fun_closest,CIH
 USE MEnvironment,        ONLY:TEnvironment,Fun_inverseDispersion
 USE MReadInputFiles,     ONLY:TMeshFS
-USE MCallInterp,         ONLY: FUN_INTERP1_COMPLEX
+USE MCallInterp,         ONLY:FUN_INTERP1_COMPLEX
 USE MQSOLVERASYMP
 
 IMPLICIT NONE
@@ -1100,8 +1100,13 @@ CONTAINS
           !dzPHI
           abs_delk=SQRT(k1**2+k2**2-2*k1*k2*cos(beta1-beta2))
           abs_sumk=SQRT(k1**2+k2**2+2*k1*k2*cos(beta1-beta2))
+          IF (D .EQ. INFINITE_DEPTH) THEN
+          GradPhi(3,1)=abs_delk*PHI_I(1)
+          GradPhi(3,2)=abs_sumk*PHI_I(2)
+          ELSE
           GradPhi(3,1)=abs_delk*tanh(abs_delk*(D+ZM))*PHI_I(1)
           GradPhi(3,2)=abs_sumk*tanh(abs_sumk*(D+ZM))*PHI_I(2)
+          ENDIF
   END FUNCTION
   
   FUNCTION INTERP_RADIATION_SOURCE_DISTRIBUTION                                    &

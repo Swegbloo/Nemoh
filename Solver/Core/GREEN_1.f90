@@ -60,7 +60,15 @@ CONTAINS
     XI(3) = MIN(X0I(3), -eps_zmin*Mesh%xy_diameter)
     
     CALL COMPUTE_S0(XI, Face, S0, VS0)
-
+    IF (I == J) THEN
+      IF (X0I(3) >= -eps_zmin*Mesh%xy_diameter) THEN
+         VS0(:) = VS0(:) + 2*PI*Face%N(:)
+      ELSE
+        ! print*,Face%N(1),Face%N(2),Face%N(3)
+        ! print*,VS0(1),VS0(2),VS0(3)
+         VS0(:) = VS0(:) -2*PI*Face%N(:)
+      ENDIF 
+    END IF
 
     ! Reflected problem across the free surface/sea bottom.
     XI(:) = X0I(:)
