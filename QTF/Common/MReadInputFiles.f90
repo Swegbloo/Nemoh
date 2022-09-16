@@ -45,8 +45,9 @@ TYPE TMeshFS
   REAL,ALLOCATABLE,DIMENSION(:,:)   :: BdyLineNormal ! normal of the line segment
   REAL,ALLOCATABLE,DIMENSION(:,:)   :: BdyLineP      ! the line connectivity   
   TYPE(TVFACEFS)                    :: VFace         ! this transposed version of the variables 
-  REAL                              :: Radius_Ext 
-  INTEGER                           :: NpointsR
+  REAL                              :: Radius_Ext    ! Exterior free surface radius (used in Asymp) 
+  INTEGER                           :: NpointsR      ! Npoints of discretized interior radius
+  INTEGER                           :: NBessel       ! number of bessel functions
 END TYPE TMeshFS
 !Potentials
 TYPE TPotVel
@@ -386,7 +387,7 @@ CONTAINS
           
           OPEN(NEWUNIT=u,FILE=TRIM(wd)//'/SF_L12_2_N.dat')
           READ(u,*) MeshFS%Mesh%ISym,Npoints,Npanels,NbdyLines,MeshFS%Radius_Ext,&
-                    MeshFS%NpointsR
+                    MeshFS%NpointsR,MeshFS%NBessel
             
           !memory allocation 
           CALL CreateTMesh(MeshFS%Mesh,Npoints,Npanels,1) 
@@ -426,7 +427,7 @@ CONTAINS
 
              CALL CALC_BDY_LINE_PROPERTIES(X1,X2,MeshFS%Radius_Ext, &
                      MeshFS%BdyLineNormal(Iline,:),                 &
-                     MeshFS%BdyLine%SegLength(Iline),                  &
+                     MeshFS%BdyLine%SegLength(Iline),               &
                      MeshFS%BdyLine%XM(Iline,:) )
           ENDDO
 

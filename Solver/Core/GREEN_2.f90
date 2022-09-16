@@ -22,13 +22,14 @@ CONTAINS
   !-------------------------------------------------------------------------------!
 
   SUBROUTINE VNSINFD                   &
-      (wavenumber, X0I, J, VFace,Mesh, &
+      (I, wavenumber, X0I, J, VFace,Mesh, &
       IGreen,SP, SM, VSP, VSM )
     ! Compute the frequency-dependent part of the Green function in the infinite depth case.
 
     ! Inputs
     REAL,                  INTENT(IN)  :: wavenumber
     REAL, DIMENSION(3),    INTENT(IN)  :: X0I   ! Coordinates of the computed flow field point
+    INTEGER,               INTENT(IN)  :: I     ! Index of the flow integration panel
     INTEGER,               INTENT(IN)  :: J     ! Index of the source integration panel
     TYPE(TMesh),           INTENT(IN)  :: Mesh
     TYPE(TGreen),          INTENT(IN)  :: IGreen ! Initial green variable
@@ -60,7 +61,7 @@ CONTAINS
      VSM=CZERO
     DO IGQ=1, FaceJ%NP_GQ
         XI(:) = X0I(:)
-        XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
+        IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
         XJ(:) = FaceJ%XM_GQ(:,IGQ)
         XJ(3) = MIN(XJ(3), -EPS*Mesh%xy_diameter)
         CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, IGreen, FS(1), VS(:, 1))
@@ -106,12 +107,13 @@ CONTAINS
 
   !------------------------------------------------
 
-  SUBROUTINE VNSFD(wavenumber, X0I, J, VFace, Mesh,IGreen, depth, SP, SM, VSP, VSM)
+  SUBROUTINE VNSFD(I, wavenumber, X0I, J, VFace, Mesh,IGreen, depth, SP, SM, VSP, VSM)
     ! Compute the frequency-dependent part of the Green function in the finite depth case.
 
     ! Inputs
     REAL,                  INTENT(IN)  :: wavenumber, depth
     REAL, DIMENSION(3),    INTENT(IN)  :: X0I   ! Coordinates of the computed flow field point
+    INTEGER,               INTENT(IN)  :: I     ! Index of the flow integration panel
     INTEGER,               INTENT(IN)  :: J     ! Index of the source integration panel
     TYPE(TMesh),           INTENT(IN)  :: Mesh
     TYPE(TVFace),          INTENT(IN)  :: VFace
@@ -162,8 +164,8 @@ CONTAINS
     DO IGQ=1, FaceJ%NP_GQ
  
         XI(:) = X0I(:)
-        XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
-
+        IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
+        
         X0J(:)= FaceJ%XM_GQ(:,IGQ)
         XJ(:) = X0J 
         XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
@@ -186,6 +188,7 @@ CONTAINS
 
         ! 1.c Shift and reflect XJ and compute another value of the Green function
         XI(3) = X0I(3)
+        IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
         XJ(3) = -X0J(3) - 2*depth
         CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(3, 1), VS(:, 3, 1))
 
@@ -210,7 +213,7 @@ CONTAINS
           ! If the y-symmetry is used, the four symmetric problems have to be solved
           XI(:) = X0I(:)
           XI(2) = -XI(2)
-          XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter)
+          IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
           XJ(:) = X0J 
           XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
 
@@ -231,6 +234,7 @@ CONTAINS
 
           ! 1.c' Shift and reflect XJ and compute another value of the Green function
           XI(3) = X0I(3)
+          IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
           XJ(3) = -X0J(3)- 2*depth
           CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(3, 2), VS(:, 3, 2))
 

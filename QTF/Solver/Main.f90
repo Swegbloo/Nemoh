@@ -173,7 +173,8 @@ IMPLICIT NONE
          WRITE(*,*) 'QTF Solver preparation, Free-Surface mesh...'
          CALL PREPARE_POTENTIAL_VELOCITIES(Qfreq,Nw,w,Nbeta,beta,NPFlowFS,               &
                 Nradiation,datPotVelFS,datPotVelQFS,ID_FREESURFACE)
-         CALL PREPARE_ASYMP_PARAM(MeshFS%Radius_Ext,MeshFS%NpointsR,ASYMP_PARAM)
+         CALL PREPARE_ASYMP_PARAM(MeshFS%Radius_Ext,MeshFS%NpointsR,                     &
+                                                        MeshFS%NBessel,ASYMP_PARAM)
          CALL PREPARE_SOURCE_DISTRIBUTION(TRIM(ID%ID),Qfreq,Nw,w,Nbeta,beta,             &
                  Mesh%Npanels,Nradiation,Motion,SOURCEDISTRQ)
         ENDIF

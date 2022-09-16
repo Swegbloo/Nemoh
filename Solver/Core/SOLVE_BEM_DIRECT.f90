@@ -126,12 +126,12 @@ CONTAINS
             VSXM=IGreen%VSM1_INF(I,J,:)
             ENDIF
             CALL VNSINFD                                     &
-            ( wavenumber, Mesh%XM(:, I), J, VFace, Mesh,     &
+            (I, wavenumber, Mesh%XM(:, I), J, VFace, Mesh,  &
               IGreen, SP, SM, VSP, VSM                       &
               )
           ELSE
             CALL VNSFD                                       &
-            ( wavenumber, Mesh%XM(:, I), J, VFace,  Mesh,    &
+            (I, wavenumber, Mesh%XM(:, I), J, VFace,  Mesh, &
                 IGreen,Env%depth, SP, SM, VSP, VSM           &
               )
           END IF

@@ -45,7 +45,7 @@ CONTAINS
                  )
                ! Second part of the Green function      
                CALL VNSINFD                                            &
-               ( wavenumber,XM_I , J, VFace, Mesh,                     &
+               (0, wavenumber,XM_I , J, VFace, Mesh,                     &
                  IGreen, SP, SM, VSP, VSM                              &
                  )
              ELSE
@@ -54,7 +54,7 @@ CONTAINS
                  FSP, FSM, VSXP, VSXM                                  &
                  )
                CALL VNSFD                                              &
-               ( wavenumber, XM_I, J, VFace,  Mesh,                    &
+               (0, wavenumber, XM_I, J, VFace,  Mesh,                    &
                    IGreen,Env%depth, SP, SM, VSP, VSM                  &
                  )
              END IF
@@ -125,12 +125,12 @@ CONTAINS
                VSXM=IGreen%VSM1_INF(I,J,:)
                ENDIF
                CALL VNSINFD                                     &
-               ( wavenumber,XM_I , J, VFace, Mesh,     &
+               (I, wavenumber,XM_I , J, VFace, Mesh,     &
                  IGreen, SP, SM, VSP, VSM                       &
                  )
              ELSE
                CALL VNSFD                                       &
-               ( wavenumber, XM_I, J, VFace,  Mesh,    &
+               (I, wavenumber, XM_I, J, VFace,  Mesh,    &
                    IGreen,Env%depth, SP, SM, VSP, VSM           &
                  )
              END IF

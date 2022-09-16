@@ -25,6 +25,7 @@ USE MLogFile
 !
 IMPLICIT NONE
 
+INTEGER,parameter :: ID_DEBUG=1 ! for debugging potential will be saved 
 
 CONTAINS
 
@@ -213,66 +214,103 @@ CONTAINS
         ENDDO
 
         DO Ibeta=1,Nbeta
-           OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotPotFILE_FS,           &
-                   STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW*2**Mesh%Isym)
+
+          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotPotFILE_FS,           &
+          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW*2**Mesh%Isym)
+          ! ILINE=(Iw-1)*Nbeta+Ibeta
+          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
+          !                (REAL(Potential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),      &
+          !                (AIMAG(Potential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
+          ! CLOSE(uFile)
+
+          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotVelFILE_FS,           &
+          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+3*2*NPFLOW*2**Mesh%Isym)
+          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
+          !                  ( REAL(Velocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
+          !                  (AIMAG(Velocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
+          !                  ( REAL(Velocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
+          !                  (AIMAG(Velocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
+          !                  ( REAL(Velocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
+          !                  (AIMAG(Velocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
+          ! CLOSE(uFile)
+
+          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//IncPotFILE_FS,           &
+          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW*2**Mesh%Isym)
+          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
+          !                (REAL(IncPotential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),      &
+          !                (AIMAG(IncPotential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
+          ! CLOSE(uFile)
+
+          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//IncVelFILE_FS,           &
+          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+3*2*NPFLOW*2**Mesh%Isym)
+          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
+          !                  ( REAL(IncVelocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
+          !                  (AIMAG(IncVelocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
+          !                  ( REAL(IncVelocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
+          !                  (AIMAG(IncVelocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
+          !                  ( REAL(IncVelocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
+          !                  (AIMAG(IncVelocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
+          ! CLOSE(uFile)
+
            ILINE=(Iw-1)*Nbeta+Ibeta
-           WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
-                          (REAL(Potential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),      &
-                          (AIMAG(Potential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-           CLOSE(uFile)
+           CALL WRITE_POTENTIAL_FS_DATA(wd,IncPotFILE_FS,omega,wavenumber,          &
+                   Vbeta(Ibeta), NPFLOW*2**Mesh%Isym,ILINE,IncPotential(:,Ibeta))
+           CALL WRITE_POTENTIAL_FS_DATA(wd,TotPotFILE_FS,omega,wavenumber,          &
+                   Vbeta(Ibeta), NPFLOW*2**Mesh%Isym,ILINE,Potential(:,Ibeta))
+           CALL WRITE_VELOCITY_FS_DATA(wd,IncVelFILE_FS,omega,wavenumber,          &
+                   Vbeta(Ibeta), NPFLOW*2**Mesh%Isym,ILINE,IncVelocity(:,:,Ibeta))
+           CALL WRITE_VELOCITY_FS_DATA(wd,TotVelFILE_FS,omega,wavenumber,          &
+                   Vbeta(Ibeta), NPFLOW*2**Mesh%Isym,ILINE,Velocity(:,:,Ibeta))
 
-           OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotVelFILE_FS,           &
-                   STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+3*2*NPFLOW*2**Mesh%Isym)
-           WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
-                            ( REAL(Velocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-                            (AIMAG(Velocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-                            ( REAL(Velocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-                            (AIMAG(Velocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-                            ( REAL(Velocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-                            (AIMAG(Velocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-           CLOSE(uFile)
+           IF (ID_DEBUG==1) THEN
+           CALL WRITE_POTENTIAL_FS_DATA_DEBUG(wd,IncPotFILE_FSdbg,omega,wavenumber,          &
+                   Vbeta(Ibeta), NPFLOW*2**Mesh%Isym,IncPotential(:,Ibeta))
+           CALL WRITE_POTENTIAL_FS_DATA_DEBUG(wd,TotPotFILE_FSdbg,omega,wavenumber,          &
+                   Vbeta(Ibeta), NPFLOW*2**Mesh%Isym,Potential(:,Ibeta))
+           CALL WRITE_VELOCITY_FS_DATA_DEBUG(wd,IncVelFILE_FSdbg,omega,wavenumber,          &
+                   Vbeta(Ibeta), NPFLOW*2**Mesh%Isym,IncVelocity(:,:,Ibeta))
+           CALL WRITE_VELOCITY_FS_DATA_DEBUG(wd,TotVelFILE_FSdbg,omega,wavenumber,          &
+                   Vbeta(Ibeta), NPFLOW*2**Mesh%Isym,Velocity(:,:,Ibeta))
+           ENDIF
 
-           OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//IncPotFILE_FS,           &
-                   STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW*2**Mesh%Isym)
-           WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
-                          (REAL(IncPotential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),      &
-                          (AIMAG(IncPotential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-           CLOSE(uFile)
-
-           OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//IncVelFILE_FS,           &
-                   STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+3*2*NPFLOW*2**Mesh%Isym)
-           WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
-                            ( REAL(IncVelocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-                            (AIMAG(IncVelocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-                            ( REAL(IncVelocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-                            (AIMAG(IncVelocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-                            ( REAL(IncVelocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-                            (AIMAG(IncVelocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-           CLOSE(uFile)
 
         ENDDO
         DEALLOCATE(Potential,Velocity)
         DEALLOCATE(IncPotential,IncVelocity)
 
         DO IRad=1,Nradiation
-           OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadPotFILE_FS,           &
-                   STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW*2**Mesh%Isym)
-           ILINE=(Iw-1)*Nradiation+Irad
-           WRITE(uFile,REC=ILINE) omega,wavenumber,Irad,                                     &
-                          (REAL(RadPotential(Ipanel,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),    &
-                          (AIMAG(RadPotential(Ipanel,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-           CLOSE(uFile)
+          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadPotFILE_FS,           &
+          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW*2**Mesh%Isym)
+          ! ILINE=(Iw-1)*Nradiation+Irad
+          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Irad,                                     &
+          !                (REAL(RadPotential(Ipanel,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),    &
+          !                (AIMAG(RadPotential(Ipanel,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym)
+          ! CLOSE(uFile)
 
-           OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadVelFILE_FS,           &
-                   STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+3*2*NPFLOW*2**Mesh%Isym)
-           WRITE(uFile,REC=ILINE) omega,wavenumber,Irad,                                     &
-                            ( REAL(RadVelocity(Ipanel,1,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
-                            (AIMAG(RadVelocity(Ipanel,1,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
-                            ( REAL(RadVelocity(Ipanel,2,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
-                            (AIMAG(RadVelocity(Ipanel,2,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
-                            ( REAL(RadVelocity(Ipanel,3,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
-                            (AIMAG(RadVelocity(Ipanel,3,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-           CLOSE(uFile)
+          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadVelFILE_FS,           &
+          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+3*2*NPFLOW*2**Mesh%Isym)
+          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Irad,                                     &
+          !                  ( REAL(RadVelocity(Ipanel,1,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
+          !                  (AIMAG(RadVelocity(Ipanel,1,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
+          !                  ( REAL(RadVelocity(Ipanel,2,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
+          !                  (AIMAG(RadVelocity(Ipanel,2,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
+          !                  ( REAL(RadVelocity(Ipanel,3,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
+          !                  (AIMAG(RadVelocity(Ipanel,3,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym)
+          ! CLOSE(uFile)
+
+           ILINE=(Iw-1)*Nradiation+Irad
+           CALL WRITE_RADPOTENTIAL_FS_DATA(wd,RadPotFILE_FS,omega,wavenumber,          &
+                   IRad, NPFLOW*2**Mesh%Isym,ILINE,RadPotential(:,IRad))
+           CALL WRITE_RADVELOCITY_FS_DATA(wd,RadVelFILE_FS,omega,wavenumber,          &
+                   IRad, NPFLOW*2**Mesh%Isym,ILINE,RadVelocity(:,:,IRad))
+
+           IF (ID_DEBUG==1) THEN
+           CALL WRITE_RADPOTENTIAL_FS_DATA_DEBUG(wd,RadPotFILE_FSdbg,omega,wavenumber,          &
+                   IRad, NPFLOW*2**Mesh%Isym,RadPotential(:,IRad))
+           CALL WRITE_RADVELOCITY_FS_DATA_DEBUG(wd,RadVelFILE_FSdbg,omega,wavenumber,          &
+                   IRad, NPFLOW*2**Mesh%Isym,RadVelocity(:,:,IRad))
+           ENDIF
+
         ENDDO
 
         DEALLOCATE(RadPotential,RadVelocity) 
@@ -553,6 +591,220 @@ CONTAINS
     IGreenFS%APD2X    =IGreen%APD2X
     IGreenFS%APD2Z    =IGreen%APD2Z
    END SUBROUTINE
+
+   SUBROUTINE INITIALIZE_POTVELFS_OUTPUT_FILES(wd,Npanels,XM,Isym,NBdyLine,XM_Line) 
+        CHARACTER(LEN=*),          INTENT(IN)::wd
+        INTEGER,                   INTENT(IN)::Npanels,Isym,NbdyLine
+        REAL,DIMENSION(3,Npanels), INTENT(IN)::XM
+        REAL,DIMENSION(NBdyLine,3),INTENT(IN)::XM_Line
+        INTEGER                              ::Ipanel,u,ITERFILE
+        CHARACTER(LEN=100)        :: FileName
+       
+        DO IterFile=1,6
+        IF (IterFile==1) FileName=IncPotFILE_FSdbg
+        IF (IterFile==2) FileName=TotPotFILE_FSdbg
+        IF (IterFile==3) FileName=RadPotFILE_FSdbg
+        IF (IterFile==4) FileName=IncVelFILE_FSdbg
+        IF (IterFile==5) FileName=TotVelFILE_FSdbg
+        IF (IterFile==6) FileName=RadVelFILE_FSdbg
+
+        OPEN(NEWUNIT=u,FILE=TRIM(wd)//'/'//PreprocDir//'/'//TRIM(FileName), &
+                                                              ACTION='WRITE')
+
+        WRITE(u,*) '#Npanels,NBdyLine'
+        WRITE(u,*) '#[XM(1,1:Npanels),XM(2,1:Npanels),XM(3,1:Npanels)]'
+        IF (IterFile<=3) THEN
+        WRITE(u,'(4(X,A))') '#w_i','beta_i','Real(Pot_i)','Imag(Pot_i)'
+        ELSE
+        WRITE(u,'(8(X,A))')'#w_i','beta_i','Real(Velx_i)','Imag(Velx_i)',&
+                'Real(Vely_i)','Imag(Vely_i)','Real(Velz_i)','Imag(Velz_i)'
+        ENDIF
+        WRITE(u,*) '#'
+        IF (Isym==0) THEN
+           WRITE(u,'(2(I6,X))') Npanels,NBdyLine
+           IF (NBdyLine==0) THEN
+           WRITE(u,'(<3*Npanels>(E14.7,X))')              &
+                 (XM(1,Ipanel),Ipanel=1,Npanels),         & 
+                 (XM(2,Ipanel),Ipanel=1,Npanels),         &
+                 (XM(3,Ipanel),Ipanel=1,Npanels)
+           ELSE
+          WRITE(u,'(<3*Npanels>(E14.7,X),<3*NBdyLine>(E14.7,X))') &
+                (XM(1,Ipanel),Ipanel=1,Npanels),         &
+                (XM(2,Ipanel),Ipanel=1,Npanels),         &
+                (XM(3,Ipanel),Ipanel=1,Npanels),         &
+                (XM_Line(Ipanel,1),Ipanel=1,NBdyLine),   &
+                (XM_Line(Ipanel,2),Ipanel=1,NBdyLine),   &
+                (XM_Line(Ipanel,3),Ipanel=1,NBdyLine)
+           ENDIF
+        ELSE
+           WRITE(u,'((I6,X))') Npanels*2,NBdyLine*2
+           IF (NBdyLine==0) THEN
+           WRITE(u,'(<2*3*Npanels>(E14.7,X))')            &
+               (XM(1,Ipanel),Ipanel=1,Npanels),           &
+               (XM(2,Ipanel),Ipanel=1,Npanels),           &
+               (XM(3,Ipanel),Ipanel=1,Npanels),           &
+               (XM(1,Ipanel),Ipanel=1,Npanels),           &
+               (-XM(2,Ipanel),Ipanel=1,Npanels),          &
+               (XM(3,Ipanel),Ipanel=1,Npanels)
+           ELSE
+           WRITE(u,'(<3*Npanels>(E14.7,X),<3*NBdyLine>(E14.7,X),<3*Npanels>(E14.7,X),<3*NBdyLine>(E14.7,X))' )&
+               (XM(1,Ipanel),Ipanel=1,Npanels),           &
+               (XM(2,Ipanel),Ipanel=1,Npanels),           &
+               (XM(3,Ipanel),Ipanel=1,Npanels),           &
+               (XM_Line(Ipanel,1),Ipanel=1,NBdyLine),     &
+               (XM_Line(Ipanel,2),Ipanel=1,NBdyLine),     &
+               (XM_Line(Ipanel,3),Ipanel=1,NBdyLine),     &
+               (XM(1,Ipanel),Ipanel=1,Npanels),           &
+               (-XM(2,Ipanel),Ipanel=1,Npanels),          &
+               (XM(3,Ipanel),Ipanel=1,Npanels),           &
+               (XM_Line(Ipanel ,1),Ipanel=1,NBdyLine),     &
+               (-XM_Line(Ipanel,2),Ipanel=1,NBdyLine),    &
+               (XM_Line(Ipanel ,3),Ipanel=1,NBdyLine)
+           ENDIF
+
+        ENDIF
+        CLOSE(u)
+        ENDDO
+   END SUBROUTINE
+
+   SUBROUTINE WRITE_POTENTIAL_FS_DATA(wd,FileM,w,k,beta,Npanels,Iline,Potential)
+         CHARACTER(LEN=*),    INTENT(IN)::wd,FileM
+         INTEGER,             INTENT(IN)::Npanels,Iline
+         REAL,                INTENT(IN)::w,k,beta
+         COMPLEX,DIMENSION(Npanels),INTENT(IN):: Potential
+         Integer :: Ipanel,uFile
+
+         OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//FileM,  &
+                 STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*Npanels)
+         WRITE(uFile,REC=ILINE) w,k,beta,                             &
+                        (REAL(Potential(Ipanel)),Ipanel=1,Npanels), &
+                        (AIMAG(Potential(Ipanel)),Ipanel=1,Npanels)
+         CLOSE(uFile)
+    END SUBROUTINE
+
+    SUBROUTINE WRITE_VELOCITY_FS_DATA(wd,FileM,w,k,beta,Npanels,Iline,Velocity)
+         CHARACTER(LEN=*),    INTENT(IN)::wd,FileM
+         INTEGER,             INTENT(IN)::Npanels,Iline
+         REAL,                INTENT(IN)::w,k,beta
+         COMPLEX,DIMENSION(Npanels,3),INTENT(IN):: Velocity
+         Integer :: Ipanel,uFile
+         OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//FileM,   &
+                   STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+3*2*Npanels)
+
+         WRITE(uFile,REC=ILINE) w,k,beta,                              &
+                            ( REAL(Velocity(Ipanel,1)),Ipanel=1,Npanels),  &
+                            (AIMAG(Velocity(Ipanel,1)),Ipanel=1,Npanels),  &
+                            ( REAL(Velocity(Ipanel,2)),Ipanel=1,Npanels),  &
+                            (AIMAG(Velocity(Ipanel,2)),Ipanel=1,Npanels),  &
+                            ( REAL(Velocity(Ipanel,3)),Ipanel=1,Npanels),  &
+                            (AIMAG(Velocity(Ipanel,3)),Ipanel=1,Npanels)
+         CLOSE(uFile)
+   END SUBROUTINE
+
+   SUBROUTINE WRITE_RADPOTENTIAL_FS_DATA(wd,FileM,w,k,IRad,Npanels,Iline,Potential)
+         CHARACTER(LEN=*),    INTENT(IN)::wd,FileM
+         INTEGER,             INTENT(IN)::Npanels,Iline,IRad
+         REAL,                INTENT(IN)::w,k
+         COMPLEX,DIMENSION(Npanels),INTENT(IN):: Potential
+         Integer :: Ipanel,uFile
+
+         OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//FileM,  &
+                 STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*Npanels)
+         WRITE(uFile,REC=ILINE) w,k,IRad,                             &
+                        (REAL(Potential(Ipanel)),Ipanel=1,Npanels), &
+                        (AIMAG(Potential(Ipanel)),Ipanel=1,Npanels)
+         CLOSE(uFile)
+    END SUBROUTINE
+
+    SUBROUTINE WRITE_RADVELOCITY_FS_DATA(wd,FileM,w,k,IRad,Npanels,Iline,Velocity)
+         CHARACTER(LEN=*),    INTENT(IN)::wd,FileM
+         INTEGER,             INTENT(IN)::Npanels,Iline,IRad
+         REAL,                INTENT(IN)::w,k
+         COMPLEX,DIMENSION(Npanels,3),INTENT(IN):: Velocity
+         Integer :: Ipanel,uFile
+         OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//FileM,   &
+                   STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+3*2*Npanels)
+
+         WRITE(uFile,REC=ILINE) w,k,IRad,                              &
+                            ( REAL(Velocity(Ipanel,1)),Ipanel=1,Npanels),  &
+                            (AIMAG(Velocity(Ipanel,1)),Ipanel=1,Npanels),  &
+                            ( REAL(Velocity(Ipanel,2)),Ipanel=1,Npanels),  &
+                            (AIMAG(Velocity(Ipanel,2)),Ipanel=1,Npanels),  &
+                            ( REAL(Velocity(Ipanel,3)),Ipanel=1,Npanels),  &
+                            (AIMAG(Velocity(Ipanel,3)),Ipanel=1,Npanels)
+         CLOSE(uFile)
+   END SUBROUTINE
+
+   SUBROUTINE WRITE_POTENTIAL_FS_DATA_DEBUG(wd,FileM,w,k,beta,Npanels,PotDat)
+         CHARACTER(LEN=*),    INTENT(IN)::wd,FileM
+         INTEGER,             INTENT(IN)::Npanels
+         REAL,                INTENT(IN)::w,k,beta
+         COMPLEX,DIMENSION(Npanels),INTENT(IN):: PotDat
+         Integer :: Ipanel,u1
+
+         OPEN(NEWUNIT=u1, FILE=wd//'/'//PreprocDir//'/'//FileM,    &
+                 ACTION='WRITE',POSITION='APPEND')
+         WRITE(u1,'(3(F10.3,X),<2*Npanels>(E14.7,X))') w,k,beta,   &
+         (REAL(PotDat(Ipanel)),Ipanel=1,Npanels),&
+         (AIMAG(PotDat(Ipanel)),Ipanel=1,Npanels)
+         CLOSE(u1)
+   END SUBROUTINE
+
+    SUBROUTINE WRITE_VELOCITY_FS_DATA_DEBUG(wd,FileM,w,k,beta,Npanels,VelDat)
+         CHARACTER(LEN=*),    INTENT(IN)::wd,FileM
+         INTEGER,             INTENT(IN)::Npanels
+         REAL,                INTENT(IN)::w,k,beta
+         COMPLEX,DIMENSION(Npanels,3),INTENT(IN):: VelDat
+         Integer :: Ipanel,u1
+
+         OPEN(NEWUNIT=u1, FILE=wd//'/'//PreprocDir//'/'//FileM,    &
+                 ACTION='WRITE',POSITION='APPEND')
+         WRITE(u1,'(3(F10.3,X),<3*2*Npanels>(E14.7,X))') w,k,beta,       &
+         (REAL(VelDat(Ipanel,1)),Ipanel=1,Npanels),&
+         (AIMAG(VelDat(Ipanel,1)),Ipanel=1,Npanels),&
+         (REAL(VelDat(Ipanel,2)),Ipanel=1,Npanels),&
+         (AIMAG(VelDat(Ipanel,2)),Ipanel=1,Npanels),&
+         (REAL(VelDat(Ipanel,3)),Ipanel=1,Npanels),&
+         (AIMAG(VelDat(Ipanel,3)),Ipanel=1,Npanels)
+         CLOSE(u1)
+   END SUBROUTINE
+
+   SUBROUTINE WRITE_RADPOTENTIAL_FS_DATA_DEBUG(wd,FileM,w,k,Irad,Npanels,PotDat)
+         CHARACTER(LEN=*),    INTENT(IN)::wd,FileM
+         INTEGER,             INTENT(IN)::Npanels
+         REAL,                INTENT(IN)::w,k
+         INTEGER,             INTENT(IN)::Irad
+         COMPLEX,DIMENSION(Npanels),INTENT(IN):: PotDat
+         Integer :: Ipanel,u1
+
+         OPEN(NEWUNIT=u1, FILE=wd//'/'//PreprocDir//'/'//FileM,    &
+                 ACTION='WRITE',POSITION='APPEND')
+         WRITE(u1,'(2(F10.3,X),(3I,X),<2*Npanels>(E14.7,X))') w,k,Irad,       &
+         (REAL(PotDat(Ipanel)),Ipanel=1,Npanels),&
+         (AIMAG(PotDat(Ipanel)),Ipanel=1,Npanels)
+         CLOSE(u1)
+   END SUBROUTINE
+
+    SUBROUTINE WRITE_RADVELOCITY_FS_DATA_DEBUG(wd,FileM,w,k,Irad,Npanels,VelDat)
+         CHARACTER(LEN=*),    INTENT(IN)::wd,FileM
+         INTEGER,             INTENT(IN)::Npanels
+         REAL,                INTENT(IN)::w,k
+         INTEGER,             INTENT(IN):: Irad
+         COMPLEX,DIMENSION(Npanels,3),INTENT(IN):: VelDat
+         Integer :: Ipanel,u1
+
+         OPEN(NEWUNIT=u1, FILE=wd//'/'//PreprocDir//'/'//FileM,    &
+                 ACTION='WRITE',POSITION='APPEND')
+         WRITE(u1,'(2(F10.3,X),(3I,X),<3*2*Npanels>(E14.7,X))') w,k,Irad,       &
+         (REAL(VelDat(Ipanel,1)),Ipanel=1,Npanels),&
+         (AIMAG(VelDat(Ipanel,1)),Ipanel=1,Npanels),&
+         (REAL(VelDat(Ipanel,2)),Ipanel=1,Npanels),&
+         (AIMAG(VelDat(Ipanel,2)),Ipanel=1,Npanels),&
+         (REAL(VelDat(Ipanel,3)),Ipanel=1,Npanels),&
+         (AIMAG(VelDat(Ipanel,3)),Ipanel=1,Npanels)
+         CLOSE(u1)
+   END SUBROUTINE
+
 
  
 END MODULE

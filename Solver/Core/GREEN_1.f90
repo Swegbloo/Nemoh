@@ -57,8 +57,8 @@ CONTAINS
     CALL VFace_to_Face(VFace,Face,J) !Extract a face J from the VFace array 
 
     XI(:) = X0I(:)
-    XI(3) = MIN(X0I(3), -eps_zmin*Mesh%xy_diameter)
-    
+    IF (I>0) XI(3) = MIN(X0I(3), -eps_zmin*Mesh%xy_diameter) ! on body panels
+                                                             !I=0 on free surface
     CALL COMPUTE_S0(XI, Face, S0, VS0)
     IF (I == J) THEN
       IF (X0I(3) >= -eps_zmin*Mesh%xy_diameter) THEN
@@ -93,9 +93,11 @@ CONTAINS
       !... and do some more.
 
       ! Reflected problem across the symmetry plane (xOz)
-      XI(1) = X0I(1)
+
+      XI(:) = X0I(:)
       XI(2) = -X0I(2)
-      XI(3) = X0I(3)
+      IF (I>0) XI(3) = MIN(X0I(3), -eps_zmin*Mesh%xy_diameter) ! on body panels
+      
       CALL COMPUTE_S0(XI, Face, S0, VS0)
       VS0(2) = -VS0(2)
 

@@ -163,9 +163,9 @@ CONTAINS
 
       call vav(0, (/xc, yc, zc/), j,VFace, mesh, env%depth,IGREEN%EPS_ZMIN, fsp, fsm, vsxp, vsxm)
       IF ((Env%depth == INFINITE_DEPTH) .OR. (wavenumber*Env%depth >= 20)) THEN
-        CALL VNSINFD(wavenumber, (/XC, YC, ZC/), J, VFace, Mesh, IGreen, SP, SM, VSP, VSM)
+        CALL VNSINFD(0,wavenumber, (/XC, YC, ZC/), J, VFace, Mesh, IGreen, SP, SM, VSP, VSM)
       ELSE
-        CALL VNSFD  (wavenumber, (/XC, YC, ZC/), J, VFace, Mesh, IGreen, Env%depth, SP, SM, VSP, VSM)
+        CALL VNSFD  (0,wavenumber, (/XC, YC, ZC/), J, VFace, Mesh, IGreen, Env%depth, SP, SM, VSP, VSM)
       ENDIF
 
       ! Compute potential from sources and Green function.

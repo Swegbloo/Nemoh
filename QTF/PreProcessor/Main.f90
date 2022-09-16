@@ -100,6 +100,10 @@ IMPLICIT NONE
         ALLOCATE(SOURCEDISTR%ZIGS(Mesh%Npanels,Nradiation+Nbeta))
         
         CALL make_directory(TRIM(ID%ID)//'/'//PreprocDir)
+        
+        IF (ID_DEBUG==1) CALL INITIALIZE_POTVELFS_OUTPUT_FILES                              &
+                                (ID%ID,MeshFS%Mesh%Npanels,MeshFS%Mesh%XM,MeshFS%Mesh%ISym, &
+                                 MeshFS%BdyLine%NWlineseg,MeshFS%BdyLine%XM)
 
 ! ------Computing potentials and velocities--------------------------------------------------        
         DO I=1,Nw
@@ -112,7 +116,7 @@ IMPLICIT NONE
            
            IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
             ! Calc Free Surface Potentials
-            CALL COMPUTE_POTENTIALS_AND_VELOCITIES_FS(TRIM(ID%ID),                             &
+            CALL COMPUTE_POTENTIALS_AND_VELOCITIES_FS(TRIM(ID%ID),                          &
                                          I,w(I),beta,Nbeta,Nradiation,InpNEMOHCAL%Env,Mesh, &
                                          VFace,IGreenFS,SourceDistr,Motion(I,:,:),MeshFS)
            ENDIF
