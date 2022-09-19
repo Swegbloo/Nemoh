@@ -21,9 +21,11 @@
     MODULE MIRF
 !
     TYPE TIRF
-        INTEGER :: Switch,Ntime,Nradiation,Nintegration
-        REAL,DIMENSION(:),ALLOCATABLE :: Time
+        INTEGER :: Switch,Ntime,Nradiation,Nintegration,Nbeta,NtimeS
+        REAL,DIMENSION(:),ALLOCATABLE :: Time,beta
+        REAL,DIMENSION(:),ALLOCATABLE :: TimeS
         REAL,DIMENSION(:,:,:),ALLOCATABLE :: K
+        COMPLEX,DIMENSION(:,:,:),ALLOCATABLE :: KexcForce
         REAL,DIMENSION(:,:),ALLOCATABLE :: AddedMass
     END TYPE TIRF
 !
@@ -31,23 +33,29 @@
 !
 !       Operators for creation, copy, initialisation and destruction
 !
-        SUBROUTINE CreateTIRF(IRF,Ntime,Nradiation,Nintegration)
+        SUBROUTINE CreateTIRF(IRF,Ntime,Nradiation,Nintegration,Nbeta,NtimeS)
         IMPLICIT NONE
         TYPE(TIRF) :: IRF
-        INTEGER :: Ntime,Nradiation,Nintegration
+        INTEGER :: Ntime,Nradiation,Nintegration,Nbeta,NtimeS
         IRF%Ntime=Ntime
+        IRF%NtimeS=NtimeS
         IRF%Nradiation=Nradiation
         ALLOCATE(IRF%Time(0:Ntime-1),IRF%AddedMass(Nradiation,Nintegration),IRF%K(0:Ntime-1,Nradiation,Nintegration))
+        ALLOCATE(IRF%TimeS(NtimeS),IRF%KexcForce(NtimeS,Nbeta,Nintegration))
         END SUBROUTINE CreateTIRF
 !       ---
         SUBROUTINE CopyTIRF(IRFTarget,IRFSource)
         IMPLICIT NONE
         INTEGER :: i,j,k
         TYPE(TIRF) :: IRFTarget,IRFSource
-        CALL CreateTIRF(IRFTarget,IRFSource%Ntime,IRFSource%Nradiation,IRFSource%Nintegration)
+        CALL CreateTIRF(IRFTarget,IRFSource%Ntime,IRFSource%Nradiation,IRFSource%Nintegration,IRFSource%Nbeta,IRFSource%NtimeS)
         DO i=0,IRFTarget%Ntime-1
             IRFTarget%Time(i)=IRFSource%Time(i)
         END DO
+        DO i=0,IRFTarget%NtimeS-1
+            IRFTarget%TimeS(i)=IRFSource%TimeS(i)
+        END DO
+
         DO j=1,IRFTarget%Nradiation
             DO k=1,IRFTarget%Nintegration
                 IRFTarget%Addedmass(j,k)=IRFSource%Addedmass(j,k)
@@ -60,6 +68,14 @@
                 END DO
             END DO
         END DO
+        DO i=0,IRFTarget%NtimeS-1
+            DO j=1,IRFTarget%Nbeta
+                DO k=1,IRFTarget%Nintegration
+                    IRFTarget%KexcForce(i,j,k)=IRFSource%KexcForce(i,j,k)
+                END DO
+            END DO
+        END DO
+
         END SUBROUTINE CopyTIRF
 !       ---
         SUBROUTINE Initialize_IRF(IRF,Results,namefile)
@@ -81,12 +97,21 @@
         CLOSE(10)
         IF (IRF%Switch.EQ.1) THEN
             IRF%Ntime=INT(tf/dt)
+            IRF%NtimeS=2*INT(tf/dt)-1
             IRF%Nradiation=Results%Nradiation
             IRF%Nintegration=Results%Nintegration
-            CALL CreateTIRF(IRF,IRF%Ntime,IRF%Nradiation,IRF%Nintegration)
+            IRF%Nbeta=Results%Nbeta
+            Allocate(IRF%beta(IRF%Nbeta))
+            IRF%beta=Results%beta
+            CALL CreateTIRF(IRF,IRF%Ntime,IRF%Nradiation,IRF%Nintegration,IRF%Nbeta,IRF%NtimeS)
             DO i=0,IRF%Ntime-1
                 IRF%Time(i)=i*dt
             END DO
+            DO i=0,IRF%NtimeS-1
+                IRF%TimeS(i)=(-(IRF%Ntime-1)+i)*dt
+            END DO
+
+
         END IF
         END SUBROUTINE  Initialize_IRF
 
@@ -94,7 +119,7 @@
 
         SUBROUTINE Compute_IRF(IRF,Results)
 
-        USE Constants, only: PI
+        USE Constants, only: PI,II
         USE MResults
 
         IMPLICIT NONE
@@ -102,6 +127,7 @@
         TYPE(TResults) :: Results
         REAL,DIMENSION(Results%Nw) :: CM
         INTEGER :: i,j,k,l
+        COMPLEX :: ExcForce_l,ExcForce_l1
 
         DO i=0,IRF%Ntime-1
             DO j=1,Results%Nradiation
@@ -132,6 +158,32 @@
             END DO
         END DO
 
+         DO i=0,IRF%NtimeS-1
+            DO j=1,Results%Nbeta
+                DO k=1,Results%Nintegration
+                    IRF%KexcForce(i,j,k)=0.
+                    DO l=1,Results%Nw-1
+                    ExcForce_l=Results%DiffractionForce(l,j,k)+Results%FroudeKrylovForce(l,j,k)
+                    ExcForce_l1=Results%DiffractionForce(l+1,j,k)+Results%FroudeKrylovForce(l+1,j,k)
+                    !integration of w(1)<=w<=w(end)
+                    IRF%KexcForce(i,j,k)=IRF%KexcForce(i,j,k)+                           &
+                            0.5*(ExcForce_l*EXP(II*Results%w(l)*IRF%TimeS(i))            &
+                                +ExcForce_l1*EXP(II*Results%w(l+1)*IRF%TimeS(i)))        &
+                            *(Results%w(l+1)-Results%w(l))
+                    !integration of -w(end)<=w<=-w(1)
+                    ExcForce_l=Conjg(ExcForce_l)
+                    ExcForce_l1=Conjg(ExcForce_l1)
+                    IRF%KexcForce(i,j,k)=IRF%KexcForce(i,j,k)+                           &
+                            0.5*(ExcForce_l*EXP(-II*Results%w(l)*IRF%TimeS(i))           &
+                                +ExcForce_l1*EXP(-II*Results%w(l+1)*IRF%TimeS(i)))       &
+                            *(Results%w(l+1)-Results%w(l))
+                    END DO
+                    IRF%KexcForce(i,j,k)=IRF%KexcForce(i,j,k)/2/PI
+                END DO
+            END DO
+        END DO
+
+
         END SUBROUTINE Compute_IRF
 
 !       ---
@@ -154,6 +206,23 @@
         END DO
         CLOSE(10)
         END SUBROUTINE Save_IRF
+
+        SUBROUTINE Save_IRF_excForce(IRF,namefile)
+        IMPLICIT NONE
+        TYPE(TIRF) :: IRF
+        CHARACTER(LEN=*) :: namefile
+        INTEGER :: i,j,k
+        OPEN(10,FILE=namefile)
+        WRITE(10,*) 'VARIABLES="Time (s)","REAL(IRF(1:Nintegration))","AIMAG(IRF(1:Nintegration))"'
+        DO j=1,IRF%Nbeta
+            WRITE(10,'(A,E14.7,A,I6,A)') 'Zone t="beta ',IRF%beta(j),'",I=',IRF%NtimeS,',F=POINT'
+            DO i=0,IRF%NtimeS-1
+                WRITE(10,'(<1+IRF%Nintegration>(X,E14.7))') IRF%TimeS(i),(REAL(IRF%KexcForce(i,j,k)),k=1,IRF%Nintegration)
+            END DO
+        END DO
+        CLOSE(10)
+        END SUBROUTINE Save_IRF_excForce
+
 !       ---
         SUBROUTINE DeleteTIRF(IRF)
         IMPLICIT NONE

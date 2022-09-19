@@ -73,6 +73,7 @@
     IF (IRF%Switch.EQ.1) THEN
         CALL Compute_IRF(IRF,Results)
         CALL Save_IRF(IRF,TRIM(ID%ID)//'/results/IRF.tec')
+        CALL Save_IRF_ExcForce(IRF,TRIM(ID%ID)//'/results/IRF_excForce.dat')
     END IF
 !
 !   --- Compute RAOs -------------------------------------------------------------------------------------------------------------------------------------------------------------------
