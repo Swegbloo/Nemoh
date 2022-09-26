@@ -3,7 +3,8 @@ USE MFace,               ONLY:TVFace,TWLine
 USE MMesh
 USE MQSolverPreparation, ONLY:TPotVel,TQfreq,TASYMP,TSourceQ
 USE CONSTANTS          , ONLY:II,CZERO,PI,INFINITE_DEPTH
-USE Elementary_functions,ONLY:CROSS_PRODUCT_COMPLEX,Fun_closest,CIH
+USE Elementary_functions,ONLY:CROSS_PRODUCT_COMPLEX,Fun_closest,CIH,&
+                              DOT_PRODUCT_COMPLEX,COMPLEX_CONJUGATE_VECT
 USE MEnvironment,        ONLY:TEnvironment,Fun_inverseDispersion
 USE MReadInputFiles,     ONLY:TMeshFS
 USE MCallInterp,         ONLY:FUN_INTERP1_COMPLEX
@@ -164,12 +165,13 @@ CONTAINS
                 QTFDuok(Iinteg,2,3)=QTFDuok(Iinteg,2,3)-0.5*rho*g*quad_P           &
                                 *genNormalWLine_dGamma(Iinteg,Iwlineinit(2)+Iwline)
 
-              ! IF (Iinteg==1.AND.Isym==1) THEN
-              !  ! print*,Iwline,TotPot_Iw1(Iwlineinit(1)+Iwline)
-              !   ! print*,Iwline,quad_M,quad_P
-              !  print*,Iwline,-0.5*rho*g*quad_M*genNormalWLine_dGamma(Iinteg,Iwline),&
-              !          -0.5*rho*g*quad_P*genNormalWLine_dGamma(Iinteg,Iwline)
-              !  ENDIF
+             !  IF (Iinteg==6.AND.Isym==1) THEN
+             !     print*,Iwline,Iinteg,WLine%XM(Iwline,1:2),genNormalWLine_dGamma(Iinteg,Iwline)
+                ! print*,Iwline,TotPot_Iw1(Iwlineinit(1)+Iwline)
+                 ! print*,Iwline,quad_M,quad_P
+                !print*,Iwline,-0.5*rho*g*quad_M*genNormalWLine_dGamma(Iinteg,Iwline),&
+                !        -0.5*rho*g*quad_P*genNormalWLine_dGamma(Iinteg,Iwline)
+             !   ENDIF
               ENDDO
            ENDDO
          ENDDO
@@ -652,6 +654,8 @@ CONTAINS
                  RadVel(:,1:2)=INTERP_RADIATION_VELOCITY                      &
                      (Nw,w,datPotVelQ%RadVel(Ipanelinit(1)+Ipanel,:,Iinteg,:),&
                            InterpSwitch,delw,sumw)
+                ! Radpot(1:2)=CMPLX(1,0)
+                ! RadVel(:,1:2)=CMPLX(1,0)
                  !------------------------------------------------------------
                  !term QFD1:(gradPhi,gradPhiPer)+(gradPhiPer,GradPhiInc)
 
@@ -659,6 +663,12 @@ CONTAINS
                         DOT_PRODUCT_COMPLEX(TotVel_Iw1,CONJG(PerVel_Iw2),3)   &
                        +DOT_PRODUCT_COMPLEX(PerVel_Iw1,CONJG(IncVel_Iw2),3)   &
                         ) 
+                 
+                ! IF (Iinteg==1) print*,Ipanel,XM(1),XM(2),REAL(IncVel_Iw1(1)),AIMAG(IncVel_Iw1(1))
+                ! IF (Iinteg==1) print*,Ipanel,XM(1),XM(2),REAL(IncVel_Iw1(2)),AIMAG(IncVel_Iw1(2))
+                ! IF (Iinteg==1) print*,Ipanel,XM(1),XM(2),REAL(IncVel_Iw1(3)),AIMAG(IncVel_Iw1(3))
+                ! IF (Iinteg==1) print*,Ipanel,XM(1),XM(2),REAL(QFD1_M),AIMAG(QFD1_M)
+
                  QFD1_P=II*sumw*(                                             &
                         DOT_PRODUCT_COMPLEX(TotVel_Iw1,PerVel_Iw2,3)          &
                        +DOT_PRODUCT_COMPLEX(PerVel_Iw1,IncVel_Iw2,3)          &
@@ -1228,13 +1238,7 @@ CONTAINS
           ENDIF
   END FUNCTION
 
-  FUNCTION COMPLEX_CONJUGATE_VECT(var,Nvect) RESULT(Conj)
-           INTEGER,                  INTENT(IN)::NVect 
-           COMPLEX,DIMENSION(Nvect), INTENT(IN):: var
-           COMPLEX,DIMENSION(Nvect) :: Conj
-           Conj=CMPLX(REAL(var),-AIMAG(var))
-  END FUNCTION
-
+  
   FUNCTION DOT_PRODUCT_DIFF_BIHARM(var11,var12,var21,var22,Nvect) RESULT(prod)
            !Dot product for the difference frequency term of biharmonic function
            INTEGER,                  INTENT(IN):: NVect 
@@ -1296,15 +1300,6 @@ CONTAINS
                    Iwlineinit(1)=Npanels+NpanWlin
                    Iwlineinit(2)=Nwline
            ENDIF
-  END FUNCTION
-
-  FUNCTION DOT_PRODUCT_COMPLEX(var1,var2,Nvect) RESULT(prod)
-       INTEGER, INTENT(IN)                  :: Nvect
-       COMPLEX,DIMENSION(Nvect), INTENT(IN) :: var1,var2  
-       COMPLEX                              ::prod
-       !NOTE: DOT_PRODUCT(A,B)=A*.B for A,B complex variables
-       !we want to have DOT_PRODUCT(A,B)=A.B
-       prod=DOT_PRODUCT(COMPLEX_CONJUGATE_VECT(var1,Nvect),var2)
   END FUNCTION
 
    

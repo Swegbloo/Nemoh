@@ -498,6 +498,13 @@ c~         IF (IJK .LE. NHASKIND) THEN                                  ! versio
             ZVZS=ZVZS+0.5*(ZSS(J)*CMPLX(VSZP1(J)+
      # VSZM1(J),VSZP2(J)+VSZM2(J))+ZSB(J)*CMPLX(VSZP1(J)-VSZM1(J),
      # VSZP2(J)-VSZM2(J)))
+         ! IF (J>=1.AND.J<=200) THEN
+        ! print*,J,XM(J),YM(J),ZM(J)
+        ! print*,J,0.5*CMPLX(SP1(J)+SM1(J),SP2(J)+SM2(J)),ZPB
+        ! print*,J,0.5*CMPLX(VSXP1(J)+VSXM1(J),VSXP2(J)+VSXM2(J)),ZVXB
+        ! print*,J,0.5*CMPLX(VSYP1(J)+VSYM1(J),VSYP2(J)+VSYM2(J)),ZVYB
+        ! print*,J,0.5*CMPLX(VSZP1(J)+VSZM1(J),VSZP2(J)+VSZM2(J)),ZVZB
+         ! ENDIF
           END DO
           POTPERSLB(IJK,IK)=ZPB
           POTPERSLS(IJK,IK)=ZPS
@@ -561,7 +568,26 @@ c~         IF (IJK .LE. NHASKIND) THEN                                  ! versio
         POTTOTSLS=POTINCSLS+POTPERSLS
         VTOTSLS=VINCSLS+VPERSLS
         ENDIF
-        
+
+      !  DO IK=2000,2000
+      ! !   ! print*,IK,XMSL(IK),YMSL(IK),POTINCSLB(IJK,IK)
+      ! !   ! print*,IK,XMSL(IK),YMSL(IK),VINCSLB(1,IJK,IK)
+      ! !   ! print*,IK,XMSL(IK),YMSL(IK),VINCSLB(2,IJK,IK)
+      ! !   ! print*,IK,XMSL(IK),YMSL(IK),VINCSLB(3,IJK,IK)
+      !     print*,IK,XMSL(IK),YMSL(IK),POTPERSLB(IJK,IK)
+      !     print*,IK,XMSL(IK),YMSL(IK),VPERSLB(1,IJK,IK)
+      !     print*,IK,XMSL(IK),YMSL(IK),VPERSLB(2,IJK,IK)
+      !     print*,IK,XMSL(IK),YMSL(IK),VPERSLB(3,IJK,IK)
+
+      ! !  ! print*,IK,XMSL(IK),YMSL(IK),POTTOTSLB(IJK,IK)
+      ! !  ! print*,IK,XMSL(IK),YMSL(IK),VTOTSLB(1,IJK,IK)
+      ! !  ! print*,IK,XMSL(IK),YMSL(IK),VTOTSLB(2,IJK,IK)
+      ! !  ! print*,IK,XMSL(IK),YMSL(IK),VTOTSLB(3,IJK,IK)
+      ! !  ! print*,IK,XMSL(IK),YMSL(IK),POTRADSLB(1,IJK,IK)
+      ! !  ! print*,IK,XMSL(IK),YMSL(IK),VRADSLB(1,1,IJK,IK)
+      ! !  ! print*,IK,XMSL(IK),YMSL(IK),VRADSLB(2,1,IJK,IK)
+      ! !  ! print*,IK,XMSL(IK),YMSL(IK),VRADSLB(3,1,IJK,IK)
+      !  ENDDO        
       ! check if dir exists
       inquire( file=file9, exist=dir_e )
       if ( dir_e ) then

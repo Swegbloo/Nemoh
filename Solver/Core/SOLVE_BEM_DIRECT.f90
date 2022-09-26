@@ -172,6 +172,7 @@ CONTAINS
     ELSE    
         ZIGB(:) = MATMUL(Vinv(:, :,1), NVEL(1:Mesh%NPanels))
     ENDIF
+        ZIGS(:) = CZERO
   ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
     IF (SolverOpt%ID .EQ. ID_GMRES) THEN
         RHS(:)=(NVEL(1:Mesh%NPanels) + NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2

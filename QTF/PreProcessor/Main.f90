@@ -101,10 +101,11 @@ IMPLICIT NONE
         
         CALL make_directory(TRIM(ID%ID)//'/'//PreprocDir)
         
-        IF (ID_DEBUG==1) CALL INITIALIZE_POTVELFS_OUTPUT_FILES                              &
+        IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
+             IF (ID_DEBUG==1) CALL INITIALIZE_POTVELFS_OUTPUT_FILES                         &
                                 (ID%ID,MeshFS%Mesh%Npanels,MeshFS%Mesh%XM,MeshFS%Mesh%ISym, &
                                  MeshFS%BdyLine%NWlineseg,MeshFS%BdyLine%XM)
-
+        ENDIF
 ! ------Computing potentials and velocities--------------------------------------------------        
         DO I=1,Nw
             CALL Read_SourceDistribution(TRIM(ID%ID),I,Nw,Nradiation,Nbeta,                 &

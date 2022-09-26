@@ -142,6 +142,12 @@ CONTAINS
   END FUNCTION
 
   !-------------------------------------------------------------------------------!
+  FUNCTION COMPLEX_CONJUGATE_VECT(var,Nvect) RESULT(Conj)
+           INTEGER,                  INTENT(IN)::NVect 
+           COMPLEX,DIMENSION(Nvect), INTENT(IN):: var
+           COMPLEX,DIMENSION(Nvect) :: Conj
+           Conj=CMPLX(REAL(var),-AIMAG(var))
+  END FUNCTION
 
   FUNCTION CROSS_PRODUCT(A, B)
     REAL, DIMENSION(3) :: CROSS_PRODUCT
@@ -160,6 +166,15 @@ CONTAINS
     CROSS_PRODUCT(2) = A(3)*B(1) - A(1)*B(3)
     CROSS_PRODUCT(3) = A(1)*B(2) - A(2)*B(1)
   END FUNCTION CROSS_PRODUCT_COMPLEX
+
+  FUNCTION DOT_PRODUCT_COMPLEX(var1,var2,Nvect) RESULT(prod)
+       INTEGER, INTENT(IN)                  :: Nvect
+       COMPLEX,DIMENSION(Nvect), INTENT(IN) :: var1,var2  
+       COMPLEX                              ::prod
+       !NOTE: DOT_PRODUCT(A,B)=A*.B for A,B complex variables
+       !we want to have DOT_PRODUCT(A,B)=A.B
+       prod=DOT_PRODUCT(COMPLEX_CONJUGATE_VECT(var1,Nvect),var2)
+  END FUNCTION
 
   !-------------------------------------------------------------------------------!
 

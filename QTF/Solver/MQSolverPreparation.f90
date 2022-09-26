@@ -477,26 +477,30 @@ END SUBROUTINE
     REAL,DIMENSION(*) :: NDGamma
     REAL,DIMENSION(3) :: VEL
     INTEGER :: i,ipanel
+    REAL,DIMENSION(3) :: N,XM,DIR   
+
+    Dir=Direction
     SELECT CASE (iCase)
     CASE (1)
         DO i=1,Wline%NWLineseg
             ipanel=Wline%IndexPanel(i)
+            N(1:2)=Mesh%N(1:2,ipanel)
+            N(3)=0 ! Normal in vertical axis is always zero on waterline
+
             IF (Mesh%cPanel(ipanel).EQ.c) THEN
-                VEL(1)=Direction(1)
-                VEL(2)=Direction(2)
-                VEL(3)=0.
-                NDGamma(i)=(Mesh%N(1,ipanel)*VEL(1)+Mesh%N(2,ipanel)*VEL(2)+Mesh%N(3,ipanel)*VEL(3))&
-                                *Wline%SegLength(i)
+                VEL(1)=Dir(1)
+                VEL(2)=Dir(2)
+                VEL(3)=Dir(3)
+                NDGamma(i)=(N(1)*VEL(1)+N(2)*VEL(2)+N(3)*VEL(3))*Wline%SegLength(i)
             ELSE
                 NDGamma(i)=0.
             END IF
             IF (Mesh%iSym.EQ.1) THEN
                 IF (Mesh%cPanel(ipanel).EQ.c) THEN
-                    VEL(1)=Direction(1)
-                    VEL(2)=Direction(2)
-                    VEL(3)=0
-                    NDGamma(i+WLINE%NWLineseg)=(Mesh%N(1,ipanel)*VEL(1)-Mesh%N(2,ipanel)*VEL(2) &
-                                                        +Mesh%N(3,ipanel)*VEL(3))*Wline%Seglength(i)
+                    VEL(1)=Dir(1)
+                    VEL(2)=Dir(2)
+                    VEL(3)=Dir(3)
+                    NDGamma(i+WLINE%NWLineseg)=(N(1)*VEL(1)-N(2)*VEL(2)+N(3)*VEL(3))*Wline%SegLength(i)
                  ELSE
                     NDGamma(i+WLINE%NWLineseg)=0.
                  END IF          
@@ -505,22 +509,27 @@ END SUBROUTINE
     CASE (2)
         DO i=1,Wline%NWLineseg
             ipanel=Wline%IndexPanel(i)
+            N(1:2)=Mesh%N(1:2,ipanel)
+            N(3)=0 ! Normal in vertical axis is always zero on waterline
+
+            XM(1:2)=Wline%XM(i,1:2)
+            XM(3)=0
             IF (Mesh%cPanel(ipanel).EQ.c) THEN
-                VEL(1)=Direction(2)*(Mesh%XM(3,ipanel)-Axis(3))-Direction(3)*(Mesh%XM(2,ipanel)-Axis(2))
-                VEL(2)=Direction(3)*(Mesh%XM(1,ipanel)-Axis(1))-Direction(1)*(Mesh%XM(3,ipanel)-Axis(3))
-                VEL(3)=Direction(1)*(Mesh%XM(2,ipanel)-Axis(2))-Direction(2)*(Mesh%XM(1,ipanel)-Axis(1))  
-                NDGamma(i)=(Mesh%N(1,ipanel)*VEL(1)+Mesh%N(2,ipanel)*VEL(2)+Mesh%N(3,ipanel)*VEL(3))&
-                                        *Wline%SegLength(i)
+               !Only on horizontal axes, vertical axes 0, then only sway
+                VEL(1)=Dir(2)*(XM(3)-Axis(3))-Dir(3)*(XM(2)-Axis(2))
+                VEL(2)=Dir(3)*(XM(1)-Axis(1))-Dir(1)*(XM(3)-Axis(3))
+                VEL(3)=Dir(1)*(XM(2)-Axis(2))-Dir(2)*(XM(1)-Axis(1))  
+                NDGamma(i)=(N(1)*VEL(1)+N(2)*VEL(2)+N(3)*VEL(3))*Wline%SegLength(i)
             ELSE
                 NDGamma(i)=0.
             END IF
             IF (Mesh%iSym.EQ.1) THEN
                 IF (Mesh%cPanel(ipanel).EQ.c) THEN
-                    VEL(1)=Direction(2)*(Mesh%XM(3,ipanel)-Axis(3))-Direction(3)*(-Mesh%XM(2,ipanel)-Axis(2))
-                    VEL(2)=Direction(3)*(Mesh%XM(1,ipanel)-Axis(1))-Direction(1)*(Mesh%XM(3,ipanel)-Axis(3))
-                    VEL(3)=Direction(1)*(-Mesh%XM(2,ipanel)-Axis(2))-Direction(2)*(Mesh%XM(1,ipanel)-Axis(1))  
-                    NDGamma(i+Wline%NWLineseg)=(Mesh%N(1,ipanel)*VEL(1)-Mesh%N(2,ipanel)*VEL(2)             &
-                                                                +Mesh%N(3,ipanel)*VEL(3))*Wline%SegLength(i)
+                    !Only on horizontal axes, vertical axes 0, then only sway
+                    VEL(1)=Dir(2)*(XM(3)-Axis(3))-Dir(3)*(-XM(2)-Axis(2))
+                    VEL(2)=Dir(3)*(XM(1)-Axis(1))-Dir(1)*(XM(3)-Axis(3))
+                    VEL(3)=Dir(1)*(-XM(2)-Axis(2))-Dir(2)*(XM(1)-Axis(1))  
+                    NDGamma(i+WLINE%NWLineseg)=(N(1)*VEL(1)-N(2)*VEL(2)+N(3)*VEL(3))*Wline%SegLength(i)
                 ELSE
                     NDGamma(i+Wline%NWLineseg)=0.
                  END IF 

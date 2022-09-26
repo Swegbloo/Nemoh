@@ -14,7 +14,9 @@ USE MMesh,                      ONLY: TMesh
 USE MFace,                      ONLY: TVFace, TWLine
 USE MEnvironment,               ONLY: TEnvironment,Fun_inverseDispersion, &
                                       COMPUTE_INC_POTENTIAL_VELOCITY
-USE Elementary_functions,       ONLY: X0 !invers of disp. relation
+USE Elementary_functions,       ONLY: DOT_PRODUCT_COMPLEX,&
+                                      X0 !invers of disp. relation
+                                
 ! Green functions
 USE M_INITIALIZE_GREEN,         ONLY: TGREEN,LISC
 USE MInfluenceMatrix,           ONLY: construct_influence_matrix, &
@@ -61,6 +63,7 @@ CONTAINS
         COMPLEX,ALLOCATABLE,DIMENSION(:,:)       ::RadPotential ! Rad pot mod I
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:)     ::RadVelocity  ! Rad velocity mod I
         CHARACTER(LEN=1000)                      :: LogTextToBeWritten
+        COMPLEX                                  :: PotIter,VxIter,VyIter,VzIter
 
         REAL                                     :: XM_I(3)
 
@@ -116,99 +119,131 @@ CONTAINS
              XM_I=MeshFS%BdyLine%XM(Ipflow-MeshFS%Mesh%NPanels,:)
             ENDIF
 
-            CALL CONSTRUCT_INFLUENCE_MATRIX_FS(omega,wavenumber,Env,IGreen,                     &
+            CALL CONSTRUCT_INFLUENCE_MATRIX_FS(omega,wavenumber,Env,IGreen,                                 &
                             Mesh,VFace,XM_I,S,GradS)
             !---------------------------------------------------------
             !Compute the physical variables for each flow point-Ipflow
             DO Ibeta=1,Nbeta
                   ! Compute total potential and velocity
-                  IF (Mesh%ISym==NO_Y_SYMMETRY) THEN
-                    Potential(Ipflow,Ibeta)=IncPotential(Ipflow,Ibeta)+                         &
-                            DOT_PRODUCT(S(1:Mesh%Npanels,1),ZPGB(1:Mesh%Npanels,Ibeta))
-                    !Vx
-                    Velocity(Ipflow,1,Ibeta)=IncVelocity(Ipflow,1,Ibeta)+                       &
-                            DOT_PRODUCT(gradS(1:Mesh%Npanels,1,1),ZPGB(1:Mesh%Npanels,Ibeta))
-                    !Vy
-                    Velocity(Ipflow,2,Ibeta)=IncVelocity(Ipflow,2,Ibeta)+                       &
-                            DOT_PRODUCT(gradS(1:Mesh%Npanels,2,1),ZPGB(1:Mesh%Npanels,Ibeta))
-                    !Vz
-                    Velocity(Ipflow,3,Ibeta)=IncVelocity(Ipflow,3,Ibeta)+                       &
-                            DOT_PRODUCT(gradS(1:Mesh%Npanels,3,1),ZPGB(1:Mesh%Npanels,Ibeta))
+              IF (Mesh%ISym==NO_Y_SYMMETRY) THEN
+                Potential(Ipflow,Ibeta)=IncPotential(Ipflow,Ibeta)+                                         &
+                     DOT_PRODUCT_COMPLEX(S(1:Mesh%Npanels,1),ZPGB(1:Mesh%Npanels,Ibeta),Mesh%Npanels)                
+                !Vx
+                Velocity(Ipflow,1,Ibeta)=IncVelocity(Ipflow,1,Ibeta)+                                       &
+                     DOT_PRODUCT_COMPLEX(gradS(1:Mesh%Npanels,1,1),ZPGB(1:Mesh%Npanels,Ibeta),Mesh%Npanels)
+                !Vy
+                Velocity(Ipflow,2,Ibeta)=IncVelocity(Ipflow,2,Ibeta)+                                       &
+                     DOT_PRODUCT_COMPLEX(gradS(1:Mesh%Npanels,2,1),ZPGB(1:Mesh%Npanels,Ibeta),Mesh%Npanels)
+                !Vz
+                Velocity(Ipflow,3,Ibeta)=IncVelocity(Ipflow,3,Ibeta)+                                       &
+                     DOT_PRODUCT_COMPLEX(gradS(1:Mesh%Npanels,3,1),ZPGB(1:Mesh%Npanels,Ibeta),Mesh%Npanels)
 
-                  ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
-                     Potential(Ipflow,Ibeta)=IncPotential(Ipflow,Ibeta)                         &
-                       +DOT_PRODUCT(S(:, 1) + S(:, 2), ZPGB(:,Ibeta))/2                         &
-                       +DOT_PRODUCT(S(:, 1) - S(:, 2), ZPGS(:,Ibeta))/2
-                     Potential(NPFLOW+Ipflow,Ibeta) =IncPotential(NPFLOW+IPflow,Ibeta)+         &
-                       +DOT_PRODUCT(S(:, 1) - S(:, 2), ZPGB(:,Ibeta))/2                         &
-                       +DOT_PRODUCT(S(:, 1) + S(:, 2), ZPGS(:,Ibeta))/2
-                    !Vx 
-                    Velocity(Ipflow,1,Ibeta)=IncVelocity(Ipflow,1,Ibeta)+                       &
-                       +DOT_PRODUCT(gradS(:, 1, 1) + gradS(:, 1, 2), ZPGB(:,Ibeta))/2           &
-                       +DOT_PRODUCT(gradS(:, 1, 1) - gradS(:, 1, 2), ZPGS(:,Ibeta))/2
-                     Velocity(NPFLOW+Ipflow,1,Ibeta) =IncVelocity(NPFLOW+Ipflow,1,Ibeta)        &
-                       +DOT_PRODUCT(gradS(:, 1, 1) - gradS(:, 1, 2), ZPGB(:,Ibeta))/2           &
-                       +DOT_PRODUCT(gradS(:, 1, 1) + gradS(:, 1, 2), ZPGS(:,Ibeta))/2
-                    !Vy 
-                    Velocity(Ipflow,2,Ibeta)=IncVelocity(Ipflow,2,Ibeta)+                       &
-                       +DOT_PRODUCT(gradS(:, 2, 1) + gradS(:, 2, 2), ZPGB(:,Ibeta))/2           &
-                       +DOT_PRODUCT(gradS(:, 2, 1) - gradS(:, 2, 2), ZPGS(:,Ibeta))/2 
-                     Velocity(NPFLOW+Ipflow,2,Ibeta) =IncVelocity(NPFLOW+Ipflow,2,Ibeta)        &
-                       -DOT_PRODUCT(gradS(:, 2, 1) - gradS(:, 2, 2), ZPGB(:,Ibeta))/2           &
-                       -DOT_PRODUCT(gradS(:, 2, 1) + gradS(:, 2, 2), ZPGS(:,Ibeta))/2
-                    !Vz 
-                     Velocity(Ipflow,3,Ibeta)=IncVelocity(Ipflow,3,Ibeta)+                      &
-                       +DOT_PRODUCT(gradS(:, 3, 1) + gradS(:, 3, 2), ZPGB(:,Ibeta))/2           &
-                       +DOT_PRODUCT(gradS(:, 3, 1) - gradS(:, 3, 2), ZPGS(:,Ibeta))/2
-                     Velocity(NPFLOW+Ipflow,3,Ibeta) =IncVelocity(NPFLOW+Ipflow,3,Ibeta)        &
-                       +DOT_PRODUCT(gradS(:, 3, 1) - gradS(:, 3, 2), ZPGB(:,Ibeta))/2           &
-                       +DOT_PRODUCT(gradS(:, 3, 1) + gradS(:, 3, 2), ZPGS(:,Ibeta))/2
-                  ENDIF
-              ENDDO
+              ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
+                Potential(Ipflow,Ibeta)=IncPotential(Ipflow,Ibeta)                                          &
+                  +DOT_PRODUCT_COMPLEX(S(:, 1) + S(:, 2), ZPGB(:,Ibeta),Mesh%Npanels)/2                     &
+                  +DOT_PRODUCT_COMPLEX(S(:, 1) - S(:, 2), ZPGS(:,Ibeta),Mesh%Npanels)/2
+                Potential(NPFLOW+Ipflow,Ibeta) =IncPotential(NPFLOW+IPflow,Ibeta)+                          &
+                  +DOT_PRODUCT_COMPLEX(S(:, 1) - S(:, 2), ZPGB(:,Ibeta),Mesh%Npanels)/2                     &
+                  +DOT_PRODUCT_COMPLEX(S(:, 1) + S(:, 2), ZPGS(:,Ibeta),Mesh%Npanels)/2
+                !Vx 
+                Velocity(Ipflow,1,Ibeta)=IncVelocity(Ipflow,1,Ibeta)+                                       &
+                   +DOT_PRODUCT_COMPLEX(gradS(:, 1, 1) + gradS(:, 1, 2), ZPGB(:,Ibeta),Mesh%Npanels)/2      &
+                   +DOT_PRODUCT_COMPLEX(gradS(:, 1, 1) - gradS(:, 1, 2), ZPGS(:,Ibeta),Mesh%Npanels)/2
+                Velocity(NPFLOW+Ipflow,1,Ibeta) =IncVelocity(NPFLOW+Ipflow,1,Ibeta)                         &
+                   +DOT_PRODUCT_COMPLEX(gradS(:, 1, 1) - gradS(:, 1, 2), ZPGB(:,Ibeta),Mesh%Npanels)/2      &
+                   +DOT_PRODUCT_COMPLEX(gradS(:, 1, 1) + gradS(:, 1, 2), ZPGS(:,Ibeta),Mesh%Npanels)/2
+                !Vy 
+                Velocity(Ipflow,2,Ibeta)=IncVelocity(Ipflow,2,Ibeta)+                                       &
+                   +DOT_PRODUCT_COMPLEX(gradS(:, 2, 1) + gradS(:, 2, 2), ZPGB(:,Ibeta),Mesh%Npanels)/2      &
+                   +DOT_PRODUCT_COMPLEX(gradS(:, 2, 1) - gradS(:, 2, 2), ZPGS(:,Ibeta),Mesh%Npanels)/2 
+                Velocity(NPFLOW+Ipflow,2,Ibeta) =IncVelocity(NPFLOW+Ipflow,2,Ibeta)                         &
+                   -DOT_PRODUCT_COMPLEX(gradS(:, 2, 1) - gradS(:, 2, 2), ZPGB(:,Ibeta),Mesh%Npanels)/2      &
+                   -DOT_PRODUCT_COMPLEX(gradS(:, 2, 1) + gradS(:, 2, 2), ZPGS(:,Ibeta),Mesh%Npanels)/2
+                !Vz 
+                 Velocity(Ipflow,3,Ibeta)=IncVelocity(Ipflow,3,Ibeta)+                                      &
+                   +DOT_PRODUCT_COMPLEX(gradS(:, 3, 1) + gradS(:, 3, 2), ZPGB(:,Ibeta),Mesh%Npanels)/2      &
+                   +DOT_PRODUCT_COMPLEX(gradS(:, 3, 1) - gradS(:, 3, 2), ZPGS(:,Ibeta),Mesh%Npanels)/2
+                 Velocity(NPFLOW+Ipflow,3,Ibeta) =IncVelocity(NPFLOW+Ipflow,3,Ibeta)                        &
+                   +DOT_PRODUCT_COMPLEX(gradS(:, 3, 1) - gradS(:, 3, 2), ZPGB(:,Ibeta),Mesh%Npanels)/2      &
+                   +DOT_PRODUCT_COMPLEX(gradS(:, 3, 1) + gradS(:, 3, 2), ZPGS(:,Ibeta),Mesh%Npanels)/2
+              ENDIF
+
+             !    PotIter=CZERO
+             !    VxIter=CZERO
+             !    VyIter=CZERO
+             !    VzIter=CZERO
+             ! DO Ipanel=1,Mesh%Npanels
+             !    PotIter=PotIter+S(Ipanel,1)*ZPGB(Ipanel,Ibeta)
+             !    VxIter=VxIter+gradS(Ipanel,1,1)*ZPGB(Ipanel,Ibeta)
+             !    VyIter=VyIter+gradS(Ipanel,2,1)*ZPGB(Ipanel,Ibeta)
+             !    VzIter=VzIter+gradS(Ipanel,3,1)*ZPGB(Ipanel,Ibeta)
+             !    print*,Ipanel,VFace%XM(Ipanel,:)
+             !    print*,Ipanel,S(Ipanel,1),PotIter
+             !    print*,Ipanel,gradS(Ipanel,1,1),VxIter
+             !    print*,Ipanel,gradS(Ipanel,2,1),VyIter
+             !    print*,Ipanel,gradS(Ipanel,3,1),VzIter
+             ! ENDDO
+             !  ! print*,Ipflow,XM_I(1),XM_I(2),IncPotential(Ipflow,Ibeta)
+             !  ! print*,Ipflow,XM_I(1),XM_I(2),IncVelocity(Ipflow,1,Ibeta)
+             !  ! print*,Ipflow,XM_I(1),XM_I(2),IncVelocity(Ipflow,2,Ibeta)
+             !  ! print*,Ipflow,XM_I(1),XM_I(2),IncVelocity(Ipflow,3,Ibeta)
+
+             !   print*,Ipflow,XM_I(1),XM_I(2),Potential(Ipflow,Ibeta)-IncPotential(Ipflow,Ibeta)
+             !   print*,Ipflow,XM_I(1),XM_I(2),Velocity(Ipflow,1,Ibeta)-IncVelocity(Ipflow,1,Ibeta)
+             !   print*,Ipflow,XM_I(1),XM_I(2),Velocity(Ipflow,2,Ibeta)-IncVelocity(Ipflow,2,Ibeta)
+             !   print*,Ipflow,XM_I(1),XM_I(2),Velocity(Ipflow,3,Ibeta)-IncVelocity(Ipflow,3,Ibeta)
+
+            ENDDO
                         
             ! Compute radiation potential and velocity
             DO IRad=1,Nradiation
                    IF (Mesh%ISym==NO_Y_SYMMETRY) THEN
-                    RadPotential(Ipflow,IRad)=                                                  &
-                      DOT_PRODUCT(S(1:Mesh%Npanels,1),SourceDistr%ZIGB(:,Irad))
+                    RadPotential(Ipflow,IRad)=                                                                       &
+                      DOT_PRODUCT_COMPLEX(S(1:Mesh%Npanels,1),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)
                     !Vx
-                    RadVelocity(Ipflow,1,IRad)=                                                 &
-                      DOT_PRODUCT(gradS(1:Mesh%Npanels,1,1),SourceDistr%ZIGB(:,Irad))
+                    RadVelocity(Ipflow,1,IRad)=                                                                      &
+                      DOT_PRODUCT_COMPLEX(gradS(1:Mesh%Npanels,1,1),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)
                     !Vy
-                    RadVelocity(Ipflow,2,IRad)=                                                 &
-                      DOT_PRODUCT(gradS(1:Mesh%Npanels,2,1),SourceDistr%ZIGB(:,Irad))
+                    RadVelocity(Ipflow,2,IRad)=                                                                      &
+                      DOT_PRODUCT_COMPLEX(gradS(1:Mesh%Npanels,2,1),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)
                     !Vz
-                    RadVelocity(Ipflow,3,IRad)=                                                 &
-                      DOT_PRODUCT(gradS(1:Mesh%Npanels,3,1),SourceDistr%ZIGB(:,Irad))
+                    RadVelocity(Ipflow,3,IRad)=                                                                      &
+                      DOT_PRODUCT_COMPLEX(gradS(1:Mesh%Npanels,3,1),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)
                   ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
-                     RadPotential(Ipflow,IRad)=                                                 &
-                        DOT_PRODUCT(S(:, 1) + S(:, 2),SourceDistr%ZIGB(:,Irad))/2               &
-                       +DOT_PRODUCT(S(:, 1) - S(:, 2),SourceDistr%ZIGS(:,Irad))/2
-                     RadPotential(NPFLOW+Ipflow,IRad) =                                         &
-                        DOT_PRODUCT(S(:, 1) - S(:, 2),SourceDistr%ZIGB(:,Irad))/2               &
-                       +DOT_PRODUCT(S(:, 1) + S(:, 2),SourceDistr%ZIGS(:,Irad))/2
+                     RadPotential(Ipflow,IRad)=                                                                      &
+                        DOT_PRODUCT_COMPLEX(S(:, 1) + S(:, 2),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)/2               &
+                       +DOT_PRODUCT_COMPLEX(S(:, 1) - S(:, 2),SourceDistr%ZIGS(:,Irad),Mesh%Npanels)/2
+                     RadPotential(NPFLOW+Ipflow,IRad) =                                                              &
+                        DOT_PRODUCT_COMPLEX(S(:, 1) - S(:, 2),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)/2               &
+                       +DOT_PRODUCT_COMPLEX(S(:, 1) + S(:, 2),SourceDistr%ZIGS(:,Irad),Mesh%Npanels)/2
                     !Vx 
-                    RadVelocity(Ipflow,1,IRad)=                                                 &
-                        DOT_PRODUCT(gradS(:, 1, 1) + gradS(:, 1, 2),SourceDistr%ZIGB(:,Irad))/2 &
-                       +DOT_PRODUCT(gradS(:, 1, 1) - gradS(:, 1, 2),SourceDistr%ZIGS(:,Irad))/2
-                    RadVelocity(NPFLOW+Ipflow,1,IRad) =                                         &
-                        DOT_PRODUCT(gradS(:, 1, 1) - gradS(:, 1, 2),SourceDistr%ZIGB(:,Irad))/2 &
-                       +DOT_PRODUCT(gradS(:, 1, 1) + gradS(:, 1, 2),SourceDistr%ZIGS(:,Irad))/2
+                    RadVelocity(Ipflow,1,IRad)=                                                                      &
+                        DOT_PRODUCT_COMPLEX(gradS(:, 1, 1) + gradS(:, 1, 2),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)/2 &
+                       +DOT_PRODUCT_COMPLEX(gradS(:, 1, 1) - gradS(:, 1, 2),SourceDistr%ZIGS(:,Irad),Mesh%Npanels)/2  
+                    RadVelocity(NPFLOW+Ipflow,1,IRad) =                                                              &
+                        DOT_PRODUCT_COMPLEX(gradS(:, 1, 1) - gradS(:, 1, 2),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)/2 &
+                       +DOT_PRODUCT_COMPLEX(gradS(:, 1, 1) + gradS(:, 1, 2),SourceDistr%ZIGS(:,Irad),Mesh%Npanels)/2  
                     !Vy 
-                    RadVelocity(Ipflow,2,IRad)=                                                 &
-                        DOT_PRODUCT(gradS(:, 2, 1) + gradS(:, 2, 2),SourceDistr%ZIGB(:,Irad))/2 &
-                       +DOT_PRODUCT(gradS(:, 2, 1) - gradS(:, 2, 2),SourceDistr%ZIGS(:,Irad))/2
-                    RadVelocity(NPFLOW+Ipflow,2,IRad) =                                         &
-                       -DOT_PRODUCT(gradS(:, 2, 1) - gradS(:, 2, 2),SourceDistr%ZIGB(:,Irad))/2 &
-                       -DOT_PRODUCT(gradS(:, 2, 1) + gradS(:, 2, 2),SourceDistr%ZIGS(:,Irad))/2
+                    RadVelocity(Ipflow,2,IRad)=                                                                      &
+                        DOT_PRODUCT_COMPLEX(gradS(:, 2, 1) + gradS(:, 2, 2),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)/2 &
+                       +DOT_PRODUCT_COMPLEX(gradS(:, 2, 1) - gradS(:, 2, 2),SourceDistr%ZIGS(:,Irad),Mesh%Npanels)/2  
+                    RadVelocity(NPFLOW+Ipflow,2,IRad) =                                                              &
+                       -DOT_PRODUCT_COMPLEX(gradS(:, 2, 1) - gradS(:, 2, 2),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)/2 &
+                       -DOT_PRODUCT_COMPLEX(gradS(:, 2, 1) + gradS(:, 2, 2),SourceDistr%ZIGS(:,Irad),Mesh%Npanels)/2  
                     !Vz 
-                    RadVelocity(Ipflow,3,IRad)=                                                 &
-                        DOT_PRODUCT(gradS(:, 3, 1) + gradS(:, 3, 2),SourceDistr%ZIGB(:,Irad))/2 &
-                       +DOT_PRODUCT(gradS(:, 3, 1) - gradS(:, 3, 2),SourceDistr%ZIGS(:,Irad))/2
-                    RadVelocity(NPFLOW+Ipflow,3,IRad) =                                         &
-                        DOT_PRODUCT(gradS(:, 3, 1) - gradS(:, 3, 2),SourceDistr%ZIGB(:,Irad))/2 &
-                       +DOT_PRODUCT(gradS(:, 3, 1) + gradS(:, 3, 2),SourceDistr%ZIGS(:,Irad))/2
+                    RadVelocity(Ipflow,3,IRad)=                                                                      &
+                        DOT_PRODUCT_COMPLEX(gradS(:, 3, 1) + gradS(:, 3, 2),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)/2 &
+                       +DOT_PRODUCT_COMPLEX(gradS(:, 3, 1) - gradS(:, 3, 2),SourceDistr%ZIGS(:,Irad),Mesh%Npanels)/2  
+                    RadVelocity(NPFLOW+Ipflow,3,IRad) =                                                              &
+                        DOT_PRODUCT_COMPLEX(gradS(:, 3, 1) - gradS(:, 3, 2),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)/2 &
+                       +DOT_PRODUCT_COMPLEX(gradS(:, 3, 1) + gradS(:, 3, 2),SourceDistr%ZIGS(:,Irad),Mesh%Npanels)/2
                   ENDIF
+                 ! IF (IRad==1) THEN
+                 !   print*,Ipflow,XM_I(1),XM_I(2),RadPotential(Ipflow,1)
+                 !   print*,Ipflow,XM_I(1),XM_I(2),RadVelocity(Ipflow,1,1)
+                 !   print*,Ipflow,XM_I(1),XM_I(2),RadVelocity(Ipflow,2,1)
+                 !   print*,Ipflow,XM_I(1),XM_I(2),RadVelocity(Ipflow,3,1)
+                 ! ENDIF
             ENDDO
            ! print*,'Panel: ',Ipflow,'/',NPFLOW,' DONE!' 
         ENDDO
@@ -299,13 +334,13 @@ CONTAINS
           ! CLOSE(uFile)
 
            ILINE=(Iw-1)*Nradiation+Irad
-           CALL WRITE_RADPOTENTIAL_FS_DATA(wd,RadPotFILE_FS,omega,wavenumber,          &
+           CALL WRITE_RADPOTENTIAL_FS_DATA(wd,RadPotFILE_FS,omega,wavenumber,         &
                    IRad, NPFLOW*2**Mesh%Isym,ILINE,RadPotential(:,IRad))
            CALL WRITE_RADVELOCITY_FS_DATA(wd,RadVelFILE_FS,omega,wavenumber,          &
                    IRad, NPFLOW*2**Mesh%Isym,ILINE,RadVelocity(:,:,IRad))
 
            IF (ID_DEBUG==1) THEN
-           CALL WRITE_RADPOTENTIAL_FS_DATA_DEBUG(wd,RadPotFILE_FSdbg,omega,wavenumber,          &
+           CALL WRITE_RADPOTENTIAL_FS_DATA_DEBUG(wd,RadPotFILE_FSdbg,omega,wavenumber,         &
                    IRad, NPFLOW*2**Mesh%Isym,RadPotential(:,IRad))
            CALL WRITE_RADVELOCITY_FS_DATA_DEBUG(wd,RadVelFILE_FSdbg,omega,wavenumber,          &
                    IRad, NPFLOW*2**Mesh%Isym,RadVelocity(:,:,IRad))
@@ -621,7 +656,7 @@ CONTAINS
         ENDIF
         WRITE(u,*) '#'
         IF (Isym==0) THEN
-           WRITE(u,'(2(I6,X))') Npanels,NBdyLine
+           WRITE(u,'(3(I6,X))') Npanels,NBdyLine,Isym
            IF (NBdyLine==0) THEN
            WRITE(u,'(<3*Npanels>(E14.7,X))')              &
                  (XM(1,Ipanel),Ipanel=1,Npanels),         & 
@@ -637,7 +672,7 @@ CONTAINS
                 (XM_Line(Ipanel,3),Ipanel=1,NBdyLine)
            ENDIF
         ELSE
-           WRITE(u,'((I6,X))') Npanels*2,NBdyLine*2
+           WRITE(u,'(3(I6,X))') Npanels,NBdyLine,Isym
            IF (NBdyLine==0) THEN
            WRITE(u,'(<2*3*Npanels>(E14.7,X))')            &
                (XM(1,Ipanel),Ipanel=1,Npanels),           &
@@ -779,7 +814,7 @@ CONTAINS
 
          OPEN(NEWUNIT=u1, FILE=wd//'/'//PreprocDir//'/'//FileM,    &
                  ACTION='WRITE',POSITION='APPEND')
-         WRITE(u1,'(2(F10.3,X),(3I,X),<2*Npanels>(E14.7,X))') w,k,Irad,       &
+         WRITE(u1,'(2(F10.3,X),(I3,X),<2*Npanels>(E14.7,X))') w,k,Irad,       &
          (REAL(PotDat(Ipanel)),Ipanel=1,Npanels),&
          (AIMAG(PotDat(Ipanel)),Ipanel=1,Npanels)
          CLOSE(u1)
@@ -795,7 +830,7 @@ CONTAINS
 
          OPEN(NEWUNIT=u1, FILE=wd//'/'//PreprocDir//'/'//FileM,    &
                  ACTION='WRITE',POSITION='APPEND')
-         WRITE(u1,'(2(F10.3,X),(3I,X),<3*2*Npanels>(E14.7,X))') w,k,Irad,       &
+         WRITE(u1,'(2(F10.3,X),(I3,X),<3*2*Npanels>(E14.7,X))') w,k,Irad,       &
          (REAL(VelDat(Ipanel,1)),Ipanel=1,Npanels),&
          (AIMAG(VelDat(Ipanel,1)),Ipanel=1,Npanels),&
          (REAL(VelDat(Ipanel,2)),Ipanel=1,Npanels),&

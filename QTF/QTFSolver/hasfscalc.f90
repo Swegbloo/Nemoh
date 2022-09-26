@@ -156,6 +156,8 @@ DO 002 COLLAPSE=0,0!!!!!     OUVERTURE ET ENREGISTREMENT DE GEOMETRIE COMPLETE  
         READ(12,REC=4)(Z(I),I=1,NP)
         READ(12,REC=5)(M1(I),I=1,NFAC),(M2(I),I=1,NFAC),&
         &(M3(I),I=1,NFAC),(M4(I),I=1,NFAC)
+        
+        IF (H==0.) H=1.E20
 
 	IMX = NFAC
 
@@ -905,7 +907,10 @@ DO 004 COLLAPSE=0,0!!!!!   IMPORTATION DES MAILLAGES - POTENTIELS / ALLOCATIONS 
 			&                  PHIP1_X*CONJG(PHII2_X)+			&
 			&                  PHIP1_Y*CONJG(PHII2_Y)+			&
 			&                  PHIP1_Z*CONJG(PHII2_Z))
-                                                 
+                  !     print*,IFACSL,XMSLF(IFACSL),YMSLF(IFACSL),REAL(PHII2_X),AIMAG(PHII2_X)                          
+                  !     print*,IFACSL,XMSLF(IFACSL),YMSLF(IFACSL),REAL(PHII2_Y),AIMAG(PHII2_Y)                          
+                  !     print*,IFACSL,XMSLF(IFACSL),YMSLF(IFACSL),REAL(PHII2_Z),AIMAG(PHII2_Z)                          
+                  !     print*,IFACSL,XMSLF(IFACSL),YMSLF(IFACSL),REAL(VS1M),AIMAG(VS1M)                          
 		      
 		      VS2M=	- ZI*W1/(2.*G)*					&
 		      &                 (PHI1 *(-W2**2*CONJG(PHIP2_Z))+	&

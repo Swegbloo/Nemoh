@@ -59,45 +59,49 @@ CONTAINS
      SM=CZERO
      VSP=CZERO
      VSM=CZERO
-    DO IGQ=1, FaceJ%NP_GQ
-        XI(:) = X0I(:)
-        IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
-        XJ(:) = FaceJ%XM_GQ(:,IGQ)
-        XJ(3) = MIN(XJ(3), -EPS*Mesh%xy_diameter)
-        CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, IGreen, FS(1), VS(:, 1))
 
-        IF (Mesh%Isym == NO_Y_SYMMETRY) THEN
-          SP_IGQ   = FS(1)
-          VSP_IGQ(1:3) = VS(1:3, 1)
-          SM_IGQ       = CZERO
-          VSM_IGQ      = CZERO
+    IF (I>0.OR.(I==0.AND.(FACEJ%XM(3).LT.-EPS*Mesh%xy_diameter))) THEN 
+       !it is not computed in case of free surface and XM_J on lid panels
+       DO IGQ=1, FaceJ%NP_GQ
+           XI(:) = X0I(:)
+           IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
+           XJ(:) = FaceJ%XM_GQ(:,IGQ)
+           XJ(3) = MIN(XJ(3), -EPS*Mesh%xy_diameter)
+           CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, IGreen, FS(1), VS(:, 1))
 
-        ELSE IF (Mesh%Isym == Y_SYMMETRY) THEN
-          ! Reflect the source point across the (xOz) plane and compute another coefficient
-          XI(2) = -X0I(2)
-          CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, IGreen, FS(2), VS(:, 2))
-          VS(2, 2) = -VS(2, 2) ! Reflection of the output vector
+           IF (Mesh%Isym == NO_Y_SYMMETRY) THEN
+             SP_IGQ   = FS(1)
+             VSP_IGQ(1:3) = VS(1:3, 1)
+             SM_IGQ       = CZERO
+             VSM_IGQ      = CZERO
 
-          ! Assemble the two results
-          SP_IGQ       = FS(1)      + FS(2)
-          VSP_IGQ(1:3) = VS(1:3, 1) + VS(1:3, 2)
-          SM_IGQ       = FS(1)      - FS(2)
-          VSM_IGQ(1:3) = VS(1:3, 1) - VS(1:3, 2)
-        END IF
+           ELSE IF (Mesh%Isym == Y_SYMMETRY) THEN
+             ! Reflect the source point across the (xOz) plane and compute another coefficient
+             XI(2) = -X0I(2)
+             CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, IGreen, FS(2), VS(:, 2))
+             VS(2, 2) = -VS(2, 2) ! Reflection of the output vector
 
-        ADPI2  = wavenumber*Mesh%A(J)/DPI2   *FaceJ%dXdXG_WGQ_per_A(IGQ)
-        ADPI   = wavenumber*Mesh%A(J)/DPI    *FaceJ%dXdXG_WGQ_per_A(IGQ)
-        AKDPI2 = wavenumber**2*Mesh%A(J)/DPI2*FaceJ%dXdXG_WGQ_per_A(IGQ)
-        AKDPI  = wavenumber**2*Mesh%A(J)/DPI *FaceJ%dXdXG_WGQ_per_A(IGQ)
+             ! Assemble the two results
+             SP_IGQ       = FS(1)      + FS(2)
+             VSP_IGQ(1:3) = VS(1:3, 1) + VS(1:3, 2)
+             SM_IGQ       = FS(1)      - FS(2)
+             VSM_IGQ(1:3) = VS(1:3, 1) - VS(1:3, 2)
+           END IF
 
-        SP  = SP+CMPLX(REAL(SP_IGQ)*ADPI2,   AIMAG(SP_IGQ)*ADPI)
-        VSP = VSP+CMPLX(REAL(VSP_IGQ)*AKDPI2, AIMAG(VSP_IGQ)*AKDPI)
+           ADPI2  = wavenumber*Mesh%A(J)/DPI2   *FaceJ%dXdXG_WGQ_per_A(IGQ)
+           ADPI   = wavenumber*Mesh%A(J)/DPI    *FaceJ%dXdXG_WGQ_per_A(IGQ)
+           AKDPI2 = wavenumber**2*Mesh%A(J)/DPI2*FaceJ%dXdXG_WGQ_per_A(IGQ)
+           AKDPI  = wavenumber**2*Mesh%A(J)/DPI *FaceJ%dXdXG_WGQ_per_A(IGQ)
 
-        IF (Mesh%ISym == Y_SYMMETRY) THEN
-          SM  = SM+CMPLX(REAL(SM_IGQ)*ADPI2,   AIMAG(SM_IGQ)*ADPI)
-          VSM = VSM+CMPLX(REAL(VSM_IGQ)*AKDPI2, AIMAG(VSM_IGQ)*AKDPI)
-        END IF
-    ENDDO
+           SP  = SP+CMPLX(REAL(SP_IGQ)*ADPI2,   AIMAG(SP_IGQ)*ADPI)
+           VSP = VSP+CMPLX(REAL(VSP_IGQ)*AKDPI2, AIMAG(VSP_IGQ)*AKDPI)
+
+           IF (Mesh%ISym == Y_SYMMETRY) THEN
+             SM  = SM+CMPLX(REAL(SM_IGQ)*ADPI2,   AIMAG(SM_IGQ)*ADPI)
+             VSM = VSM+CMPLX(REAL(VSM_IGQ)*AKDPI2, AIMAG(VSM_IGQ)*AKDPI)
+           END IF
+       ENDDO
+    ENDIF
 
     DEALLOCATE(FaceJ%dXdXG_WGQ_per_A)
     DEALLOCATE(FaceJ%XM_GQ)
@@ -160,194 +164,196 @@ CONTAINS
     ! Part 1: Solve 4 infinite depth problems
     !========================================
 
+    IF (I>0.OR.(I==0.AND.(FACEJ%XM(3).LT.-EPS*Mesh%xy_diameter))) THEN 
+       !it is not computed in case of free surface and XM_J on lid panels
 
-    DO IGQ=1, FaceJ%NP_GQ
+       DO IGQ=1, FaceJ%NP_GQ
  
-        XI(:) = X0I(:)
-        IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
+           XI(:) = X0I(:)
+           IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
+           
+           X0J(:)= FaceJ%XM_GQ(:,IGQ)
+           XJ(:) = X0J 
+           XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
+           
+           ! Distance in xOy plane
+           RRR = NORM2(XI(1:2) - XJ(1:2))
+
+           ! 1.a First infinite depth problem
+           CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(1, 1), VS(:, 1, 1))
+
+           PSR(1, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+
+           ! 1.b Shift and reflect XI and compute another value of the Green function
+           XI(3) = -X0I(3) - 2*depth
+           XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
+           CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(2, 1), VS(:, 2, 1))
+           VS(3, 2, 1) = -VS(3, 2, 1) ! Reflection of the output vector
+
+           PSR(2, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+
+           ! 1.c Shift and reflect XJ and compute another value of the Green function
+           XI(3) = X0I(3)
+           IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
+           XJ(3) = -X0J(3) - 2*depth
+           CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(3, 1), VS(:, 3, 1))
+
+           PSR(3, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+
+           ! 1.d Shift and reflect both XI and XJ and compute another value of the Green function
+           XI(3) = -X0I(3)        - 2*depth
+           XJ(3) = -X0J(3) - 2*depth
+           CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(4, 1), VS(:, 4, 1))
+           VS(3, 4, 1) = -VS(3, 4, 1) ! Reflection of the output vector
+
+           PSR(4, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+
+           IF (Mesh%ISym == NO_Y_SYMMETRY) THEN
+             ! Add up the results of the four problems
+             SP_IGQ       = -SUM(FS(1:4, 1)) - SUM(PSR(1:4, 1))
+             VSP_IGQ(1:3) = -SUM(VS(1:3, 1:4, 1), 2)
+             SM_IGQ       = CZERO
+             VSM_IGQ(1:3) = CZERO
+
+           ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
+             ! If the y-symmetry is used, the four symmetric problems have to be solved
+             XI(:) = X0I(:)
+             XI(2) = -XI(2)
+             IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
+             XJ(:) = X0J 
+             XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
+
+             RRR = NORM2(XI(1:2) - XJ(1:2))
+
+             ! 1.a' First infinite depth problem
+             CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(1, 2), VS(:, 1, 2))
+
+             PSR(1, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+
+             ! 1.b' Shift and reflect XI and compute another value of the Green function
+             XI(3) = -X0I(3)        - 2*depth
+             XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
+             CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(2, 2), VS(:, 2, 2))
+             VS(3, 2, 2) = -VS(3, 2, 2)
+
+             PSR(2, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+
+             ! 1.c' Shift and reflect XJ and compute another value of the Green function
+             XI(3) = X0I(3)
+             IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
+             XJ(3) = -X0J(3)- 2*depth
+             CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(3, 2), VS(:, 3, 2))
+
+             PSR(3, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+
+             ! 1.d' Shift and reflect both XI and XJ and compute another value of the Green function
+             XI(3) = -X0I(3)        - 2*depth
+             XJ(3) = -X0J(3)- 2*depth
+             CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(4, 2), VS(:, 4, 2))
+             VS(3, 4, 2) = -VS(3, 4, 2)
+
+             PSR(4, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+
+             ! Reflection of the four output vectors around xOz plane
+             VS(2, 1:4, 2) = -VS(2, 1:4, 2)
+
+             ! Add up the results of the 2×4 problems
+             SP_IGQ       = -SUM(FS(1:4, 1))-SUM(PSR(1:4, 1))   - SUM(FS(1:4, 2))-SUM(PSR(1:4, 2))
+             VSP_IGQ(1:3) = -SUM(VS(1:3, 1:4, 1), 2)            - SUM(VS(1:3, 1:4, 2), 2)
+             SM_IGQ       = -SUM(FS(1:4, 1)) - SUM(PSR(1:4, 1)) + SUM(FS(1:4, 2)) + SUM(PSR(1:4, 2))
+             VSM_IGQ(1:3) = -SUM(VS(1:3, 1:4, 1), 2)            + SUM(VS(1:3, 1:4, 2), 2)
+           END IF
+           ! Multiply by some coefficients
+           AMH  = wavenumber*depth
+           AKH  = AMH*TANH(AMH)
+           A    = (AMH+AKH)**2/(depth*(AMH**2-AKH**2+AKH))
+           COF1 = -A/(8*PI**2)*Mesh%A(J)*FaceJ%dXdXG_WGQ_per_A(IGQ)
+           COF2 = -A/(8*PI)   *Mesh%A(J)*FaceJ%dXdXG_WGQ_per_A(IGQ)
+           COF3 = wavenumber*COF1
+           COF4 = wavenumber*COF2
+
+           SP     = SP+CMPLX(REAL(SP_IGQ)*COF1,  AIMAG(SP_IGQ)*COF2)
+           VSP(:) = VSP(:)+CMPLX(REAL(VSP_IGQ)*COF3, AIMAG(VSP_IGQ)*COF4)
+
+           IF (Mesh%ISym == Y_SYMMETRY) THEN
+             SM     = SM+CMPLX(REAL(SM_IGQ)*COF1,  AIMAG(SM_IGQ)*COF2)
+             VSM(:) = VSM(:)+CMPLX(REAL(VSM_IGQ)*COF3, AIMAG(VSM_IGQ)*COF4)
+           END IF
         
-        X0J(:)= FaceJ%XM_GQ(:,IGQ)
-        XJ(:) = X0J 
-        XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
-        
-        ! Distance in xOy plane
-        RRR = NORM2(XI(1:2) - XJ(1:2))
+       END DO  
 
-        ! 1.a First infinite depth problem
-        CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(1, 1), VS(:, 1, 1))
+       !=====================================================
+       ! Part 2: Integrate (NEXP+1)×4 terms of the form 1/MM'
+       !=====================================================
+       DO IGQ=1, FaceJ%NP_GQ 
+           AMBDA(NEXP+1) = 0
+           AR(NEXP+1)    = 2
+       
+          XJ(:) = FaceJ%XM_GQ(:,IGQ)
 
-        PSR(1, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+           DO KE = 1, NEXP+1
+             XI(:) = X0I(:)
 
-        ! 1.b Shift and reflect XI and compute another value of the Green function
-        XI(3) = -X0I(3) - 2*depth
-        XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
-        CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(2, 1), VS(:, 2, 1))
-        VS(3, 2, 1) = -VS(3, 2, 1) ! Reflection of the output vector
+             ! 2.a Shift observation point and compute integral
+             XI(3) =  X0I(3) + depth*AMBDA(KE) - 2*depth
+             CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(1, 1), VTS(:, 1, 1))
 
-        PSR(2, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+             ! 2.b Shift and reflect observation point and compute integral
+             XI(3) = -X0I(3) - depth*AMBDA(KE)
+             CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(2, 1), VTS(:, 2, 1))
+             VTS(3, 2, 1) = -VTS(3, 2, 1) ! Reflection of the output vector
 
-        ! 1.c Shift and reflect XJ and compute another value of the Green function
-        XI(3) = X0I(3)
-        IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
-        XJ(3) = -X0J(3) - 2*depth
-        CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(3, 1), VS(:, 3, 1))
+             ! 2.c Shift and reflect observation point and compute integral
+             XI(3) = -X0I(3) + depth*AMBDA(KE) - 4*depth
+             CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(3, 1), VTS(:, 3, 1))
+             VTS(3, 3, 1) = -VTS(3, 3, 1) ! Reflection of the output vector
 
-        PSR(3, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+             ! 2.d Shift observation point and compute integral
+             XI(3) =  X0I(3) - depth*AMBDA(KE) + 2*depth
+             CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(4, 1), VTS(:, 4, 1))
 
-        ! 1.d Shift and reflect both XI and XJ and compute another value of the Green function
-        XI(3) = -X0I(3)        - 2*depth
-        XJ(3) = -X0J(3) - 2*depth
-        CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(4, 1), VS(:, 4, 1))
-        VS(3, 4, 1) = -VS(3, 4, 1) ! Reflection of the output vector
+             AQT = -AR(KE)/(8*PI)
 
-        PSR(4, 1) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+             IF (Mesh%ISym == NO_Y_SYMMETRY) THEN
+               ! Add all the contributions
+               SP     = SP     + AQT*SUM(FTS(1:4, 1))*FaceJ%dXdXG_WGQ_per_A(IGQ)
+               VSP(:) = VSP(:) + AQT*SUM(VTS(1:3, 1:4, 1), 2)*FaceJ%dXdXG_WGQ_per_A(IGQ)
+              !print*,REAL(VSP(3)),AIMAG(VSP(3))
 
-        IF (Mesh%ISym == NO_Y_SYMMETRY) THEN
-          ! Add up the results of the four problems
-          SP_IGQ       = -SUM(FS(1:4, 1)) - SUM(PSR(1:4, 1))
-          VSP_IGQ(1:3) = -SUM(VS(1:3, 1:4, 1), 2)
-          SM_IGQ       = CZERO
-          VSM_IGQ(1:3) = CZERO
+             ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
+               ! If the y-symmetry is used, the four symmetric problems have to be solved
+               XI = X0I(:)
+               XI(2) = -X0I(2)
+               ! 2.a' Shift observation point and compute integral
+               XI(3) =  X0I(3) + depth*AMBDA(KE) - 2*depth
+               CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(1, 2), VTS(:, 1, 2))
 
-        ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
-          ! If the y-symmetry is used, the four symmetric problems have to be solved
-          XI(:) = X0I(:)
-          XI(2) = -XI(2)
-          IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
-          XJ(:) = X0J 
-          XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
+               ! 2.b' Shift and reflect observation point and compute integral
+               XI(3) = -X0I(3) - depth*AMBDA(KE)
+               CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(2, 2), VTS(:, 2, 2))
+               VTS(3, 2, 2) = -VTS(3, 2, 2) ! Reflection of the output vector
 
-          RRR = NORM2(XI(1:2) - XJ(1:2))
+               ! 2.c' Shift and reflect observation point and compute integral
+               XI(3) = -X0I(3) + depth*AMBDA(KE) - 4*depth
+               CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(3, 2), VTS(:, 3, 2))
+               VTS(3, 3, 2) = -VTS(3, 3, 2) ! Reflection of the output vector
 
-          ! 1.a' First infinite depth problem
-          CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(1, 2), VS(:, 1, 2))
+               ! 2.d' Shift observation point and compute integral
+               XI(3) =  X0I(3) - depth*AMBDA(KE) + 2*depth
+               CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(4, 2), VTS(:, 4, 2))
 
-          PSR(1, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
+               ! Reflection of the output vector around the xOz plane
+               VTS(2, 1:4, 2) = -VTS(2, 1:4, 2)
 
-          ! 1.b' Shift and reflect XI and compute another value of the Green function
-          XI(3) = -X0I(3)        - 2*depth
-          XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
-          CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(2, 2), VS(:, 2, 2))
-          VS(3, 2, 2) = -VS(3, 2, 2)
-
-          PSR(2, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
-
-          ! 1.c' Shift and reflect XJ and compute another value of the Green function
-          XI(3) = X0I(3)
-          IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
-          XJ(3) = -X0J(3)- 2*depth
-          CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(3, 2), VS(:, 3, 2))
-
-          PSR(3, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
-
-          ! 1.d' Shift and reflect both XI and XJ and compute another value of the Green function
-          XI(3) = -X0I(3)        - 2*depth
-          XJ(3) = -X0J(3)- 2*depth
-          CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(4, 2), VS(:, 4, 2))
-          VS(3, 4, 2) = -VS(3, 4, 2)
-
-          PSR(4, 2) = PI/(wavenumber*SQRT(RRR**2+(XI(3)+XJ(3))**2))
-
-          ! Reflection of the four output vectors around xOz plane
-          VS(2, 1:4, 2) = -VS(2, 1:4, 2)
-
-          ! Add up the results of the 2×4 problems
-          SP_IGQ       = -SUM(FS(1:4, 1))-SUM(PSR(1:4, 1))   - SUM(FS(1:4, 2))-SUM(PSR(1:4, 2))
-          VSP_IGQ(1:3) = -SUM(VS(1:3, 1:4, 1), 2)            - SUM(VS(1:3, 1:4, 2), 2)
-          SM_IGQ       = -SUM(FS(1:4, 1)) - SUM(PSR(1:4, 1)) + SUM(FS(1:4, 2)) + SUM(PSR(1:4, 2))
-          VSM_IGQ(1:3) = -SUM(VS(1:3, 1:4, 1), 2)            + SUM(VS(1:3, 1:4, 2), 2)
-        END IF
-        ! Multiply by some coefficients
-        AMH  = wavenumber*depth
-        AKH  = AMH*TANH(AMH)
-        A    = (AMH+AKH)**2/(depth*(AMH**2-AKH**2+AKH))
-        COF1 = -A/(8*PI**2)*Mesh%A(J)*FaceJ%dXdXG_WGQ_per_A(IGQ)
-        COF2 = -A/(8*PI)   *Mesh%A(J)*FaceJ%dXdXG_WGQ_per_A(IGQ)
-        COF3 = wavenumber*COF1
-        COF4 = wavenumber*COF2
-
-        SP     = SP+CMPLX(REAL(SP_IGQ)*COF1,  AIMAG(SP_IGQ)*COF2)
-        VSP(:) = VSP(:)+CMPLX(REAL(VSP_IGQ)*COF3, AIMAG(VSP_IGQ)*COF4)
-
-        IF (Mesh%ISym == Y_SYMMETRY) THEN
-          SM     = SM+CMPLX(REAL(SM_IGQ)*COF1,  AIMAG(SM_IGQ)*COF2)
-          VSM(:) = VSM(:)+CMPLX(REAL(VSM_IGQ)*COF3, AIMAG(VSM_IGQ)*COF4)
-        END IF
-     
-    END DO  
-
-    !=====================================================
-    ! Part 2: Integrate (NEXP+1)×4 terms of the form 1/MM'
-    !=====================================================
-    DO IGQ=1, FaceJ%NP_GQ 
-        AMBDA(NEXP+1) = 0
-        AR(NEXP+1)    = 2
-    
-       XJ(:) = FaceJ%XM_GQ(:,IGQ)
-
-        DO KE = 1, NEXP+1
-          XI(:) = X0I(:)
-
-          ! 2.a Shift observation point and compute integral
-          XI(3) =  X0I(3) + depth*AMBDA(KE) - 2*depth
-          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(1, 1), VTS(:, 1, 1))
-
-          ! 2.b Shift and reflect observation point and compute integral
-          XI(3) = -X0I(3) - depth*AMBDA(KE)
-          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(2, 1), VTS(:, 2, 1))
-          VTS(3, 2, 1) = -VTS(3, 2, 1) ! Reflection of the output vector
-
-          ! 2.c Shift and reflect observation point and compute integral
-          XI(3) = -X0I(3) + depth*AMBDA(KE) - 4*depth
-          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(3, 1), VTS(:, 3, 1))
-          VTS(3, 3, 1) = -VTS(3, 3, 1) ! Reflection of the output vector
-
-          ! 2.d Shift observation point and compute integral
-          XI(3) =  X0I(3) - depth*AMBDA(KE) + 2*depth
-          CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(4, 1), VTS(:, 4, 1))
-
-          AQT = -AR(KE)/(8*PI)
-
-          IF (Mesh%ISym == NO_Y_SYMMETRY) THEN
-            ! Add all the contributions
-            SP     = SP     + AQT*SUM(FTS(1:4, 1))*FaceJ%dXdXG_WGQ_per_A(IGQ)
-            VSP(:) = VSP(:) + AQT*SUM(VTS(1:3, 1:4, 1), 2)*FaceJ%dXdXG_WGQ_per_A(IGQ)
-           !print*,REAL(VSP(3)),AIMAG(VSP(3))
-
-          ELSE IF (Mesh%ISym == Y_SYMMETRY) THEN
-            ! If the y-symmetry is used, the four symmetric problems have to be solved
-            XI = X0I(:)
-            XI(2) = -X0I(2)
-            ! 2.a' Shift observation point and compute integral
-            XI(3) =  X0I(3) + depth*AMBDA(KE) - 2*depth
-            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(1, 2), VTS(:, 1, 2))
-
-            ! 2.b' Shift and reflect observation point and compute integral
-            XI(3) = -X0I(3) - depth*AMBDA(KE)
-            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(2, 2), VTS(:, 2, 2))
-            VTS(3, 2, 2) = -VTS(3, 2, 2) ! Reflection of the output vector
-
-            ! 2.c' Shift and reflect observation point and compute integral
-            XI(3) = -X0I(3) + depth*AMBDA(KE) - 4*depth
-            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(3, 2), VTS(:, 3, 2))
-            VTS(3, 3, 2) = -VTS(3, 3, 2) ! Reflection of the output vector
-
-            ! 2.d' Shift observation point and compute integral
-            XI(3) =  X0I(3) - depth*AMBDA(KE) + 2*depth
-            CALL COMPUTE_ASYMPTOTIC_S0(XI(:), XJ, FaceJ%A, EPS, FTS(4, 2), VTS(:, 4, 2))
-
-            ! Reflection of the output vector around the xOz plane
-            VTS(2, 1:4, 2) = -VTS(2, 1:4, 2)
-
-            ! Add all the contributions
-            SP     = SP     + AQT*(SUM(FTS(1:4, 1))         + SUM(FTS(1:4, 2))        )*FaceJ%dXdXG_WGQ_per_A(IGQ)
-            VSP(:) = VSP(:) + AQT*(SUM(VTS(1:3, 1:4, 1), 2) + SUM(VTS(1:3, 1:4, 2), 2))*FaceJ%dXdXG_WGQ_per_A(IGQ)
-            SM     = SM     + AQT*(SUM(FTS(1:4, 1))         - SUM(FTS(1:4, 2))        )*FaceJ%dXdXG_WGQ_per_A(IGQ)
-            VSM(:) = VSM(:) + AQT*(SUM(VTS(1:3, 1:4, 1), 2) - SUM(VTS(1:3, 1:4, 2), 2))*FaceJ%dXdXG_WGQ_per_A(IGQ)
-          END IF
-        END DO
-    END DO
-    
+               ! Add all the contributions
+               SP     = SP     + AQT*(SUM(FTS(1:4, 1))         + SUM(FTS(1:4, 2))        )*FaceJ%dXdXG_WGQ_per_A(IGQ)
+               VSP(:) = VSP(:) + AQT*(SUM(VTS(1:3, 1:4, 1), 2) + SUM(VTS(1:3, 1:4, 2), 2))*FaceJ%dXdXG_WGQ_per_A(IGQ)
+               SM     = SM     + AQT*(SUM(FTS(1:4, 1))         - SUM(FTS(1:4, 2))        )*FaceJ%dXdXG_WGQ_per_A(IGQ)
+               VSM(:) = VSM(:) + AQT*(SUM(VTS(1:3, 1:4, 1), 2) - SUM(VTS(1:3, 1:4, 2), 2))*FaceJ%dXdXG_WGQ_per_A(IGQ)
+             END IF
+           END DO
+       END DO
+    ENDIF 
     DEALLOCATE(FaceJ%dXdXG_WGQ_per_A)
     DEALLOCATE(FaceJ%XM_GQ)
 
