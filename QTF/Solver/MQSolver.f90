@@ -953,6 +953,7 @@ CONTAINS
   COMPLEX,DIMENSION(2,ASYMP_PARAM%NBESSEL+1)       :: CmSmRad_delk,CmSmRad_sumk
   COMPLEX,DIMENSION(2,ASYMP_PARAM%NBESSEL+1)       :: IR1l,IR2l
   COMPLEX,DIMENSION(2,ASYMP_PARAM%NBESSEL+3)       :: Ivartheta1l,Ivartheta2l
+  INTEGER                             :: ufile
 
   Isym=Mesh%Isym
   Npanels=Mesh%Npanels
@@ -999,6 +1000,18 @@ CONTAINS
    IF (delk.EQ.0)  IR1l(1,Ibessel)=0.
    IF (delk.EQ.0)  IR2l(1,Ibessel)=0.
   ENDDO
+  !OPEN(NEWUNIT=ufile,FILE='./IR1M.DAT',ACTION='WRITE',POSITION='APPEND')
+  !WRITE(ufile,'(4(F10.3,X),<Nbessel*2+2>(E14.7,X))') k1,k2,delk,sumk,(IR1l(1,Ibessel),Ibessel=0,Nbessel)
+  !CLOSE(ufile)
+  !OPEN(NEWUNIT=ufile,FILE='./IR2M.DAT',ACTION='WRITE',POSITION='APPEND')
+  !WRITE(ufile,'(4(F10.3,X),<Nbessel*2+2>(E14.7,X))') k1,k2,delk,sumk,(IR2l(1,Ibessel),Ibessel=0,Nbessel)
+  !CLOSE(ufile)
+  !OPEN(NEWUNIT=ufile,FILE='./IR1P.DAT',ACTION='WRITE',POSITION='APPEND')
+  !WRITE(ufile,'(4(F10.3,X),<Nbessel*2+2>(E14.7,X))') k1,k2,delk,sumk,(IR1l(2,Ibessel),Ibessel=0,Nbessel)
+  !CLOSE(ufile)
+  !OPEN(NEWUNIT=ufile,FILE='./IR2P.DAT',ACTION='WRITE',POSITION='APPEND')
+  !WRITE(ufile,'(4(F10.3,X),<Nbessel*2+2>(E14.7,X))') k1,k2,delk,sumk,(IR2l(2,Ibessel),Ibessel=0,Nbessel)
+  !CLOSE(ufile)
 
   DO Iinteg=1,Nintegration
      QTFHASFS_ASYMP(Iinteg,:,:)=CZERO

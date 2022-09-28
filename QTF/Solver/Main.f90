@@ -83,7 +83,7 @@ IMPLICIT NONE
         REAL                                    :: EPS_ZMIN
         COMPLEX, ALLOCATABLE,DIMENSION(:,:,:)   :: QTF_DUOK ,QTF_HASBO   
         COMPLEX, ALLOCATABLE,DIMENSION(:,:,:)   :: QTF_HASFS,QTF_HASFS_ASYMP
-        INTEGER                                 :: Iterm
+        INTEGER                                 :: Iterm,ufile
         CHARACTER(LEN=1)                        :: strI
         !
 
@@ -216,6 +216,19 @@ IMPLICIT NONE
 
        WRITE(*,*) 'QTF Solver preparation, Done!'
        CALL WRITE_QTFSOLVERLOGFILE(TRIM(ID%ID),Nbeta,beta,Qfreq)
+      ! OPEN(NEWUNIT=ufile,FILE='./IR1M.DAT',Action='WRITE')
+      ! WRITE(ufile,*) ''
+      ! CLOSE(ufile) 
+      ! OPEN(NEWUNIT=ufile,FILE='./IR2M.DAT',Action='WRITE')
+      ! WRITE(ufile,*) ''
+      ! CLOSE(ufile)
+      ! OPEN(NEWUNIT=ufile,FILE='./IR1P.DAT',Action='WRITE')
+      ! WRITE(ufile,*) ''
+      ! CLOSE(ufile) 
+      ! OPEN(NEWUNIT=ufile,FILE='./IR2P.DAT',Action='WRITE')
+      ! WRITE(ufile,*) ''
+      ! CLOSE(ufile) 
+
 
         DO Ibeta1=1,Nbeta
            DO Ibeta2=1,Nbeta
