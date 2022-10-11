@@ -60,8 +60,6 @@ CONTAINS
      VSP=CZERO
      VSM=CZERO
 
-    IF (I>0.OR.(I==0.AND.(FACEJ%XM(3).LT.-EPS*Mesh%xy_diameter))) THEN 
-       !it is not computed in case of free surface and XM_J on lid panels
        DO IGQ=1, FaceJ%NP_GQ
            XI(:) = X0I(:)
            IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
@@ -101,7 +99,6 @@ CONTAINS
              VSM = VSM+CMPLX(REAL(VSM_IGQ)*AKDPI2, AIMAG(VSM_IGQ)*AKDPI)
            END IF
        ENDDO
-    ENDIF
 
     DEALLOCATE(FaceJ%dXdXG_WGQ_per_A)
     DEALLOCATE(FaceJ%XM_GQ)
@@ -163,9 +160,6 @@ CONTAINS
     !========================================
     ! Part 1: Solve 4 infinite depth problems
     !========================================
-
-    IF (I>0.OR.(I==0.AND.(FACEJ%XM(3).LT.-EPS*Mesh%xy_diameter))) THEN 
-       !it is not computed in case of free surface and XM_J on lid panels
 
        DO IGQ=1, FaceJ%NP_GQ
  
@@ -353,7 +347,6 @@ CONTAINS
              END IF
            END DO
        END DO
-    ENDIF 
     DEALLOCATE(FaceJ%dXdXG_WGQ_per_A)
     DEALLOCATE(FaceJ%XM_GQ)
 
