@@ -216,13 +216,13 @@ END FUNCTION
               +CONJG(CmPer)*CnRad(1)*cos(ll*beta)*Fun_Dlmn(1,ll,mm,nn)  &
               +CONJG(CmPer)*SnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,nn,mm)  &
               +CONJG(SmPer)*CnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,mm,nn)  &
-              +CONJG(SmPer)*SnRad(1)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,ll) 
+              +CONJG(SmPer)*SnRad(1)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,abs(ll)) 
           !for sum freq    
           Ivartheta(2)=Ivartheta(2)                                     &
               +CmPer*CnRad(2)*cos(ll*beta)*Fun_Dlmn(1,ll,mm,nn)         &
               +CmPer*SnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,nn,mm)         &
               +SmPer*CnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,mm,nn)         &
-              +SmPer*SnRad(2)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,ll)            
+              +SmPer*SnRad(2)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,abs(ll))            
         ENDDO
      ENDDO
   END FUNCTION
@@ -255,12 +255,12 @@ END FUNCTION
               +CmPer*CnRad(1)*cos(ll*beta)*Fun_Dlmn(1,ll,mm,nn)         &
               +CmPer*SnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,nn,mm)         &
               +SmPer*CnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,mm,nn)         &
-              +SmPer*SnRad(1)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,ll)     
+              +SmPer*SnRad(1)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,abs(ll))     
           Ivartheta(2)=Ivartheta(2)                                     &
               +CmPer*CnRad(2)*cos(ll*beta)*Fun_Dlmn(1,ll,mm,nn)         &
               +CmPer*SnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,nn,mm)         &
               +SmPer*CnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,mm,nn)         &
-              +SmPer*SnRad(2)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,ll)            
+              +SmPer*SnRad(2)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,abs(ll))            
         ENDDO
      ENDDO
   END FUNCTION
@@ -288,7 +288,7 @@ END FUNCTION
 
           IF (Isym.EQ.1) THEN
             alpha=atan2(-XM(2,Ipanel),XM(1,Ipanel))
-            calcClSl=sig(Ipanel)*CIH(k,XM(3,Ipanel),D)                       &
+            calcClSl=sig(Npanels+Ipanel)*CIH(k,XM(3,Ipanel),D)               &
                     *Fun_epsilon_l(ll)*(-II)**ll*fun_BESSJ(ll,k*r)           &
                     *AreaPanel(Ipanel)
             ClSl(1)=ClSl(1)+calcClSl*cos(ll*alpha)
