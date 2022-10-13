@@ -41,7 +41,7 @@ IMPLICIT NONE
         TYPE(TMeshFS)                   :: MeshFS
         TYPE(TNemCal)                   :: inpNEMOHCAL
         TYPE(TEnvironment)              :: Env
-        INTEGER                         :: Nw,Nbeta           ! Number of Freq,direction
+        INTEGER                         :: Nw,Nbeta,Nbeta2    ! Number of Freq,direction
         REAL, ALLOCATABLE,DIMENSION(:)  :: w,kw,beta          ! vector of freq [rad/s],
                                                               ! wave numbers [rad/m],
                                                               ! direction angle [rad]
@@ -62,7 +62,7 @@ IMPLICIT NONE
         TYPE(TPotVel)                           :: datPotVelFS   ! data Pot & vel (FreeSurface)
         TYPE(TPotVel)                           :: datPotVelQFS  ! data Pot & vel for QTF (FreeSurface)
 
-        INTEGER                                 :: I,Ibeta1,Ibeta2,Iinteg,Ipanel
+        INTEGER                                 :: I,Ibeta1,Ibeta2,Iinteg,Ipanel,Ibeta2temp
         INTEGER                                 :: Iw1,Iw2,IwQ 
         INTEGER                                 :: NPFlow        ! Number of flow points
         INTEGER                                 :: NPFlowFS      ! Number of flow points (Free-surface)
@@ -79,7 +79,7 @@ IMPLICIT NONE
         REAL                                    :: winputQ(3), BForwardSpeed,delwiter
         INTEGER                                 :: NwQ    ! Number of wave freq
         !---------
-        INTEGER                                 :: SwitchQuadHM 
+        INTEGER                                 :: SwitchQuadHM,SwitchBiDir 
         REAL                                    :: EPS_ZMIN
         COMPLEX, ALLOCATABLE,DIMENSION(:,:,:)   :: QTF_DUOK ,QTF_HASBO   
         COMPLEX, ALLOCATABLE,DIMENSION(:,:,:)   :: QTF_HASFS,QTF_HASFS_ASYMP
@@ -103,6 +103,7 @@ IMPLICIT NONE
         Nradiation   =InpNEMOHCAL%Nradtot
         winputQ      =InpNEMOHCAL%qtfinput%omega
         SwitchQuadHM =InpNEMOHCAL%qtfinput%switch_quadHM
+        SwitchBiDir  =InpNEMOHCAL%qtfinput%bidirection
         NwQ          =winputQ(1)
         BForwardSpeed=InpNEMOHCAL%qtfinput%body_forward_speed
         NP_GQ        =Read_NP_GaussQuad(TRIM(ID%ID)) 
@@ -228,10 +229,14 @@ IMPLICIT NONE
       ! OPEN(NEWUNIT=ufile,FILE='./IR2P.DAT',Action='WRITE')
       ! WRITE(ufile,*) ''
       ! CLOSE(ufile) 
-
+        Nbeta2=Nbeta
+        IF (SwitchBiDir==0) Nbeta2=1
 
         DO Ibeta1=1,Nbeta
-           DO Ibeta2=1,Nbeta
+           DO Ibeta2temp=1,Nbeta2
+                IF (SwitchBiDir==0) Ibeta2=Ibeta1 
+                IF (SwitchBiDir==1) Ibeta2=Ibeta2temp
+
                 WRITE(*,'(A,F7.3,A,F7.3,A)'),'beta1=', beta(Ibeta1)*180/PI,&
                         ', beta2=', beta(Ibeta2)*180/PI, ' [deg]'
                 DO IwQ=0,NwQ-1

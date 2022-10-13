@@ -34,7 +34,8 @@ CONTAINS
           INTEGER                                   :: IDCONTRIB(3)
           INTEGER,DIMENSION(inpNEMCAL%Nintegtot)    :: DOF
           INTEGER                                   :: Ninteg,IintegS,Iinteg, &
-                                                       Ibeta1,Ibeta2
+                                                       Ibeta1,Ibeta2,Ibeta2temp,&
+                                                       SwitchBiDir,Nbeta2
           CHARACTER*1                               :: strDOF
           CHARACTER*1,DIMENSION(2)                  :: str_MP
                   
@@ -47,6 +48,10 @@ CONTAINS
           Nbeta= inpNEMCAL%waveinput%NBeta
           NwQ  = inpNEMCAL%qtfinput%omega(1)
           Ninteg=inpNEMCAL%Nintegtot
+          SwitchBiDir=inpNEMCAL%qtfinput%bidirection
+          Nbeta2=Nbeta
+          IF (SwitchBiDir==0) Nbeta2=1
+
           str_MP(1)='M'
           str_MP(2)='P'
           DO ID_MP=1,InpNEMCAL%qtfinput%switch_QTFP+1
@@ -73,7 +78,6 @@ CONTAINS
                   IDCONTRIB(2)=1
                 ENDIF
                 !open QTF_HASFS file
-
                 IF (InpNEMCAL%qtfinput%switch_qtfhasfs==IDHASFS) THEN
                   OPEN(NEWUNIT=u3, FILE=TRIM(wd)//'/results/QTF/QTF'//str_MP(ID_MP)//'_HASFS.dat',&
                           STATUS='UNKNOWN', ACTION='READ')
@@ -86,7 +90,10 @@ CONTAINS
 
                
                 DO Ibeta1=1,Nbeta
-                    DO Ibeta2=1,Nbeta
+                    DO Ibeta2temp=1,Nbeta2
+                    IF (SwitchBiDir==0) Ibeta2=Ibeta1 
+                    IF (SwitchBiDir==1) Ibeta2=Ibeta2temp
+
                     ALLOCATE(w(NwQ))
                     ALLOCATE(QTFtotR(NwQ,NwQ))
                     ALLOCATE(QTFtotI(NwQ,NwQ))

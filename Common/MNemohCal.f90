@@ -79,6 +79,7 @@
               INTEGER  :: switch_qtfp       !LQTFP
               REAL,DIMENSION(3) :: omega    !rad freq [Nw,wmin,wmax]
               REAL     :: body_forward_speed!body forward-speed
+              INTEGER  :: bidirection       !bi-direction
               INTEGER  :: NContrib          !Contrib   
               INTEGER  :: switch_quadHM     !quadratic hydrostatic and moment terms  
               INTEGER  :: switch_qtfduok    !Loutduok   
@@ -183,7 +184,8 @@
              READ(ufile,*)! ---QTF----
              READ(ufile,*)InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr
              IF (InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr==1) THEN 
-               READ(ufile,*)(InpNEMOHCAL%qtfinput%omega(K),K=1,3)    
+               READ(ufile,*)(InpNEMOHCAL%qtfinput%omega(K),K=1,3)
+               READ(ufile,*) InpNEMOHCAL%qtfinput%bidirection   
                !READ(ufile,*)InpNEMOHCAL%qtfinput%body_forward_speed
                InpNEMOHCAL%qtfinput%body_forward_speed=0 ! for now 0
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_QTFP

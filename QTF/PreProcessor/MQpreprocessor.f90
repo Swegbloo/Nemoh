@@ -27,7 +27,7 @@ USE MLogFile
 !
 IMPLICIT NONE
 
-INTEGER,parameter :: ID_DEBUG=1 ! for debugging potential will be saved 
+INTEGER,parameter :: ID_DEBUG=0 ! for debugging potential will be saved 
 
 CONTAINS
 
