@@ -122,7 +122,7 @@
     CHARACTER(LEN=20) :: lookfor
     CHARACTER(LEN=80) :: discard
     INTEGER :: i
-    REAL :: Switch_Plot_WaveElevation ! Unused?
+    REAL :: Switch_Plot_WaveElevation
     OPEN(10,FILE=namefile)
     READ(10,'(A20)') lookfor
     DO WHILE (lookfor.NE.'--- Post processing ')
@@ -131,5 +131,6 @@
     DO i=1,3
         READ(10,*)
     END DO
+     READ(10,*) Switch_Plot_WaveElevation
     CLOSE(10)
     END SUBROUTINE  Initialize_Plot_WaveElevation

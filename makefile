@@ -217,6 +217,21 @@ run_nonsymmetrical: preProc solver postProc
 clean_nonsymmetrical:
 	$(MAKE) -C Verification/NonSymmetrical/ clean
 
+.PHONY: run_2Bodies clean_2Bodies
+run_2Bodies: preProc solver postProc
+	$(MAKE) -C Verification/2Bodies/ run
+
+clean_clean_2Bodies:
+	$(MAKE) -C Verification/2Bodies/ clean
+
+.PHONY: run_Postprocessing clean_Postprocessing
+run_Postprocessing: preProc solver postProc
+	$(MAKE) -C Verification/Postprocessing/ run
+
+clean_clean_Postprocessing:
+	$(MAKE) -C Verification/Postprocessing/ clean
+
+
 .PHONY: test clean_test
 test: preProc solver postProc
 	@echo ""

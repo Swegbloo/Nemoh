@@ -118,7 +118,7 @@
     thetamax          =InpNEMOHCAL%OptOUTPUT%Kochin%max_theta
     Switch_FreeSurface=InpNEMOHCAL%OptOUTPUT%Freesurface%Switch
     Nx                =InpNEMOHCAL%OptOUTPUT%Freesurface%Nx
-    Nx                =InpNEMOHCAL%OptOUTPUT%Freesurface%Ny
+    Ny                =InpNEMOHCAL%OptOUTPUT%Freesurface%Ny
     Lx                =InpNEMOHCAL%OptOUTPUT%Freesurface%Lx
     Ly                =InpNEMOHCAL%OptOUTPUT%Freesurface%Ly
     Switch_SourceDistr=InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr

@@ -78,32 +78,32 @@ bin:
 # Rules to build
 QTFpreProc_N:		$(OBJQPRE_N) 
 			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -o $(outputdir)/QTFpreProc_N $(OBJQPRE_N)
+			@$(FC) -o $(outputdir)/QTFpreProc $(OBJQPRE_N)
 			@echo "QTF pre-processing tool compilation successful!"
 
 clean_QTFpreProc_N:
 			@rm -f $(OBJQPRE_N)
-			@rm -f $(outputdir)/QTFpreProc_N
+			@rm -f $(outputdir)/QTFpreProc
 
 # Rules to build
 QTFSolver_N:		$(OBJQSOL_N) 
 			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -o $(outputdir)/QTFSolver_N $(OBJQSOL_N)
+			@$(FC) -o $(outputdir)/QTFSolver $(OBJQSOL_N)
 			@echo "QTF solver tool compilation successful!"
 
 clean_QTFSolver_N:
 			@rm -f $(OBJQSOL_N)
-			@rm -f $(outputdir)/QTFSolver_N
+			@rm -f $(outputdir)/QTFSolver
 
 # Rules to build
 QTFpostproc_N:		$(OBJPOSTN)
 			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -o $(outputdir)/QTFpostproc_N $(OBJPOSTN)
+			@$(FC) -o $(outputdir)/QTFpostproc $(OBJPOSTN)
 			@echo "QTF post-processing tool compilation successful!"
 
 clean_QTFpostproc_N:
 			@rm -f $(OBJPOSTN)
-			@rm -f $(outputdir)/QTFpostproc_N
+			@rm -f $(outputdir)/QTFpostproc
 
 # rules for object files
 .f.o:
