@@ -11,22 +11,6 @@ FFLAGS2=  -O3 -ffree-line-length-0 -finit-local-zero -mcmodel=medium -fbounds-ch
 outputdir=./bin
 
 #### same process for second order (QTF) ################
-#SOURCES FORTRAN QTFpreProc(modules de postprocessing)
-#ELEMENTARY_FNS is added by RK for preparing CREK 2nd term Green function
-SRCQPRE=./Common/Identification.f90\
-./Common/Elementary_functions.f90\
-./Common/Environment.f90\
-./Common/Mesh.f90\
-./QTF/QTFpreProcessor/QTFCOM_VAR.f90\
-./QTF/QTFpreProcessor/QTFRead.f90\
-./QTF/QTFpreProcessor/QTFWrite.f90\
-./QTF/QTFpreProcessor/QTFGeom.f90\
-./QTF/QTFpreProcessor/ELEMENTARY_FNS.f90\
-./QTF/QTFpreProcessor/QTFBaseFunctions.f90\
-./QTF/QTFpreProcessor/QTFInit.f90\
-./QTF/QTFpreProcessor/Main.f90\
-
-#### same process for second order (QTF) ################
 OBJQPRE=$(SRCQPRE:.f90=.o)
 
 #### same process for second order (QTF) ################
@@ -73,23 +57,23 @@ SRCQSOL_N=./Common/Identification.f90\
 ./QTF/Solver/MQSolver.f90\
 ./QTF/Solver/Main.f90\
 
+#SOURCES FORTRAN QTFpostprocN (post processing module)
+SRCQPOSTN=./Common/Identification.f90\
+./Common/MNemohCal.f90\
+./Common/Constants.f90\
+./QTF/PostProcessor/MQpostproc.f90\
+./QTF/PostProcessor/Main.f90\
+
+OBJPOSTN=$(SRCQPOSTN:.f90=.o)
+
 #### same process for second order (QTF) ################
 OBJQSOL_N=$(SRCQSOL_N:.f90=.o)
 
 ################
-build: bin qtfpre qtfsol QTFpreProc_N QTFSolver_N QTFpostproc QTFpostproc_N
+build: bin QTFpreProc_N QTFSolver_N QTFpostproc_N
 
 bin:
 	mkdir -p $(outputdir)
-
-#
-#Build QTFpreProc executable
-qtfpre:	QTFpreProc
-qtfsol: duokap hasbo hasfs hasfscalc asymp QTFSolver
-
-#Rules to Build MAIN EXECUTABLE of QTFpreProc
-QTFpreProc:	$(OBJQPRE) 
-		$(FC) -o QTFpreProc $(OBJQPRE)
 
 # Rules to build
 QTFpreProc_N:		$(OBJQPRE_N) 
@@ -111,58 +95,6 @@ clean_QTFSolver_N:
 			@rm -f $(OBJQSOL_N)
 			@rm -f $(outputdir)/QTFSolver_N
 
-#Rules to Build QTFSolver
-duokap:	./QTF/QTFSolver/duokap.f ./QTF/QTFSolver/para.o
-		$(FC) -c ./QTF/QTFSolver/para.f90
-		$(FC) $(FFLAGS2) ./QTF/QTFSolver/duokap.f -o duokap
-		
-hasbo: ./QTF/QTFSolver/hasbo.f ./QTF/QTFSolver/para.o
-		$(FC) -c ./QTF/QTFSolver/para.f90
-		$(FC) $(FFLAGS2) ./QTF/QTFSolver/hasbo.f -o hasbo
-	
-hasfs: ./QTF/QTFSolver/hasfs.f ./QTF/QTFSolver/subhasp.f ./QTF/QTFSolver/para.o 
-		$(FC) -c ./QTF/QTFSolver/para.f90
-		$(FC) $(FFLAGS2) ./QTF/QTFSolver/hasfs.f ./QTF/QTFSolver/subhasp.f -o hasfs
-
-hasfscalc: ./QTF/QTFSolver/hasfscalc.f90 ./QTF/QTFSolver/para.o
-		$(FC) -c ./QTF/QTFSolver/para.f90
-		$(FC) $(FFLAGS2) ./QTF/QTFSolver/hasfscalc.f90 -o hasfscalc
-
-asymp: ./QTF/QTFSolver/hasfsasymp.f90 ./QTF/QTFSolver/para.o
-		$(FC) -c ./QTF/QTFSolver/para.f90
-		$(FC) $(FFLAGS2) ./QTF/QTFSolver/hasfsasymp.f90 -o asymp
-
-QTFSolver: ./QTF/QTFSolver/Solver2.f90 ./QTF/QTFSolver/para.o
-		$(FC) $(FFLAGS2) ./QTF/QTFSolver/Solver2.f90 -o QTFSolver
-
-#SOURCES FORTRAN QTFpostproc (post processing module)
-SRCQPOST=./Common/Identification.f90\
-./Common/MNemohCal.f90\
-./Common/Constants.f90\
-./QTF/QTFpostproc/MQpostproc.f90\
-./QTF/QTFpostproc/Main.f90\
-
-OBJPOST=$(SRCQPOST:.f90=.o)
-
-# Rules to build
-QTFpostproc:		$(OBJPOST)
-			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -o $(outputdir)/QTFpostproc $(OBJPOST)
-			@echo "QTF post-processing tool compilation successful!"
-
-clean_QTFpostproc:
-			@rm -f $(OBJPOST)
-			@rm -f $(outputdir)/QTFpostproc
-
-#SOURCES FORTRAN QTFpostprocN (post processing module)
-SRCQPOSTN=./Common/Identification.f90\
-./Common/MNemohCal.f90\
-./Common/Constants.f90\
-./QTF/PostProcessor/MQpostproc.f90\
-./QTF/PostProcessor/Main.f90\
-
-OBJPOSTN=$(SRCQPOSTN:.f90=.o)
-
 # Rules to build
 QTFpostproc_N:		$(OBJPOSTN)
 			@test -d $(outputdir) || mkdir $(outputdir)
@@ -181,22 +113,10 @@ clean_QTFpostproc_N:
 	
 # # #Copy to local bin directory
 install : build
-	mv QTFpreProc duokap hasbo hasfs hasfscalc asymp QTFSolver  $(outputdir)
 
 # Remove *.o and main executable
  clean:	
 	rm -f *.mod *.o
 
- cleanall: clean_QTFpreProc_N clean_QTFSolver_N clean_QTFpostproc
-	rm ./Common/*.o
-	rm ./QTF/QTFpreProcessor/*.o
-	rm ./QTF/QTFSolver/*.o
-	rm $(outputdir)/duokap
-	rm $(outputdir)/hasbo
-	rm $(outputdir)/hasfs
-	rm $(outputdir)/hasfscalc
-	rm $(outputdir)/asymp
-	rm $(outputdir)/QTFSolver
-	rm $(outputdir)/QTFpreProc
-	rm *.o
+ cleanall: clean_QTFpreProc_N clean_QTFSolver_N clean_QTFpostproc_N
 	rm *.mod
