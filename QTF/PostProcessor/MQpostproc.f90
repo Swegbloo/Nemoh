@@ -146,7 +146,7 @@ CONTAINS
                           QTFtotR(Iw1,Iw2)=QTFtotR(Iw1,Iw2)/inpNEMCAL%Env%RHO/inpNEMCAL%Env%G
                           QTFtotI(Iw1,Iw2)=QTFtotI(Iw1,Iw2)/inpNEMCAL%Env%RHO/inpNEMCAL%Env%G
 
-                          WRITE(uo_m,'(4(F10.3,X),I2,4(X,E14.7))')              &
+                          WRITE(uo_m,'(4(F12.3,X),I2,4(X,E14.7))')              &
                                 w(Iw1),w(Iw2),betai,betaj,IintegS,              &
                                 SQRT(QTFtotR(Iw1,Iw2)**2+QTFtotI(Iw1,Iw2)**2),  &
                                 ATAN2(QTFtotI(Iw1,Iw2),QTFtotR(Iw1,Iw2))*180/PI, &

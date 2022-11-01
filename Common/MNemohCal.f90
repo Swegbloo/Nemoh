@@ -248,11 +248,11 @@
                    IF (abs(dwtemp-dw).LT.0.001) THEN
                    dw =wmin  
                    END IF
-                   IF(dw.NE.wmin) THEN
-                      WRITE(*,*) &
-             "ERROR: minimum frequency must be equal to frequency step!"
-                      STOP
-                   END IF
+           !        IF(dw.NE.wmin) THEN
+           !           WRITE(*,*) &
+           !  "ERROR: minimum frequency must be equal to frequency step!"
+           !           STOP
+           !        END IF
 
                 END IF
 

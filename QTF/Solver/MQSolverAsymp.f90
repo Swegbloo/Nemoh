@@ -5,6 +5,7 @@ USE CONSTANTS          , ONLY:II,CZERO,PI
 USE MEnvironment,        ONLY:Fun_Dispersion
 USE Elementary_functions,ONLY:CIH,fun_BESSJ,   &
                               Fun_KronDelta
+USE MROMBERG,            ONLY:romberg_trap
 IMPLICIT NONE
 
 CONTAINS
@@ -106,36 +107,33 @@ CONTAINS
      INTEGER               :: eps_l 
      COMPLEX ,DIMENSION(2) :: IR1_0Rext
      COMPLEX ,DIMENSION(2) :: IR1l
+     INTEGER               :: NR,Niter
+     REAL                  :: rel_error,dR
+     COMPLEX               :: IR_0INF,IR_RFINF
+
+    
      eps_l=Fun_epsilon_l(l)
-        
-     IR1_0Rext=fun_IR1_0Rext(l,k1,k2,delk,sumk,Rf,NRf)
-     IR1l(1)=eps_l*II**l*(fun_gamma(l,delk-k2,k1)-IR1_0Rext(1))
-     IR1l(2)=eps_l*II**l*(II*fun_gamma(l,sumk+k2,k1)-IR1_0Rext(2))
-     
-    !print*,l,IR1_0Rext(:)
+     rel_error=0.01
+     NR=51;Niter=100000 
+
+     IF (delk>0) THEN
+     dR=2*PI/MAX(delk-k2,k1)/NR
+     IR_0INF=fun_gamma(l,delk-k2,k1) 
+     IR_RFINF=Fun_IntegIR_RFInf(l,rel_error,Niter,dR,Rf(NRf),NRf,k1,k2,delk,IR_0INF,11)
+     IR1l(1)=eps_l*(II**l)*IR_RFINF       !for diff freq
+     ELSE
+        IR1l(1)=CZERO
+     ENDIF 
+    
+
+     dR=2*PI/MAX(sumk+k2,k1)/NR
+     IR_0INF=II*fun_gamma(l,sumk+k2,k1) 
+     IR_RFINF=Fun_IntegIR_RFInf(l,rel_error,Niter,dR,Rf(NRf),NRf,k1,k2,sumk,IR_0INF,12)
+     IR1l(2)=eps_l*(II**l)*IR_RFINF       !for sum freq
+        !print*,l,IR1_0Rext(:)
     !print*,l,delk-k1,k1,fun_gamma(l,delk-k2,k1)
   END FUNCTION
-
-  FUNCTION Fun_IR1_0Rext(l,k1,k2,delk,sumk,Rf,NRf) result(IR1)
-     INTEGER,             INTENT(IN):: l,NRf
-     REAL,                INTENT(IN):: k1,k2,delk,sumk
-     REAL,DIMENSION(NRf), INTENT(IN):: Rf
-     COMPLEX,DIMENSION(2)           :: IR1   
-     REAL                           :: dRf
-     INTEGER ::Ir
-
-     IR1=CZERO
-     DO Ir=1,NRf-1
-        dRf=Rf(Ir+1)-Rf(Ir)
-        IR1(1)=IR1(1)+0.5*(                                                     &
-                exp(II*(delk-k2)*Rf(Ir))*fun_BESSJ(l,k1*Rf(Ir))                 &
-               +exp(II*(delk-k2)*Rf(Ir+1))*fun_BESSJ(l,k1*Rf(Ir+1)) )*dRf
-        IR1(2)=IR1(2)+0.5*(                                                     &
-              exp(II*( (sumk+k2)*Rf(Ir)+PI/2   ))*fun_BESSJ(l,k1*Rf(Ir))        &
-             +exp(II*( (sumk+k2)*Rf(Ir+1)+PI/2 ))*fun_BESSJ(l,k1*Rf(Ir+1)) )*dRf
-     ENDDO
-  END FUNCTION
-
+  
   FUNCTION Fun_IR2l(l,k1,k2,delk,sumk,Rf,NRf) result(IR2l)
      INTEGER,             INTENT(IN):: l,NRf
      REAL,                INTENT(IN):: k1,k2,delk,sumk
@@ -143,35 +141,430 @@ CONTAINS
      INTEGER               :: eps_l 
      COMPLEX ,DIMENSION(2) :: IR2_0Rext
      COMPLEX ,DIMENSION(2) :: IR2l
+     INTEGER               :: NR,Niter
+     REAL                  :: rel_error,dR
+     COMPLEX               :: IR_0INF,IR_RFINF
+
+
      eps_l=Fun_epsilon_l(l)
 
-     IR2_0Rext=fun_IR2_0Rext(l,k1,k2,delk,sumk,Rf,NRf)
-     IR2l(1)=eps_l*CONJG(II**l)*(II*fun_gamma(l,delk+k1,k2)-IR2_0Rext(1))
-     IR2l(2)=eps_l*II**l*(II*fun_gamma(l,sumk+k1,k2)-IR2_0Rext(2))
+     rel_error=0.01
+     NR=51;Niter=100000 
+
+     IF (delk>0) THEN
+     dR=2*PI/MAX(delk+k1,k2)/NR
+     IR_0INF=II*fun_gamma(l,delk+k1,k2)
+     IR_RFINF=Fun_IntegIR_RFInf(l,rel_error,Niter,dR,Rf(NRf),NRf,k1,k2,delk,IR_0INF,21)
+     IR2l(1)=eps_l*CONJG(II**l)*IR_RFINF       !for diff freq
+     ELSE
+     IR2l(1)=CZERO
+     ENDIF 
+
+
+     dR=2*PI/MAX(sumk+k1,k2)/NR
+     IR_0INF=II*fun_gamma(l,sumk+k1,k2) 
+     IR_RFINF=Fun_IntegIR_RFInf(l,rel_error,Niter,dR,Rf(NRf),NRf,k1,k2,sumk,IR_0INF,22)
+     IR2l(2)=eps_l*(II**l)*IR_RFINF       !for sum freq
+
+     !IR2_0Rext=fun_IR2_0Rext(l,k1,k2,delk,sumk,Rf,NRf)
+     !IR2l(1)=eps_l*CONJG(II**l)*(II*fun_gamma(l,delk+k1,k2)-IR2_0Rext(1))
+    ! IR2l(2)=eps_l*II**l*(II*fun_gamma(l,sumk+k1,k2)-IR2_0Rext(2))
 
     ! print*,l,IR2_0Rext(:)
      !print*,l,delk+k1,k2,fun_gamma(l,delk+k1,k2)
-END FUNCTION
+    END FUNCTION
 
-  FUNCTION Fun_IR2_0Rext(l,k1,k2,delk,sumk,Rf,NRf) result(IR2)
-     INTEGER,             INTENT(IN):: l,NRf
-     REAL,                INTENT(IN):: k1,k2,delk,sumk
-     REAL,DIMENSION(NRf), INTENT(IN):: Rf
-     COMPLEX,DIMENSION(2)           :: IR2   
-     REAL                           :: dRf
-     INTEGER ::Ir
 
-     IR2=CZERO
-     DO Ir=1,NRf-1
-        dRf=Rf(Ir+1)-Rf(Ir)
-        IR2(1)=IR2(1)+0.5*(                                                     &
-             exp(II*( (delk+k1)*Rf(Ir)+PI/2   ))*fun_BESSJ(l,k2*Rf(Ir))         &
-            +exp(II*( (delk+k1)*Rf(Ir+1)+PI/2 ))*fun_BESSJ(l,k2*Rf(Ir+1)) )*dRf
-        IR2(2)=IR2(2)+0.5*(                                                     &
-             exp(II*( (sumk+k1)*Rf(Ir)+PI/2   ))*fun_BESSJ(l,k2*Rf(Ir))         &
-            +exp(II*( (sumk+k1)*Rf(Ir+1)+PI/2 ))*fun_BESSJ(l,k2*Rf(Ir+1)) )*dRf
-     ENDDO
+  
+
+  FUNCTION Fun_IntegIR_RFInf(l,rel_error,Niter,dR,Rf,NRf,k1,k2,delkORsumk,IR_0INF,Iswitch) result(IR_RFINF)
+     IMPLICIT NONE
+     COMPLEX,  INTENT(IN) :: IR_0INF
+     REAL,     INTENT(IN) :: rel_error,dR,k1,k2,delkORsumk,Rf
+     INTEGER,  INTENT(IN) :: Niter,Iswitch,NRf,l
+     COMPLEX              :: IR_RFINF
+     
+     COMPLEX              :: IR_0RF,IR_0RF1
+     REAL                 :: comp_rel_error
+     INTEGER              :: iter
+     INTEGER              :: NR0RF
+
+     REAL,DIMENSION(3)    :: paramR
+     INTEGER              :: paramI
+     REAL,ALLOCATABLE,DIMENSION(:)    :: R0RF
+     REAL(kind=8)         :: R0,R1
+     REAL(kind=8)         :: parRomberg_TOL
+     INTEGER(kind=4)      :: parRomberg_M
+
+     NR0RF  =MAX(INT(Rf/dR+1),NRf)
+     ALLOCATE(R0RF(NR0RF))
+     R0RF=Fun_discretized_R0R1(0.,Rf,NR0RF)
+       
+     paramR(1)=k1
+     paramR(2)=k2
+     paramR(3)=delkORsumk
+     paramI   =l
+     parRomberg_TOL=1E-8
+     
+       R0=0.
+       R1=real(Rf,kind=8)
+
+       IF (Iswitch==11) THEN
+       IR_0RF=Fun_IR1M_R0_R1(l,k1,k2,delkORsumk,R0RF,NR0RF)
+      ! IR_0RF=Fun_INTEGRATION_TRAPZ(R0RF,NR0RF,Fun_Integrand1M_REAL)      &
+      !       +II*Fun_INTEGRATION_TRAPZ(R0RF,NR0RF,Fun_Integrand1M_IMAG)
+      ! IR_0RF=real(romberg_trap(R0,R1,Fun_Integrand1M_REAL_R8, parRomberg_TOL,parRomberg_M))&
+      !    +II*real(romberg_trap(R0,R1,Fun_Integrand1M_IMAG_R8, parRomberg_TOL,parRomberg_M)) 
+       ELSEIF (Iswitch==12) THEN
+       IR_0RF=Fun_IR1P_R0_R1(l,k1,k2,delkORsumk,R0RF,NR0RF)
+     !  IR_0RF=Fun_INTEGRATION_TRAPZ(R0RF,NR0RF,Fun_Integrand1P_REAL)      &
+     !        +II*Fun_INTEGRATION_TRAPZ(R0RF,NR0RF,Fun_Integrand1P_IMAG)
+     !  IR_0RF=real(romberg_trap(R0,R1,Fun_Integrand1P_REAL_R8, parRomberg_TOL,parRomberg_M))&
+     !     +II*real(romberg_trap(R0,R1,Fun_Integrand1P_IMAG_R8, parRomberg_TOL,parRomberg_M)) 
+       ELSEIF (Iswitch==21) THEN
+       IR_0RF=Fun_IR2M_R0_R1(l,k1,k2,delkORsumk,R0RF,NR0RF)
+     !  IR_0RF=Fun_INTEGRATION_TRAPZ(R0RF,NR0RF,Fun_Integrand2M_REAL)      &
+     !       +II*Fun_INTEGRATION_TRAPZ(R0RF,NR0RF,Fun_Integrand2M_IMAG)
+     !  IR_0RF=real(romberg_trap(R0,R1,Fun_Integrand2M_REAL_R8, parRomberg_TOL,parRomberg_M))&
+     !     +II*real(romberg_trap(R0,R1,Fun_Integrand2M_IMAG_R8, parRomberg_TOL,parRomberg_M))  
+       ELSEIF (Iswitch==22) THEN
+       IR_0RF=Fun_IR2P_R0_R1(l,k1,k2,delkORsumk,R0RF,NR0RF)
+     !  IR_0RF=Fun_INTEGRATION_TRAPZ(R0RF,NR0RF,Fun_Integrand2P_REAL)      &
+     !        +II*Fun_INTEGRATION_TRAPZ(R0RF,NR0RF,Fun_Integrand2P_IMAG)
+     !  IR_0RF=real(romberg_trap(R0,R1,Fun_Integrand2P_REAL_R8, parRomberg_TOL,parRomberg_M))&
+     !     +II*real(romberg_trap(R0,R1,Fun_Integrand2P_IMAG_R8, parRomberg_TOL,parRomberg_M))  
+       ENDIF
+     
+       IR_RFINF=IR_0INF-IR_0RF
+       
+     !print*,Iswitch,IR_0RF1,IR_0RF
+     DEALLOCATE(R0RF)
+
+     CONTAINS
+        FUNCTION Fun_Integrand1M_REAL_R8(r) result(f1M_Re)
+              REAL(kind=8),  INTENT(IN):: r
+              REAL(kind=8)             :: f1M_Re
+              REAL                     :: k1,k2,delk
+              INTEGER                  :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              delk=paramR(3)
+              l   =paramI
+              f1M_Re=real(cos((delk-k2)*real(r))*fun_BESSJ(l,k1*real(r)),kind=8)
+        END FUNCTION
+        
+        FUNCTION Fun_Integrand1M_IMAG_R8(r) result(f1M_Im)
+              REAL(kind=8),  INTENT(IN):: r
+              REAL(kind=8)             :: f1M_Im
+              REAL                     :: k1,k2,delk
+              INTEGER                  :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              delk=paramR(3)
+              l   =paramI
+              f1M_Im=real(sin((delk-k2)*real(r))*fun_BESSJ(l,k1*real(r)),kind=8)
+        END FUNCTION
+
+        FUNCTION Fun_Integrand1P_REAL_R8(r) result(f1P_Re)
+              REAL(kind=8),  INTENT(IN):: r
+              REAL(kind=8)             :: f1P_Re
+              REAL                     :: k1,k2,sumk
+              INTEGER                  :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              sumk=paramR(3)
+              l   =paramI
+
+              f1P_Re=real(cos((sumk+k2)*real(r)+PI/2 )*fun_BESSJ(l,k1*real(r)),kind=8)
+        END FUNCTION
+
+        FUNCTION Fun_Integrand1P_IMAG_R8(r) result(f1P_Im)
+              REAL(kind=8),   INTENT(IN):: r
+              REAL(kind=8)             :: f1P_Im
+              REAL                     :: k1,k2,sumk
+              INTEGER                  :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              sumk=paramR(3)
+              l   =paramI
+
+              f1P_Im=real(sin((sumk+k2)*real(r)+PI/2 )*fun_BESSJ(l,k1*real(r)),kind=8)
+        END FUNCTION
+     
+
+        FUNCTION Fun_Integrand2M_REAL_R8(r) result(f2M_Re)
+              REAL(kind=8),   INTENT(IN):: r
+              REAL(kind=8)             :: f2M_Re
+              REAL                     :: k1,k2,delk
+              INTEGER                  :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              delk=paramR(3)
+              l   =paramI
+              f2M_Re=real(cos((delk+k1)*real(r)+PI/2 )*fun_BESSJ(l,k2*real(r)),kind=8)
+        END FUNCTION
+        
+        FUNCTION Fun_Integrand2M_IMAG_R8(r) result(f2M_Im)
+              REAL(kind=8),   INTENT(IN):: r
+              REAL(kind=8)             :: f2M_Im
+              REAL                     :: k1,k2,delk
+              INTEGER                  :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              delk=paramR(3)
+              l   =paramI
+              f2M_Im=real(sin((delk+k1)*real(r)+PI/2 )*fun_BESSJ(l,k2*real(r)),kind=8)
+        END FUNCTION
+
+        FUNCTION Fun_Integrand2P_REAL_R8(r) result(f2P_Re)
+              REAL(kind=8),   INTENT(IN):: r
+              REAL(kind=8)             :: f2P_Re
+              REAL                     :: k1,k2,sumk
+              INTEGER                  :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              sumk=paramR(3)
+              l   =paramI
+
+              f2P_Re=real(cos((sumk+k1)*real(r)+PI/2 )*fun_BESSJ(l,k2*real(r)),kind=8)
+        END FUNCTION
+
+        FUNCTION Fun_Integrand2P_IMAG_R8(r) result(f2P_Im)
+              REAL(kind=8),   INTENT(IN):: r
+              REAL(kind=8)             :: f2P_Im
+              REAL                     :: k1,k2,sumk
+              INTEGER                  :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              sumk=paramR(3)
+              l   =paramI
+
+              f2P_Im=real(sin((sumk+k1)*real(r)+PI/2 )*fun_BESSJ(l,k2*real(r)),kind=8)
+        END FUNCTION
+
+        FUNCTION Fun_Integrand1M_REAL(r) result(f1M_Re)
+              REAL,   INTENT(IN):: r
+              REAL              :: f1M_Re
+              REAL              :: k1,k2,delk
+              INTEGER           :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              delk=paramR(3)
+              l   =paramI
+              f1M_Re=cos((delk-k2)*r)*fun_BESSJ(l,k1*r)
+        END FUNCTION
+        
+        FUNCTION Fun_Integrand1M_IMAG(r) result(f1M_Im)
+              REAL,   INTENT(IN):: r 
+              REAL              :: f1M_Im
+              REAL              :: k1,k2,delk
+              INTEGER           :: l
+
+              k1  =paramR(1)
+              k2  =paramR(2)
+              delk=paramR(3)
+              l   =paramI
+
+             f1M_Im=sin((delk-k2)*r)*fun_BESSJ(l,k1*r)
+        END FUNCTION
+
+        FUNCTION Fun_Integrand1P_REAL(r) result(f1P_Re)
+              REAL,   INTENT(IN):: r
+              REAL              :: f1P_Re
+              REAL              :: k1,k2,sumk
+              INTEGER           :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              sumk=paramR(3)
+              l   =paramI
+
+              f1P_Re=cos((sumk+k2)*r+PI/2 )*fun_BESSJ(l,k1*r)
+        END FUNCTION
+      
+        FUNCTION Fun_Integrand1P_IMAG(r) result(f1P_Im)
+              REAL,   INTENT(IN):: r
+              REAL              :: f1P_Im
+              REAL              :: k1,k2,sumk
+              INTEGER           :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              sumk=paramR(3)
+              l   =paramI
+
+              f1P_Im=sin((sumk+k2)*r+PI/2 )*fun_BESSJ(l,k1*r)
+        END FUNCTION
+        
+        FUNCTION Fun_Integrand2M_REAL(r) result(f2M_Re)
+              REAL,   INTENT(IN):: r
+              REAL              :: f2M_Re
+              REAL              :: k1,k2,delk
+              INTEGER           :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              delk=paramR(3)
+              l   =paramI
+
+              f2M_Re=cos((delk+k1)*r+PI/2 )*fun_BESSJ(l,k2*r)
+        END FUNCTION
+      
+        FUNCTION Fun_Integrand2M_IMAG(r) result(f2M_Im)
+              REAL,   INTENT(IN):: r
+              REAL              :: f2M_Im
+              REAL              :: k1,k2,delk
+              INTEGER           :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              delk=paramR(3)
+              l   =paramI
+
+              f2M_Im=sin((delk+k1)*r+PI/2 )*fun_BESSJ(l,k2*r)
+        END FUNCTION
+
+        FUNCTION Fun_Integrand2P_REAL(r) result(f2P_Re)
+              REAL,   INTENT(IN):: r
+              REAL              :: f2P_Re
+              REAL              :: k1,k2,sumk
+              INTEGER           :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              sumk=paramR(3)
+              l   =paramI
+
+              f2P_Re=cos((sumk+k1)*r+PI/2 )*fun_BESSJ(l,k2*r)
+        END FUNCTION
+      
+        FUNCTION Fun_Integrand2P_IMAG(r) result(f2P_Im)
+              REAL,   INTENT(IN) :: r
+              REAL               :: f2P_Im
+              REAL              :: k1,k2,sumk
+              INTEGER           :: l
+              k1  =paramR(1)
+              k2  =paramR(2)
+              sumk=paramR(3)
+              l   =paramI
+
+              f2P_Im=sin((sumk+k1)*r+PI/2 )*fun_BESSJ(l,k2*r)
+        END FUNCTION
+
+        
+        FUNCTION Fun_IR1M_R0_R1(l,k1,k2,delk,Rf,NRf) result(IR1)
+            INTEGER,             INTENT(IN):: l,NRf
+            REAL,                INTENT(IN):: k1,k2,delk
+            REAL,DIMENSION(NRf), INTENT(IN):: Rf
+            COMPLEX                        :: IR1   
+            REAL                           :: dRf
+            INTEGER ::Ir
+
+            dRf=Rf(2)-Rf(1)
+            IR1=CZERO
+            DO Ir=1,NRf-1
+               IR1=IR1+0.5*(                                                           &
+                       exp(II*(delk-k2)*Rf(Ir))*fun_BESSJ(l,k1*Rf(Ir))                 &
+                      +exp(II*(delk-k2)*Rf(Ir+1))*fun_BESSJ(l,k1*Rf(Ir+1)) )*dRf
+            ENDDO
+        END FUNCTION
+
+                
+        FUNCTION Fun_IR1P_R0_R1(l,k1,k2,sumk,Rf,NRf) result(IR1)
+           INTEGER,             INTENT(IN):: l,NRf
+           REAL,                INTENT(IN):: k1,k2,sumk
+           REAL,DIMENSION(NRf), INTENT(IN):: Rf
+           COMPLEX                        :: IR1   
+           REAL                           :: dRf
+           INTEGER ::Ir
+
+           dRf=Rf(2)-Rf(1)
+           IR1=CZERO
+           DO Ir=1,NRf-1
+              IR1=IR1+0.5*(                                                           &
+                    exp(II*( (sumk+k2)*Rf(Ir)+PI/2   ))*fun_BESSJ(l,k1*Rf(Ir))        &
+                   +exp(II*( (sumk+k2)*Rf(Ir+1)+PI/2 ))*fun_BESSJ(l,k1*Rf(Ir+1)) )*dRf
+           ENDDO
+        END FUNCTION
+     
+               
+        FUNCTION Fun_IR2M_R0_R1(l,k1,k2,delk,Rf,NRf) result(IR2)
+           INTEGER,             INTENT(IN):: l,NRf
+           REAL,                INTENT(IN):: k1,k2,delk
+           REAL,DIMENSION(NRf), INTENT(IN):: Rf
+           COMPLEX                        :: IR2   
+           REAL                           :: dRf
+           INTEGER ::Ir
+
+           dRf=Rf(2)-Rf(1)
+           IR2=CZERO
+           DO Ir=1,NRf-1
+              IR2=IR2+0.5*(                                                           &
+                   exp(II*( (delk+k1)*Rf(Ir)+PI/2   ))*fun_BESSJ(l,k2*Rf(Ir))         &
+                  +exp(II*( (delk+k1)*Rf(Ir+1)+PI/2 ))*fun_BESSJ(l,k2*Rf(Ir+1)) )*dRf
+           ENDDO
+        END FUNCTION
+     
+       
+        FUNCTION Fun_IR2P_R0_R1(l,k1,k2,sumk,Rf,NRf) result(IR2)
+           INTEGER,             INTENT(IN):: l,NRf
+           REAL,                INTENT(IN):: k1,k2,sumk
+           REAL,DIMENSION(NRf), INTENT(IN):: Rf
+           COMPLEX                        :: IR2   
+           REAL                           :: dRf
+           INTEGER ::Ir
+       
+           dRf=Rf(2)-Rf(1)
+           IR2=CZERO
+           DO Ir=1,NRf-1
+              IR2=IR2+0.5*(                                                           &
+                   exp(II*( (sumk+k1)*Rf(Ir)+PI/2   ))*fun_BESSJ(l,k2*Rf(Ir))         &
+                  +exp(II*( (sumk+k1)*Rf(Ir+1)+PI/2 ))*fun_BESSJ(l,k2*Rf(Ir+1)) )*dRf
+           ENDDO
+        END FUNCTION
+
+
   END FUNCTION
+
+ ! FUNCTION Fun_INTEGRATION_TRAPZ(X,NX,FunX,paramR,paramI) result(INTEG)
+ !       INTEGER,              INTENT(IN):: NX
+ !       REAL,   DIMENSION(NX),INTENT(IN):: X
+ !       REAL,                 EXTERNAL  :: FunX
+ !       REAL,   DIMENSION(3), INTENT(IN):: paramR
+ !       INTEGER,              INTENT(IN):: paramI
+ !       INTEGER Ix
+ !       REAL    INTEG
+ !       INTEG=0.0
+ !       DO Ix=1,NX-1
+ !          INTEG=INTEG+0.5*                                             &
+ !              (FunX(X(Ix),paramR(1),paramR(2),paramR(3),paramI)        &
+ !              +FunX(X(Ix+1),paramR(1),paramR(2),paramR(3),paramI)      &
+ !              )*(X(Ix+1)-X(Ix))
+ !       ENDDO
+
+ ! END FUNCTION
+  
+  FUNCTION Fun_INTEGRATION_TRAPZ(X,NX,FunX) result(INTEG)
+        INTEGER,              INTENT(IN):: NX
+        REAL,   DIMENSION(NX),INTENT(IN):: X
+        REAL,                 EXTERNAL  :: FunX
+        INTEGER Ix
+        REAL    INTEG
+        INTEG=0.0
+        DO Ix=1,NX-1
+           INTEG=INTEG+0.5*(FunX(X(Ix))+FunX(X(Ix+1)))*(X(Ix+1)-X(Ix))
+        ENDDO
+
+  END FUNCTION
+
+
+  FUNCTION Fun_discretized_R0R1(R0,R1,NR) result(R)
+    REAL,       INTENT(IN)::R0,R1
+    INTEGER,    INTENT(IN)::NR
+    REAL,DIMENSION(NR)    ::R
+    INTEGER               ::IR
+    REAL                  ::dR
+    dR=(R1-R0)/(NR-1)
+    DO IR=1,NR
+        R(IR)=R0+(IR-1)*dR
+    ENDDO
+
+  END
 
   FUNCTION PREPARE_KOCHIN_COEFFICIENTS(Isym,Npanels,XM,Apanels,D,Nbessel,k,zig) &
                   result(CmSm)
@@ -278,6 +671,7 @@ END FUNCTION
         REAL                                         :: r,alpha
         ClSl=CZERO
         DO Ipanel=1,Npanels
+         ! IF (XM(3,Ipanel)<0) THEN
           r=sqrt(XM(1,Ipanel)**2+XM(2,Ipanel)**2)
           alpha=atan2(XM(2,Ipanel),XM(1,Ipanel))
           calcClSl=sig(Ipanel)*CIH(k,XM(3,Ipanel),D)                        &
@@ -294,6 +688,7 @@ END FUNCTION
             ClSl(1)=ClSl(1)+calcClSl*cos(ll*alpha)
             ClSl(2)=ClSl(2)+calcClSl*sin(ll*alpha)
           ENDIF 
+         ! ENDIF
         ENDDO
         ClSl=-ClSl/4/PI
   END FUNCTION

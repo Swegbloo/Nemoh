@@ -425,14 +425,14 @@ SUBROUTINE Discretized_omega_wavenumber_for_QTF               &
              Qfreq%diffwQ(2:NwQ,Ibeta)=Qfreq%wQ(2:NwQ,Ibeta)-Qfreq%wQ(1,Ibeta)
              Qfreq%sumwQ(1:NwQ-1,Ibeta)=Qfreq%wQ(1:NwQ-1,Ibeta)+Qfreq%wQ(1,Ibeta)
              Qfreq%NwQ=NwQ
-             IF ((Fun_MIN(NwQ-1,Qfreq%diffwQ(2:NwQ,Ibeta))-w(1))<-0.0001) THEN
-                    print*,'INPUT ERROR: Min. diff. rad freq < w(1) in QTFpreproc data!'
-                    STOP
-             ENDIF
-             IF ((Fun_MAX(NwQ-1,Qfreq%sumwQ(1:NwQ-1,Ibeta))-w(Nw))>0.0001) THEN
-                    print*,'INPUT ERROR: Max. sum rad freq > w(Nw) in QTFpreproc data!'
-                    STOP
-             ENDIF
+            ! IF ((Fun_MIN(NwQ-1,Qfreq%diffwQ(2:NwQ,Ibeta))-w(1))<-0.0001) THEN
+            !        print*,'INPUT ERROR: Min. diff. rad freq < w(1) in QTFpreproc data!'
+            !        STOP
+            ! ENDIF
+            ! IF ((Fun_MAX(NwQ-1,Qfreq%sumwQ(1:NwQ-1,Ibeta))-w(Nw))>0.0001) THEN
+            !        print*,'INPUT ERROR: Max. sum rad freq > w(Nw) in QTFpreproc data!'
+            !        STOP
+            ! ENDIF
            ENDDO
 END SUBROUTINE
 
@@ -667,7 +667,7 @@ SUBROUTINE WRITE_QTFSOLVERLOGFILE(wd,Nbeta,beta,Qfreq)
        WRITE(LogTextToBeWritten,*) '----Solver (QTF Module)---'
        CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdStartLog,IdprintTerm)
        DO Ibeta=1,Nbeta
-       WRITE(LogTextToBeWritten,'(A,F7.3,A,I4,A,3(F7.3,A))') ' Beta= ',beta(Ibeta)*180/PI,      &
+       WRITE(LogTextToBeWritten,'(A,F8.3,A,I4,A,3(F8.3,A))') ' Beta= ',beta(Ibeta)*180/PI,      &
                ' deg, NFreq= ',Qfreq%NwQ, ', omega = (', Qfreq%wQ(1,Ibeta),':'                  &
                ,Qfreq%wQ(2,Ibeta)-Qfreq%wQ(1,Ibeta),':',Qfreq%wQ(Qfreq%NwQ,Ibeta),') rad/s'
        CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)

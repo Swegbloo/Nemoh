@@ -237,7 +237,7 @@ IMPLICIT NONE
                 IF (SwitchBiDir==0) Ibeta2=Ibeta1 
                 IF (SwitchBiDir==1) Ibeta2=Ibeta2temp
 
-                WRITE(*,'(A,F7.3,A,F7.3,A)'),'beta1=', beta(Ibeta1)*180/PI,&
+                WRITE(*,'(A,F8.3,A,F8.3,A)'),'beta1=', beta(Ibeta1)*180/PI,&
                         ', beta2=', beta(Ibeta2)*180/PI, ' [deg]'
                 DO IwQ=0,NwQ-1
                     DO Iw1=IwQ+1,NwQ

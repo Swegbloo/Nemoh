@@ -64,10 +64,10 @@ CONTAINS
           OPEN(NEWUNIT=u2, FILE=wd//OutQTFDir//FileP, ACTION='WRITE',POSITION='APPEND')
 
           DO Iinteg=1,Ninteg
-             WRITE(u1,'(4(F10.3,X),I3,2(X,E14.7))')               & 
+             WRITE(u1,'(4(F12.3,X),I3,2(X,E14.7))')               & 
                   w1,w2,beta1,beta2,Iinteg,                       &
                   REAL(QTFdat(Iinteg,1)),AIMAG(QTFdat(Iinteg,1))
-             WRITE(u2,'(4(F10.3,X),I3,2(X,E14.7))')               & 
+             WRITE(u2,'(4(F12.3,X),I3,2(X,E14.7))')               & 
                   w1,w2,beta1,beta2,Iinteg,                       &
                   REAL(QTFdat(Iinteg,2)),AIMAG(QTFdat(Iinteg,2))
           ENDDO
