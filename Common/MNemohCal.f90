@@ -56,6 +56,8 @@
           TYPE TOptOutput
               INTEGER            :: Switch_POTENTIAL
               INTEGER            :: Switch_SourceDistr
+              INTEGER            :: Switch_RAO
+              INTEGER            :: FreqType
               TYPE(TIRF)         :: IRF
               TYPE(TKochin)      :: Kochin
               TYPE(TFreesurface) :: Freesurface
@@ -80,12 +82,16 @@
               REAL,DIMENSION(3) :: omega    !rad freq [Nw,wmin,wmax]
               REAL     :: body_forward_speed!body forward-speed
               INTEGER  :: bidirection       !bi-direction
-              INTEGER  :: NContrib          !Contrib   
+              INTEGER  :: NContrib          !Contrib  
+              CHARACTER(LEN=100) :: FSmeshfile !Free surface meshfile
+              REAL     :: FSRe              !Free surface exterior radius
+              INTEGER  :: FSNRe             !Number of points in Free surface exterior radius
+              INTEGER  :: FSNBessel         !Number of bessel function
+              INTEGER  :: FreqTypeOutput    !Frq type output
               INTEGER  :: switch_quadHM     !quadratic hydrostatic and moment terms  
               INTEGER  :: switch_qtfduok    !Loutduok   
               INTEGER  :: switch_qtfhasbo   !Louthasbo
-              INTEGER  :: switch_qtfhasfs   !Louthasgs
-              INTEGER,DIMENSION(3):: qtfhasfs_print !Nw1,Nw2,NDOF
+              INTEGER  :: switch_qtfhasfs   !Louthasfs
           END TYPE Tqtfinput
 
           TYPE TNemCal
@@ -180,6 +186,9 @@
              ELSE
                            InpNEMOHCAL%OptOUTPUT%Freesurface%Switch=0
              ENDIF
+            
+             READ(ufile,*) InpNEMOHCAL%OptOUTPUT%Switch_RAO
+             READ(ufile,*) InpNEMOHCAL%OptOUTPUT%FreqType
 
              READ(ufile,*)! ---QTF----
              READ(ufile,*)InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr
@@ -188,17 +197,17 @@
                READ(ufile,*) InpNEMOHCAL%qtfinput%bidirection   
                !READ(ufile,*)InpNEMOHCAL%qtfinput%body_forward_speed
                InpNEMOHCAL%qtfinput%body_forward_speed=0 ! for now 0
-               READ(ufile,*)InpNEMOHCAL%qtfinput%switch_QTFP
+               InpNEMOHCAL%qtfinput%switch_QTFP=1 ! always compute QTFP
                READ(ufile,*)InpNEMOHCAL%qtfinput%Ncontrib
+               READ(ufile,*)InpNEMOHCAL%qtfinput%FSmeshfile
+               READ(ufile,*)InpNEMOHCAL%qtfinput%FSRe,          &
+                            InpNEMOHCAL%qtfinput%FSNRe,         &
+                            InpNEMOHCAL%qtfinput%FSNBessel
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_quadHM
+               READ(ufile,*)InpNEMOHCAL%qtfinput%FreqTypeOutput
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfduok
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfhasbo
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfhasfs
-
-               IF (InpNEMOHCAL%qtfinput%switch_qtfhasfs==1) THEN      
-                  READ(ufile,*)(InpNEMOHCAL%qtfinput%qtfhasfs_print(K),&
-                                K=1,3)
-               ENDIF
              ENDIF 
           CLOSE(ufile)
         

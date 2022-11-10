@@ -1,13 +1,35 @@
 # makefile written by Adrien Combourieu from INNOSEA (adrien.combourieu@innosea.fr)
 
-#COMPILATEUR  
- FC=ifort
-#FC=gfortran
-#OPTIONS  
-# FFLAGS= -c 
-FFLAGS=  -g -O3 -ffree-line-length-0 -fbounds-check -c
-FFLAGS2=  -O3 -ffree-line-length-0 -finit-local-zero -mcmodel=medium -fbounds-check
+# Compiler
+gtest=$(shell which gfortran 2> /dev/null | grep -o gfortran)
+itest=$(shell which ifort 2> /dev/null | grep -o ifort)
+# M.A.: this test does not work by me...
+
+MOD_DIR=/tmp/
+
+ifeq ($(gtest), gfortran)
+	FC=gfortran
+	FFLAGS=  -c                                     # No linker (yet)
+	#FFLAGS+= -g                                     # Add extra informations for debugging
+	FFLAGS+= -O2                                    # Optimization level
+	FFLAGS+= -J$(MOD_DIR)                           # Where to put .mod files
+	FFLAGS+= -cpp -DGNUFORT -ffree-line-length-none # Run preprocessor
+	#FFLAGS+=-fdefault-real-8			# forcing variables to be double precision
+	#if with -fdefault-real-8  change in Common/Constants.f90 ID_DP=1 else ID_DP=0
+endif
+
+ifeq ($(itest), ifort)
+	FC=ifort
+	FFLAGS=-c -cpp
+	FFLAGS+= -O2                                    # Optimization level
+	#FFLAGS+= -g                                     # Add extra informations for debugging
+	FFLAGS+= -module $(MOD_DIR)                           # Where to put .mod files
+	# FFLAGS+= -r8					# forcing variables to be double precision
+	# if with -r8  change in Common/Constants.f90 ID_DP=1 else ID_DP=0
+endif
 #FFLAGS2= -O3 -fopenmp -ffree-line-length-0 -finit-local-zero -mcmodel=medium -fbounds-check -fno-automatic
+
+# Output directory
 outputdir=./bin
 
 #### same process for second order (QTF) ################
@@ -88,22 +110,22 @@ clean_QTFpreProc_N:
 # Rules to build
 QTFSolver_N:		$(OBJQSOL_N) 
 			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -o $(outputdir)/QTFSolver $(OBJQSOL_N)
+			@$(FC) -o $(outputdir)/QTFsolver $(OBJQSOL_N)
 			@echo "QTF solver tool compilation successful!"
 
 clean_QTFSolver_N:
 			@rm -f $(OBJQSOL_N)
-			@rm -f $(outputdir)/QTFSolver
+			@rm -f $(outputdir)/QTFsolver
 
 # Rules to build
 QTFpostproc_N:		$(OBJPOSTN)
 			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -o $(outputdir)/QTFpostproc $(OBJPOSTN)
+			@$(FC) -o $(outputdir)/QTFpostProc $(OBJPOSTN)
 			@echo "QTF post-processing tool compilation successful!"
 
 clean_QTFpostproc_N:
 			@rm -f $(OBJPOSTN)
-			@rm -f $(outputdir)/QTFpostproc
+			@rm -f $(outputdir)/QTFpostProc
 
 # rules for object files
 .f.o:
@@ -119,4 +141,3 @@ install : build
 	rm -f *.mod *.o
 
  cleanall: clean_QTFpreProc_N clean_QTFSolver_N clean_QTFpostproc_N
-	rm *.mod

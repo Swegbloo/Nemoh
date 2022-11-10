@@ -24,6 +24,7 @@ MODULE MPP_Compute_RAOs
     USE MResults
     USE MPP_ReadInputFiles, ONLY:TMech 
     USE M_SOLVER,           ONLY:LU_INVERS_MATRIX
+    USE MNemohCal,          ONLY:TNemCal
 !
     IMPLICIT NONE
 
@@ -56,8 +57,9 @@ CONTAINS
 
     END SUBROUTINE Compute_RAOs
 
-    SUBROUTINE SAVE_RAO(RAOs,w,beta,Nintegration,Nw,Nbeta,IndxForce,dirname,filename)
+    SUBROUTINE SAVE_RAO(RAOs,w,beta,Nintegration,Nw,Nbeta,IndxForce,dirname,filename,InpNEMOHCAL)
     CHARACTER(LEN=*),                   INTENT(IN) :: filename,dirname
+    TYPE(TNemCal),                      INTENT(IN) :: InpNEMOHCAL
     INTEGER,                            INTENT(IN) :: Nintegration,Nw, Nbeta
     REAL, DIMENSION(Nw),                INTENT(IN) :: w
     REAL, DIMENSION(Nbeta),             INTENT(IN) :: beta
@@ -67,16 +69,34 @@ CONTAINS
     INTEGER :: Iw, Ibeta,Iinteg,u,Ninteg2
     REAL,DIMENSION(Nintegration*2) ::wRAOS 
     REAL                           ::RAOSphase 
+    CHARACTER(LEN=23) :: FreqVar_text,FreqVar_text2
+    REAL,DIMENSION(Nw)::freqVar
+    
+    IF (InpNEMOHCAL%OptOUTPUT%FreqType==1.OR.InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr) THEN
+        FreqVar_text='VARIABLES="w (rad/s)"'
+        freqVar=w
+        FreqVar_text2='Number of pulsation= '
+    ELSEIF (InpNEMOHCAL%OptOUTPUT%FreqType==2) THEN
+        FreqVar_text='VARIABLES="f (Hz)"'
+        freqVar=w/2/PI
+        FreqVar_text2='Number of frequency= '
+    ELSEIF (InpNEMOHCAL%OptOUTPUT%FreqType==3) THEN
+        FreqVar_text='VARIABLES="T (s)"'
+        freqVar=2*PI/w
+        FreqVar_text2='Number of periode= '
+    ENDIF
+
+
     CALL make_directory(dirname)
     Ninteg2=2*Nintegration
     OPEN(NEWUNIT=u, FILE=TRIM(dirname)//TRIM(filename),ACTION='WRITE')
-    WRITE(u,'(13(A,X))') 'VARIABLES= pulsation (rad/s)', '|X| (m/m)','|Y| (m/m)',' |Z| (m/m)',  &
+    WRITE(u,'(13(A,X))') FreqVar_text, '|X| (m/m)','|Y| (m/m)',' |Z| (m/m)',  &
                 '|phi| (deg)',' |theta| (deg)',' |psi| (deg)', &
                  'ang(x) (deg)',' ang(y) (deg)',' ang(z) (deg)', &
                  'ang(phi) (deg)',' ang(theta) (deg)',' ang(psi) (deg)'
     WRITE(u,*) 'Number of column (Nvariables*Nbody)=',Nintegration 
     DO Ibeta=1,Nbeta
-    WRITE(u,'((A,X),F10.3,(A,X),I4)') 'beta=',beta(Ibeta)*180/PI,'(deg), Number of pulsation=',Nw
+    WRITE(u,'((A,X),F10.3,2(A,X),I4)') 'beta=',beta(Ibeta)*180/PI,'(deg),',FreqVar_text2,Nw
         DO Iw=1,Nw
              DO Iinteg=1,Nintegration
                 wRAOS(Iinteg)=ABS(RAOs(Iinteg,Iw,Ibeta))
@@ -84,7 +104,7 @@ CONTAINS
                 RAOSphase=ATAN2(AIMAG(RAOs(Iinteg,Iw,Ibeta)),REAL(RAOs(Iinteg,Iw,Ibeta)))
                 wRAOS(Iinteg+Nintegration)=180/PI*RAOSphase
              ENDDO
-             WRITE(u,'((F10.3,X),<Ninteg2>(E14.7,X))') w(Iw),(wRAOS(Iinteg),Iinteg=1,Ninteg2)
+             WRITE(u,'((F10.3,X),<Ninteg2>(E14.7,X))') freqVar(Iw),(wRAOS(Iinteg),Iinteg=1,Ninteg2)
         ENDDO
     ENDDO
     CLOSE(u)

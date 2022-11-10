@@ -14,6 +14,7 @@ USE MMesh,                      ONLY: TMesh,CreateTMesh
 USE MFace,                      ONLY: TWLine
 USE Elementary_functions,       ONLY: CROSS_PRODUCT
 USE MFileDirectoryList
+USE MNemohCal,                  ONLY: Tqtfinput
 
 IMPLICIT NONE
 PUBLIC:: Read_NP_GaussQuad,Read_Mechanical_Coefs,Read_FirstOrderLoad,Read_Motion, &
@@ -378,16 +379,19 @@ CONTAINS
         END SUBROUTINE
 
         
-        SUBROUTINE READ_PREPARE_FREESURFACE_MESH(wd,MeshFS)
+        SUBROUTINE READ_PREPARE_FREESURFACE_MESH(wd,MeshFS,QTFinputNem)
           CHARACTER(LEN=*),                       INTENT(IN):: wd
+          TYPE(Tqtfinput),                        INTENT(IN):: QTFinputNem
           TYPE(TMeshFS),                          INTENT(INOUT):: MeshFS
           INTEGER           :: u,Ipoint,Ip,J,Ipanel,Iline
           INTEGER           :: Npoints,Npanels,NbdyLines
           REAL,DIMENSION(3) :: X1,X2,X3,X4 !panel nodes
           
-          OPEN(NEWUNIT=u,FILE=TRIM(wd)//'/SF_L12_2_N.dat')
-          READ(u,*) MeshFS%Mesh%ISym,Npoints,Npanels,NbdyLines,MeshFS%Radius_Ext,&
-                    MeshFS%NpointsR,MeshFS%NBessel
+          OPEN(NEWUNIT=u,FILE=TRIM(wd)//'/'//QTFinputNem%FSmeshfile)
+          READ(u,*) MeshFS%Mesh%ISym,Npoints,Npanels,NbdyLines
+          MeshFS%Radius_Ext=QTFinputNem%FSRe
+          MeshFS%NpointsR=QTFinputNem%FSNRe
+          MeshFS%NBessel=QTFinputNem%FSNBessel
             
           !memory allocation 
           CALL CreateTMesh(MeshFS%Mesh,Npoints,Npanels,1) 

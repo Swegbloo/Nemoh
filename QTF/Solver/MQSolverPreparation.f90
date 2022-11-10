@@ -665,7 +665,7 @@ SUBROUTINE WRITE_QTFSOLVERLOGFILE(wd,Nbeta,beta,Qfreq)
             
        WRITE(*, *) ' '
        WRITE(LogTextToBeWritten,*) '----Solver (QTF Module)---'
-       CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdStartLog,IdprintTerm)
+       CALL WRITE_LOGFILE(TRIM(wd)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
        DO Ibeta=1,Nbeta
        WRITE(LogTextToBeWritten,'(A,F8.3,A,I4,A,3(F8.3,A))') ' Beta= ',beta(Ibeta)*180/PI,      &
                ' deg, NFreq= ',Qfreq%NwQ, ', omega = (', Qfreq%wQ(1,Ibeta),':'                  &

@@ -11,7 +11,8 @@
 PROGRAM Main
 !
 USE MIdentification
-USE MNemohCal,          ONLY:TNemCal,READ_TNEMOHCAL,Discretized_Omega_and_Beta
+USE MNemohCal,          ONLY:TNemCal,READ_TNEMOHCAL,Tqtfinput,               &
+                             Discretized_Omega_and_Beta
 USE MMesh
 USE MFace,              ONLY:TVFace, Prepare_FaceMesh,TWLine,Prepare_Waterline
 USE MReadInputFiles,    ONLY:Read_NP_GaussQuad,Read_Mechanical_Coefs,TMech,  &
@@ -31,6 +32,7 @@ IMPLICIT NONE
         TYPE(TMesh)                     :: Mesh
         TYPE(TMeshFS)                   :: MeshFS
         TYPE(TNemCal)                   :: inpNEMOHCAL
+        TYPE(Tqtfinput)                 :: QTFinputNem
         INTEGER                         :: Nw,Nbeta           ! Number of Freq,direction
         REAL, ALLOCATABLE,DIMENSION(:)  :: w,beta             ! vector of freq [rad/s],
                                                               ! direction angle [rad]
@@ -61,6 +63,7 @@ IMPLICIT NONE
         Nbeta       =InpNEMOHCAL%waveinput%NBeta
         Nintegration=InpNEMOHCAL%Nintegtot
         Nradiation  =InpNEMOHCAL%Nradtot
+        QTFinputNem =InpNEMOHCAL%qtfinput
         CALL Read_FirstOrderLoad(TRIM(ID%ID),Nw,Nbeta,Nintegration,Nradiation,Forces1)
         ALLOCATE(Motion(Nw,Nradiation,Nbeta))
         CALL Read_Motion(TRIM(ID%ID),Nw,Nbeta,Nradiation,Motion)!RAO
@@ -79,7 +82,7 @@ IMPLICIT NONE
 !       -------------------------------------                      
 !       Prepare Free-surface mesh
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
-          CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID)//'/mesh',MeshFS)
+          CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID)//'/mesh',MeshFS,QTFinputNem)
           CALL INITIALIZE_GREEN_FS(IGreen,IGreenFS)
         ENDIF
 !       --------------------------------------

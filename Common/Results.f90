@@ -165,39 +165,56 @@
         DEALLOCATE(line)
         END SUBROUTINE ReadTResults
 !       ---
-        SUBROUTINE SaveTResults(Results,namedir)
+        SUBROUTINE SaveTResults(Results,namedir,InpNEMOHCAL)
+        USE MNemohCal,              ONLY:TNemCal
         IMPLICIT NONE
         TYPE(TResults) :: Results
+        TYPE(TNemCal)  :: InpNEMOHCAL
+        REAL,DIMENSION(Results%Nw)::freqVar
         CHARACTER(LEN=*) :: namedir
+        CHARACTER(LEN=23) :: FreqVar_text
         INTEGER :: i,j,k,l
         REAL :: PI
         PI=4.*ATAN(1.0)
+
+        IF (InpNEMOHCAL%OptOUTPUT%FreqType==1) THEN
+            FreqVar_text='VARIABLES="w (rad/s)"'
+            freqVar=Results%w
+        ELSEIF (InpNEMOHCAL%OptOUTPUT%FreqType==2) THEN
+            FreqVar_text='VARIABLES="f (Hz)"'
+            freqVar=Results%w/2/PI
+        ELSEIF (InpNEMOHCAL%OptOUTPUT%FreqType==3) THEN
+            FreqVar_text='VARIABLES="T (s)"'
+            freqVar=2*PI/Results%w
+        ENDIF
+
+
         OPEN(10,FILE=namedir//'/RadiationCoefficients.tec')
-        WRITE(10,'(A)') 'VARIABLES="w (rad/s)"'
+        WRITE(10,'(A)') FreqVar_text
         DO k=1,Results%Nintegration
             WRITE(10,'(A,I4,I4,A,I4,I4,A)') '"A',Results%IndxForce(k,2),Results%IndxForce(k,3),'" "B',Results%IndxForce(k,2),Results%IndxForce(k,3),'"'
         END DO
         DO j=1,Results%Nradiation
             WRITE(10,'(A,I4,A,I4,A,I6,A)') 'Zone t="Motion of body ',Results%IndxRadiation(j,2),' in DoF',Results%IndxRadiation(j,3),'",I=',Results%Nw,',F=POINT'
             DO i=1,Results%Nw
-                WRITE(10,'(80(X,E14.7))') Results%w(i),(Results%AddedMass(i,j,k),Results%RadiationDamping(i,j,k),k=1,Results%Nintegration)
+                WRITE(10,'(80(X,E14.7))') freqVar(i),(Results%AddedMass(i,j,k),Results%RadiationDamping(i,j,k),k=1,Results%Nintegration)
             END DO
         END DO
         CLOSE(10)
         OPEN(10,FILE=namedir//'/DiffractionForce.tec')
-        WRITE(10,'(A)') 'VARIABLES="w (rad/s)"'
+        WRITE(10,'(A)') FreqVar_text
         DO k=1,Results%Nintegration
             WRITE(10,'(A,I4,I4,A,I4,I4,A)') '"abs(F',Results%IndxForce(k,2),Results%IndxForce(k,3),')" "angle(F',Results%IndxForce(k,2),Results%IndxForce(k,3),')"'
         END DO
         DO j=1,Results%Nbeta
             WRITE(10,'(A,F7.3,A,I6,A)') 'Zone t="Diffraction force - beta = ',Results%beta(j)*180./(4.*ATAN(1.0)),' deg",I=',Results%Nw,',F=POINT'
             DO i=1,Results%Nw
-                WRITE(10,'(80(X,E14.7))') Results%w(i),(ABS(Results%DiffractionForce(i,j,k)),ATAN2(IMAG(Results%DiffractionForce(i,j,k)),REAL(Results%DiffractionForce(i,j,k))),k=1,Results%Nintegration)
+                WRITE(10,'(80(X,E14.7))') freqVar(i),(ABS(Results%DiffractionForce(i,j,k)),ATAN2(IMAG(Results%DiffractionForce(i,j,k)),REAL(Results%DiffractionForce(i,j,k))),k=1,Results%Nintegration)
             END DO
         END DO
         CLOSE(10)
         OPEN(10,FILE=namedir//'/ExcitationForce.tec')
-        WRITE(10,'(A)') 'VARIABLES="w (rad/s)"'
+        WRITE(10,'(A)') FreqVar_text
         DO k=1,Results%Nintegration
             WRITE(10,'(A,I4,I4,A,I4,I4,A)') '"abs(F',Results%IndxForce(k,2),Results%IndxForce(k,3),')" "angle(F',Results%IndxForce(k,2),Results%IndxForce(k,3),')"'
         END DO
@@ -205,7 +222,7 @@
             WRITE(10,'(A,F7.3,A,I6,A)') 'Zone t="Excitation force - beta = ',Results%beta(j)*180./(4.*ATAN(1.0)),' deg",I=',Results%Nw,',F=POINT'
             DO i=1,Results%Nw
 !       Adrien Combourieu: in ExcitationForce.tec, the phase is given in radians.
-                WRITE(10,'(80(X,E14.7))') Results%w(i),(ABS(Results%DiffractionForce(i,j,k)+Results%FroudeKrylovForce(i,j,k)),ATAN2(IMAG(Results%DiffractionForce(i,j,k)+Results%FroudeKrylovForce(i,j,k)),REAL(Results%DiffractionForce(i,j,k)+Results%FroudeKrylovForce(i,j,k))),k=1,Results%Nintegration)
+                WRITE(10,'(80(X,E14.7))') freqVar(i),(ABS(Results%DiffractionForce(i,j,k)+Results%FroudeKrylovForce(i,j,k)),ATAN2(IMAG(Results%DiffractionForce(i,j,k)+Results%FroudeKrylovForce(i,j,k)),REAL(Results%DiffractionForce(i,j,k)+Results%FroudeKrylovForce(i,j,k))),k=1,Results%Nintegration)
             END DO
         END DO
         CLOSE(10)

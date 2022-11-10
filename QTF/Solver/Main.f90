@@ -13,7 +13,8 @@
 PROGRAM MAIN
 !
 USE MIdentification
-USE MNemohCal,          ONLY:TNemCal,READ_TNEMOHCAL,IntegrationAXIS_FROM_MNEMOHCAL
+USE MNemohCal,          ONLY:TNemCal,READ_TNEMOHCAL,Tqtfinput,                &
+                             IntegrationAXIS_FROM_MNEMOHCAL
 USE MMesh
 USE MFace,              ONLY:TVFace, Prepare_FaceMesh,TWLine,Prepare_Waterline
 USE MReadInputFiles,    ONLY:Read_NP_GaussQuad,Read_Mechanical_Coefs,TMech,   &
@@ -35,11 +36,14 @@ USE MQSolverOutputFiles !CONTAINS: OutFileDM,OutFileDP,...
 
 IMPLICIT NONE
 !
+INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved 
+!
 ! ------Declaration variables
         TYPE(TID)                       :: ID
         TYPE(TMesh)                     :: Mesh
         TYPE(TMeshFS)                   :: MeshFS
         TYPE(TNemCal)                   :: inpNEMOHCAL
+        TYPE(Tqtfinput)                 :: QTFinputNem
         TYPE(TEnvironment)              :: Env
         INTEGER                         :: Nw,Nbeta,Nbeta2    ! Number of Freq,direction
         REAL, ALLOCATABLE,DIMENSION(:)  :: w,kw,beta          ! vector of freq [rad/s],
@@ -86,6 +90,9 @@ IMPLICIT NONE
         INTEGER                                 :: Iterm,ufile
         CHARACTER(LEN=1)                        :: strI
         !
+        CHARACTER(LEN=1000)                :: LogTextToBeWritten
+        REAL                               :: tcpu_start
+
 
 !
 !   --- Initialize and read input datas -----------------------------------------------
@@ -94,7 +101,8 @@ IMPLICIT NONE
         CALL ReadTID(ID)
         CALL ReadTMesh(Mesh,TRIM(ID%ID)//'/mesh/')  
         CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
-        !        
+        !
+        QTFinputNem  =InpNEMOHCAL%qtfinput
         Env          =InpNEMOHCAL%Env
         Nw           =InpNEMOHCAL%waveinput%NFreq
         Nbeta        =InpNEMOHCAL%waveinput%NBeta
@@ -117,7 +125,7 @@ IMPLICIT NONE
 !       -------------------------------------                      
 !       Prepare Free-surface mesh
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
-          CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID)//'/mesh',MeshFS)
+          CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID)//'/mesh',MeshFS,QTFinputNem)
           CALL Prepare_FaceMesh(MeshFS%Mesh,NP_GQ,VFaceFS)
           NPFlowFS   =(MeshFS%Mesh%Npanels+MeshFS%BdyLine%NWLineSeg)*2**MeshFS%Mesh%Isym !Number of flow point
         ENDIF
@@ -213,10 +221,12 @@ IMPLICIT NONE
        ! ENDDO
        ! STOP
        !  COMPUTE QTF
-       CALL  INITIALIZE_OUTPUT_FILES(TRIM(ID%ID))
+       CALL  INITIALIZE_OUTPUT_FILES(TRIM(ID%ID),InpNEMOHCAL%qtfinput%Ncontrib,ID_DEBUG)
 
        WRITE(*,*) 'QTF Solver preparation, Done!'
        CALL WRITE_QTFSOLVERLOGFILE(TRIM(ID%ID),Nbeta,beta,Qfreq)
+       CALL START_RECORD_TIME(tcpu_start,TRIM(ID%ID)//'/'//LogFILE,IdAppend)
+
       ! OPEN(NEWUNIT=ufile,FILE='./IR1M.DAT',Action='WRITE')
       ! WRITE(ufile,*) ''
       ! CLOSE(ufile) 
@@ -268,13 +278,15 @@ IMPLICIT NONE
                         CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileDM,OutFileDP,Nintegration, &
                                 Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
                                 beta(Ibeta1),beta(Ibeta2), QTF_DUOK(:,:,7))
-                        DO Iterm=1,6
-                        WRITE(strI,'(I0.1)') Iterm
-                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileDM_term//strI//'.dat',     &
-                                OutFileDP_term//strI//'.dat',Nintegration,                &
-                                Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2), beta(Ibeta1),  &
-                                beta(Ibeta2),QTF_DUOK(:,:,Iterm))
-                        ENDDO 
+                         IF (ID_DEBUG==1) THEN
+                           DO Iterm=1,6
+                           WRITE(strI,'(I0.1)') Iterm
+                           CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileDM_term//strI//'.dat',     &
+                                   OutFileDP_term//strI//'.dat',Nintegration,                &
+                                   Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2), beta(Ibeta1),  &
+                                   beta(Ibeta2),QTF_DUOK(:,:,Iterm))
+                           ENDDO
+                         ENDIF 
                         ENDIF
                         
                         IF (InpNEMOHCAL%qtfinput%Ncontrib.GE.2) THEN 
@@ -286,13 +298,16 @@ IMPLICIT NONE
                         CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHBM,OutFileHBP,Nintegration,&
                                 Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
                                 beta(Ibeta1),beta(Ibeta2), QTF_HASBO(:,:,7))
-                        DO Iterm=1,6
-                        WRITE(strI,'(I0.1)') Iterm
-                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHBM_term//strI//'.dat',    &
-                                OutFileHBP_term//strI//'.dat',Nintegration,               &
-                                Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
-                                beta(Ibeta1),beta(Ibeta2),QTF_HASBO(:,:,Iterm))
-                        ENDDO 
+
+                         IF (ID_DEBUG==1) THEN
+                          DO Iterm=1,6
+                          WRITE(strI,'(I0.1)') Iterm
+                          CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHBM_term//strI//'.dat',    &
+                                  OutFileHBP_term//strI//'.dat',Nintegration,               &
+                                  Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
+                                  beta(Ibeta1),beta(Ibeta2),QTF_HASBO(:,:,Iterm))
+                          ENDDO
+                         ENDIF 
                         ENDIF
 
                         IF (InpNEMOHCAL%qtfinput%Ncontrib.EQ.3) THEN 
@@ -304,13 +319,16 @@ IMPLICIT NONE
                         CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHFSM,OutFileHFSP,          &
                                 Nintegration,Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),   &
                                 beta(Ibeta1),beta(Ibeta2), QTF_HASFS(:,:,10))
-                        DO Iterm=1,9
-                        WRITE(strI,'(I0.1)') Iterm
-                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHFSM_term//strI//'.dat',   &
-                                OutFileHFSP_term//strI//'.dat',Nintegration,              &
-                                Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
-                                beta(Ibeta1),beta(Ibeta2),QTF_HASFS(:,:,Iterm))
-                        ENDDO 
+
+                         IF (ID_DEBUG==1) THEN
+                            DO Iterm=1,9
+                            WRITE(strI,'(I0.1)') Iterm
+                            CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHFSM_term//strI//'.dat',   &
+                                    OutFileHFSP_term//strI//'.dat',Nintegration,              &
+                                    Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
+                                    beta(Ibeta1),beta(Ibeta2),QTF_HASFS(:,:,Iterm))
+                            ENDDO 
+                         ENDIF
                         ! InFinite domain (Asymptotic) Free surface force         
                         CALL COMPUTATION_QTF_POTENTIAL_FREESURFACEFORCE_ASYMP(Iw1,Iw2,    &
                                 Ibeta1,Ibeta2,Nintegration,NwQ,Nbeta,Env,Nw,w,Qfreq,      &
@@ -319,19 +337,25 @@ IMPLICIT NONE
                         CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileASYM,OutFileASYP,          &
                                 Nintegration,Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),   &
                                 beta(Ibeta1),beta(Ibeta2),QTF_HASFS_ASYMP(:,:,3))
-                        DO Iterm=1,2
-                        WRITE(strI,'(I0.1)') Iterm
-                        CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileASYM_term//strI//'.dat',   &
-                                OutFileASYP_term//strI//'.dat',Nintegration,              &
-                                Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
-                                beta(Ibeta1),beta(Ibeta2),QTF_HASFS_ASYMP(:,:,Iterm))
-                        ENDDO 
-
+                        
+                         IF (ID_DEBUG==1) THEN
+                            DO Iterm=1,2
+                            WRITE(strI,'(I0.1)') Iterm
+                            CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileASYM_term//strI//'.dat',   &
+                                    OutFileASYP_term//strI//'.dat',Nintegration,              &
+                                    Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
+                                    beta(Ibeta1),beta(Ibeta2),QTF_HASFS_ASYMP(:,:,Iterm))
+                            ENDDO 
+                         ENDIF
                         ENDIF
                     ENDDO
                 ENDDO
            ENDDO
         ENDDO
+       
+        CALL END_RECORD_TIME(tcpu_start,TRIM(ID%ID)//'/'//LogFILE)
+        WRITE(LogTextToBeWritten,*) '---- DONE ---'
+        CALL WRITE_LOGFILE(TRIM(ID%ID)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
 
         
        ! print*,RadVel(900:1000,1,1,1)

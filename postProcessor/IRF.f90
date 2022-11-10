@@ -167,15 +167,15 @@
                     ExcForce_l1=Results%DiffractionForce(l+1,j,k)+Results%FroudeKrylovForce(l+1,j,k)
                     !integration of w(1)<=w<=w(end)
                     IRF%KexcForce(i,j,k)=IRF%KexcForce(i,j,k)+                           &
-                            0.5*(ExcForce_l*EXP(II*Results%w(l)*IRF%TimeS(i))            &
-                                +ExcForce_l1*EXP(II*Results%w(l+1)*IRF%TimeS(i)))        &
+                            0.5*(ExcForce_l*EXP(-II*Results%w(l)*IRF%TimeS(i))            &
+                                +ExcForce_l1*EXP(-II*Results%w(l+1)*IRF%TimeS(i)))        &
                             *(Results%w(l+1)-Results%w(l))
                     !integration of -w(end)<=w<=-w(1)
                     ExcForce_l=Conjg(ExcForce_l)
                     ExcForce_l1=Conjg(ExcForce_l1)
                     IRF%KexcForce(i,j,k)=IRF%KexcForce(i,j,k)+                           &
-                            0.5*(ExcForce_l*EXP(-II*Results%w(l)*IRF%TimeS(i))           &
-                                +ExcForce_l1*EXP(-II*Results%w(l+1)*IRF%TimeS(i)))       &
+                            0.5*(ExcForce_l*EXP(II*Results%w(l)*IRF%TimeS(i))           &
+                                +ExcForce_l1*EXP(II*Results%w(l+1)*IRF%TimeS(i)))       &
                             *(Results%w(l+1)-Results%w(l))
                     END DO
                     IRF%KexcForce(i,j,k)=IRF%KexcForce(i,j,k)/2/PI

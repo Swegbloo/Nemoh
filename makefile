@@ -92,12 +92,12 @@ OBJHS=$(SRCHS:.f90=.o)
 # Rules to build
 hydroCal:	$(OBJHS)
 			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -o $(outputdir)/hydroCal $(OBJHS)
-			@echo "HydroCal compilation successful!"
+			@$(FC) -o $(outputdir)/hydrosCal $(OBJHS)
+			@echo "hydrosCal compilation successful!"
 
 clean_hydroCal:
 			@rm -f $(OBJHS)
-			@rm -f $(outputdir)/hydroCal
+			@rm -f $(outputdir)/hydrosCal
 ###################
 #  Pre-processor  #
 ###################
@@ -180,6 +180,7 @@ SRCO=./Common/Constants.f90\
 ./Common/Environment.f90\
 ./Common/Results.f90\
 ./Common/Mesh.f90\
+./Common/MNemohCal.f90\
 ./Solver/Core/M_SOLVER.f90\
 ./postProcessor/MPP_ReadInputFiles.f90\
 ./postProcessor/MPP_Compute_RAOs.f90\
@@ -202,57 +203,58 @@ clean_postProc:
 ################
 #  Test cases  #
 ################
-
+# Verification directory
+verdir=./../output/
 .PHONY: run_cylinder clean_cylinder
 run_cylinder: preProc solver postProc
-	$(MAKE) -C Verification/Cylinder/ run
+	$(MAKE) -C $(verdir)/Verification/Cylinder/ run
 
 clean_cylinder:
-	$(MAKE) -C Verification/Cylinder/ clean
+	$(MAKE) -C $(verdir)/Verification/Cylinder/ clean
 
 .PHONY: run_nonsymmetrical clean_nonsymmetrical
 run_nonsymmetrical: preProc solver postProc
-	$(MAKE) -C Verification/NonSymmetrical/ run
+	$(MAKE) -C $(verdir)/Verification/NonSymmetrical/ run
 
 clean_nonsymmetrical:
-	$(MAKE) -C Verification/NonSymmetrical/ clean
+	$(MAKE) -C $(verdir)/Verification/NonSymmetrical/ clean
 
 .PHONY: run_2Bodies clean_2Bodies
 run_2Bodies: preProc solver postProc
-	$(MAKE) -C Verification/2Bodies/ run
+	$(MAKE) -C $(verdir)/Verification/2Bodies/ run
 
 clean_clean_2Bodies:
-	$(MAKE) -C Verification/2Bodies/ clean
+	$(MAKE) -C $(verdir)/Verification/2Bodies/ clean
 
 .PHONY: run_Postprocessing clean_Postprocessing
 run_Postprocessing: preProc solver postProc
-	$(MAKE) -C Verification/Postprocessing/ run
+	$(MAKE) -C $(verdir)/Verification/Postprocessing/ run
 
 clean_clean_Postprocessing:
-	$(MAKE) -C Verification/Postprocessing/ clean
+	$(MAKE) -C $(verdir)/Verification/Postprocessing/ clean
 
 
-.PHONY: test clean_test
-test: preProc solver postProc
+.PHONY: run_quicktest clean_quicktest
+run_quicktest: preProc solver postProc
 	@echo ""
 	@echo "Sphere"
-	@$(MAKE) --silent -C Verification/QuickTests/1_Sphere/                     test
+	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/1_Sphere/                     test
 	@echo ""
 	@echo "Sphere using y-symmetry"
-	@$(MAKE) --silent -C Verification/QuickTests/2_SymmetricSphere/            test
+	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/2_SymmetricSphere/            test
 	@echo ""
 	@echo "Sphere in finite depth"
-	@$(MAKE) --silent -C Verification/QuickTests/3_FiniteDepthSphere/          test
+	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/3_FiniteDepthSphere/          test
 	@echo ""
 	@echo "Sphere in finite depth using y-symmetry"
-	@$(MAKE) --silent -C Verification/QuickTests/4_SymmetricFiniteDepthSphere/ test
+	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/4_SymmetricFiniteDepthSphere/ test
 	@echo ""
 	@echo "Alien sphere"
-	@$(MAKE) --silent -C Verification/QuickTests/5_AlienSphere/                test
+	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/5_AlienSphere/                test
 
-clean_test:
-	@$(MAKE) --silent -C Verification/QuickTests/1_Sphere/                     clean
-	@$(MAKE) --silent -C Verification/QuickTests/2_SymmetricSphere/            clean
-	@$(MAKE) --silent -C Verification/QuickTests/3_FiniteDepthSphere/          clean
-	@$(MAKE) --silent -C Verification/QuickTests/4_SymmetricFiniteDepthSphere/ clean
-	@$(MAKE) --silent -C Verification/QuickTests/5_AlienSphere/                clean
+clean_quicktest:
+	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/1_Sphere/                     clean
+	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/2_SymmetricSphere/            clean
+	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/3_FiniteDepthSphere/          clean
+	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/4_SymmetricFiniteDepthSphere/ clean
+	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/5_AlienSphere/                clean

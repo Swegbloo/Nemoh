@@ -136,6 +136,12 @@
     WRITE(*,'(A,I5,A,F7.4,A,F7.4)') '  ->',Nbeta,' wave directions from  ',beta(1),' to ',beta(Nbeta)
     WRITE(*,'(A,I5,A)') '  ->',Nradiation,' radiation problems'
     WRITE(*,'(A,I5,A)') '  ->',Nintegration,' forces'
+    IF (Mesh%Isym==1) THEN
+    WRITE(*,'(A,I5)') '  ->  Half-body mesh (symmetric) with Npanels=', Mesh%Npanels
+    ELSE
+    WRITE(*,'(A,I5)') '  ->  Full-body mesh with Npanels=', Mesh%Npanels
+    ENDIF
+
     WRITE(*,*) ' '
 !
 !   --- Generate force integration file ----------------------------------------------------------------------------------------

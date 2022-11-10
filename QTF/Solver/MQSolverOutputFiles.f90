@@ -6,9 +6,9 @@ IMPLICIT NONE
 
 CONTAINS
 
-        SUBROUTINE INITIALIZE_OUTPUT_FILES(workdir)
+        SUBROUTINE INITIALIZE_OUTPUT_FILES(workdir,contrib,ID_DEBUG)
              CHARACTER(len=*)   :: workdir
-             INTEGER            :: Iterm
+             INTEGER            :: Iterm,contrib,ID_DEBUG
              CHARACTER(len=1)   :: strT
              
              CALL make_directory(workdir//OutQTFDir)
@@ -16,32 +16,36 @@ CONTAINS
              CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDP)
              CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBM)
              CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBP)
-
+             IF (contrib==3) THEN
              CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSM)
              CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSP)
              CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileASYM)
              CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileASYP)
+             ENDIF
+             IF (ID_DEBUG==1) THEN
+                DO Iterm=1,6
+                   WRITE(strT,'(I0.1)') Iterm
+                   CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDM_term//strT//'.dat')
+                   CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDP_term//strT//'.dat')
+                   
+                   CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBM_term//strT//'.dat')
+                   CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBP_term//strT//'.dat')
+                ENDDO
 
-             DO Iterm=1,6
-                WRITE(strT,'(I0.1)') Iterm
-                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDM_term//strT//'.dat')
-                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDP_term//strT//'.dat')
-                
-                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBM_term//strT//'.dat')
-                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBP_term//strT//'.dat')
-             ENDDO
-             DO Iterm=1,9
-                WRITE(strT,'(I0.1)') Iterm
-                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSM_term//strT//'.dat')
-                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSP_term//strT//'.dat')
-             ENDDO
-             DO Iterm=1,2
-                WRITE(strT,'(I0.1)') Iterm
-                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSM_term//strT//'.dat')
-                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileASYM_term//strT//'.dat')
-                CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileASYP_term//strT//'.dat')
-             ENDDO
-
+                IF (contrib==3) THEN
+                DO Iterm=1,9
+                   WRITE(strT,'(I0.1)') Iterm
+                   CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSM_term//strT//'.dat')
+                   CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSP_term//strT//'.dat')
+                ENDDO
+                DO Iterm=1,2
+                   WRITE(strT,'(I0.1)') Iterm
+                   CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHFSM_term//strT//'.dat')
+                   CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileASYM_term//strT//'.dat')
+                   CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileASYP_term//strT//'.dat')
+                ENDDO
+                ENDIF
+             ENDIF
        END
 
        SUBROUTINE WRITE_INIT_QTF_FILE(FileName)

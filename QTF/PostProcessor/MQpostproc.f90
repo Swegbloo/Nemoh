@@ -38,6 +38,8 @@ CONTAINS
                                                        SwitchBiDir,Nbeta2
           CHARACTER*1                               :: strDOF
           CHARACTER*1,DIMENSION(2)                  :: str_MP
+          CHARACTER(LEN=15)                         :: FreqVar1_text,FreqVar2_text
+          REAL                                      :: FreqVar1,FreqVar2
                   
           !CALL CHECK_QTF_DATA_EXIST(inpNEMCAL,wd)
           IDCONTRIB(1:3)=0
@@ -51,6 +53,17 @@ CONTAINS
           SwitchBiDir=inpNEMCAL%qtfinput%bidirection
           Nbeta2=Nbeta
           IF (SwitchBiDir==0) Nbeta2=1
+          
+          IF (inpNEMCAL%qtfinput%FreqTypeOutput==1) THEN
+              FreqVar1_text='      w1[rad/s]'
+              FreqVar2_text='      w2[rad/s]'
+          ELSEIF (inpNEMCAL%qtfinput%FreqTypeOutput==2) THEN
+              FreqVar1_text='      f1[Hz]'
+              FreqVar2_text='      f2[Hz]'
+          ELSEIF (inpNEMCAL%qtfinput%FreqTypeOutput==3) THEN
+              FreqVar1_text='      T1[s]'
+              FreqVar2_text='      T2[s]'
+          ENDIF
 
           str_MP(1)='M'
           str_MP(2)='P'
@@ -58,7 +71,7 @@ CONTAINS
             !open output file 
             OPEN(NEWUNIT=uo_m, FILE=TRIM(wd)//'/results/QTF/OUT_QTF'//str_MP(ID_MP)//'_N.dat',&
                      ACTION='WRITE')
-            WRITE(uo_m,'(9(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [deg]','beta2[deg]','DOF',&
+            WRITE(uo_m,'(9(A,X))') FreqVar1_text, FreqVar2_text,'beta1 [deg]','beta2[deg]','DOF',&
                     'MOD(QTF)/rho/g','PHASE(QTF)[deg]','Re(QTF)/rho/g','Im(QTF)/rho/g'
 
               DO IintegS=1,Ninteg  
@@ -145,11 +158,21 @@ CONTAINS
                         DO Iw2=1,Iw1
                           QTFtotR(Iw1,Iw2)=QTFtotR(Iw1,Iw2)/inpNEMCAL%Env%RHO/inpNEMCAL%Env%G
                           QTFtotI(Iw1,Iw2)=QTFtotI(Iw1,Iw2)/inpNEMCAL%Env%RHO/inpNEMCAL%Env%G
+                          IF (inpNEMCAL%qtfinput%FreqTypeOutput==1) THEN
+                              FreqVar1=w(Iw1)
+                              FreqVar2=w(Iw2)
+                          ELSEIF (inpNEMCAL%qtfinput%FreqTypeOutput==2) THEN
+                              FreqVar1=w(Iw1)/2/PI
+                              FreqVar2=w(Iw2)/2/PI
+                          ELSEIF (inpNEMCAL%qtfinput%FreqTypeOutput==3) THEN
+                              FreqVar1=2*PI/w(Iw1)
+                              FreqVar2=2*PI/w(Iw2)
+                          ENDIF
 
                           WRITE(uo_m,'(4(F12.3,X),I2,4(X,E14.7))')              &
-                                w(Iw1),w(Iw2),betai,betaj,IintegS,              &
+                                FreqVar1,FreqVar2,betai,betaj,IintegS,          &
                                 SQRT(QTFtotR(Iw1,Iw2)**2+QTFtotI(Iw1,Iw2)**2),  &
-                                ATAN2(QTFtotI(Iw1,Iw2),QTFtotR(Iw1,Iw2))*180/PI, &
+                                ATAN2(QTFtotI(Iw1,Iw2),QTFtotR(Iw1,Iw2))*180/PI,&
                                 QTFtotR(Iw1,Iw2),QTFtotI(Iw1,Iw2)
                         ENDDO
                       ENDDO
