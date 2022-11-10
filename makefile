@@ -204,7 +204,7 @@ clean_postProc:
 #  Test cases  #
 ################
 # Verification directory
-verdir=./../output/
+verdir=./
 .PHONY: run_cylinder clean_cylinder
 run_cylinder: preProc solver postProc
 	$(MAKE) -C $(verdir)/Verification/Cylinder/ run
@@ -223,14 +223,14 @@ clean_nonsymmetrical:
 run_2Bodies: preProc solver postProc
 	$(MAKE) -C $(verdir)/Verification/2Bodies/ run
 
-clean_clean_2Bodies:
+clean_2Bodies:
 	$(MAKE) -C $(verdir)/Verification/2Bodies/ clean
 
 .PHONY: run_Postprocessing clean_Postprocessing
 run_Postprocessing: preProc solver postProc
 	$(MAKE) -C $(verdir)/Verification/Postprocessing/ run
 
-clean_clean_Postprocessing:
+clean_Postprocessing:
 	$(MAKE) -C $(verdir)/Verification/Postprocessing/ clean
 
 
