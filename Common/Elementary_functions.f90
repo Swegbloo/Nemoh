@@ -1,25 +1,27 @@
 !--------------------------------------------------------------------------------------
 !
-!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la Noë, 44300 Nantes, France
+!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
+!						  LHEEA, UMR 6598, F-44000 Nantes, France
 !
-!   Licensed under the Apache License, Version 2.0 (the "License");
-!   you may not use this file except in compliance with the License.
-!   You may obtain a copy of the License at
+!    This program is free software: you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by
+!    the Free Software Foundation, either version 3 of the License, or
+!    (at your option) any later version.
 !
-!       http://www.apache.org/licenses/LICENSE-2.0
+!    This program is distributed in the hope that it will be useful,
+!    but WITHOUT ANY WARRANTY; without even the implied warranty of
+!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!    GNU General Public License for more details.
 !
-!   Unless required by applicable law or agreed to in writing, software
-!   distributed under the License is distributed on an "AS IS" BASIS,
-!   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-!   See the License for the specific language governing permissions and
-!   limitations under the License. 
+!    You should have received a copy of the GNU General Public License
+!    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 !   Contributors list:
 !   - G. Delhommeau
 !   - P. Guével
 !   - J.C. Daubisse
 !   - J. Singh  
-!
+!	- R. Kurnia
 !--------------------------------------------------------------------------------------
 MODULE Elementary_functions
 
@@ -272,7 +274,11 @@ CONTAINS
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Bessel functions added by RK !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     FUNCTION fun_BESSJ (N,X) RESULT(BESSJ)
-
+!*   Reference: From Numath Library By Tuan Dang Trong in Fortran 77.   *
+!*                                                                      *
+!*                               F90 Release 1.0 By J-P Moreau, Paris.  *
+!*                                      all variables declared          *
+!*                                         (www.jpmoreau.fr)            *
 !     This subroutine calculates the first kind modified Bessel function
 !     of integer order N, for any REAL X. We use here the classical
 !     recursion formula, when X > N. For X < N, the Miller's algorithm
@@ -338,7 +344,11 @@ CONTAINS
       FUNCTION fun_BESSJ0 (X) RESULT(BESSJ0)
       IMPLICIT NONE
       REAL X,BESSJ0,AX,FR,FS,Z,FP,FQ,XX
-
+!*   Reference: From Numath Library By Tuan Dang Trong in Fortran 77.   *
+!*                                                                      *
+!*                               F90 Release 1.0 By J-P Moreau, Paris.  *
+!*                                      all variables declared          *
+!*                                         (www.jpmoreau.fr)            *
 !     This subroutine calculates the First Kind Bessel Function of
 !     order 0, for any real number X. The polynomial approximation by
 !     series of Chebyshev polynomials is used for 0<X<8 and 0<8/X<1.
@@ -380,6 +390,11 @@ CONTAINS
       FUNCTION fun_BESSJ1 (X) RESULT(BESSJ1)
       IMPLICIT NONE
       REAL X,BESSJ1,AX,FR,FS,Z,FP,FQ,XX
+!*   Reference: From Numath Library By Tuan Dang Trong in Fortran 77.   *
+!*                                                                      *
+!*                               F90 Release 1.0 By J-P Moreau, Paris.  *
+!*                                      all variables declared          *
+!*                                         (www.jpmoreau.fr)            *	  
 !     This subroutine calculates the First Kind Bessel Function of
 !     order 1, for any real number X. The polynomial approximation by
 !     series of Chebyshev polynomials is used for 0<X<8 and 0<8/X<1.
