@@ -213,7 +213,10 @@
         CHARACTER(LEN=*) :: namefile
         INTEGER :: i,j,k
         OPEN(10,FILE=namefile)
-        WRITE(10,*) 'VARIABLES="Time (s)","REAL(IRF(1:Nintegration))","AIMAG(IRF(1:Nintegration))"'
+        WRITE(10,*) 'VARIABLES="Time (s)"'
+		DO k=1,IRF%Nintegration
+            WRITE(10,'(A,I4,A)') '"IRF ',k,'"'
+        END DO
         DO j=1,IRF%Nbeta
             WRITE(10,'(A,E14.7,A,I6,A)') 'Zone t="beta ',IRF%beta(j),'",I=',IRF%NtimeS,',F=POINT'
             DO i=0,IRF%NtimeS-1

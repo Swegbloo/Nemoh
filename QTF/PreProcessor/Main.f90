@@ -82,7 +82,7 @@ IMPLICIT NONE
 !       -------------------------------------                      
 !       Prepare Free-surface mesh
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
-          CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID)//'/mesh',MeshFS,QTFinputNem)
+          CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID),MeshFS,QTFinputNem)
           CALL INITIALIZE_GREEN_FS(IGreen,IGreenFS)
         ENDIF
 !       --------------------------------------

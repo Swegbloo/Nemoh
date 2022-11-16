@@ -97,7 +97,7 @@ SUBROUTINE ExMaillage(ID,DSCRPT,X,Y,Z,NP,NPMX,facette,NF,NFMX,NSYM)
   end do
   close(10)
   ! Fichier de maillage
-  open(10,file=TRIM(ID%ID)//'/mesh/'//DSCRPT%ID(1:DSCRPT%lID)//'.dat')
+  open(10,file=TRIM(ID%ID)//'/'//DSCRPT%ID(1:DSCRPT%lID)//'.dat')
   write(10,'(20X,I1,10X,I1)') 2,NSYM
   do i=1,np
     write(10,'(10X,I4,3(10X,F14.7))') i,X(i),Y(i),Z(i)

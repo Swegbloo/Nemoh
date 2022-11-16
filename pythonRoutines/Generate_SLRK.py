@@ -202,7 +202,7 @@ def generate_mesh(nemohpath, NPASTH, NPASRInput,  Lligne, RM=0.10, RCEREXT=300, 
     NN2=np.append(M3SL.reshape(NFACSL,1)-1,M4SL.reshape(NFACSL,1)-1,axis=1)
     NN=np.append(NN1,NN2,axis=1)
     NN=np.append(np.ones((NFACSL,1))*4,NN,axis=1).astype(int)
-    meshpath = os.path.join(nemohpath, 'Mesh')
+    meshpath = nemohpath    #os.path.join(nemohpath, 'Mesh')
     filename = os.path.join(meshpath, 'SF_L12')
 
     createVTK(xyz,NN,filename)

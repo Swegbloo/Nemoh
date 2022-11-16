@@ -78,7 +78,9 @@ PROGRAM Mesh
   INTEGER,DIMENSION(4) :: p
   CHARACTER(LEN=2) :: Num
   INTEGER :: cNum
-
+  LOGICAL :: ex
+  INTEGER :: Msys
+  
   WRITE(*,*)
   WRITE(*,*) ' -> Read input data '
   WRITE(*,*) ' '
@@ -91,7 +93,7 @@ PROGRAM Mesh
   READ(10,*) xG,yG,zG
   READ(10,*) Nmailmx
   CLOSE(10)
-  OPEN(10,file=TRIM(ID%ID)//'/mesh/'//DSCRPT%ID(1:DSCRPT%lID))
+  OPEN(10,file=TRIM(ID%ID)//'/'//DSCRPT%ID(1:DSCRPT%lID))
   READ(10,*) Np
   READ(10,*) nFace
   DO i=1,Np
@@ -188,6 +190,10 @@ PROGRAM Mesh
     WRITE(*,'(A,F7.3,1X,A,F7.3)') ' XF = ',XF+xG,' XG = ',xG
     WRITE(*,'(A,F7.3,1X,A,F7.3)') ' YF = ',YF+yG,' YG = ',yG
   END IF
+
+  INQUIRE (DIRECTORY=ID%ID(1:ID%lID)//'/mesh', EXIST=ex) 
+  IF (.NOT.ex) Msys=SYSTEM('mkdir '//ID%ID(1:ID%lID)//'/mesh')
+  
   OPEN(10,FILE=TRIM(ID%ID)//'/mesh/Hydrostatics.dat')
   WRITE(10,'(A,F7.3,A,F7.3)') ' XF = ',XF+xG,' - XG = ',xG
   WRITE(10,'(A,F7.3,A,F7.3)') ' YF = ',YF+yG,' - YG = ',yG

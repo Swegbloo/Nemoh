@@ -125,7 +125,7 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
 !       -------------------------------------                      
 !       Prepare Free-surface mesh
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
-          CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID)//'/mesh',MeshFS,QTFinputNem)
+          CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID),MeshFS,QTFinputNem)
           CALL Prepare_FaceMesh(MeshFS%Mesh,NP_GQ,VFaceFS)
           NPFlowFS   =(MeshFS%Mesh%Npanels+MeshFS%BdyLine%NWLineSeg)*2**MeshFS%Mesh%Isym !Number of flow point
         ENDIF

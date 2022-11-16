@@ -163,7 +163,7 @@ CONTAINS
       tX=0.
       tY=0.
       READ(10,*) meshfile
-      OPEN(11,FILE=TRIM(ID%ID)//'/mesh/'//TRIM(meshfile))
+      OPEN(11,FILE=TRIM(ID%ID)//'/'//TRIM(meshfile))
       READ(11,*) M,N
       IF ((c.GT.1).AND.(N.NE.Mesh%Isym)) THEN
         WRITE(*,*) ' Error: there is an inconsistency in the mesh files regarding the xOz symmetries'

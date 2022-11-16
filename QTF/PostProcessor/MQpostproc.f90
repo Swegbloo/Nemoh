@@ -187,7 +187,7 @@ CONTAINS
                 IF (IDCONTRIB(3)==1) CLOSE(u4)
 
             END DO
-            print*,'results/OUT_QTF',str_MP(ID_MP),'.dat saved!'
+            print*,'results/QTF/OUT_QTF',str_MP(ID_MP),'.dat saved!'
             CLOSE(uo_m)
           END DO
          

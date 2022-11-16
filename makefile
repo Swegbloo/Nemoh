@@ -204,57 +204,64 @@ clean_postProc:
 #  Test cases  #
 ################
 # Verification directory
-verdir=./
-.PHONY: run_cylinder clean_cylinder
-run_cylinder: preProc solver postProc
-	$(MAKE) -C $(verdir)/Verification/Cylinder/ run
+verdir=.
+.PHONY: run_1_cylinder clean_1_cylinder
+run_1_cylinder: 
+	$(MAKE) -C $(verdir)/Verification/1_Cylinder/ run
 
-clean_cylinder:
-	$(MAKE) -C $(verdir)/Verification/Cylinder/ clean
+clean_1_cylinder:
+	$(MAKE) -C $(verdir)/Verification/1_Cylinder/ clean
 
-.PHONY: run_nonsymmetrical clean_nonsymmetrical
-run_nonsymmetrical: preProc solver postProc
-	$(MAKE) -C $(verdir)/Verification/NonSymmetrical/ run
+.PHONY: run_2_2Bodies clean_2_2Bodies
+run_2_2Bodies: 
+	$(MAKE) -C $(verdir)/Verification/2_2Bodies/ run
 
-clean_nonsymmetrical:
-	$(MAKE) -C $(verdir)/Verification/NonSymmetrical/ clean
+clean_2_2Bodies:
+	$(MAKE) -C $(verdir)/Verification/2_2Bodies/ clean
 
-.PHONY: run_2Bodies clean_2Bodies
-run_2Bodies: preProc solver postProc
-	$(MAKE) -C $(verdir)/Verification/2Bodies/ run
+.PHONY: run_3_nonsymmetrical clean_3_nonsymmetrical
+run_3_nonsymmetrical: 
+	$(MAKE) -C $(verdir)/Verification/3_NonSymmetrical/ run
 
-clean_2Bodies:
-	$(MAKE) -C $(verdir)/Verification/2Bodies/ clean
+clean_3_nonsymmetrical:
+	$(MAKE) -C $(verdir)/Verification/3_NonSymmetrical/ clean
 
-.PHONY: run_Postprocessing clean_Postprocessing
-run_Postprocessing: preProc solver postProc
-	$(MAKE) -C $(verdir)/Verification/Postprocessing/ run
+.PHONY: run_4_Postprocessing clean_4_Postprocessing
+run_4_Postprocessing: 
+	$(MAKE) -C $(verdir)/Verification/4_Postprocessing/ run
 
-clean_Postprocessing:
-	$(MAKE) -C $(verdir)/Verification/Postprocessing/ clean
+clean_4_Postprocessing:
+	$(MAKE) -C $(verdir)/Verification/4_Postprocessing/ clean
 
 
-.PHONY: run_quicktest clean_quicktest
-run_quicktest: preProc solver postProc
+.PHONY: run_5_quicktest clean_5_quicktest
+run_5_quicktest: 
 	@echo ""
 	@echo "Sphere"
-	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/1_Sphere/                     test
+	@$(MAKE) --silent -C $(verdir)/Verification/5_QuickTests/1_Sphere/                     test
 	@echo ""
 	@echo "Sphere using y-symmetry"
-	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/2_SymmetricSphere/            test
+	@$(MAKE) --silent -C $(verdir)/Verification/5_QuickTests/2_SymmetricSphere/            test
 	@echo ""
 	@echo "Sphere in finite depth"
-	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/3_FiniteDepthSphere/          test
+	@$(MAKE) --silent -C $(verdir)/Verification/5_QuickTests/3_FiniteDepthSphere/          test
 	@echo ""
 	@echo "Sphere in finite depth using y-symmetry"
-	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/4_SymmetricFiniteDepthSphere/ test
+	@$(MAKE) --silent -C $(verdir)/Verification/5_QuickTests/4_SymmetricFiniteDepthSphere/ test
 	@echo ""
 	@echo "Alien sphere"
-	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/5_AlienSphere/                test
+	@$(MAKE) --silent -C $(verdir)/Verification/5_QuickTests/5_AlienSphere/                test
 
-clean_quicktest:
-	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/1_Sphere/                     clean
-	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/2_SymmetricSphere/            clean
-	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/3_FiniteDepthSphere/          clean
-	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/4_SymmetricFiniteDepthSphere/ clean
-	@$(MAKE) --silent -C $(verdir)/Verification/QuickTests/5_AlienSphere/                clean
+clean_5_quicktest:
+	@$(MAKE) --silent -C $(verdir)/Verification/5_QuickTests/1_Sphere/                     clean
+	@$(MAKE) --silent -C $(verdir)/Verification/5_QuickTests/2_SymmetricSphere/            clean
+	@$(MAKE) --silent -C $(verdir)/Verification/5_QuickTests/3_FiniteDepthSphere/          clean
+	@$(MAKE) --silent -C $(verdir)/Verification/5_QuickTests/4_SymmetricFiniteDepthSphere/ clean
+	@$(MAKE) --silent -C $(verdir)/Verification/5_QuickTests/5_AlienSphere/                clean
+
+.PHONY: run_6_box_coarsemesh clean_6_box_coarsemesh
+run_6_box_coarsemesh:
+	$(MAKE) -C $(verdir)/Verification/6_box_coarsemesh/ run
+
+clean_6_box_coarsemesh:
+	$(MAKE) -C $(verdir)/Verification/6_box_coarsemesh/ clean
