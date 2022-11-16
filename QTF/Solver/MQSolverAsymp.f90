@@ -191,13 +191,7 @@ CONTAINS
      IR_RFINF=Fun_IntegIR_RFInf(l,rel_error,Niter,dR,Rf(NRf),NRf,k1,k2,sumk,IR_0INF,22)
      IR2l(2)=eps_l*(II**l)*IR_RFINF       !for sum freq
 
-     !IR2_0Rext=fun_IR2_0Rext(l,k1,k2,delk,sumk,Rf,NRf)
-     !IR2l(1)=eps_l*CONJG(II**l)*(II*fun_gamma(l,delk+k1,k2)-IR2_0Rext(1))
-    ! IR2l(2)=eps_l*II**l*(II*fun_gamma(l,sumk+k1,k2)-IR2_0Rext(2))
-
-    ! print*,l,IR2_0Rext(:)
-     !print*,l,delk+k1,k2,fun_gamma(l,delk+k1,k2)
-    END FUNCTION
+   END FUNCTION
 
 
   
@@ -262,7 +256,6 @@ CONTAINS
      
        IR_RFINF=IR_0INF-IR_0RF
        
-     !print*,Iswitch,IR_0RF1,IR_0RF
      DEALLOCATE(R0RF)
 
      CONTAINS

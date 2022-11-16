@@ -10,7 +10,7 @@ clc;clear;
 cd (pathstr);
 addpath(genpath(pathstr))
 %%%
-TestCaseNo=4;       
+TestCaseNo=1;       
 if TestCaseNo==1        %7_QTF_Cylinder
     dataparamQTF_1;
     qtftype='M';

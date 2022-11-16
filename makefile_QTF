@@ -162,18 +162,18 @@ run_8_oc4_semisub:
 clean_8_oc4_semisub:
 	$(MAKE) -C $(verdir)/Verification/8_QTF_OC4_Semisubmersible/mesh2200_Floating/ clean
 
-.PHONY: run_9_softwind clean_9_softwind
-run_9_softwind: 
+.PHONY: run_9a_softwind clean_9a_softwind
+run_9a_softwind: 
 	$(MAKE) -C $(verdir)/Verification/9_QTF_SOFTWIND/mesh_1872half_QTF_Floating/ run
 
-clean_9_softwind:
+clean_9a_softwind:
 	$(MAKE) -C $(verdir)/Verification/9_QTF_SOFTWIND/mesh_1872half_QTF_Floating/ clean
 
-.PHONY: run_10_softwind_FS clean_10_softwind_FS
-run_10_softwind_FS: 
+.PHONY: run_9b_softwind_FS clean_9b_softwind_FS
+run_9b_softwind_FS: 
 	$(MAKE) -C $(verdir)/Verification/9_QTF_SOFTWIND/mesh_1872half_nolid_QTF_Floating_FS/ run
 
-clean_10_softwind_FS:
+clean_9b_softwind_FS:
 	$(MAKE) -C $(verdir)/Verification/9_QTF_SOFTWIND/mesh_1872half_nolid_QTF_Floating_FS/ clean
 
 

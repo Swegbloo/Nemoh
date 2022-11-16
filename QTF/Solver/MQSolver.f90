@@ -100,16 +100,6 @@ CONTAINS
           Npanels=Mesh%Npanels
           NpanWlin=Npanels+WLine%NWLineSeg
 
-          !DO Ipanel=1,WLine%NWLineSeg
-          !  print*,Ipanel,TotPot_Iw1(Npanels+Ipanel)
-          !  print*,Ipanel,TotPot_Iw1(2*Npanels+WLine%NWLineSeg+Ipanel)
-          !ENDDO
-          
-         ! DO Ipanel=1,NpanWlin
-         !   print*,Ipanel,TotVel_Iw1(Ipanel,1),TotVel_Iw1(NpanWlin+Ipanel,1)
-         !   print*,Ipanel,TotVel_Iw1(Ipanel,2),TotVel_Iw1(NpanWlin+Ipanel,2)
-         !   print*,Ipanel,TotVel_Iw1(Ipanel,3),TotVel_Iw1(NpanWlin+Ipanel,3)
-         ! ENDDO
 
           DO Iinteg=1,Nintegration
            QTFDuok(Iinteg,:,:)=0
@@ -139,10 +129,6 @@ CONTAINS
                 QTFDuok(Iinteg,2,1)=QTFDuok(Iinteg,2,1)+0.5*rho*                &
                                 quad_P*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
 
-                !IF (Iinteg==1) THEN
-                !print*,Ipanel,0.5*quad_M*genNormal_dS(Iinteg,Ipanel)*rho,      &
-                !                 0.5*quad_P*genNormal_dS(Iinteg,Ipanel)*rho
-                !ENDIF
         
                 ! term: product(displacement,dtgradPhi)
                 quad_M=DOT_PRODUCT_DIFF_BIHARM(                                 &
@@ -156,10 +142,6 @@ CONTAINS
                 QTFDuok(Iinteg,2,2)=QTFDuok(Iinteg,2,2)+rho*                    &
                                 quad_P*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
 
-                 !IF (Iinteg==1) THEN
-                 !print*,Ipanel,quad_M*genNormal_dS(Iinteg,Ipanel)*rho,         &
-                 !                   quad_P*genNormal_dS(Iinteg,Ipanel)*rho
-                 !ENDIF
               ENDDO
             ENDIF
            ENDDO
@@ -188,13 +170,6 @@ CONTAINS
                 QTFDuok(Iinteg,2,3)=QTFDuok(Iinteg,2,3)-0.5*rho*g*quad_P           &
                                 *genNormalWLine_dGamma(Iinteg,Iwlineinit(2)+Iwline)
 
-             !  IF (Iinteg==6.AND.Isym==1) THEN
-             !     print*,Iwline,Iinteg,WLine%XM(Iwline,1:2),genNormalWLine_dGamma(Iinteg,Iwline)
-                ! print*,Iwline,TotPot_Iw1(Iwlineinit(1)+Iwline)
-                 ! print*,Iwline,quad_M,quad_P
-                !print*,Iwline,-0.5*rho*g*quad_M*genNormalWLine_dGamma(Iinteg,Iwline),&
-                !        -0.5*rho*g*quad_P*genNormalWLine_dGamma(Iinteg,Iwline)
-             !   ENDIF
               ENDDO
            ENDDO
          ENDDO
@@ -252,20 +227,7 @@ CONTAINS
                        InertiaForce_Iw1(Iinteg+1:Iinteg+3),                    &
                        InertiaForce_Iw2(Iinteg+1:Iinteg+3))
                  
-              !IF(Iw1==30) Then
-              !print*,Iw1,Iw2
-              !print*,'4',QTFDuok(Iinteg+4,1), QTFDuok(Iinteg+4,2)
-              !print*,'5',QTFDuok(Iinteg+5,1), QTFDuok(Iinteg+5,2)
-              !print*,'6',QTFDuok(Iinteg+6,1), QTFDuok(Iinteg+6,2)
-              !ENDIF
-              ! DO Iinteg=1,6  
-              ! print*, InertiaForce_Iw1(Iinteg),InertiaForce_Iw2(Iinteg)
-              ! ENDDO
-
-              ! DO Iinteg=1,6
-              !  print*, QTFDuok(Iinteg,1),QTFDuok(Iinteg,2)
-              ! ENDDO
-
+             
               !term: quadratic term of second order excitation force=-[K]*Xi_Tilde
               r3=-IntegAxis(3,Iinteg+4)!r3=Zm-ZCOG, ZM=0
               XiTilde_M(Iinteg+1:Iinteg+6)=CZERO
@@ -505,32 +467,6 @@ CONTAINS
               QTFHasbo(Iinteg,2,5)=QTFHasbo(Iinteg,2,5)                   &
                     -II*sumw*rho*(QB2_P/2)*Mesh%A(Ipanel)
            
-            !  !------------------------------------------------------
-              !IF (Iinteg==1) THEN
-              !  print*,Ipanel,Phi_I
-              !ENDIF
-
-             ! IF (Iinteg==2) THEN
-             !   print*,Ipanel,-rho*Pressure_I(1)*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel)
-             ! ENDIF
-             ! IF (Iinteg==2.AND.Ipanel<=200) THEN
-             !  ! print*,XM,Pressure_I(1)
-             !   print*,Ipanelinit(2)+Ipanel,-rho*Pressure_I(1)*genNormal_dS(Iinteg,Ipanelinit(2)+Ipanel),&
-             !           QTFHasbo_temp(Iinteg,1,1)
-             ! ENDIF
-
-              !IF (Iinteg==1 .AND. Isym==2) THEN
-              !    print*,Ipanel,dnPhi_I(1)*Radpot(1)*Mesh%A(Ipanel)
-              !ENDIF
-              !IF (Iinteg==1.AND.Ipanel.LE.100) THEN
-              !    !print*,Ipanel,Mesh%A(Ipanel)
-              !    print*,Isym,Ipanel,TotVel_Iw1(Ipanelinit(1)+Ipanel,:)
-              !    !  print*,Isym,Ipanel,QTFHasbo(Iinteg,1)  
-              !ENDIF
-              !  IF (Iinteg==1 .AND. Isym==2) THEN
-              !      print*,Ipanel,QB1_M
-              !      print*,Ipanel,QB1_P
-              !  ENDIF
             ENDDO
             ENDIF
            ENDDO
@@ -576,9 +512,7 @@ CONTAINS
                      -0.5*II*sumw*rho                                  &
                      *DOT_PRODUCT_COMPLEX(QB2V_P,dGAMMA_Vect,3)
               !----------------------------------------------------
-              !IF (Iinteg==1 .AND. Isym==2) THEN
-              !   print*,Iwline,-0.5*II*delw*rho*DOT_PRODUCT_COMPLEX(QB2V_M,dGAMMA_Vect,3)
-              !ENDIF
+            
             ENDDO
            ENDDO
           ENDDO
@@ -677,8 +611,7 @@ CONTAINS
                  RadVel(:,1:2)=INTERP_RADIATION_VELOCITY                      &
                      (Nw,w,datPotVelQ%RadVel(Ipanelinit(1)+Ipanel,:,Iinteg,:),&
                            InterpSwitch,delw,sumw)
-                ! Radpot(1:2)=CMPLX(1,0)
-                ! RadVel(:,1:2)=CMPLX(1,0)
+
                  !------------------------------------------------------------
                  !term QFD1:(gradPhi,gradPhiPer)+(gradPhiPer,GradPhiInc)
 
@@ -687,11 +620,7 @@ CONTAINS
                        +DOT_PRODUCT_COMPLEX(PerVel_Iw1,CONJG(IncVel_Iw2),3)   &
                         ) 
                  
-                ! IF (Iinteg==1) print*,Ipanel,XM(1),XM(2),REAL(IncVel_Iw1(1)),AIMAG(IncVel_Iw1(1))
-                ! IF (Iinteg==1) print*,Ipanel,XM(1),XM(2),REAL(IncVel_Iw1(2)),AIMAG(IncVel_Iw1(2))
-                ! IF (Iinteg==1) print*,Ipanel,XM(1),XM(2),REAL(IncVel_Iw1(3)),AIMAG(IncVel_Iw1(3))
-                ! IF (Iinteg==1) print*,Ipanel,XM(1),XM(2),REAL(QFD1_M),AIMAG(QFD1_M)
-
+               
                  QFD1_P=II*sumw*(                                             &
                         DOT_PRODUCT_COMPLEX(TotVel_Iw1,PerVel_Iw2,3)          &
                        +DOT_PRODUCT_COMPLEX(PerVel_Iw1,IncVel_Iw2,3)          &
@@ -1023,18 +952,6 @@ CONTAINS
    IF (delk.EQ.0)  IR1l(1,Ibessel)=0.
    IF (delk.EQ.0)  IR2l(1,Ibessel)=0.
   ENDDO
-  !OPEN(NEWUNIT=ufile,FILE='./IR1M.DAT',ACTION='WRITE',POSITION='APPEND')
-  !WRITE(ufile,'(4(F10.3,X),<Nbessel*2+2>(E14.7,X))') k1,k2,delk,sumk,(IR1l(1,Ibessel),Ibessel=0,Nbessel)
-  !CLOSE(ufile)
-  !OPEN(NEWUNIT=ufile,FILE='./IR2M.DAT',ACTION='WRITE',POSITION='APPEND')
-  !WRITE(ufile,'(4(F10.3,X),<Nbessel*2+2>(E14.7,X))') k1,k2,delk,sumk,(IR2l(1,Ibessel),Ibessel=0,Nbessel)
-  !CLOSE(ufile)
-  !OPEN(NEWUNIT=ufile,FILE='./IR1P.DAT',ACTION='WRITE',POSITION='APPEND')
-  !WRITE(ufile,'(4(F10.3,X),<Nbessel*2+2>(E14.7,X))') k1,k2,delk,sumk,(IR1l(2,Ibessel),Ibessel=0,Nbessel)
-  !CLOSE(ufile)
-  !OPEN(NEWUNIT=ufile,FILE='./IR2P.DAT',ACTION='WRITE',POSITION='APPEND')
-  !WRITE(ufile,'(4(F10.3,X),<Nbessel*2+2>(E14.7,X))') k1,k2,delk,sumk,(IR2l(2,Ibessel),Ibessel=0,Nbessel)
-  !CLOSE(ufile)
 
   DO Iinteg=1,Nintegration
      QTFHASFS_ASYMP(Iinteg,:,:)=CZERO
@@ -1055,10 +972,8 @@ CONTAINS
                                 CmSmRad_delk,CmSmRad_sumk,Ibessel)
       Ivartheta2l(:,Ibessel)=Fun_IVartheta2l(Nbessel,beta(Ibeta2),CmSmPer_k1,   &
                                 CmSmRad_delk,CmSmRad_sumk,Ibessel)
-    !  print*,Ibessel,Ivartheta1l(:,Ibessel)
-    !  print*,Ibessel,Ivartheta2l(:,Ibessel)
+    
      ENDDO
-    ! STOP 
 
      !all the integral terms both for diff and sum freq
      I_DF=Fun_IDF(w1,w2,k1,k2,delk,sumk,g,depth,Rf,NRf,Nbessel,           &

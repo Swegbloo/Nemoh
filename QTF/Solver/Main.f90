@@ -214,48 +214,13 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
                                         w,Qfreq,RotAnglesQ)
         CALL PREPARE_TRANSLATION_MOTION(Motion,Nw,Nbeta,Nradiation,Nbodies,              &
                                         w,Qfreq,TransMotionQ)
-       ! print*,WLine%NWLineSeg
-       ! DO Ibeta1=1,Nbeta
-       !   print*,'------------------------------'
-       !   print*,beta(Ibeta1)
-       !  ! DO Iw1=1,Nw
-       !  ! DO I=1,Nradiation
-       !  !    print*,Iw1,I,Motion(Iw1,I,Ibeta1)
-       !  ! ENDDO
-       !  ! ENDDO
-       !  ! DO Ipanel=1,Mesh%Npanels!+WLine%NWLineSeg
-       !  !  print*,Ipanel,datPotVelQ%TotVel(Ipanel,1,Ibeta1,6),&
-       !  !          datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),1,Ibeta1,6)
-       !  !  print*,Ipanel,datPotVelQ%TotVel(Ipanel,2,Ibeta1,6),&
-       !  !          datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),2,Ibeta1,6)
-       !  !  print*,Ipanel,datPotVelQ%TotVel(Ipanel,3,Ibeta1,6),&
-       !  !          datPotVelQ%TotVel(Ipanel+(Mesh%Npanels+WLine%NWLineSeg),3,Ibeta1,6)
-       !  !        ! print*,Ipanel,BdisplaceQ(8,Ibeta1,Ipanel,:)
-       !  ! ENDDO
-       !   DO Ipanel=1,NPFlowFS! MeshFS%Mesh%Npanels
-       !    print*,Ipanel,datPotVelQFS%TotPot(Ipanel,Ibeta1,1),datPotVelQFS%IncPot(Ipanel,Ibeta1,1)
-       !   ENDDO
-       ! ENDDO
-       ! STOP
-       !  COMPUTE QTF
+     
        CALL  INITIALIZE_OUTPUT_FILES(TRIM(ID%ID),InpNEMOHCAL%qtfinput%Ncontrib,ID_DEBUG)
 
        WRITE(*,*) 'QTF Solver preparation, Done!'
        CALL WRITE_QTFSOLVERLOGFILE(TRIM(ID%ID),Nbeta,beta,Qfreq)
        CALL START_RECORD_TIME(tcpu_start,TRIM(ID%ID)//'/'//LogFILE,IdAppend)
 
-      ! OPEN(NEWUNIT=ufile,FILE='./IR1M.DAT',Action='WRITE')
-      ! WRITE(ufile,*) ''
-      ! CLOSE(ufile) 
-      ! OPEN(NEWUNIT=ufile,FILE='./IR2M.DAT',Action='WRITE')
-      ! WRITE(ufile,*) ''
-      ! CLOSE(ufile)
-      ! OPEN(NEWUNIT=ufile,FILE='./IR1P.DAT',Action='WRITE')
-      ! WRITE(ufile,*) ''
-      ! CLOSE(ufile) 
-      ! OPEN(NEWUNIT=ufile,FILE='./IR2P.DAT',Action='WRITE')
-      ! WRITE(ufile,*) ''
-      ! CLOSE(ufile) 
         Nbeta2=Nbeta
         IF (SwitchBiDir==0) Nbeta2=1
 
@@ -373,9 +338,6 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
         CALL END_RECORD_TIME(tcpu_start,TRIM(ID%ID)//'/'//LogFILE)
         WRITE(LogTextToBeWritten,*) '---- DONE ---'
         CALL WRITE_LOGFILE(TRIM(ID%ID)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
-
-        
-       ! print*,RadVel(900:1000,1,1,1)
 
 ! ----- Finalize ---------------------------------------------------------------------------
 !       DEALOCATING variables

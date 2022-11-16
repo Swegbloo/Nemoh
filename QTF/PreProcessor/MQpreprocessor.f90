@@ -185,31 +185,7 @@ CONTAINS
                    +DOT_PRODUCT_COMPLEX(gradS(:, 3, 1) + gradS(:, 3, 2), ZPGS(:,Ibeta),Mesh%Npanels)/2
               ENDIF
 
-             !    PotIter=CZERO
-             !    VxIter=CZERO
-             !    VyIter=CZERO
-             !    VzIter=CZERO
-             ! DO Ipanel=1,Mesh%Npanels
-             !    PotIter=PotIter+S(Ipanel,1)*ZPGB(Ipanel,Ibeta)
-             !    VxIter=VxIter+gradS(Ipanel,1,1)*ZPGB(Ipanel,Ibeta)
-             !    VyIter=VyIter+gradS(Ipanel,2,1)*ZPGB(Ipanel,Ibeta)
-             !    VzIter=VzIter+gradS(Ipanel,3,1)*ZPGB(Ipanel,Ibeta)
-             !    print*,Ipanel,VFace%XM(Ipanel,:)
-             !    print*,Ipanel,S(Ipanel,1),PotIter
-             !    print*,Ipanel,gradS(Ipanel,1,1),VxIter
-             !    print*,Ipanel,gradS(Ipanel,2,1),VyIter
-             !    print*,Ipanel,gradS(Ipanel,3,1),VzIter
-             ! ENDDO
-             !  ! print*,Ipflow,XM_I(1),XM_I(2),IncPotential(Ipflow,Ibeta)
-             !  ! print*,Ipflow,XM_I(1),XM_I(2),IncVelocity(Ipflow,1,Ibeta)
-             !  ! print*,Ipflow,XM_I(1),XM_I(2),IncVelocity(Ipflow,2,Ibeta)
-             !  ! print*,Ipflow,XM_I(1),XM_I(2),IncVelocity(Ipflow,3,Ibeta)
-
-             !   print*,Ipflow,XM_I(1),XM_I(2),Potential(Ipflow,Ibeta)-IncPotential(Ipflow,Ibeta)
-             !   print*,Ipflow,XM_I(1),XM_I(2),Velocity(Ipflow,1,Ibeta)-IncVelocity(Ipflow,1,Ibeta)
-             !   print*,Ipflow,XM_I(1),XM_I(2),Velocity(Ipflow,2,Ibeta)-IncVelocity(Ipflow,2,Ibeta)
-             !   print*,Ipflow,XM_I(1),XM_I(2),Velocity(Ipflow,3,Ibeta)-IncVelocity(Ipflow,3,Ibeta)
-
+             
             ENDDO
                         
             ! Compute radiation potential and velocity
@@ -255,54 +231,12 @@ CONTAINS
                         DOT_PRODUCT_COMPLEX(gradS(:, 3, 1) - gradS(:, 3, 2),SourceDistr%ZIGB(:,Irad),Mesh%Npanels)/2 &
                        +DOT_PRODUCT_COMPLEX(gradS(:, 3, 1) + gradS(:, 3, 2),SourceDistr%ZIGS(:,Irad),Mesh%Npanels)/2
                   ENDIF
-                 ! IF (IRad==1) THEN
-                 !   print*,Ipflow,XM_I(1),XM_I(2),RadPotential(Ipflow,1)
-                 !   print*,Ipflow,XM_I(1),XM_I(2),RadVelocity(Ipflow,1,1)
-                 !   print*,Ipflow,XM_I(1),XM_I(2),RadVelocity(Ipflow,2,1)
-                 !   print*,Ipflow,XM_I(1),XM_I(2),RadVelocity(Ipflow,3,1)
-                 ! ENDIF
+
             ENDDO
-           ! print*,'Panel: ',Ipflow,'/',NPFLOW,' DONE!' 
+          
         ENDDO
 
         DO Ibeta=1,Nbeta
-
-          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotPotFILE_FS,           &
-          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW*2**Mesh%Isym)
-          ! ILINE=(Iw-1)*Nbeta+Ibeta
-          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
-          !                (REAL(Potential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),      &
-          !                (AIMAG(Potential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-          ! CLOSE(uFile)
-
-          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//TotVelFILE_FS,           &
-          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+3*2*NPFLOW*2**Mesh%Isym)
-          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
-          !                  ( REAL(Velocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-          !                  (AIMAG(Velocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-          !                  ( REAL(Velocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-          !                  (AIMAG(Velocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-          !                  ( REAL(Velocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-          !                  (AIMAG(Velocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-          ! CLOSE(uFile)
-
-          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//IncPotFILE_FS,           &
-          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW*2**Mesh%Isym)
-          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
-          !                (REAL(IncPotential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),      &
-          !                (AIMAG(IncPotential(Ipanel,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-          ! CLOSE(uFile)
-
-          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//IncVelFILE_FS,           &
-          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+3*2*NPFLOW*2**Mesh%Isym)
-          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Vbeta(Ibeta),                             &
-          !                  ( REAL(IncVelocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-          !                  (AIMAG(IncVelocity(Ipanel,1,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-          !                  ( REAL(IncVelocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-          !                  (AIMAG(IncVelocity(Ipanel,2,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-          !                  ( REAL(IncVelocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym),  &
-          !                  (AIMAG(IncVelocity(Ipanel,3,Ibeta)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-          ! CLOSE(uFile)
 
            ILINE=(Iw-1)*Nbeta+Ibeta
            CALL WRITE_POTENTIAL_FS_DATA(wd,IncPotFILE_FS,omega,wavenumber,          &
@@ -331,25 +265,7 @@ CONTAINS
         DEALLOCATE(IncPotential,IncVelocity)
 
         DO IRad=1,Nradiation
-          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadPotFILE_FS,           &
-          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+2*NPFLOW*2**Mesh%Isym)
-          ! ILINE=(Iw-1)*Nradiation+Irad
-          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Irad,                                     &
-          !                (REAL(RadPotential(Ipanel,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),    &
-          !                (AIMAG(RadPotential(Ipanel,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-          ! CLOSE(uFile)
-
-          ! OPEN(NEWUNIT=uFile, FILE=TRIM(wd)//'/'//PreprocDir//'/'//RadVelFILE_FS,           &
-          !         STATUS='UNKNOWN',ACCESS='DIRECT',RECL=3+3*2*NPFLOW*2**Mesh%Isym)
-          ! WRITE(uFile,REC=ILINE) omega,wavenumber,Irad,                                     &
-          !                  ( REAL(RadVelocity(Ipanel,1,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
-          !                  (AIMAG(RadVelocity(Ipanel,1,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
-          !                  ( REAL(RadVelocity(Ipanel,2,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
-          !                  (AIMAG(RadVelocity(Ipanel,2,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
-          !                  ( REAL(RadVelocity(Ipanel,3,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym),&
-          !                  (AIMAG(RadVelocity(Ipanel,3,IRad)),Ipanel=1,NPFLOW*2**Mesh%Isym)
-          ! CLOSE(uFile)
-
+          
            ILINE=(Iw-1)*Nradiation+Irad
            CALL WRITE_RADPOTENTIAL_FS_DATA(wd,RadPotFILE_FS,omega,wavenumber,         &
                    IRad, NPFLOW*2**Mesh%Isym,ILINE,RadPotential(:,IRad))
