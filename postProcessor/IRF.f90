@@ -42,7 +42,7 @@
         IRF%Ntime=Ntime
         IRF%NtimeS=NtimeS
         IRF%Nradiation=Nradiation
-        ALLOCATE(IRF%Time(0:Ntime-1),IRF%AddedMass(Nradiation,Nintegration),IRF%K(0:Ntime-1,Nradiation,Nintegration))
+        ALLOCATE(IRF%Time(1:Ntime),IRF%AddedMass(Nradiation,Nintegration),IRF%K(1:Ntime,Nradiation,Nintegration))
         ALLOCATE(IRF%TimeS(NtimeS),IRF%KexcForce(NtimeS,Nbeta,Nintegration))
         END SUBROUTINE CreateTIRF
 !       ---
@@ -51,10 +51,10 @@
         INTEGER :: i,j,k
         TYPE(TIRF) :: IRFTarget,IRFSource
         CALL CreateTIRF(IRFTarget,IRFSource%Ntime,IRFSource%Nradiation,IRFSource%Nintegration,IRFSource%Nbeta,IRFSource%NtimeS)
-        DO i=0,IRFTarget%Ntime-1
+        DO i=1,IRFTarget%Ntime
             IRFTarget%Time(i)=IRFSource%Time(i)
         END DO
-        DO i=0,IRFTarget%NtimeS-1
+        DO i=1,IRFTarget%NtimeS
             IRFTarget%TimeS(i)=IRFSource%TimeS(i)
         END DO
 
@@ -63,14 +63,14 @@
                 IRFTarget%Addedmass(j,k)=IRFSource%Addedmass(j,k)
             END DO
         END DO
-        DO i=0,IRFTarget%Ntime-1
+        DO i=1,IRFTarget%Ntime
             DO j=1,IRFTarget%Nradiation
                 DO k=1,IRFTarget%Nintegration
                     IRFTarget%K(i,j,k)=IRFSource%K(i,j,k)
                 END DO
             END DO
         END DO
-        DO i=0,IRFTarget%NtimeS-1
+        DO i=1,IRFTarget%NtimeS
             DO j=1,IRFTarget%Nbeta
                 DO k=1,IRFTarget%Nintegration
                     IRFTarget%KexcForce(i,j,k)=IRFSource%KexcForce(i,j,k)
@@ -106,10 +106,10 @@
             Allocate(IRF%beta(IRF%Nbeta))
             IRF%beta=Results%beta
             CALL CreateTIRF(IRF,IRF%Ntime,IRF%Nradiation,IRF%Nintegration,IRF%Nbeta,IRF%NtimeS)
-            DO i=0,IRF%Ntime-1
+            DO i=1,IRF%Ntime
                 IRF%Time(i)=i*dt
             END DO
-            DO i=0,IRF%NtimeS-1
+            DO i=1,IRF%NtimeS
                 IRF%TimeS(i)=(-(IRF%Ntime-1)+i)*dt
             END DO
 
@@ -131,7 +131,7 @@
         INTEGER :: i,j,k,l
         COMPLEX :: ExcForce_l,ExcForce_l1
 
-        DO i=0,IRF%Ntime-1
+        DO i=1,IRF%Ntime
             DO j=1,Results%Nradiation
                 DO k=1,Results%Nintegration
                     IRF%K(i,j,k)=0.
@@ -149,7 +149,7 @@
                 IRF%AddedMass(j,k)=0.
                 DO l=1,Results%Nw
                     CM(l)=0.
-                    DO i=0,IRF%Ntime-2
+                    DO i=1,IRF%Ntime-1
  !                       CM(l)=CM(l)+IRF%K(i,j,k)*SIN(2.*PI/Results%Period(l)*IRF%Time(i))*(IRF%Time(i+1)-IRF%Time(i))
                        CM(l)=CM(l)+0.5*(IRF%K(i,j,k)*SIN(Results%w(l)*IRF%Time(i))+IRF%K(i+1,j,k)*SIN(Results%w(l)*IRF%Time(i+1)))*(IRF%Time(i+1)-IRF%Time(i))
                     END DO
@@ -160,7 +160,7 @@
             END DO
         END DO
 
-         DO i=0,IRF%NtimeS-1
+         DO i=1,IRF%NtimeS
             DO j=1,Results%Nbeta
                 DO k=1,Results%Nintegration
                     IRF%KexcForce(i,j,k)=0.
@@ -202,7 +202,7 @@
         END DO
         DO j=1,IRF%Nradiation
             WRITE(10,'(A,I4,A,I6,A)') 'Zone t="DoF ',j,'",I=',IRF%Ntime,',F=POINT'
-            DO i=0,IRF%Ntime-1
+            DO i=1,IRF%Ntime
                 WRITE(10,'(80(X,E14.7))') IRF%Time(i),(IRF%AddedMass(j,k),IRF%K(i,j,k),k=1,IRF%Nintegration)
             END DO
         END DO
@@ -216,13 +216,17 @@
         INTEGER :: i,j,k
         OPEN(10,FILE=namefile)
         WRITE(10,*) 'VARIABLES="Time (s)"'
-		DO k=1,IRF%Nintegration
+		    DO k=1,IRF%Nintegration
             WRITE(10,'(A,I4,A)') '"IRF ',k,'"'
         END DO
+        IF ((1+IRF%Nintegration).GT.10000) THEN
+          PRINT*,'Increase the value used in the following write command'
+          STOP
+        ENDIF
         DO j=1,IRF%Nbeta
             WRITE(10,'(A,E14.7,A,I6,A)') 'Zone t="beta ',IRF%beta(j),'",I=',IRF%NtimeS,',F=POINT'
-            DO i=0,IRF%NtimeS-1
-                WRITE(10,'(<1+IRF%Nintegration>(X,E14.7))') IRF%TimeS(i),(REAL(IRF%KexcForce(i,j,k)),k=1,IRF%Nintegration)
+            DO i=1,IRF%NtimeS
+                WRITE(10,'(10000(X,E14.7))') IRF%TimeS(i),(REAL(IRF%KexcForce(i,j,k)),k=1,IRF%Nintegration)
             END DO
         END DO
         CLOSE(10)

@@ -52,7 +52,8 @@
         Results%Nradiation=Nradiation
         Results%Nintegration=Nintegration
         ALLOCATE(Results%w(Nw),Results%IndxForce(Nintegration,3),Results%beta(Nbeta),Results%IndxRadiation(Nintegration,3))
-        ALLOCATE(Results%DiffractionForce(Nw,Nbeta,Nintegration),Results%FroudeKrylovForce(Nw,Nbeta,Nintegration),Results%AddedMass(Nw,Nradiation,Nintegration),Results%RadiationDamping(Nw,Nradiation,Nintegration))
+        ALLOCATE(Results%DiffractionForce(Nw,Nbeta,Nintegration),Results%FroudeKrylovForce(Nw,Nbeta,Nintegration))
+        ALLOCATE(Results%AddedMass(Nw,Nradiation,Nintegration),Results%RadiationDamping(Nw,Nradiation,Nintegration))
         Results%Ntheta=Ntheta
         IF (Results%Ntheta.GT.0) THEN
             ALLOCATE(Results%Theta(Ntheta),Results%HKochinDiffraction(Nw,Nbeta,Ntheta),Results%HKochinRadiation(Nw,Nradiation,Ntheta))
@@ -83,7 +84,7 @@
                     ResultsTarget%FroudeKrylovForce(j,i,k)=ResultsSource%FroudeKrylovForce(j,i,k)
                 END DO
             END DO
-            DO i=1,ResultsTarget%Nbeta
+            DO i=1,ResultsTarget%Nradiation
                 DO k=1,ResultsTarget%Nintegration
                     ResultsTarget%AddedMass(j,i,k)=ResultsSource%AddedMass(j,i,k)
                     ResultsTarget%RadiationDamping(j,i,k)=ResultsSource%RadiationDamping(j,i,k)
@@ -125,7 +126,7 @@
         READ(10,*) (Results%w(k),k=1,Nw)
         READ(10,*) (Results%theta(k),k=1,Ntheta)
         CLOSE(10)
-        
+
         ALLOCATE(line(2*Nintegration))
         OPEN(10,FILE=namefile)
         READ(10,*)
@@ -235,7 +236,7 @@
         DO l=1,Results%Nw
           WRITE(10,'(F7.4)') Results%w(l)
           DO j=1,Results%Nradiation
-              WRITE(10,'(6(X,E13.6))') (Results%RadiationDamping(l,j,k),k=1,Results%Nradiation)
+              WRITE(10,'(6(X,E13.6))') (Results%RadiationDamping(l,j,k),k=1,Results%Nintegration)
           END DO
         END DO
         CLOSE(10)
@@ -244,7 +245,7 @@
         DO l=1,Results%Nw
           WRITE(10,'(F7.4)') Results%w(l)
           DO j=1,Results%Nradiation
-              WRITE(10,'(6(X,E13.6))') (Results%AddedMass(l,j,k),k=1,Results%Nradiation)
+              WRITE(10,'(6(X,E13.6))') (Results%AddedMass(l,j,k),k=1,Results%Nintegration)
           END DO
         END DO
         CLOSE(10)
@@ -262,7 +263,7 @@
                                                             (180.D0/PI*( ATAN2(IMAG(Results%DiffractionForce(l,j,k)+Results%FroudeKrylovForce(l,j,k)),        &
                                                                                REAL(Results%DiffractionForce(l,j,k)+Results%FroudeKrylovForce(l,j,k)) )  ) ,  &
                                                                k=1,Results%Nintegration)
-                                                               
+
             END DO
         END DO
         CLOSE(10)
