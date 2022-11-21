@@ -22,7 +22,7 @@
 !
 !   Contributors list:
 !	- A. Babarit
-!   - R Kurnia  
+!   - R Kurnia
 !
 !--------------------------------------------------------------------------------------
 
@@ -39,7 +39,7 @@
     IMPLICIT NONE
     TYPE(TID) :: ID,DSCRPT              ! Calculation identification data
     TYPE(TMesh) :: Mesh                 ! Mesh data
-    TYPE(TEnvironment) :: Environment   ! Environment data  
+    TYPE(TEnvironment) :: Environment   ! Environment data
 
 !   Maillage proprement dit
         INTEGER,PARAMETER :: NFMX=20000 ! Nombre de facettes max
@@ -61,7 +61,7 @@
 !   Calcul coque
 	REAL,DIMENSION(3,3) :: Icoque
 	REAL,DIMENSION(3) :: Gcoque,CDG
-        
+
         INTEGER         :: i,j,Nsym
         LOGICAL :: ex
         INTEGER :: cdir
@@ -69,7 +69,7 @@
 !   --- Initialize and read input datas ----------------------------------------------------------------------------------------
 !
     CALL ReadTID(ID)
-    CALL ReadTMesh(Mesh,TRIM(ID%ID)//'/mesh/') 
+    CALL ReadTMesh(Mesh,TRIM(ID%ID)//'/mesh/')
     CALL ReadTEnvironment(Environment,TRIM(ID%ID)//'/Nemoh.cal')
     RHO=Environment%RHO
     G=Environment%G
@@ -80,9 +80,9 @@
     READ(10,*) DSCRPT%ID
     DSCRPT%lID=LNBLNK(DSCRPT%ID)
     READ(10,*)
-    READ(10,*) 
+    READ(10,*)
     READ(10,*) xG,yG,zG
-    READ(10,*) 
+    READ(10,*)
     CLOSE(10)
     DO j=1,NP
         X(j)=Mesh%X(1,j)-xG
@@ -124,7 +124,7 @@
         WRITE(*,*) ' '
         CDG(1)=xG
         CDG(2)=yG
-        CDG(3)=zG      
+        CDG(3)=zG
         CALL coque(X,Y,Z,NP,facette,NF,Deplacement,Icoque,Gcoque,CDG,Nsym,rho)
         OPEN(10,FILE=ID%ID(1:ID%lID)//'/mesh/GC_hull.dat')
         WRITE(10,'(3(1X,E14.7))') Gcoque(1),Gcoque(2),Gcoque(3)
@@ -135,7 +135,8 @@
         END DO
         CLOSE(10)
 
-        INQUIRE (DIRECTORY=TRIM(ID%ID)//'/Mechanics', EXIST=ex) 
+        !INQUIRE (DIRECTORY=TRIM(ID%ID)//'/Mechanics', EXIST=ex) !this is Intel-specific
+        INQUIRE (FILE=TRIM(ID%ID)//'/Mechanics/.', EXIST=ex)
         IF (.NOT.ex) cdir=SYSTEM('mkdir '//TRIM(ID%ID)//'/Mechanics')
 
         OPEN(10,FILE=ID%ID(1:ID%lID)//'/Mechanics/Inertia.dat')
@@ -153,7 +154,7 @@
         END DO
         CLOSE(10)
 
-        INQUIRE (FILE=TRIM(ID%ID)//'/Mechanics/Badd.dat', EXIST=ex)       
+        INQUIRE (FILE=TRIM(ID%ID)//'/Mechanics/Badd.dat', EXIST=ex)
         IF (.NOT.ex) THEN
         OPEN(10,FILE=ID%ID(1:ID%lID)//'/Mechanics/Badd.dat')
         DO i=1,6
@@ -162,7 +163,7 @@
         CLOSE(10)
         ENDIF
 
-        INQUIRE (FILE=TRIM(ID%ID)//'/Mechanics/Km.dat', EXIST=ex)       
+        INQUIRE (FILE=TRIM(ID%ID)//'/Mechanics/Km.dat', EXIST=ex)
         IF (.NOT.ex) THEN
         OPEN(10,FILE=ID%ID(1:ID%lID)//'/Mechanics/Km.dat')
         DO i=1,6

@@ -9,6 +9,9 @@ itest=$(shell which ifort 2> /dev/null | grep -o ifort)
 
 MOD_DIR=/tmp/
 
+# External libraries location
+LIBDIR=/home/libre-service/Documents/Codes/util/
+
 ifeq ($(gtest), gfortran)
 	FC=gfortran
 	FFLAGS=  -c                                     # No linker (yet)
@@ -18,6 +21,7 @@ ifeq ($(gtest), gfortran)
 	FFLAGS+= -cpp -DGNUFORT -ffree-line-length-none # Run preprocessor
 	#FFLAGS+=-fdefault-real-8			# forcing variables to be double precision
 	#if with -fdefault-real-8  change in Common/Constants.f90 ID_DP=1 else ID_DP=0
+	FFLAGS+= -L$(LIBDIR)
 endif
 
 ifeq ($(itest), ifort)
@@ -157,7 +161,7 @@ OBJS=$(SRCS:.f90=.o)
 # Rules to build
 solver:		$(OBJSEXT) $(OBJS)
 			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -llapack -lblas -o $(outputdir)/solver $(OBJSEXT) $(OBJS)
+			@$(FC) -o $(outputdir)/solver $(OBJSEXT) $(OBJS) -llapack -lblas
 			@echo "Solver compilation succesful!"
 
 clean_solver:
@@ -193,7 +197,7 @@ OBJO=$(SRCO:.f90=.o)
 # Rules to build
 postProc:	$(OBJOEXT) $(OBJO)
 			@test -d $(outputdir) || mkdir $(outputdir)
-			@$(FC) -llapack -lblas -o $(outputdir)/postProc $(OBJOEXT) $(OBJO)
+			@$(FC) -o $(outputdir)/postProc $(OBJOEXT) $(OBJO) -llapack -lblas
 			@echo "Postprocessor compilation succesful!"
 
 clean_postProc:
@@ -206,28 +210,28 @@ clean_postProc:
 # Verification directory
 verdir=.
 .PHONY: run_1_cylinder clean_1_cylinder
-run_1_cylinder: 
+run_1_cylinder:
 	$(MAKE) -C $(verdir)/Verification/1_Cylinder/ run
 
 clean_1_cylinder:
 	$(MAKE) -C $(verdir)/Verification/1_Cylinder/ clean
 
 .PHONY: run_2_2Bodies clean_2_2Bodies
-run_2_2Bodies: 
+run_2_2Bodies:
 	$(MAKE) -C $(verdir)/Verification/2_2Bodies/ run
 
 clean_2_2Bodies:
 	$(MAKE) -C $(verdir)/Verification/2_2Bodies/ clean
 
 .PHONY: run_3_nonsymmetrical clean_3_nonsymmetrical
-run_3_nonsymmetrical: 
+run_3_nonsymmetrical:
 	$(MAKE) -C $(verdir)/Verification/3_NonSymmetrical/ run
 
 clean_3_nonsymmetrical:
 	$(MAKE) -C $(verdir)/Verification/3_NonSymmetrical/ clean
 
 .PHONY: run_4_Postprocessing clean_4_Postprocessing
-run_4_Postprocessing: 
+run_4_Postprocessing:
 	$(MAKE) -C $(verdir)/Verification/4_Postprocessing/ run
 
 clean_4_Postprocessing:
@@ -235,7 +239,7 @@ clean_4_Postprocessing:
 
 
 .PHONY: run_5_quicktest clean_5_quicktest
-run_5_quicktest: 
+run_5_quicktest:
 	@echo ""
 	@echo "Sphere"
 	@$(MAKE) --silent -C $(verdir)/Verification/5_QuickTests/1_Sphere/                     test

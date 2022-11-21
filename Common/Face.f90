@@ -48,7 +48,7 @@ MODULE MFace
     INTEGER                 :: NP_GQ! Number of point of the Gauss quadrature
     REAL, ALLOCATABLE       :: dXdXG_WGQ_per_A(:) !a factor dxdXG*WGQ/A for the Gauss Q Integral
     REAL, ALLOCATABLE       :: XM_GQ(:,:)         !Gauss Quad. nodes (x,y,z) in a panel
-                                                  !Those allocatable becase we need input NP_GQ from user input     
+                                                  !Those allocatable becase we need input NP_GQ from user input
   END TYPE TFace
 
   ! A vector of Face with size Npanels x 1
@@ -70,13 +70,13 @@ MODULE MFace
     INTEGER, DIMENSION(:), ALLOCATABLE  :: IndexPanel     ! Index of panel where the
     INTEGER                             :: NWlineseg      ! Number of waterline segments
   END TYPE
- 
+
 CONTAINS
 
   SUBROUTINE Prepare_FaceMesh(Mesh,NP_GQ, VFace)
 
     !INPUT/OUTPUT
-    INTEGER     , INTENT(IN)    :: NP_GQ 
+    INTEGER     , INTENT(IN)    :: NP_GQ
     TYPE(TMesh) , INTENT(IN)    :: Mesh
     TYPE(TVFace), INTENT(INOUT) :: VFace
     !Local variables
@@ -84,9 +84,9 @@ CONTAINS
     TYPE(TFace)                 :: Face
     TYPE(TDATGQ)                :: DataGQ       !Data Gauss Quadrature
     Npanels=Mesh%Npanels
-    
-    Face%NP_GQ=NP_GQ 
-   
+
+    Face%NP_GQ=NP_GQ
+
     Allocate(Face%dXdXG_WGQ_per_A(NP_GQ))
     Allocate(Face%XM_GQ(3,NP_GQ))
 
@@ -94,7 +94,7 @@ CONTAINS
     Allocate(VFace%N(Npanels,3),VFace%A(Npanels),VFace%tDis(Npanels))
     Allocate(VFace%dXdXG_WGQ_per_A(Npanels,NP_GQ))
     Allocate(VFace%XM_GQ(Npanels,3,NP_GQ))
-    
+
     CALL GAUSS_QUADRATURE_DATA(DataGQ)
 
     DO I=1,Npanels
@@ -102,17 +102,18 @@ CONTAINS
          CALL PREPARE_GAUSS_QUADRATURE_ON_MESH(Mesh,Face,DATAGQ)
          CALL Face_to_VFace(Face,VFace,I)
     END DO
+
     DEAllocate(Face%dXdXG_WGQ_per_A)
     DEAllocate(Face%XM_GQ)
 
-    END SUBROUTINE 
+    END SUBROUTINE
 
   SUBROUTINE Face_to_VFace(Face,VFACE,I)
     !INPUT/OUTPUT
     INTEGER,         INTENT(IN)  :: I
     TYPE(TFace),     INTENT(IN)  :: Face
     TYPE(TVFace),    INTENT(INOUT) :: VFace
-        
+
     VFace%X(I,:,:)              =Face%X(:,:)
     VFace%XM(I,:)               =Face%XM(:)
     VFace%N(I,:)                =Face%N(:)
@@ -128,8 +129,13 @@ CONTAINS
     INTEGER,        INTENT(IN)  :: I
     TYPE(TVFace),   INTENT(IN)  :: VFace
     TYPE(TFace),    INTENT(INOUT) :: Face
-        
-    Face%X(:,:)              =VFace%X(I,:,:)  
+
+    IF(.NOT.ALLOCATED(Face%dXdXG_WGQ_per_A)) THEN
+      Allocate(Face%dXdXG_WGQ_per_A(VFace%NP_GQ))
+      Allocate(Face%XM_GQ(3,VFace%NP_GQ))
+    ENDIF
+
+    Face%X(:,:)              =VFace%X(I,:,:)
     Face%XM(:)               =VFace%XM(I,:)
     Face%N(:)                =VFace%N(I,:)
     Face%A                   =VFace%A(I)
@@ -177,7 +183,7 @@ CONTAINS
     REAL, DIMENSION(3)            :: Normal          !Unit normal vector
     REAL, DIMENSION(4)            :: XL,YL           !
     REAL                          :: XG1,YG1,AA,BB,CC,DD
-    REAL                          :: A,B,C,D 
+    REAL                          :: A,B,C,D
 
     IF (FLAG_GQ==1) THEN
          NP_GQ=Face%NP_GQ
@@ -188,7 +194,7 @@ CONTAINS
          !Normal=CROSS_PRODUCT(Tangen1,Tangen2)
          !Normal=Normal/sqrt(Normal(1)**2+Normal(2)**2+Normal(3)**2)
          Normal=Face%N(1:3) !Unit normal vector had been calculated before
-                                
+
          Tangen1=Tangen1(1:3)/SQRT(Tangen1(1)**2+Tangen1(2)**2+Tangen1(3)**2) !Unit Tangen
          !Tangen2=Tangen2(1:3)/SQRT(Tangen2(1)**2+Tangen2(2)**2+Tangen2(3)**2)
          Tangen2=CROSS_PRODUCT(Normal,Tangen1)
@@ -199,7 +205,7 @@ CONTAINS
          YL(:)=-Tangen2(1)*(Face%X(1,1:4)-Face%XM(1))&
                    -Tangen2(2)*(Face%X(2,1:4)-Face%XM(2))&
                            -Tangen2(3)*(Face%X(3,1:4)-Face%XM(3))
-         
+
          DO L=1,NP_GQ
           AA=.25*(1-DATAGQ%XGQ(L,IdColumn))*(1-DATAGQ%YGQ(L,IdColumn))
           BB=.25*(1-DATAGQ%XGQ(L,IdColumn))*(1+DATAGQ%YGQ(L,IdColumn))
@@ -208,14 +214,14 @@ CONTAINS
 
           XG1=AA*XL(1)+BB*XL(2)+CC*XL(3)+DD*XL(4)
           YG1=AA*YL(1)+BB*YL(2)+CC*YL(3)+DD*YL(4)
-          
-          Face%XM_GQ(1:3,L)=Face%XM(1:3)+Tangen1(1:3)*XG1-Tangen2(1:3)*YG1 
+
+          Face%XM_GQ(1:3,L)=Face%XM(1:3)+Tangen1(1:3)*XG1-Tangen2(1:3)*YG1
 
           A=(1.-DATAGQ%YGQ(L,IdColumn))*(XL(4)-XL(1))+(1+DATAGQ%YGQ(L,IdColumn))*(XL(3)-XL(2))
           B=(1.-DATAGQ%XGQ(L,IdColumn))*(YL(2)-YL(1))+(1+DATAGQ%XGQ(L,IdColumn))*(YL(3)-YL(4))
           C=(1.-DATAGQ%XGQ(L,IdColumn))*(XL(2)-XL(1))+(1+DATAGQ%XGQ(L,IdColumn))*(XL(3)-XL(4))
           D=(1.-DATAGQ%YGQ(L,IdColumn))*(YL(4)-YL(1))+(1+DATAGQ%YGQ(L,IdColumn))*(YL(3)-YL(2))
-          Face%dXdXG_WGQ_per_A(L)=(ABS(A*B-C*D)*DATAGQ%WGQ(L,IdColumn)*.25)/Face%A 
+          Face%dXdXG_WGQ_per_A(L)=(ABS(A*B-C*D)*DATAGQ%WGQ(L,IdColumn)*.25)/Face%A
          ENDDO
     ELSE
          Face%dXdXG_WGQ_per_A(:)= 1
@@ -229,7 +235,7 @@ CONTAINS
 
   !INPUT/OUTPUT
   TYPE(TDATGQ),         INTENT(OUT):: DATAGQ
-  !Local 
+  !Local
   REAL,DIMENSION(16,4)  :: XGQ,YGQ,WGQ
   INTEGER::I,L
 
@@ -264,7 +270,7 @@ CONTAINS
   DATAGQ%XGQ=XGQ(:,:)
   DATAGQ%YGQ=YGQ(:,:)
   DATAGQ%WGQ=WGQ(:,:)
-   
+
   END SUBROUTINE
 
   SUBROUTINE Prepare_Waterline(VFace,EPS,BodyDiameter,Npanels,WLine)
@@ -280,7 +286,7 @@ CONTAINS
      INTEGER, DIMENSION(Npanels)   :: IndexPanel
      INTEGER                       :: IlineSeg,I,J
      REAL                          :: Distance,ZER
-     
+
      IlineSeg=0
      ZER=-EPS*BodyDiameter
      DO I=1,Npanels
@@ -299,7 +305,7 @@ CONTAINS
                   IndexPanel(IlineSeg)=I
                ENDIF
             ENDIF
-          ENDDO 
+          ENDDO
         ENDIF
      ENDDO
     ALLOCATE(WLine%XM(IlineSeg,3),WLine%SegLength(IlineSeg))

@@ -41,7 +41,7 @@
     IMPLICIT NONE
 !   ID
     TYPE(TID)               :: ID
-!   NEMOHCAL    
+!   NEMOHCAL
     TYPE(TNemCal)      :: inpNEMOHCAL
 !   Environment
     TYPE(TEnvironment) :: Environment
@@ -49,8 +49,8 @@
     TYPE(TResults) :: Results
 !   IRFs
     TYPE(TIRF) :: IRF
-!   Mechanical Coef: Mass_Mat,Stiffness,... 
-    TYPE(TMech)   :: MechCoef       
+!   Mechanical Coef: Mass_Mat,Stiffness,...
+    TYPE(TMech)   :: MechCoef
 !   RAOs
     COMPLEX,DIMENSION(:,:,:),ALLOCATABLE :: RAOs
 !   Plot Wave elevation
@@ -64,7 +64,7 @@
     CALL ReadTID(ID)
     WRITE(*,'(A,$)') '.'
 
-!   Read Nemoh.call 
+!   Read Nemoh.call
     CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
 !   Read environment
     Environment =InpNEMOHCAL%Env
@@ -88,10 +88,10 @@
 
     ALLOCATE(RAOs(Results%Nradiation,Results%Nw,Results%Nbeta))
     IF (InpNEMOHCAL%OptOUTPUT%Switch_RAO==1 .OR. InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr==1) THEN
-    CALL Read_Mechanical_Coefs(TRIM(ID%ID),Results%Nradiation,MechCoef)
-    CALL Compute_RAOs(RAOs,Results,MechCoef)
-    CALL SAVE_RAO(RAOs,Results%w,Results%beta,Results%Nintegration,Results%Nw,Results%Nbeta,&
-            Results%IndxForce(:,3),TRIM(ID%ID)//'/Motion/','RAO.dat',InpNEMOHCAL)
+      CALL Read_Mechanical_Coefs(TRIM(ID%ID),Results%Nradiation,MechCoef)
+      CALL Compute_RAOs(RAOs,Results,MechCoef)
+      CALL SAVE_RAO(RAOs,Results%w,Results%beta,Results%Nintegration,Results%Nw,Results%Nbeta,&
+              Results%IndxForce(:,3),TRIM(ID%ID)//'/Motion/','RAO.dat',InpNEMOHCAL)
     ELSE
        RAOs(:,:,:)=CMPLX(0.,0.)
     ENDIF
@@ -115,7 +115,7 @@
     CALL DeleteTResults(Results)
 
     IF (InpNEMOHCAL%OptOUTPUT%Switch_RAO==1 .OR. InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr==1) THEN
-    DEALLOCATE(RAOs)
+      DEALLOCATE(RAOs)
     ENDIF
 !
     END PROGRAM Main

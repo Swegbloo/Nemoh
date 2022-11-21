@@ -22,11 +22,11 @@
 !--------------------------------------------------------------------------------------
 
         MODULE MNemohCal
-         
+
           USE Constants
           USE MEnvironment, only: TEnvironment
           IMPLICIT NONE
-      
+
           PUBLIC      :: READ_TNEMOHCAL
 
           INTEGER, PARAMETER :: IdRadFreq=1     !unit rad/s
@@ -38,17 +38,17 @@
               INTEGER  :: NFreq,NBeta
               REAL     :: Freq1,Freq2,Beta1,Beta2
           END TYPE Twaveinput
-           
+
           TYPE TIRF
               INTEGER  :: Switch
               REAL     :: time_step,duration
           END TYPE TIRF
-          
+
           TYPE TKochin
               INTEGER  :: Switch,Ntheta
               REAL     :: min_theta,max_theta   !degree
           END TYPE TKochin
-          
+
           TYPE TFreesurface
               INTEGER     :: Switch
               INTEGER     :: NX,NY      !Number of points
@@ -67,7 +67,7 @@
 
           TYPE TBCase
               INTEGER :: ICase
-              REAL,DIMENSION(3) :: Direction,Axis 
+              REAL,DIMENSION(3) :: Direction,Axis
           END TYPE TBCase
 
           TYPE Tbodyinput
@@ -78,20 +78,20 @@
                TYPE(TBCase),ALLOCATABLE :: RadCase(:)
                TYPE(TBCase),ALLOCATABLE :: IntCase(:)
           END TYPE Tbodyinput
-          
+
           TYPE Tqtfinput
               INTEGER  :: switch_qtfp       !LQTFP
               REAL,DIMENSION(3) :: omega    !rad freq [Nw,wmin,wmax]
               REAL     :: body_forward_speed!body forward-speed
               INTEGER  :: bidirection       !bi-direction
-              INTEGER  :: NContrib          !Contrib  
+              INTEGER  :: NContrib          !Contrib
               CHARACTER(LEN=100) :: FSmeshfile !Free surface meshfile
               REAL     :: FSRe              !Free surface exterior radius
               INTEGER  :: FSNRe             !Number of points in Free surface exterior radius
               INTEGER  :: FSNBessel         !Number of bessel function
               INTEGER  :: FreqTypeOutput    !Frq type output
-              INTEGER  :: switch_quadHM     !quadratic hydrostatic and moment terms  
-              INTEGER  :: switch_qtfduok    !Loutduok   
+              INTEGER  :: switch_quadHM     !quadratic hydrostatic and moment terms
+              INTEGER  :: switch_qtfduok    !Loutduok
               INTEGER  :: switch_qtfhasbo   !Louthasbo
               INTEGER  :: switch_qtfhasfs   !Louthasfs
           END TYPE Tqtfinput
@@ -108,10 +108,10 @@
         CONTAINS
 
          SUBROUTINE READ_TNEMOHCAL(wd,InpNEMOHCAL)
-           
+
           CHARACTER(LEN=*),     INTENT(IN)      :: wd
           TYPE(TNemCal),        INTENT(OUT)     :: InpNEMOHCAL
-          
+
           !Local var
           INTEGER ufile,I,J,K
           LOGICAL :: exist_dir
@@ -129,7 +129,7 @@
            !!
            InpNEMOHCAL%Nradtot=0
            InpNEMOHCAL%Nintegtot=0
-           
+
            DO I=1,InpNEMOHCAL%Nbodies
              READ(ufile,*) !----Body(I)--------------------------------!
              READ(ufile,*) InpNEMOHCAL%bodyinput(I)%meshfile
@@ -155,7 +155,7 @@
               (InpNEMOHCAL%bodyinput(I)%IntCase(J)%Direction(K),K=1,3),&
               (InpNEMOHCAL%bodyinput(I)%IntCase(J)%Axis(K),K=1,3)
              END DO
-             READ(ufile,*) !For additional info, ie. for generalize mode, Not implemented yet 
+             READ(ufile,*) !For additional info, ie. for generalize mode, Not implemented yet
            END DO
              READ(ufile,*) !--- Load cases to be solved ---------------!
              READ(ufile,*) InpNEMOHCAL%waveinput%FreqType,             &
@@ -188,15 +188,15 @@
              ELSE
                            InpNEMOHCAL%OptOUTPUT%Freesurface%Switch=0
              ENDIF
-            
+
              READ(ufile,*) InpNEMOHCAL%OptOUTPUT%Switch_RAO
              READ(ufile,*) InpNEMOHCAL%OptOUTPUT%FreqType
 
              READ(ufile,*)! ---QTF----
              READ(ufile,*)InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr
-             IF (InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr==1) THEN 
+             IF (InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr==1) THEN
                READ(ufile,*)(InpNEMOHCAL%qtfinput%omega(K),K=1,3)
-               READ(ufile,*) InpNEMOHCAL%qtfinput%bidirection   
+               READ(ufile,*) InpNEMOHCAL%qtfinput%bidirection
                !READ(ufile,*)InpNEMOHCAL%qtfinput%body_forward_speed
                InpNEMOHCAL%qtfinput%body_forward_speed=0 ! for now 0
                InpNEMOHCAL%qtfinput%switch_QTFP=1 ! always compute QTFP
@@ -210,12 +210,14 @@
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfduok
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfhasbo
                READ(ufile,*)InpNEMOHCAL%qtfinput%switch_qtfhasfs
-             ENDIF 
+             ENDIF
           CLOSE(ufile)
-        
+
           IF(InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr==1) THEN
-            INQUIRE (DIRECTORY=TRIM(wd)//'/results/sources',           &
-                       EXIST=exist_dir) 
+            !INQUIRE (DIRECTORY=TRIM(wd)//'/results/sources',           &
+            !           EXIST=exist_dir) !this is Intel-specific
+            INQUIRE (FILE=TRIM(wd)//'/results/sources/.',           &
+                       EXIST=exist_dir)
             IF (.NOT.exist_dir) CALL SYSTEM('mkdir '//TRIM(wd)//       &
                                                     '/results/sources')
           END IF
@@ -242,13 +244,13 @@
            !input/output
            TYPE(Twaveinput),         INTENT(IN) :: waveinp
            INTEGER,                  INTENT(IN) :: IDQTF,Nw,Nbeta
-           REAl,DIMENSION(Nw),       INTENT(OUT):: w    
-           REAl,DIMENSION(Nbeta),    INTENT(OUT):: beta  
+           REAl,DIMENSION(Nw),       INTENT(OUT):: w
+           REAl,DIMENSION(Nbeta),    INTENT(OUT):: beta
            !local variables
            INTEGER                              ::j
            REAL                                 ::wmin,wmax,dw,dwtemp
            REAL                                 ::betamin,betamax
-           
+
             wmin        =waveinp%Freq1
             wmax        =waveinp%Freq2
 
@@ -257,7 +259,7 @@
                 IF (IDQTF==1) THEN
                    dwtemp = wmax/Nw
                    IF (abs(dwtemp-dw).LT.0.001) THEN
-                   dw =wmin  
+                   dw =wmin
                    END IF
            !        IF(dw.NE.wmin) THEN
            !           WRITE(*,*) &
@@ -268,7 +270,7 @@
                 END IF
 
                 DO j=1,Nw
-                    w(j)=wmin+dw*(j-1)                
+                    w(j)=wmin+dw*(j-1)
                 END DO
             ELSE
                 IF (IDQTF==1) THEN
@@ -278,10 +280,10 @@
                 ENDIF
                 w(1)=wmin
             END IF
-                
+
             IF (waveinp%FreqType==IdFreqHz) w(:)=2*PI*w(:)
             IF (waveinp%FreqType==IdPeriod) w(:)=2*PI/w(:)
-            
+
             betamin        =waveinp%Beta1
             betamax        =waveinp%Beta2
             IF (Nbeta.GT.1) THEN
@@ -295,8 +297,5 @@
 
          END SUBROUTINE
 
-         
-        END MODULE 
 
-
-           
+        END MODULE

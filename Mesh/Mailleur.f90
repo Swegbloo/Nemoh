@@ -116,6 +116,7 @@
 SUBROUTINE plan(X1,X2,X3,X4,maille,noeud,n,facette,nf)
 
   INTEGER i,j,k
+  INTEGER n,nf,ni,nj
   REAL X1,X2,X3,X4,Pi,Pf
   DIMENSION X1(3),X2(3),X3(3),X4(3),Pi(3),Pf(3)
   REAL noeud,maille

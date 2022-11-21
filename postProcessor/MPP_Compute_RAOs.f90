@@ -24,7 +24,7 @@ MODULE MPP_Compute_RAOs
 
     USE CONSTANTS,          ONLY:II,PI
     USE MResults
-    USE MPP_ReadInputFiles, ONLY:TMech 
+    USE MPP_ReadInputFiles, ONLY:TMech
     USE M_SOLVER,           ONLY:LU_INVERS_MATRIX
     USE MNemohCal,          ONLY:TNemCal
 !
@@ -53,7 +53,7 @@ CONTAINS
       CALL LU_INVERS_MATRIX(MAT_A,Results%Nradiation, invMAT_A)
       DO Ibeta=1,Results%Nbeta
        ExcitForce=Results%DiffractionForce(Iw,Ibeta,:)+Results%FroudeKrylovForce(Iw,Ibeta,:)
-       RAOs(:,Iw,Ibeta)=MATMUL(invMAT_A,ExcitForce) 
+       RAOs(:,Iw,Ibeta)=MATMUL(invMAT_A,ExcitForce)
       ENDDO
    ENDDO
 
@@ -69,12 +69,12 @@ CONTAINS
     COMPLEX,DIMENSION(Nintegration,Nw,Nbeta),&
                                         INTENT(IN) :: RAOs
     INTEGER :: Iw, Ibeta,Iinteg,u,Ninteg2
-    REAL,DIMENSION(Nintegration*2) ::wRAOS 
-    REAL                           ::RAOSphase 
+    REAL,DIMENSION(Nintegration*2) ::wRAOS
+    REAL                           ::RAOSphase
     CHARACTER(LEN=23) :: FreqVar_text,FreqVar_text2
     REAL,DIMENSION(Nw)::freqVar
-    
-    IF (InpNEMOHCAL%OptOUTPUT%FreqType==1.OR.InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr) THEN
+
+    IF (InpNEMOHCAL%OptOUTPUT%FreqType==1.OR.InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr==1) THEN
         FreqVar_text='VARIABLES="w (rad/s)"'
         freqVar=w
         FreqVar_text2='Number of pulsation= '
@@ -91,12 +91,16 @@ CONTAINS
 
     CALL make_directory(dirname)
     Ninteg2=2*Nintegration
+    IF (Ninteg2.GT.10000) THEN
+      PRINT*,'Increase the value used in the following write command'
+      STOP
+    ENDIF
     OPEN(NEWUNIT=u, FILE=TRIM(dirname)//TRIM(filename),ACTION='WRITE')
     WRITE(u,'(13(A,X))') FreqVar_text, '|X| (m/m)','|Y| (m/m)',' |Z| (m/m)',  &
                 '|phi| (deg)',' |theta| (deg)',' |psi| (deg)', &
                  'ang(x) (deg)',' ang(y) (deg)',' ang(z) (deg)', &
                  'ang(phi) (deg)',' ang(theta) (deg)',' ang(psi) (deg)'
-    WRITE(u,*) 'Number of column (Nvariables*Nbody)=',Nintegration 
+    WRITE(u,*) 'Number of column (Nvariables*Nbody)=',Nintegration
     DO Ibeta=1,Nbeta
     WRITE(u,'((A,X),F10.3,2(A,X),I4)') 'beta=',beta(Ibeta)*180/PI,'(deg),',FreqVar_text2,Nw
         DO Iw=1,Nw
@@ -106,7 +110,7 @@ CONTAINS
                 RAOSphase=ATAN2(AIMAG(RAOs(Iinteg,Iw,Ibeta)),REAL(RAOs(Iinteg,Iw,Ibeta)))
                 wRAOS(Iinteg+Nintegration)=180/PI*RAOSphase
              ENDDO
-             WRITE(u,'((F10.3,X),<Ninteg2>(E14.7,X))') freqVar(Iw),(wRAOS(Iinteg),Iinteg=1,Ninteg2)
+             WRITE(u,'((F10.3,X),10000(E14.7,X))') freqVar(Iw),(wRAOS(Iinteg),Iinteg=1,Ninteg2)
         ENDDO
     ENDDO
     CLOSE(u)
@@ -116,7 +120,8 @@ CONTAINS
    SUBROUTINE  make_directory(dirname)
           CHARACTER(LEN=*),       INTENT(IN) ::dirname
           LOGICAL                            ::existdir
-          INQUIRE (DIRECTORY=dirname, EXIST=existdir)       
+          !INQUIRE (DIRECTORY=dirname, EXIST=existdir) !this is Intel-specific
+          INQUIRE (FILE=TRIM(dirname)//'/.', EXIST=existdir)
           IF (.NOT.existdir) CALL SYSTEM('mkdir '//dirname)
    END SUBROUTINE
 
