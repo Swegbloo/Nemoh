@@ -23,7 +23,7 @@
 !--------------------------------------------------------------------------------------
 !    List of input/output file
 !--------------------------------------------------------------------------------------
-MODULE MFileDirectoryList  
+MODULE MFileDirectoryList
 
 CHARACTER(LEN=*), PARAMETER      ::PreprocDir='QTFPreprocOut'
 CHARACTER(LEN=*), PARAMETER      ::LogFILE   ='logfileQTF.txt'
@@ -77,7 +77,8 @@ CONTAINS
    SUBROUTINE  make_directory(dirname)
           CHARACTER(LEN=*),       INTENT(IN) ::dirname
           LOGICAL                            ::existdir
-          INQUIRE (DIRECTORY=dirname, EXIST=existdir)       
+          !INQUIRE (DIRECTORY=dirname, EXIST=existdir) !this is Intel-specific
+          INQUIRE (FILE=TRIM(dirname)//'/.', EXIST=existdir)
           IF (.NOT.existdir) CALL SYSTEM('mkdir '//dirname)
    END SUBROUTINE
 

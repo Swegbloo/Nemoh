@@ -269,3 +269,5 @@ run_6_box_coarsemesh:
 
 clean_6_box_coarsemesh:
 	$(MAKE) -C $(verdir)/Verification/6_box_coarsemesh/ clean
+
+clean_all_tests:	clean_1_cylinder clean_2_2Bodies clean_3_nonsymmetrical clean_4_Postprocessing clean_5_quicktest clean_6_box_coarsemesh

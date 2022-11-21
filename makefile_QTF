@@ -98,7 +98,7 @@ bin:
 	mkdir -p $(outputdir)
 
 # Rules to build
-QTFpreProc_N:		$(OBJQPRE_N) 
+QTFpreProc_N:		$(OBJQPRE_N)
 			@test -d $(outputdir) || mkdir $(outputdir)
 			@$(FC) -o $(outputdir)/QTFpreProc $(OBJQPRE_N)
 			@echo "QTF pre-processing tool compilation successful!"
@@ -108,7 +108,7 @@ clean_QTFpreProc_N:
 			@rm -f $(outputdir)/QTFpreProc
 
 # Rules to build
-QTFSolver_N:		$(OBJQSOL_N) 
+QTFSolver_N:		$(OBJQSOL_N)
 			@test -d $(outputdir) || mkdir $(outputdir)
 			@$(FC) -o $(outputdir)/QTFsolver $(OBJQSOL_N)
 			@echo "QTF solver tool compilation successful!"
@@ -132,12 +132,12 @@ clean_QTFpostproc_N:
 	$(FC) $(FFLAGS) $<
 %.o::	%.f90
 	$(FC) $(FFLAGS) $< -o $@
-	
+
 # # #Copy to local bin directory
 install : build
 
 # Remove *.o and main executable
- clean:	
+ clean:
 	rm -f *.mod *.o
 
  cleanall: clean_QTFpreProc_N clean_QTFSolver_N clean_QTFpostproc_N
@@ -156,24 +156,24 @@ clean_7_QTF_Cylinder:
 	$(MAKE) -C $(verdir)/Verification/7_QTF_Cylinder/mesh634_floating/ clean
 
 .PHONY: run_8_oc4_semisub clean_8_oc4_semisub
-run_8_oc4_semisub: 
+run_8_oc4_semisub:
 	$(MAKE) -C $(verdir)/Verification/8_QTF_OC4_Semisubmersible/mesh2200_Floating/ run
 
 clean_8_oc4_semisub:
 	$(MAKE) -C $(verdir)/Verification/8_QTF_OC4_Semisubmersible/mesh2200_Floating/ clean
 
 .PHONY: run_9a_softwind clean_9a_softwind
-run_9a_softwind: 
+run_9a_softwind:
 	$(MAKE) -C $(verdir)/Verification/9_QTF_SOFTWIND/mesh_1872half_QTF_Floating/ run
 
 clean_9a_softwind:
 	$(MAKE) -C $(verdir)/Verification/9_QTF_SOFTWIND/mesh_1872half_QTF_Floating/ clean
 
 .PHONY: run_9b_softwind_FS clean_9b_softwind_FS
-run_9b_softwind_FS: 
+run_9b_softwind_FS:
 	$(MAKE) -C $(verdir)/Verification/9_QTF_SOFTWIND/mesh_1872half_nolid_QTF_Floating_FS/ run
 
 clean_9b_softwind_FS:
 	$(MAKE) -C $(verdir)/Verification/9_QTF_SOFTWIND/mesh_1872half_nolid_QTF_Floating_FS/ clean
 
-
+clean_all_tests: clean_7_QTF_Cylinder clean_8_oc4_semisub clean_9a_softwind clean_9b_softwind_FS
