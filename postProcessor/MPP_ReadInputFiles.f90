@@ -38,21 +38,21 @@ CONTAINS
            TYPE(TMech),                 INTENT(OUT)::MechCoef
            !Local
            INTEGER      ::u1,u2,u3,u4,C,I,J
-           
+
            ALLOCATE(MechCoef%MassMat(Nradiation,Nradiation))
            ALLOCATE(MechCoef%StiffMat(Nradiation,Nradiation))
            ALLOCATE(MechCoef%StiffMat_EXT(Nradiation,Nradiation))
            ALLOCATE(MechCoef%DampCoefMat_EXT(Nradiation,Nradiation))
            CALL exist_file(trim(wd)//'/Mechanics/Inertia.dat')
-           CALL exist_file(trim(wd)//'/Mechanics/kh.dat')
-           CALL exist_file(trim(wd)//'/Mechanics/km.dat')
+           CALL exist_file(trim(wd)//'/Mechanics/Kh.dat')
+           CALL exist_file(trim(wd)//'/Mechanics/Km.dat')
            CALL exist_file(trim(wd)//'/Mechanics/Badd.dat')
-           
+
            OPEN(NEWUNIT=u1,FILE=trim(wd)//'/Mechanics/Inertia.dat',ACTION='READ')
-           OPEN(NEWUNIT=u2,FILE=trim(wd)//'/Mechanics/kh.dat',ACTION='READ')
-           OPEN(NEWUNIT=u3,FILE=trim(wd)//'/Mechanics/km.dat',ACTION='READ')
+           OPEN(NEWUNIT=u2,FILE=trim(wd)//'/Mechanics/Kh.dat',ACTION='READ')
+           OPEN(NEWUNIT=u3,FILE=trim(wd)//'/Mechanics/Km.dat',ACTION='READ')
            OPEN(NEWUNIT=u4,FILE=trim(wd)//'/Mechanics/Badd.dat',ACTION='READ')
-           
+
            DO I=1,Nradiation
                 READ(u1,*) (MechCoef%MassMat(I,J),J=1,Nradiation)
                 READ(u2,*) (MechCoef%StiffMat(I,J),J=1,Nradiation)
@@ -68,7 +68,7 @@ END SUBROUTINE
 SUBROUTINE  exist_file(filename)
           CHARACTER(LEN=*),       INTENT(IN) :: filename
           LOGICAL                            ::existfile
-          INQUIRE (FILE=filename, EXIST=existfile)       
+          INQUIRE (FILE=filename, EXIST=existfile)
           IF (.NOT.existfile) THEN
                PRINT*,filename,' data is missing!'
                STOP

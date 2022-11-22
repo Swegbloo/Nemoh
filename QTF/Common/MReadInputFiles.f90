@@ -109,13 +109,13 @@ CONTAINS
            ALLOCATE(MechCoef%StiffMat_EXT(Nradiation,Nradiation))
            ALLOCATE(MechCoef%DampCoefMat_EXT(Nradiation,Nradiation))
            CALL exist_file(trim(wd)//'/Mechanics/Inertia.dat')
-           CALL exist_file(trim(wd)//'/Mechanics/kh.dat')
-           CALL exist_file(trim(wd)//'/Mechanics/km.dat')
+           CALL exist_file(trim(wd)//'/Mechanics/Kh.dat')
+           CALL exist_file(trim(wd)//'/Mechanics/Km.dat')
            CALL exist_file(trim(wd)//'/Mechanics/Badd.dat')
 
            OPEN(NEWUNIT=u1,FILE=trim(wd)//'/Mechanics/Inertia.dat',ACTION='READ')
-           OPEN(NEWUNIT=u2,FILE=trim(wd)//'/Mechanics/kh.dat',ACTION='READ')
-           OPEN(NEWUNIT=u3,FILE=trim(wd)//'/Mechanics/km.dat',ACTION='READ')
+           OPEN(NEWUNIT=u2,FILE=trim(wd)//'/Mechanics/Kh.dat',ACTION='READ')
+           OPEN(NEWUNIT=u3,FILE=trim(wd)//'/Mechanics/Km.dat',ACTION='READ')
            OPEN(NEWUNIT=u4,FILE=trim(wd)//'/Mechanics/Badd.dat',ACTION='READ')
 
            DO I=1,Nradiation
@@ -380,13 +380,13 @@ CONTAINS
           REAL, DIMENSION(Nintegration,Npanels),INTENT(INOUT):: genNormal_dS
           !Local
           INTEGER I,J,Ninteg,u
-          CALL exist_file(TRIM(wd)//'/Mesh/Integration.dat')
+          CALL exist_file(TRIM(wd)//'/mesh/Integration.dat')
 
-          OPEN(NEWUNIT=u, FILE=TRIM(wd)//'/Mesh/Integration.dat', STATUS='OLD', ACTION='READ')
+          OPEN(NEWUNIT=u, FILE=TRIM(wd)//'/mesh/Integration.dat', STATUS='OLD', ACTION='READ')
           READ(u,*) Ninteg
           IF (Ninteg.NE.Nintegration) THEN
             CLOSE(u)
-            print*,'Number of rows (Nintegration) in /Mesh/Integration.dat is not correct!'
+            print*,'Number of rows (Nintegration) in /mesh/Integration.dat is not correct!'
             STOP
           ENDIF
           DO I = 1, Nintegration
