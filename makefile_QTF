@@ -10,7 +10,7 @@ MOD_DIR=/tmp/
 ifeq ($(gtest), gfortran)
 	FC=gfortran
 	FFLAGS=  -c                                     # No linker (yet)
-	#FFLAGS+= -g                                     # Add extra informations for debugging
+	#FLAGS+= -g -O0 -fcheck=all                     # Add extra informations for debugging
 	FFLAGS+= -O2                                    # Optimization level
 	FFLAGS+= -J$(MOD_DIR)                           # Where to put .mod files
 	FFLAGS+= -cpp -DGNUFORT -ffree-line-length-none # Run preprocessor

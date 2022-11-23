@@ -946,7 +946,7 @@ CONTAINS
   CmSmPer_k2=PREPARE_KOCHIN_COEFFICIENTS                       &
           (Isym,Npanels,Mesh%XM,Mesh%A,depth,Nbessel,k2,ZIG_Per_Iw2)
   !Prepare Integral over radius of free surface (Rext,Infinity)
-  DO Ibessel=0,Nbessel
+  DO Ibessel=1,Nbessel+1
    IR1l(:,Ibessel)=Fun_IR1l(Ibessel,k1,k2,delk,sumk,Rf,NRf)
    IR2l(:,Ibessel)=Fun_IR2l(Ibessel,k1,k2,delk,sumk,Rf,NRf)
    IF (delk.EQ.0)  IR1l(1,Ibessel)=0.
@@ -967,11 +967,11 @@ CONTAINS
      CmSmRad_sumk=PREPARE_KOCHIN_COEFFICIENTS                           &
           (Isym,Npanels,Mesh%XM,Mesh%A,depth,Nbessel,sumk,ZIG_Rad(:,2))
      !Prepare Integral over vartheta (0,2pi)
-     DO Ibessel=-1,Nbessel+1
+     DO Ibessel=1,Nbessel+3
       Ivartheta1l(:,Ibessel)=Fun_IVartheta1l(Nbessel,beta(Ibeta1),CmSmPer_k2,   &
-                                CmSmRad_delk,CmSmRad_sumk,Ibessel)
+                                CmSmRad_delk,CmSmRad_sumk,Ibessel-2)
       Ivartheta2l(:,Ibessel)=Fun_IVartheta2l(Nbessel,beta(Ibeta2),CmSmPer_k1,   &
-                                CmSmRad_delk,CmSmRad_sumk,Ibessel)
+                                CmSmRad_delk,CmSmRad_sumk,Ibessel-2)
 
      ENDDO
 
