@@ -1,8 +1,6 @@
 !--------------------------------------------------------------------------------------
-! NEMOH Solver
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -17,11 +15,15 @@
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !--------------------------------------------------------------------------------------
+!
+! NEMOH Solver
+!
+!--------------------------------------------------------------------------------------
 MODULE GREEN_2
 
   USE Constants
   USE MMesh
-  USE MFace,              ONLY:TFace,TVFace,VFace_to_FACE   
+  USE MFace,              ONLY:TFace,TVFace,VFace_to_FACE
   USE Elementary_functions
 
   USE M_INITIALIZE_GREEN, ONLY: TGreen,FLAG_IGREEN
@@ -49,7 +51,7 @@ CONTAINS
     TYPE(TMesh),           INTENT(IN)  :: Mesh
     TYPE(TGreen),          INTENT(IN)  :: IGreen ! Initial green variable
     TYPE(TVFace),          INTENT(IN)  :: VFace
-    
+
     ! Outputs
     COMPLEX,               INTENT(OUT) :: SP, SM   ! Integral of the Green function over the panel.
     COMPLEX, DIMENSION(3), INTENT(OUT) :: VSP, VSM ! Gradient of the integral of the Green function with respect to X0I.
@@ -61,14 +63,14 @@ CONTAINS
     COMPLEX, DIMENSION(Mesh%ISym+1)    :: FS
     COMPLEX, DIMENSION(3, Mesh%ISym+1) :: VS
     TYPE(TFace)                        :: FaceJ
-    INTEGER                            :: IGQ !Index Gauss Quadrature Integration point 
+    INTEGER                            :: IGQ !Index Gauss Quadrature Integration point
     COMPLEX               :: SP_IGQ, SM_IGQ   ! Integral of the Green function over the panel for Gauss point IGQ.
     COMPLEX, DIMENSION(3) :: VSP_IGQ, VSM_IGQ ! Gradient of the integral of the Green function
- 
+
     ALLOCATE(FaceJ%dXdXG_WGQ_per_A(VFace%NP_GQ))
     ALLOCATE(FaceJ%XM_GQ(3,VFace%NP_GQ))
-    EPS=IGREEN%EPS_ZMIN 
-    CALL VFace_to_FACE(VFace,FaceJ,J)    !Extract a face J from the VFace array 
+    EPS=IGREEN%EPS_ZMIN
+    CALL VFace_to_FACE(VFace,FaceJ,J)    !Extract a face J from the VFace array
     !initialization
      SP=CZERO
      SM=CZERO
@@ -77,7 +79,7 @@ CONTAINS
 
        DO IGQ=1, FaceJ%NP_GQ
            XI(:) = X0I(:)
-           IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
+           IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface
            XJ(:) = FaceJ%XM_GQ(:,IGQ)
            XJ(3) = MIN(XJ(3), -EPS*Mesh%xy_diameter)
            CALL COMPUTE_S2(XI, XJ, INFINITE_DEPTH, wavenumber, IGreen, FS(1), VS(:, 1))
@@ -150,23 +152,23 @@ CONTAINS
     REAL, DIMENSION(3, 4, 2**Mesh%Isym)    :: VTS
     COMPLEX, DIMENSION(4, 2**Mesh%Isym)    :: FS
     COMPLEX, DIMENSION(3, 4, 2**Mesh%Isym) :: VS
-    INTEGER                                :: IGQ       !Index Gauss Quadrature Integration point 
+    INTEGER                                :: IGQ       !Index Gauss Quadrature Integration point
     COMPLEX               :: SP_IGQ, SM_IGQ  ! Integral of the Green function over the panel for Gauss point IGQ.
     COMPLEX, DIMENSION(3) :: VSP_IGQ, VSM_IGQ! Gradient of the integral of the Green function
                                              !  with respect to X0I and Gauss point IGQ.
-   
+
     INTEGER                 :: NEXP
     REAL, DIMENSION(31)     :: AMBDA, AR
-    REAL                    :: EPS 
+    REAL                    :: EPS
     ALLOCATE(FaceJ%dXdXG_WGQ_per_A(VFace%NP_GQ))
     ALLOCATE(FaceJ%XM_GQ(3,VFace%NP_GQ))
-    
+
     !passing values
     NEXP =IGreen%NEXP
     AMBDA=IGreen%AMBDA(:)
     AR   =IGreen%AR(:)
-    EPS  =IGREEN%EPS_ZMIN 
-    CALL VFace_to_FACE(VFace,FaceJ,J)    !Extract a face J from the VFace array 
+    EPS  =IGREEN%EPS_ZMIN
+    CALL VFace_to_FACE(VFace,FaceJ,J)    !Extract a face J from the VFace array
     !initialization
      SP=CZERO
      SM=CZERO
@@ -177,14 +179,14 @@ CONTAINS
     !========================================
 
        DO IGQ=1, FaceJ%NP_GQ
- 
+
            XI(:) = X0I(:)
-           IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
-           
+           IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface
+
            X0J(:)= FaceJ%XM_GQ(:,IGQ)
-           XJ(:) = X0J 
+           XJ(:) = X0J
            XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
-           
+
            ! Distance in xOy plane
            RRR = NORM2(XI(1:2) - XJ(1:2))
 
@@ -203,7 +205,7 @@ CONTAINS
 
            ! 1.c Shift and reflect XJ and compute another value of the Green function
            XI(3) = X0I(3)
-           IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
+           IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface
            XJ(3) = -X0J(3) - 2*depth
            CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(3, 1), VS(:, 3, 1))
 
@@ -228,8 +230,8 @@ CONTAINS
              ! If the y-symmetry is used, the four symmetric problems have to be solved
              XI(:) = X0I(:)
              XI(2) = -XI(2)
-             IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
-             XJ(:) = X0J 
+             IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface
+             XJ(:) = X0J
              XJ(3) = MIN(X0J(3), -EPS*Mesh%xy_diameter)
 
              RRR = NORM2(XI(1:2) - XJ(1:2))
@@ -249,7 +251,7 @@ CONTAINS
 
              ! 1.c' Shift and reflect XJ and compute another value of the Green function
              XI(3) = X0I(3)
-             IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface 
+             IF (I>0) XI(3) = MIN(X0I(3), -EPS*Mesh%xy_diameter) !for I on body panel, I=0 on free surface
              XJ(3) = -X0J(3)- 2*depth
              CALL COMPUTE_S2(XI(:), XJ(:), depth, wavenumber, IGreen, FS(3, 2), VS(:, 3, 2))
 
@@ -288,16 +290,16 @@ CONTAINS
              SM     = SM+CMPLX(REAL(SM_IGQ)*COF1,  AIMAG(SM_IGQ)*COF2)
              VSM(:) = VSM(:)+CMPLX(REAL(VSM_IGQ)*COF3, AIMAG(VSM_IGQ)*COF4)
            END IF
-        
-       END DO  
+
+       END DO
 
        !=====================================================
        ! Part 2: Integrate (NEXP+1)×4 terms of the form 1/MM'
        !=====================================================
-       DO IGQ=1, FaceJ%NP_GQ 
+       DO IGQ=1, FaceJ%NP_GQ
            AMBDA(NEXP+1) = 0
            AR(NEXP+1)    = 2
-       
+
           XJ(:) = FaceJ%XM_GQ(:,IGQ)
 
            DO KE = 1, NEXP+1
@@ -375,7 +377,7 @@ CONTAINS
     ! Inputs
     REAL, DIMENSION(3),    INTENT(IN)  :: XI, XJ
     REAL,                  INTENT(IN)  :: depth, wavenumber
-   TYPE(TGREEN),           INTENT(IN)  :: IGreen  
+   TYPE(TGREEN),           INTENT(IN)  :: IGreen
 
     ! Outputs
     COMPLEX,               INTENT(OUT) :: FS
@@ -474,7 +476,7 @@ CONTAINS
                 ZL(3)=PL5(IGreen%XZ(KJ-1),IGreen%XZ(KJ+1),IGreen%XZ(KJ+2),IGreen%XZ(KJ-2),IGreen%XZ(KJ  ),AKZ)
                 ZL(4)=PL5(IGreen%XZ(KJ  ),IGreen%XZ(KJ+2),IGreen%XZ(KJ-2),IGreen%XZ(KJ-1),IGreen%XZ(KJ+1),AKZ)
                 ZL(5)=PL5(IGreen%XZ(KJ+1),IGreen%XZ(KJ-2),IGreen%XZ(KJ-1),IGreen%XZ(KJ  ),IGreen%XZ(KJ+2),AKZ)
- 
+
                 PD1Z = DOT_PRODUCT(XL, MATMUL(IGreen%APD1Z(KI-2:KI+2, KJ-2:KJ+2), ZL))
                 PD2Z = DOT_PRODUCT(XL, MATMUL(IGreen%APD2Z(KI-2:KI+2, KJ-2:KJ+2), ZL))
 
@@ -528,7 +530,7 @@ CONTAINS
       FS      = CMPLX(-PSURR*AKZ, 0.0)
       VS(1:3) = CZERO
     ENDIF
-      
+
       DEALLOCATE(XL,ZL)
     RETURN
   END SUBROUTINE COMPUTE_S2

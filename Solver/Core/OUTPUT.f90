@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -17,7 +16,7 @@
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 !   Contributors list:
-!   - A. Babarit 
+!   - A. Babarit
 !
 !--------------------------------------------------------------------------------------
 MODULE OUTPUT
@@ -29,7 +28,7 @@ MODULE OUTPUT
 
   !PUBLIC :: WRITE_DATA_ON_MESH
 
-  PUBLIC 
+  PUBLIC
   INTEGER, PARAMETER :: RAW_OUTPUT=0, TECPLOT_OUTPUT=1
   INTEGER :: output_format = TECPLOT_OUTPUT
 
@@ -46,14 +45,14 @@ CONTAINS
     do I=1,NPanels
       WRITE(u,'(2(X,E14.7))') REAL(ZIGB(I)), IMAG(ZIGB(I))
     end do
-    
+
     do I=1,NPanels
       WRITE(u,'(2(X,E14.7))') REAL(ZIGS(I)), IMAG(ZIGS(I))
     end do
     CLOSE(u)
     END SUBROUTINE WRITE_SOURCES
-    
- 
+
+
 
   SUBROUTINE WRITE_DATA_ON_MESH(Mesh, cdata, filename)
     ! Save in a file a field of complex values on a mesh.
@@ -61,7 +60,7 @@ CONTAINS
     TYPE(TMesh),                                   INTENT(IN) :: Mesh
     COMPLEX, DIMENSION(Mesh%NPanels*2**Mesh%ISym), INTENT(IN) :: cdata
     CHARACTER(LEN=*),                              INTENT(IN) :: filename ! Output file
-    
+
     ! Local variables
     INTEGER            :: u, i, j
     REAL, DIMENSION(3) :: x
@@ -71,7 +70,7 @@ CONTAINS
     IF (output_format == TECPLOT_OUTPUT) THEN
       WRITE(u,*) 'VARIABLES="X" "Y" "Z" "abs(p) (Pa)" "angle(p) (rad)"'
       WRITE(u,'(A,I7,A,I7,A)') 'ZONE N=', Mesh%Npoints*2**Mesh%ISym,',E = ', Mesh%Npanels*2**Mesh%ISym,', F=FEPOINT, ET=QUADRILATERAL'
-    END IF 
+    END IF
 
     DO i = 1, Mesh%NPanels
       DO j = 1, 4

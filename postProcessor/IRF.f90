@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -18,7 +17,7 @@
 !
 !   Contributors list:
 !   - A. Babarit
-!	- R. Kurnia
+!	  - R. Kurnia
 !--------------------------------------------------------------------------------------
     MODULE MIRF
 !

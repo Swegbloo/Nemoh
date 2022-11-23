@@ -1,8 +1,29 @@
+%--------------------------------------------------------------------------------------
+%
+%    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
+%
+%    This program is free software: you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation, either version 3 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+%   Contributors list:
+%   - A. Babarit
+%
+%--------------------------------------------------------------------------------------
 % 
 % --> function [A,B,Fe]=Nemoh(w, dir, depth)
 %
 % Purpose: Matlab wrapper for calculation of hydrodynamic coefficients using Nemoh
-% 
+%
 % Inputs :
 % - w     : Vector length(w) of wave frequencies (rad/s)
 % - dir   : Wave direction (degrees)
@@ -36,7 +57,7 @@ clear textline;
 textline={};
 while (~feof(fid))
     textline(n)={fgetl(fid)};
-    if (n == 4) 
+    if (n == 4)
         textline(n)={sprintf('%f                 ! DEPTH			! M		! Water depth',depth)};
     end
     if ((mod(n,18) == 9) && ((n-9)/18 <= nBodies))
@@ -48,22 +69,22 @@ while (~feof(fid))
             if (temp(i) == '\')
                 temp2=[temp2,temp(k:i),'\'];
                 k=i+1;
-            end;            
+            end;
         end
         temp2=[temp2,temp(k:ntemp)];
         textline(n)={temp2};
         cell2mat(textline(n));
     end
-    if (n == 9+18*nBodies) 
+    if (n == 9+18*nBodies)
         textline(n)={sprintf('%g %f %f       ! Number of wave frequencies, Min, and Max (rad/s)',length(w),w(1),w(length(w)))};
     end
-     if (n == 10+18*nBodies) 
+     if (n == 10+18*nBodies)
         textline(n)={sprintf('%g %f %f		! Number of wave directions, Min and Max (degrees)',1,dir,dir)};
     end
     n=n+1;
 end
 fclose(fid);
-fid = fopen([rep,filesep,'Nemoh.cal'], 'w'); 
+fid = fopen([rep,filesep,'Nemoh.cal'], 'w');
 for i=1:n-1
     fprintf(fid, [cell2mat(textline(i)),'\n']);
 end

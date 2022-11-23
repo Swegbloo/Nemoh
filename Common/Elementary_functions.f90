@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -20,8 +19,8 @@
 !   - G. Delhommeau
 !   - P. Guével
 !   - J.C. Daubisse
-!   - J. Singh  
-!	- R. Kurnia
+!   - J. Singh
+!	  - R. Kurnia
 !--------------------------------------------------------------------------------------
 MODULE Elementary_functions
 
@@ -116,7 +115,7 @@ CONTAINS
   FUNCTION CIH_Vect(AK,Z,H,NZ) result(CIHV)
     INTEGER           , INTENT(IN) :: NZ
     REAL              , INTENT(IN) :: AK,H
-    REAL,DIMENSION(NZ), INTENT(IN) :: Z  
+    REAL,DIMENSION(NZ), INTENT(IN) :: Z
     REAL,DIMENSION(NZ)             :: CIHV
 
     IF((AK*H.LE.20).AND.(AK*H.GT.0.))THEN
@@ -132,7 +131,7 @@ CONTAINS
    FUNCTION SIH_Vect(AK,Z,H,NZ) result(SIHV)
     INTEGER           , INTENT(IN) :: NZ
     REAL              , INTENT(IN) :: AK,H
-    REAL,DIMENSION(NZ), INTENT(IN) :: Z  
+    REAL,DIMENSION(NZ), INTENT(IN) :: Z
     REAL,DIMENSION(NZ)             :: SIHV
 
     IF((AK*H.LE.20).AND.(AK*H.GT.0.))THEN
@@ -145,7 +144,7 @@ CONTAINS
 
   !-------------------------------------------------------------------------------!
   FUNCTION COMPLEX_CONJUGATE_VECT(var,Nvect) RESULT(Conj)
-           INTEGER,                  INTENT(IN)::NVect 
+           INTEGER,                  INTENT(IN)::NVect
            COMPLEX,DIMENSION(Nvect), INTENT(IN):: var
            COMPLEX,DIMENSION(Nvect) :: Conj
            Conj=CMPLX(REAL(var),-AIMAG(var))
@@ -171,7 +170,7 @@ CONTAINS
 
   FUNCTION DOT_PRODUCT_COMPLEX(var1,var2,Nvect) RESULT(prod)
        INTEGER, INTENT(IN)                  :: Nvect
-       COMPLEX,DIMENSION(Nvect), INTENT(IN) :: var1,var2  
+       COMPLEX,DIMENSION(Nvect), INTENT(IN) :: var1,var2
        COMPLEX                              ::prod
        !NOTE: DOT_PRODUCT(A,B)=A*.B for A,B complex variables
        !we want to have DOT_PRODUCT(A,B)=A.B
@@ -206,7 +205,7 @@ CONTAINS
         X_UP = X_MEAN
       END IF
     END DO
-  
+
     X0 = X_MEAN
 
     RETURN
@@ -219,7 +218,7 @@ CONTAINS
     PL2=((XU-U1)*(XU-U2))/((U3-U1)*(U3-U2))
     RETURN
   END FUNCTION
-  
+
   REAL FUNCTION PL5(U1,U2,U3,U4,U5,XU)
     REAL::U1,U2,U3,U4,U5,XU
     PL5=((XU-U1)*(XU-U2)*(XU-U3)*(XU-U4))/&
@@ -232,7 +231,7 @@ CONTAINS
     REAL, INTENT(IN)   :: w(N),wobs
     INTEGER            :: Iwobs,Iw,Nw
     REAL               :: mindist,mindistN
-    
+
     mindist=w(N)-w(1)
     DO Iw=1,N
         IF (abs(w(Iw)-wobs)<=mindist)THEN
@@ -240,7 +239,7 @@ CONTAINS
                 mindist=abs(w(Iw)-wobs)
         ENDIF
     ENDDO
-    RETURN     
+    RETURN
   END FUNCTION
 
   FUNCTION Fun_MIN(N,vect) result(minvalue)
@@ -251,7 +250,7 @@ CONTAINS
     minvalue=vect(1)
     DO I=1,N
     minvalue=MIN(vect(I),minvalue)
-    ENDDO    
+    ENDDO
   END FUNCTION
 
   FUNCTION Fun_MAX(N,vect) result(maxvalue)
@@ -262,7 +261,7 @@ CONTAINS
     maxvalue=vect(1)
     DO I=1,N
     maxvalue=MAX(vect(I),maxvalue)
-    ENDDO    
+    ENDDO
   END FUNCTION
 
   FUNCTION Fun_KronDelta(m,n) result(delta)
@@ -282,7 +281,7 @@ CONTAINS
 !     This subroutine calculates the first kind modified Bessel function
 !     of integer order N, for any REAL X. We use here the classical
 !     recursion formula, when X > N. For X < N, the Miller's algorithm
-!     is used to avoid overflows. 
+!     is used to avoid overflows.
 !     REFERENCE:
 !     C.W.CLENSHAW, CHEBYSHEV SERIES FOR MATHEMATICAL FUNCTIONS,
 !     MATHEMATICAL TABLES, VOL.5, 1962.
@@ -394,7 +393,7 @@ CONTAINS
 !*                                                                      *
 !*                               F90 Release 1.0 By J-P Moreau, Paris.  *
 !*                                      all variables declared          *
-!*                                         (www.jpmoreau.fr)            *	  
+!*                                         (www.jpmoreau.fr)            *
 !     This subroutine calculates the First Kind Bessel Function of
 !     order 1, for any real number X. The polynomial approximation by
 !     series of Chebyshev polynomials is used for 0<X<8 and 0<8/X<1.
@@ -408,7 +407,7 @@ CONTAINS
       .2457520174D-5,-.240337019D-6 /,P6 /.636619772D0 /
       DATA Q1,Q2,Q3,Q4,Q5 /.04687499995D0,-.2002690873D-3,   &
       .8449199096D-5,-.88228987D-6,.105787412D-6 /
-      DATA R1,R2,R3,R4,R5,R6 /72362614232.D0,-7895059235.D0, & 
+      DATA R1,R2,R3,R4,R5,R6 /72362614232.D0,-7895059235.D0, &
       242396853.1D0,-2972611.439D0,15704.48260D0,-30.16036606D0 /
       DATA S1,S2,S3,S4,S5,S6 /144725228442.D0,2300535178.D0, &
       18583304.74D0,99447.43394D0,376.9991397D0,1.D0 /
@@ -428,10 +427,10 @@ CONTAINS
       BESSJ1 = SQRT(P6/AX)*(COS(XX)*FP-Z*SIN(XX)*FQ)*SIGN(S6,X)
       ENDIF
       RETURN
-      
+
       END FUNCTION
 
-      
+
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 END MODULE Elementary_functions

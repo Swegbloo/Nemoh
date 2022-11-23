@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -84,7 +83,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 			END IF
 		END DO
 		K=IMN
-		DO J=1,4			
+		DO J=1,4
 			IF (K.GT.4) THEN
 				K=K-4
 			END IF
@@ -112,7 +111,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 					P3(K)=P(4,K)
 					P4(K)=P(1,K)
 				END DO
-			ELSE 
+			ELSE
 				IF ((P(2,3).GT.0.0).AND.(P(3,3).GT.0.0)) THEN
 					! CAS OU Z2 ET Z3 SONT POSITIFS, Z4 NEG
 					J=2
@@ -131,7 +130,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 						P3(K)=P(3,K)
 						P4(K)=P(4,K)
 					END DO
-				ELSE 
+				ELSE
 					IF ((P(4,3).GT.0.0).AND.(P(3,3).GT.0.0)) THEN
 						! CAS OU Z3 ET Z4 SONT POSITIFS, Z2 NEG
 						J=4
@@ -163,7 +162,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 								P2(K)=P(2,K)
 								P3(K)=PL(K)
 								P4(K)=P(1,K)
-							END DO	
+							END DO
 							IF (ITEC.EQ.1) THEN
 								WRITE(10,*) (P1(K),K=1,3)
 								WRITE(10,*) (P2(K),K=1,3)
@@ -186,7 +185,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 								Facettesmouillee(k,Nfmouillee+1)=Npmouillee+k
 							END DO
 							Npmouillee=4+Npmouillee
-							Nfmouillee=1+Nfmouillee	
+							Nfmouillee=1+Nfmouillee
 							CALL VOLELMT(P1,P2,P3,P4,VLF,PGF,SEF,KHE,RHO,G)
 							IF (ZMN.LT.0.0) THEN
 							DEPLACEMENT=DEPLACEMENT+VLF
@@ -243,7 +242,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 									Facettesmouillee(k,Nfmouillee+1)=Npmouillee+k
 								END DO
 								Npmouillee=4+Npmouillee
-								Nfmouillee=1+Nfmouillee	
+								Nfmouillee=1+Nfmouillee
 								CALL VOLELMT(P1,P2,P3,P4,VLF,PGF,SEF,KHE,RHO,G)
 								IF (ZMN.LT.0.0) THEN
 								DEPLACEMENT=DEPLACEMENT+VLF
@@ -263,7 +262,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 									P2(K)=P(2,K)
 									P3(K)=PL(K)
 									P4(K)=PK(K)
-								END DO								
+								END DO
 							ELSE
 								IF (P(4,3).GT.0.0) THEN
 									! CAS OU Z4 EST POSITIF, Z2 ET Z3 NEG
@@ -300,7 +299,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 										Facettesmouillee(k,Nfmouillee+1)=Npmouillee+k
 									END DO
 									Npmouillee=4+Npmouillee
-									Nfmouillee=1+Nfmouillee	
+									Nfmouillee=1+Nfmouillee
 									CALL VOLELMT(P1,P2,P3,P4,VLF,PGF,SEF,KHe,RHO,G)
 									IF (ZMN.LT.0.0) THEN
 									DEPLACEMENT=DEPLACEMENT+VLF
@@ -320,7 +319,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 										P2(K)=P(2,K)
 										P3(K)=PL(K)
 										P4(K)=PK(K)
-									END DO								
+									END DO
 								ELSE
 									IF (P(2,3).GT.0.0) THEN
 										! CAS OU Z2 EST POSITIF, Z3 ET Z4 NEG
@@ -357,7 +356,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 											Facettesmouillee(k,Nfmouillee+1)=Npmouillee+k
 										END DO
 										Npmouillee=4+Npmouillee
-										Nfmouillee=1+Nfmouillee	
+										Nfmouillee=1+Nfmouillee
 										CALL VOLELMT(P1,P2,P3,P4,VLF,PGF,SEF,KHe,RHO,G)
 										IF (ZMN.LT.0.0) THEN
 										DEPLACEMENT=DEPLACEMENT+VLF
@@ -377,7 +376,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 											P2(K)=P(4,K)
 											P3(K)=PL(K)
 											P4(K)=PK(K)
-										END DO								
+										END DO
 									ELSE
 										IF ((P(2,3).GT.0.0).AND.(P(4,3).EQ.0.0)) THEN
 											J=2
@@ -390,7 +389,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 												P2(K)=PL(K)
 												P3(K)=P(3,K)
 												P4(K)=P(4,K)
-											END DO	
+											END DO
 										ELSE
 											DO K=1,3
 												P1(K)=P(1,K)
@@ -403,7 +402,7 @@ SUBROUTINE HYDRO(X,Y,Z,NP,FACETTES,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xmouillee,Ymoui
 								END IF
 							END IF
 						END IF
-					END IF					
+					END IF
 				END IF
 			END IF
 			Xmouillee(Npmouillee+1)=P1(1)

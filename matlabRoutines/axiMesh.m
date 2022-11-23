@@ -1,4 +1,25 @@
-% 
+%--------------------------------------------------------------------------------------
+%
+%    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
+%
+%    This program is free software: you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation, either version 3 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+%   Contributors list:
+%   - A. Babarit
+%
+%--------------------------------------------------------------------------------------
+%
 % --> function [Mass,Inertia,KH,XB,YB,ZB]=axiMesh(r,z,n)
 %
 % Purpose : Mesh generation of an axisymmetric body for use with Nemoh
@@ -30,7 +51,7 @@ theta=[0.:pi/(ntheta-1):pi];
 nx=0;
 % Calcul des sommets du maillage
 for j=1:ntheta
-    for i=1:n    
+    for i=1:n
         nx=nx+1;
         x(nx)=r(i)*cos(theta(j));
         y(nx)=r(i)*sin(theta(j));
@@ -128,7 +149,7 @@ for i=1:nf
 end;
 ligne=fgetl(fid);
 ligne=fgetl(fid);
-for i=1:nf    
+for i=1:nf
     ligne=fscanf(fid,'%g %g',6);
     xu(i)=ligne(1);
     yv(i)=ligne(2);
@@ -146,7 +167,7 @@ title('Mesh for Nemoh');
 clear KH;
 KH=zeros(6,6);
 fid=fopen([nomrep,filesep,'mesh',filesep,'KH.dat'],'r');
-for i=1:6   
+for i=1:6
     ligne=fscanf(fid,'%g %g',6);
     KH(i,:)=ligne;
 end;
@@ -188,7 +209,7 @@ fprintf(fid,'0.	0.              ! XEFF YEFF		! M		! Wave measurement point\n');
 fprintf(fid,'--- Description of floating bodies -----------------------------------------------------------------------------------------------\n');
 fprintf(fid,'1				! Number of bodies\n');
 fprintf(fid,'--- Body 1 -----------------------------------------------------------------------------------------------------------------------\n');
-if isunix 
+if isunix
     fprintf(fid,['''',nomrep,filesep,'mesh',filesep,'axisym.dat''		! Name of mesh file\n']);
 else
     fprintf(fid,[nomrep,'\\mesh\\axisym.dat      ! Name of mesh file\n']);
@@ -216,7 +237,7 @@ fprintf(fid,'--- Post processing -----------------------------------------------
 fprintf(fid,'1	0.1	10.		! IRF 				! IRF calculation (0 for no calculation), time step and duration\n');
 fprintf(fid,'0				! Show pressure\n');
 fprintf(fid,'0	0.	180.		! Kochin function 		! Number of directions of calculation (0 for no calculations), Min and Max (degrees)\n');
-fprintf(fid,'0	50	400.	400.	! Free surface elevation 	! Number of points in x direction (0 for no calcutions) and y direction and dimensions of domain in x and y direction\n');	
+fprintf(fid,'0	50	400.	400.	! Free surface elevation 	! Number of points in x direction (0 for no calcutions) and y direction and dimensions of domain in x and y direction\n');
 fprintf(fid,'---')
 status=fclose(fid);
 fclose('all');

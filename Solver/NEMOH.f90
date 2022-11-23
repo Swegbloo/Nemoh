@@ -1,11 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!   NEMOH V1.0 - BVP solver - January 2014
-!
-!--------------------------------------------------------------------------------------
-!
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -26,7 +21,11 @@
 !   - J.C. Daubisse
 !   - J. Singh
 !   - A. Babarit
-!	= R. Kurnia
+!	  - R. Kurnia
+!--------------------------------------------------------------------------------------
+!
+!   NEMOH V1.0 - BVP solver - January 2014
+!
 !--------------------------------------------------------------------------------------
 
 PROGRAM Main
@@ -36,7 +35,7 @@ PROGRAM Main
   USE MEnvironment,         ONLY: TEnvironment,    ReadTEnvironment
   USE MBodyConditions,      ONLY: TBodyConditions, ReadTBodyConditions
   USE M_Solver,             ONLY: TSolver,         ReadTSolver, ID_GMRES
-  USE MLogFile              ! 
+  USE MLogFile              !
   ! Preprocessing and initialization
   USE MFace,                ONLY: TVFace, Prepare_FaceMesh
   USE M_INITIALIZE_GREEN,   ONLY: TGREEN, INITIALIZE_GREEN
@@ -56,15 +55,15 @@ PROGRAM Main
   TYPE(TMesh)           :: Mesh           ! Mesh of the floating body
   TYPE(TBodyConditions) :: BodyConditions ! Physical conditions on the floating body
   TYPE(TEnvironment)    :: Env            ! Physical conditions of the environment
-  TYPE(TSolver)         :: SolverOpt      ! Solver Option, specified by user in input_solver.txt 
-  
+  TYPE(TSolver)         :: SolverOpt      ! Solver Option, specified by user in input_solver.txt
+
   INTEGER                            :: i_problem          ! Index of the current problem
   REAL                               :: omega, wavenumber  ! Wave frequency and wavenumber
   COMPLEX, DIMENSION(:), ALLOCATABLE     :: ZIGB, ZIGS     ! Computed source distribution
   COMPLEX, DIMENSION(:,:,:), ALLOCATABLE :: V, Vinv,S      ! Influece coefficients
   COMPLEX, DIMENSION(:), ALLOCATABLE :: Potential          ! Computed potential
   REAL,DIMENSION(3)                  :: NOINPUT             ! unused but has to be declared
-  TYPE(TVFACE)                       :: VFace              ! Face Mesh structure variable                   
+  TYPE(TVFACE)                       :: VFace              ! Face Mesh structure variable
   TYPE(TGREEN)                       :: IGreen             ! Initial Green variables
   REAL                               :: tcpu_start
   CHARACTER(LEN=1000)                :: LogTextToBeWritten
@@ -176,7 +175,7 @@ PROGRAM Main
         TRIM(wd)//'/results/freesurface.'//string(i_problem)//'.dat' &
         )
     END IF
-    
+
     IF (BodyConditions%Switch_SourceDistr(i_problem) == 1) THEN
       ! Write pressure field on the floating body in file
       CALL WRITE_SOURCES(ZIGB,ZIGS,Mesh%Npanels,                    &
@@ -202,5 +201,5 @@ CONTAINS
     CHARACTER(LEN=5) :: s
     WRITE(s, '(I0.5)') i
   END FUNCTION
-      
+
 END PROGRAM Main

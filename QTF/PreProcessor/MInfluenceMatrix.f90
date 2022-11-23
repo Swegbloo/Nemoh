@@ -1,6 +1,6 @@
-!-----------------------------------------------------------------------------------
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!--------------------------------------------------------------------------------------
+!
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!-------------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------------
 !   Contributors list:
 !    - Ruddy Kurnia (ECN)
 !--------------------------------------------------------------------------------------
@@ -29,7 +29,7 @@ USE MMesh,                      ONLY: TMesh
 USE MFace,                      ONLY: TVFace
 IMPLICIT NONE
 
-CONTAINS      
+CONTAINS
         SUBROUTINE CONSTRUCT_INFLUENCE_MATRIX_FS(omega,wavenumber,Env,IGreen,Mesh,VFace,XM_I,S,gradS)
         !======================================
         !Construction of the influence matrix
@@ -57,13 +57,13 @@ CONTAINS
            DO J = 1, Mesh%NPanels
              IF ((Env%depth == INFINITE_DEPTH).OR.(omega**2*Env%depth/Env%g.GE.20)) THEN
                ! First part of the Green function
-               ! These output are independent of omega, but always computed here to avoid 
+               ! These output are independent of omega, but always computed here to avoid
                ! large memory used for saving the matrix, particularly for the free surface panels
                CALL VAV                                                     &
                (0, XM_I, J,VFace,Mesh, INFINITE_DEPTH,IGREEN%EPS_ZMIN,&
                  FSP, FSM, VSXP, VSXM &
                  )
-               ! Second part of the Green function      
+               ! Second part of the Green function
                CALL VNSINFD                                            &
                (0, wavenumber,XM_I , J, VFace, Mesh,                     &
                  IGreen, SP, SM, VSP, VSM                              &

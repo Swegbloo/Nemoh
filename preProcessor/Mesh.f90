@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -218,12 +217,12 @@ CONTAINS
 
             CALL CrossProduct(U,V,W1)
             A1=0.5*calNorme(W1)
-          
+
            ! DO j=1,3
            !     U(j)=Mesh%X(j,Mesh%P(4,i))-Mesh%X(j,Mesh%P(3,i))
            !     V(j)=Mesh%X(j,Mesh%P(2,i))-Mesh%X(j,Mesh%P(3,i))
            ! END DO
-           
+
             ! Area of 2-3-4 triangle
             U(:) = Mesh%X(:,Mesh%P(4,i))-Mesh%X(:,Mesh%P(3,i))
             V(:) = Mesh%X(:,Mesh%P(2,i))-Mesh%X(:,Mesh%P(3,i))
@@ -236,7 +235,7 @@ CONTAINS
             IF (Mesh%A(i).LT.1.0E-07) THEN
                 WRITE(*,'(A,I6,A,E14.7)') 'Error: surface of panel ',i,' is too small (',Mesh%A(i),')'
                 STOP
-            END IF 
+            END IF
            ! DO j=1,3
            !     Mesh%XM(j,i)=1./3*(Mesh%X(j,Mesh%P(1,i))+Mesh%X(j,Mesh%P(2,i))+Mesh%X(j,Mesh%P(4,i)))*A1/Mesh%A(i)+1./3*(Mesh%X(j,Mesh%P(2,i))+Mesh%X(j,Mesh%P(3,i))+Mesh%X(j,Mesh%P(4,i)))*A2/Mesh%A(i)
            ! END DO
@@ -254,23 +253,23 @@ CONTAINS
            Mesh%N(:,i) = U(:)/calNorme(U)
 
         END DO
-      
+
 !       Export mesh
-        INQUIRE (DIRECTORY=ID%ID(1:ID%lID)//'/mesh', EXIST=ex) 
+        INQUIRE (DIRECTORY=ID%ID(1:ID%lID)//'/mesh', EXIST=ex)
         IF (.NOT.ex) M=SYSTEM('mkdir '//ID%ID(1:ID%lID)//'/mesh')
         OPEN(10,FILE=TRIM(ID%ID)//'/mesh/L12.dat')
         WRITE(10,'(I3,X,I3)') 2,Mesh%Isym
         DO i=1,Mesh%Npoints
-            WRITE(10,'(I6,3(X,E14.7))') i,(Mesh%X(j,i),j=1,3)    
+            WRITE(10,'(I6,3(X,E14.7))') i,(Mesh%X(j,i),j=1,3)
         END DO
         WRITE(10,'(I6,3(X,E14.7))') 0,0.,0.,0.
         DO i=1,Mesh%Npanels
-            WRITE(10,'(4(X,I6))') (Mesh%P(j,i),j=1,4) 
+            WRITE(10,'(4(X,I6))') (Mesh%P(j,i),j=1,4)
         END DO
         WRITE(10,'(4(X,I6))') 0,0,0,0
         CLOSE(10)
         OPEN(10,FILE=TRIM(ID%ID)//'/mesh/L10.dat')
-        WRITE(10,*) 
+        WRITE(10,*)
         WRITE(10,'(4(X,I6))') Mesh%Isym,Mesh%Npoints,Mesh%Npanels,Mesh%Nbodies
         DO i=1,Mesh%Npanels
             WRITE(10,'(I5,7(X,E14.7))') Mesh%cPanel(i),(Mesh%XM(j,i),j=1,3),(Mesh%N(j,i),j=1,3),Mesh%A(i)
@@ -285,25 +284,25 @@ CONTAINS
 		    WRITE(10,'(7(2X,E14.7))') (Mesh%X(j,i),j=1,3),0.0,0.0,0.0,0.
 	    END DO
 	    DO i=1,Mesh%Npanels
-		    WRITE(10,'(I6,3(2X,I6))') (Mesh%P(j,i),j=1,4) 
+		    WRITE(10,'(I6,3(2X,I6))') (Mesh%P(j,i),j=1,4)
 	    END DO
 	    WRITE(10,*) 'ZONE t="normales", F=POINT, I=',Mesh%Npanels
 	    DO i=1,Mesh%Npanels
-		    WRITE(10,'(7(2X,E14.7))') (Mesh%XM(j,i),j=1,3),(Mesh%N(j,i),j=1,3),Mesh%A(i) 
+		    WRITE(10,'(7(2X,E14.7))') (Mesh%XM(j,i),j=1,3),(Mesh%N(j,i),j=1,3),Mesh%A(i)
 	    END DO
 	    CLOSE(10)
             INQUIRE (DIRECTORY=TRIM(ID%ID)//'/results', EXIST=ex)
             IF (.NOT.ex) M=SYSTEM('mkdir '//TRIM(ID%ID)//'/results')
         END SUBROUTINE ReadTMesh
-!       --- 
+!       ---
         SUBROUTINE DeleteTMesh(Mesh)
         IMPLICIT NONE
         TYPE(TMesh) :: Mesh
         DEALLOCATE(Mesh%X,Mesh%N,Mesh%P,Mesh%XM,Mesh%A,Mesh%cPanel,Mesh%LastPanel,Mesh%CG)
-        END SUBROUTINE DeleteTMesh  
+        END SUBROUTINE DeleteTMesh
 !       ---
     END MODULE MMesh
-!   ---    
+!   ---
 SUBROUTINE CrossProduct(U,V,W)
   IMPLICIT NONE
   REAL,DIMENSION(3) :: U,V,W

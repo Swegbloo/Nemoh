@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -17,14 +16,14 @@
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 !   Contributors list:
-!   - R. Kurnia 
+!   - R. Kurnia
 !
 !--------------------------------------------------------------------------------------
 
 MODULE MLogFile
-        
+
   IMPLICIT NONE
-  
+
   PUBLIC       ::  WRITE_LOGFILE,START_RECORD_TIME
   !  CPU TIME
   INTEGER,parameter, public  :: IdAppend=1      !Append writing to a file
@@ -58,24 +57,24 @@ CONTAINS
 
         CALL CPU_TIME(tcpu_start)
         CALL DATE_AND_TIME(VALUES=DATETIMEVAL)
-  
+
         CALL WRITE_LOGFILE(logfile,' STARTING TIME:',FlagW,IdprintTerm)
         WRITE(textToBeWritten,*)  ' Date: ',DATETIMEVAL(3),'-',DATETIMEVAL(2),'-',DATETIMEVAL(1)
         CALL WRITE_LOGFILE(logfile,TRIM(textToBeWritten),IDAppend,IdprintTerm)
         WRITE(textToBeWritten,*) ' Time: ',DATETIMEVAL(5),':',DATETIMEVAL(6),':',DATETIMEVAL(7)
         CALL WRITE_LOGFILE(logfile,TRIM(textToBeWritten),IDAppend,IdprintTerm)
-  END SUBROUTINE        
-  
+  END SUBROUTINE
+
   SUBROUTINE END_RECORD_TIME(tcpu_start,logfile)
         CHARACTER(LEN=*) logfile
         INTEGER,DIMENSION(8)    :: DATETIMEVAL
         CHARACTER(LEN=1000)     :: textToBeWritten
         INTEGER                 :: FlagW
         REAL                    :: tcpu_start,tcpu_finish,comptime
-        
+
         CALL CPU_TIME(tcpu_finish)
         comptime=tcpu_finish-tcpu_start
         WRITE(textToBeWritten,*) 'Computation time', comptime, ' [s]'
         CALL WRITE_LOGFILE(logfile,TRIM(textToBeWritten),IDAppend,IdprintTerm)
-  END SUBROUTINE      
+  END SUBROUTINE
 END MODULE

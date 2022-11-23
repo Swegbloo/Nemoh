@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -20,10 +19,9 @@
 !   - G. Delhommeau
 !   - P. Guével
 !   - J.C. Daubisse
-!   - J. Singh 
-!   - A. Babarit 
-!   2022 02 10
-!   R. Kurnia, added LU decomp and GMRES solver
+!   - J. Singh
+!   - A. Babarit
+!   - R. Kurnia (2022), added LU decomp and GMRES solver
 !
 !--------------------------------------------------------------------------------------
 MODULE M_SOLVER
@@ -45,42 +43,42 @@ MODULE M_SOLVER
     CHARACTER(20) :: SNAME
   END TYPE TSolver
 
- 
+
   CONTAINS
 
   !---------------------------------------------------------------------------!
 
   SUBROUTINE ReadTSolver(SolverOpt,wd)
-  
+
    TYPE(TSolver) :: SolverOpt
    CHARACTER(LEN=*) :: wd
-   CHARACTER(20) :: SOLVER_NAME 
+   CHARACTER(20) :: SOLVER_NAME
    INTEGER       :: NPGQ
    OPEN(10,file=wd//'/input_solver.txt',form='formatted',status='old')
    READ(10,*) NPGQ
    READ(10,*) SolverOpt%eps_zmin
-   READ(10,*) SolverOpt%ID 
+   READ(10,*) SolverOpt%ID
    IF (SolverOpt%ID == ID_GMRES) READ(10,*) SolverOpt%mRestart, SolverOpt%Tolerance, SolverOpt%MaxIter
-   CLOSE(10)    
+   CLOSE(10)
    IF (NPGQ<1 .OR. NPGQ>4) THEN
            WRITE(*,*) ''
            WRITE(*,*) 'Specify N in input_solver.txt for Gauss Quadrature with N in (1,4)'
        STOP
    END IF
    SolverOpt%NP_GQ=NPGQ**2
-   
+
    IF (SolverOpt%ID == ID_GAUSS ) THEN
             SolverOpt%SNAME='GAUSS ELIMINATION'
    ELSE IF (SolverOpt%ID == ID_LU) THEN
             SolverOpt%SNAME='LU DECOMPOSITION'
-   ELSE 
+   ELSE
             SolverOpt%SNAME='GMRES'
             IF (SolverOpt%mRestart < 1) THEN
                     WRITE(*,*) 'Specify in input_solver.txt, the restart parameter for GMRES, m>0 and m<Npanels'
                     STOP
             END IF
     END IF
-  
+
   END SUBROUTINE
 
   SUBROUTINE GAUSSZ(A,N, Ainv)
@@ -112,13 +110,13 @@ MODULE M_SOLVER
       DO I = J+1, N
         IF ((ABS(WS(K, J))-ABS(WS(I, J))) <= 0.0) K = I
       END DO
-      IF (K <= J) THEN 
+      IF (K <= J) THEN
         DO L = J, 2*N
           C = WS(J, L)
           WS(J, L) = WS(K, L)
           WS(K, L) = C
         END DO
-      ELSE 
+      ELSE
         IF (ABS(WS(J, J)) <= EPS) THEN
           WRITE(*, '(A,E16.6)') 'PIVOT INFERIEUR A ', EPS
           STOP
@@ -131,7 +129,7 @@ MODULE M_SOLVER
         END DO
       END DO
     END DO
-    IF (ABS(WS(N, N)) < EPS) THEN 
+    IF (ABS(WS(N, N)) < EPS) THEN
       WRITE(*, '(A,E16.6)') 'PIVOT INFERIEUR A ', EPS
       STOP
     END IF
@@ -143,7 +141,7 @@ MODULE M_SOLVER
         END DO
       END DO
     END DO
-   
+
     ! Extract output
      Ainv(:, :) = WS(:, N+1:2*N)
      DEALLOCATE(WS)
@@ -162,19 +160,19 @@ MODULE M_SOLVER
     INTEGER:: I,J,INFO,ID_DP
     INTEGER, DIMENSION(N)    :: IPIV
     COMPLEX, DIMENSION(N)    :: WORK  ! work array for LAPACK
-    
+
     CALL CHECK_DOUBLE_PRECISION(ID_DP)
-    
+
     !Initialization
     Ainv(:,:)=A
-    
+
     ! ZGETRF is for complex double variable, use CGETRF for complex variable
     ! Note that all of variables in this codes are defined as complex/ real (single precision)
     ! but in the compile process,it is forced to be double precision with '-r8', see the makefile
     ! if the -r8 is removed, then CGETRF and CGETRI must be used.
     ! ZGETRF computes an LU factorization of a general M-by-N matrix A
     ! using partial pivoting with row interchanges.
-    
+
     IF (ID_DP.EQ.1) THEN
       CALL ZGETRF(N,N,Ainv,N,IPIV,INFO) !LAPACK function
     ELSE
@@ -188,35 +186,35 @@ MODULE M_SOLVER
     ! ZGETRI is for complex double variable, use CGETRI for complex variable
     ! ZGETRI computes the inverse of a matrix using the LU factorization
     ! computed by ZGETRF.
-     
+
     IF (ID_DP.EQ.1) THEN
     call ZGETRI(N, Ainv, N, IPIV, WORK, N, info)
     ELSE
     call CGETRI(N, Ainv, N, IPIV, WORK, N, info)
     END IF
-    
+
     IF (INFO /= 0) THEN
          STOP 'Matrix inversion failed!'
     END IF
 
     RETURN
-       
+
     END SUBROUTINE
- 
+
     SUBROUTINE LU_SOLVER(A,B,SOL,M,N,NRHS)
     !INPUT
     INTEGER,                       INTENT(IN)   :: M,N,NRHS
     COMPLEX, DIMENSION(M, N),      INTENT(IN)   :: A
     COMPLEX, DIMENSION(M,NRHS),    INTENT(IN)   :: B
-    
+
     !OUTPUT
     COMPLEX, DIMENSION(M,NRHS),    INTENT(OUT)   :: SOL
-   
+
     !Local
     INTEGER:: I,J,INFO,ID_DP,LDA,LDB
     COMPLEX, ALLOCATABLE,DIMENSION(:,:)  :: Ainout,Binout
     INTEGER, ALLOCATABLE,DIMENSION(:)    :: IPIV
-    
+
     CALL CHECK_DOUBLE_PRECISION(ID_DP)
 
     LDA=MAX(1,M)
@@ -225,28 +223,28 @@ MODULE M_SOLVER
     !Initialization
     Ainout(1:M,1:N)=A
     Binout(1:M,1:NRHS)=B
-    
+
     ! ZGETRF is for complex double variable, use CGETRF for complex variable
     ! Note that all of variables in this codes are defined as complex/ real (single precision)
     ! but in the compile process,it is forced to be double precision with '-r8', see the makefile
     ! if the -r8 is removed, then CGETRF and CGETRI must be used.
     ! ZGETRF computes an LU factorization of a general M-by-N matrix A
     ! using partial pivoting with row interchanges.
-    
+
     IF (ID_DP.EQ.1) THEN
       CALL ZGETRF(M,N,Ainout,LDA,IPIV,INFO) !LAPACK function
     ELSE
       CALL CGETRF(M,N,Ainout,LDA,IPIV,INFO) !LAPACK function
     END IF
- 
+
     IF (INFO /= 0) THEN
      stop 'Matrix is numerically singular!'
     END IF
- 
+
     ! ZGETRS is for complex double variable, use CGETRI for complex variable
     ! ZGETRS solves the lineary system using the LU factorization
     ! computed by ZGETRF.
-     
+
       IF (ID_DP.EQ.1) THEN
       call ZGETRS('N',M, NRHS, Ainout, LDA, IPIV, Binout, LDB, info)
       ELSE
@@ -258,9 +256,9 @@ MODULE M_SOLVER
     SOL(:,:)=Binout(:,:)
     DEALLOCATE(Ainout,Binout,IPIV)
     RETURN
-       
+
     END SUBROUTINE
-  
+
 
     SUBROUTINE GMRES_SOLVER(A,B,ZOL_GMRES,nD,SolverOpt)
     ! Input
@@ -270,10 +268,10 @@ MODULE M_SOLVER
     Type(TSolver),              INTENT(IN)   :: SolverOpt
     ! Output
     COMPLEX, DIMENSION(nD),     INTENT(OUT)  :: ZOL_GMRES
-   
+
     INTEGER ID_DP
 
-    !   For GMRES variables and parameters   
+    !   For GMRES variables and parameters
     integer mD  ! dimension for othonormal basis mD, and the matrix size nD x nD
     integer i,j,lda, lwork, ldstrt
     integer revcom, colx, coly, colz, nbscal
@@ -285,9 +283,9 @@ MODULE M_SOLVER
     real  cntl(5), rinfo(2)
     complex ZERO, ONE
     parameter (ZERO = (0.0e0, 0.0e0), ONE = (1.0e0, 0.0e0))
-   
+
     CALL CHECK_DOUBLE_PRECISION(ID_DP)
-    
+
     mD=SolverOpt%mRestart
 
     lda=nD
@@ -307,7 +305,7 @@ MODULE M_SOLVER
     !*****************************************
     !** Reverse communication implementation
     !*
-    
+
     !*******************************************************
     !** Initialize the control parameters to default value
     !*******************************************************
@@ -338,7 +336,7 @@ MODULE M_SOLVER
           icntl(8) = 1
     !****************************************
     !*
-    
+
     IF (ID_DP.EQ.1) THEN
     10     call drive_zgmres(nD,nD,mD,lwork,work,irc,icntl,cntl,info,rinfo)
                    revcom = irc(1)
@@ -356,14 +354,14 @@ MODULE M_SOLVER
             ELSE IF (revcom.eq.precondLeft) then
             !* perform the left preconditioning
             !*         work(colz) <-- M^{-1} * work(colx)
-            
+
                      call zcopy(nD,work(colx),1,work(colz),1)
                      call ztrsm('L','L','N','N',nD,1,ONE,A,lda,work(colz),nD)
                      goto 10
             !*
             ELSE IF (revcom.eq.precondRight) then
             !* perform the right preconditioning
-                     
+
                      call zcopy(nD,work(colx),1,work(colz),1)
                      call ztrsm('L','U','N','N',nD,1,ONE,A,lda,work(colz),nD)
                      goto 10
@@ -372,7 +370,7 @@ MODULE M_SOLVER
             !*      perform the scalar product
             !*      work(colz) <-- work(colx) work(coly)
             !*
-            
+
                      call zgemv('C',nD,nbscal,ONE,work(colx),nD,work(coly),1,ZERO,work(colz),1)
                      goto 10
             END IF
@@ -393,14 +391,14 @@ MODULE M_SOLVER
             ELSE IF (revcom.eq.precondLeft) then
             !* perform the left preconditioning
             !*         work(colz) <-- M^{-1} * work(colx)
-            
+
                      call ccopy(nD,work(colx),1,work(colz),1)
                      call ctrsm('L','L','N','N',nD,1,ONE,A,lda,work(colz),nD)
                      goto 12
             !*
             ELSE IF (revcom.eq.precondRight) then
             !* perform the right preconditioning
-                     
+
                      call ccopy(nD,work(colx),1,work(colz),1)
                      call ctrsm('L','U','N','N',nD,1,ONE,A,lda,work(colz),nD)
                      goto 12
@@ -409,7 +407,7 @@ MODULE M_SOLVER
             !*      perform the scalar product
             !*      work(colz) <-- work(colx) work(coly)
             !*
-            
+
                      call cgemv('C',nD,nbscal,ONE,work(colx),nD,work(coly),1,ZERO,work(colz),1)
                      goto 12
             END IF
@@ -442,7 +440,7 @@ MODULE M_SOLVER
 !*******************************
        deallocate(work)
     END SUBROUTINE
-       
+
     SUBROUTINE CHECK_DOUBLE_PRECISION(ID_DP)
     INTEGER ID_DP
     REAL testREAL
@@ -450,10 +448,10 @@ MODULE M_SOLVER
     IF (KIND(testREAL)==KIND(1.d0)) THEN
         ID_DP=1
     ELSE
-        ID_DP=0        
+        ID_DP=0
     END IF
     !    print*,'ID_DP=', ID_DP, '      '
     RETURN
     END SUBROUTINE
 
-END MODULE 
+END MODULE

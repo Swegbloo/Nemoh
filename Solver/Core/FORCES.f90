@@ -1,8 +1,6 @@
 !--------------------------------------------------------------------------------------
-! NEMOH Solver
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -17,9 +15,15 @@
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !--------------------------------------------------------------------------------------
+!
+! NEMOH Solver
+! Deduce from the potential the forces on the floating body (for the diffraction problems)
+! and the added mass and damping (for the radiation problem).
+!
+!--------------------------------------------------------------------------------------
+
 MODULE FORCES
-  ! Deduce from the potential the forces on the floating body (for the diffraction problems)
-  ! and the added mass and damping (for the radiation problem).
+
 
   USE Constants
   USE MMesh,     ONLY: TMesh

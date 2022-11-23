@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -17,14 +16,14 @@
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 !   Contributors list:
-!   - A. Babarit  
+!   - A. Babarit
 !
 !--------------------------------------------------------------------------------------
 MODULE MEnvironment
 
   USE Elementary_functions, ONLY: CIH, SIH,X0,CIH_Vect,SIH_Vect
 
-  IMPLICIT NONE  
+  IMPLICIT NONE
 
   ! Definition of TYPE Environment
   TYPE TEnvironment
@@ -36,8 +35,8 @@ MODULE MEnvironment
 
 CONTAINS
 
-  SUBROUTINE ReadTEnvironment(Environment, file) 
-    ! Read Environment data from file 
+  SUBROUTINE ReadTEnvironment(Environment, file)
+    ! Read Environment data from file
 
     CHARACTER(LEN=*),   INTENT(IN)  :: file
     TYPE(TEnvironment), INTENT(OUT) :: Environment
@@ -50,7 +49,7 @@ CONTAINS
     READ(u,*) Environment%G
     READ(u,*) Environment%Depth
     READ(u,*) Environment%Xeff, Environment%Yeff
-    CLOSE(u)    
+    CLOSE(u)
 
   END SUBROUTINE
 
@@ -95,8 +94,8 @@ CONTAINS
       IF (Nite.GE.Nitemx) THEN
         WRITE(*,*) 'Error: unable to find the wavenumber'
         STOP
-      END IF  
-      Wavenumber=xc/Environment%Depth    
+      END IF
+      Wavenumber=xc/Environment%Depth
     END IF
   END FUNCTION Wavenumber
 
@@ -185,7 +184,7 @@ CONTAINS
     NPTOT=Npanels+NP_Add
     XM_ALL(1:Npanels,:)=XM
     IF (NP_Add>0)  THEN
-    XM_ALL(Npanels+1:NPanels+NP_Add,:)=XM_Add  
+    XM_ALL(Npanels+1:NPanels+NP_Add,:)=XM_Add
     ENDIF
     QZ=CIH_Vect(k,XM_ALL(:,3),Environment%Depth,Npanels+NP_Add)
     dzQZ=k*SIH_Vect(k,XM_ALL(:,3),Environment%Depth,Npanels+NP_Add)
@@ -206,4 +205,4 @@ CONTAINS
 
   END SUBROUTINE COMPUTE_INC_POTENTIAL_VELOCITY
 
-END MODULE 
+END MODULE

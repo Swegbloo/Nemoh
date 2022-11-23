@@ -1,11 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!   NEMOH V1.0 - preProcessor - January 2014
-!
-!--------------------------------------------------------------------------------------
-!
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -21,8 +16,12 @@
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 !   Contributors list:
-!   - A. Babarit  
+!   - A. Babarit
 !   - R. Kurnia
+!--------------------------------------------------------------------------------------
+!
+!   NEMOH V1.0 - preProcessor - January 2014
+!
 !--------------------------------------------------------------------------------------
 !
     PROGRAM Main
@@ -40,8 +39,8 @@
 !
     TYPE(TID) :: ID                     ! Calculation identification data
     TYPE(TMesh) :: Mesh                 ! Mesh data
-    TYPE(TEnvironment) :: Environment   ! Environment data  
-    TYPE(TNemCal)      :: inpNEMOHCAL 
+    TYPE(TEnvironment) :: Environment   ! Environment data
+    TYPE(TNemCal)      :: inpNEMOHCAL
 !   Wave frequencies
     INTEGER :: Nw
     REAL :: wmin,wmax
@@ -59,9 +58,9 @@
     INTEGER :: Switch_Potential
     INTEGER :: Nintegration
     REAL,DIMENSION(:),ALLOCATABLE :: NDS
-    REAL,DIMENSION(:,:),ALLOCATABLE :: FNDS 
+    REAL,DIMENSION(:,:),ALLOCATABLE :: FNDS
 !   Froude Krylov forces
-    COMPLEX,DIMENSION(:,:,:),ALLOCATABLE :: FKforce 
+    COMPLEX,DIMENSION(:,:,:),ALLOCATABLE :: FKforce
     REAL,DIMENSION(4,3) :: P
     INTEGER  :: IMN,jj
     REAL :: ZMN
@@ -82,7 +81,7 @@
 !   --- Initialize and read input datas ----------------------------------------------------------------------------------------
 !
     CALL ReadTID(ID)
-    CALL ReadTMesh(Mesh,ID) 
+    CALL ReadTMesh(Mesh,ID)
     CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
 !   ----------- passing inputs ------------------------------------------
     Environment =InpNEMOHCAL%Env
@@ -101,7 +100,7 @@
     END IF
     IF (InpNEMOHCAL%waveinput%FreqType==IdFreqHz) w(:)=2*PI*w(:)
     IF (InpNEMOHCAL%waveinput%FreqType==IdPeriod) w(:)=2*PI/w(:)
-    
+
     Nbeta          =InpNEMOHCAL%waveinput%NBeta
     betamin        =InpNEMOHCAL%waveinput%Beta1
     betamax        =InpNEMOHCAL%waveinput%Beta2
@@ -151,7 +150,7 @@
     ALLOCATE(FNDS(Nintegration,Mesh%Npanels*2**Mesh%Isym))
     ALLOCATE(NDS(Mesh%Npanels*2**Mesh%Isym))
     indsum=1
-    DO IdBody=1,InpNEMOHCAL%Nbodies 
+    DO IdBody=1,InpNEMOHCAL%Nbodies
         DO IdMode=1,InpNEMOHCAL%bodyinput(IdBody)%NIntegration
         CALL ComputeNDS(Mesh,IdBody,InpNEMOHCAL%bodyinput(IdBody)%IntCase(IdMode)%ICase,&
                 InpNEMOHCAL%bodyinput(IdBody)%IntCase(IdMode)%Direction(1:3),           &
@@ -181,17 +180,17 @@
             CALL ComputeDiffractionCondition(Mesh,w(i),Beta(j),Environment,PRESSURE,NVEL)
             DO c=1,Mesh%Npanels*2**Mesh%Isym
                 NormalVelocity(c,j+(i-1)*(Nbeta+Nradiation))=NVEL(c)
-            END DO 
+            END DO
 !           Calculate the corresponding FK forces
             DO k=1,Nintegration
                 FKForce(i,j,k)=0.
                 DO c=1,Mesh%nPanels*2**Mesh%Isym
-                    FKForce(i,j,k)=FKForce(i,j,k)-PRESSURE(c)*FNDS(k,c)   
+                    FKForce(i,j,k)=FKForce(i,j,k)-PRESSURE(c)*FNDS(k,c)
                 END DO
             END DO
         END DO
         indsum=1
-        DO IdBody=1,InpNEMOHCAL%Nbodies 
+        DO IdBody=1,InpNEMOHCAL%Nbodies
                 DO IdMode=1,InpNEMOHCAL%bodyinput(IdBody)%NRadiation
                 CALL ComputeRadiationCondition(Mesh,IdBody,                     &
                         InpNEMOHCAL%bodyinput(IdBody)%RadCase(IdMode)%ICase,         &
@@ -199,12 +198,12 @@
                         InpNEMOHCAL%bodyinput(IdBody)%RadCase(IdMode)%Axis(1:3),NVEL)
                      DO c=1,Mesh%Npanels*2**Mesh%Isym
                         NormalVelocity(c,indsum+Nbeta+(i-1)*(Nbeta+Nradiation))=NVEL(c)
-                     END DO 
+                     END DO
                 indsum=indsum+1
                 END DO
         END DO
     END DO
-    CLOSE(11)        
+    CLOSE(11)
     DEALLOCATE(PRESSURE,NVEL,FNDS)
 !
 !   --- Save body conditions ----------------------------------------------------------------------------------------
@@ -222,7 +221,7 @@
     DO c=1,Mesh%Npanels*2**Mesh%Isym
         WRITE(11,*) (REAL(NormalVelocity(c,j)),IMAG(NormalVelocity(c,j)),j=1,(Nbeta+Nradiation)*Nw)
     END DO
-    CLOSE(11)        
+    CLOSE(11)
     DEALLOCATE(NormalVelocity)
 !
 !   --- Save FK forces ----------------------------------------------------------------------------------------
@@ -230,7 +229,7 @@
     OPEN(10,FILE=TRIM(ID%ID)//'/results/FKForce.tec')
     WRITE(10,'(A)') 'VARIABLES="w (rad/s)"'
     indsum=1
-    DO IdBody=1,InpNEMOHCAL%Nbodies 
+    DO IdBody=1,InpNEMOHCAL%Nbodies
         DO IdMode=1,InpNEMOHCAL%bodyinput(IdBody)%NIntegration
         WRITE(10,'(A,I4,I4,A,I4,I4,A)') '"abs(F',IdBody,indsum,')" "angle(F',IdBody,indsum,')"'
         indsum=indsum+1
@@ -245,7 +244,7 @@
     CLOSE(10)
     OPEN(10,FILE=TRIM(ID%ID)//'/results/FKForce.dat')
     DO k=1,Nintegration
-        WRITE(10,*) ((ABS(FKForce(i,c,k)),ATAN2(IMAG(FKForce(i,c,k)),REAL(FKForce(i,c,k))),c=1,Nbeta),(0.*c,0.*c,c=1,Nradiation),i=1,Nw) 
+        WRITE(10,*) ((ABS(FKForce(i,c,k)),ATAN2(IMAG(FKForce(i,c,k)),REAL(FKForce(i,c,k))),c=1,Nbeta),(0.*c,0.*c,c=1,Nradiation),i=1,Nw)
     END DO
     CLOSE(10)
     DEALLOCATE(FKForce)
@@ -258,18 +257,18 @@
         DO j=1,Ny
             WRITE(11,'(3(X,E14.7))') -0.5*Lx+Lx*(i-1)/(Nx-1),-0.5*Ly+Ly*(j-1)/(Ny-1),0.
         END DO
-    END DO  
+    END DO
     DO i=1,Nx-1
         DO j=1,Ny-1
             WRITE(11,'(4(X,I7))') j+(i-1)*Ny,j+1+(i-1)*Ny,j+1+i*Ny,j+i*Ny
         END DO
-    END DO 
+    END DO
     CLOSE(11)
 !
 !   --- Generate Kochin file ----------------------------------------------------------------------------------------
 !
     OPEN(11,FILE=TRIM(ID%ID)//'/mesh/Kochin.dat')
-    WRITE(11,*) NTheta    
+    WRITE(11,*) NTheta
     IF (Ntheta.GT.0) THEN
         IF (NTheta.GT.1) THEN
             DO j=1,NTheta
@@ -280,14 +279,14 @@
         END IF
     END IF
     CLOSE(11)
-!   
+!
 !   --- Save index of cases ----------------------------------------------------------------------------------------------
 !
     OPEN(10,FILE=TRIM(ID%ID)//'/results/index.dat')
     WRITE(10,*) Nw,Nbeta,Nradiation,Nintegration,Ntheta
     WRITE(10,*) '--- Force ---'
     indsum=1
-    DO IdBody=1,InpNEMOHCAL%Nbodies 
+    DO IdBody=1,InpNEMOHCAL%Nbodies
         DO IdMode=1,InpNEMOHCAL%bodyinput(IdBody)%NIntegration
         WRITE(10,*) indsum,IdBody,IdMode
         indsum=indsum+1
@@ -295,7 +294,7 @@
     END DO
     WRITE(10,*) '--- Motion ---'
     indsum=1
-    DO IdBody=1,InpNEMOHCAL%Nbodies 
+    DO IdBody=1,InpNEMOHCAL%Nbodies
         DO IdMode=1,InpNEMOHCAL%bodyinput(IdBody)%NRadiation
         WRITE(10,*) indsum,IdBody,IdMode
         indsum=indsum+1
@@ -308,8 +307,8 @@
     CLOSE(10)
 !
 !   --- Finalize ----------------------------------------------------------------------------------------------------
-! 
-    DEALLOCATE(w,Beta) 
+!
+    DEALLOCATE(w,Beta)
     DO IdBody=1,InpNEMOHCAL%Nbodies
       DEALLOCATE(inpNEMOHCAL%bodyinput(IdBody)%RadCase)
       DEALLOCATE(inpNEMOHCAL%bodyinput(IdBody)%IntCase)

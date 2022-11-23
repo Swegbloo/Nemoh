@@ -1,8 +1,6 @@
 !--------------------------------------------------------------------------------------
-! NEMOH Solver
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -17,8 +15,12 @@
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !--------------------------------------------------------------------------------------
+!
+! NEMOH Solver
+! Compute the first part (independant of frequency) of the Green function.
+!
+!--------------------------------------------------------------------------------------
 MODULE GREEN_1
-  ! Compute the first part (independant of frequency) of the Green function.
 
   USE Constants
   USE MMesh
@@ -67,9 +69,9 @@ CONTAINS
       ! The contribution of the reflected problem is added to the solution of the original problem to ensure
       ! that (∇φ)_z=0 at the sea bottom.
     END IF
-    
 
-    CALL VFace_to_Face(VFace,Face,J) !Extract a face J from the VFace array 
+
+    CALL VFace_to_Face(VFace,Face,J) !Extract a face J from the VFace array
 
     XI(:) = X0I(:)
     IF (I>0) XI(3) = MIN(X0I(3), -eps_zmin*Mesh%xy_diameter) ! on body panels
@@ -82,7 +84,7 @@ CONTAINS
         ! print*,Face%N(1),Face%N(2),Face%N(3)
         ! print*,VS0(1),VS0(2),VS0(3)
          VS0(:) = VS0(:) -2*PI*Face%N(:)
-      ENDIF 
+      ENDIF
     END IF
 
     ! Reflected problem across the free surface/sea bottom.
@@ -104,7 +106,7 @@ CONTAINS
       VSP(:) = -VS0(:) - MK*VS1(:)
       FSM    = -S0     - MK*S1
       VSM(:) = -VS0(:) - MK*VS1(:)
-      
+
       !... and do some more.
 
       ! Reflected problem across the symmetry plane (xOz)
@@ -112,7 +114,7 @@ CONTAINS
       XI(:) = X0I(:)
       XI(2) = -X0I(2)
       IF (I>0) XI(3) = MIN(X0I(3), -eps_zmin*Mesh%xy_diameter) ! on body panels
-      
+
       CALL COMPUTE_S0(XI, Face, S0, VS0)
       VS0(2) = -VS0(2)
 

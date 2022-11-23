@@ -1,11 +1,5 @@
 !--------------------------------------------------------------------------------------
-!
-!   NEMOH2 - second order (QTF) - Postprocessing module
-!   MAIN PROGRAM
-!   Description:  producing QTF output as the WAMIT QTF output format
-!-----------------------------------------------------------------------------------
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -19,9 +13,15 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!-------------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------------
 !   Contributors list:
 !    - Ruddy Kurnia (ECN)
+!--------------------------------------------------------------------------------------
+!
+!   NEMOH2 - second order (QTF) - Postprocessing module
+!   MAIN PROGRAM
+!   Description:  producing QTF output as the WAMIT QTF output format
+!
 !--------------------------------------------------------------------------------------
 PROGRAM Main
 !       Used modules

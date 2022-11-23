@@ -1,8 +1,29 @@
+%--------------------------------------------------------------------------------------
+%
+%    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
+%
+%    This program is free software: you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation, either version 3 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+%   Contributors list:
+%   - A. Babarit
+%
+%--------------------------------------------------------------------------------------
 % 
 % --> function [Mass,Inertia,KH,XB,YB,ZB]=Mesh(nBodies,n,X,tX,CG,nfobj)
 %
 % Purpose : Mesh generation of a symmetric body for use with Nemoh. Because
-%           of symmetry, only half of the body must be described. 
+%           of symmetry, only half of the body must be described.
 %
 % Inputs : description of body surface in large panels
 %   - nBodies           : number of bodies
@@ -138,7 +159,7 @@ for c=1:nBodies
     end;
     ligne=fgetl(fid);
     ligne=fgetl(fid);
-    for i=1:nf(c)    
+    for i=1:nf(c)
         ligne=fscanf(fid,'%g %g',6);
         xu(i)=ligne(1);
         yv(i)=ligne(2);
@@ -154,7 +175,7 @@ for c=1:nBodies
     quiver3(xu,yv,zw,u,v,w);
     title('Mesh for Nemoh');
     fid=fopen([nomrep,filesep,'mesh',filesep,'KH.dat'],'r');
-    for i=1:6   
+    for i=1:6
         ligne=fscanf(fid,'%g %g',6);
         KH(c,i,:)=ligne;
     end;
@@ -200,7 +221,7 @@ fprintf(fid,'--- Description of floating bodies --------------------------------
 fprintf(fid,'%g				! Number of bodies\n',nBodies);
 for c=1:nBodies
     fprintf(fid,'--- Body %g -----------------------------------------------------------------------------------------------------------------------\n',c);
-    if isunix 
+    if isunix
         fprintf(fid,['''',nomrep,filesep,'mesh',filesep,'mesh',int2str(c),'.dat''		! Name of mesh file\n']);
     else
         fprintf(fid,[nomrep,'\\mesh\\mesh',int2str(c),'.dat      ! Name of mesh file\n']);
@@ -229,7 +250,7 @@ fprintf(fid,'--- Post processing -----------------------------------------------
 fprintf(fid,'1	0.1	10.		! IRF 				! IRF calculation (0 for no calculation), time step and duration\n');
 fprintf(fid,'0				! Show pressure\n');
 fprintf(fid,'0	0.	180.		! Kochin function 		! Number of directions of calculation (0 for no calculations), Min and Max (degrees)\n');
-fprintf(fid,'0	50	400.	400.	! Free surface elevation 	! Number of points in x direction (0 for no calcutions) and y direction and dimensions of domain in x and y direction\n');	
+fprintf(fid,'0	50	400.	400.	! Free surface elevation 	! Number of points in x direction (0 for no calcutions) and y direction and dimensions of domain in x and y direction\n');
 fprintf(fid,'---')
 status=fclose(fid);
 fclose('all');

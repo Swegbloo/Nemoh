@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -17,7 +16,7 @@
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 !   Contributors list:
-!   - A. Babarit  
+!   - A. Babarit
 !
 !--------------------------------------------------------------------------------------
 !
@@ -152,7 +151,7 @@ SUBROUTINE coque(X,Y,Z,NP,facettes,NF,Deplacement,Icoque,Gcoque,CG,Nsym,rho)
 	END DO
 	IF (Nsym.EQ.1) THEN
 	    Icoque(1,2)=0.
-	    Icoque(2,3)=0.    
+	    Icoque(2,3)=0.
 	END IF
 	!
 	Icoque(2,1)=Icoque(1,2)
@@ -161,4 +160,3 @@ SUBROUTINE coque(X,Y,Z,NP,facettes,NF,Deplacement,Icoque,Gcoque,CG,Nsym,rho)
   RETURN
 
 END SUBROUTINE
-  

@@ -1,6 +1,5 @@
 !--------------------------------------------------------------------------------------
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -23,7 +22,7 @@ MODULE MCallInterp
 
 USE linear_interpolation_module
 
-IMPLICIT NONE 
+IMPLICIT NONE
 
 CONTAINS
 
@@ -33,7 +32,7 @@ CONTAINS
    REAL,DIMENSION(NXOUT)          :: XOUT,VAROUT
    Type(linear_interp_1d)         :: interp1
    INTEGER                        :: iflag,I
-   
+
    CALL interp1%initialize(X,VAR,iflag)
    DO I=1,NXOUT
      CALL interp1%evaluate(XOUT(I), VAROUT(I))
@@ -63,7 +62,7 @@ CONTAINS
    REAL                           :: XOUT,VAROUT
    Type(linear_interp_1d)         :: interp1
    INTEGER                        :: iflag,I
-   
+
    CALL interp1%initialize(X,VAR,iflag)
    CALL interp1%evaluate(XOUT, VAROUT)
    CALL interp1%destroy()

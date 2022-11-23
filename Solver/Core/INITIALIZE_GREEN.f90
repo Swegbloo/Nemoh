@@ -1,8 +1,6 @@
 !--------------------------------------------------------------------------------------
-! NEMOH Solver
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -16,6 +14,10 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!--------------------------------------------------------------------------------------
+!
+! NEMOH Solver
+!
 !--------------------------------------------------------------------------------------
 MODULE M_INITIALIZE_GREEN
 
@@ -39,7 +41,7 @@ MODULE M_INITIALIZE_GREEN
   PRIVATE :: FF     ! Called by LISC
 
   INTEGER,PARAMETER       :: FLAG_IGREEN=2
-  
+
  !Init Green var
   TYPE TGREEN
      ! Independent of Omega, computed in INITIALIZE_GREEN
@@ -47,7 +49,7 @@ MODULE M_INITIALIZE_GREEN
      REAL,DIMENSION(:,:,:),ALLOCATABLE :: VSP1,VSM1  !First term gradient of the green function
      REAL,DIMENSION(:,:)  ,ALLOCATABLE :: FSP1_INF,FSM1_INF  !First term green function for infinite depth
      REAL,DIMENSION(:,:,:),ALLOCATABLE :: VSP1_INF,VSM1_INF  !First term gradient of the green function for infinite depth
-    
+
      INTEGER                           :: IR,JZ,NPINTE               !for Green2
      REAL,DIMENSION(:)    ,ALLOCATABLE :: XR,XZ                      !for Green2
      REAL,DIMENSION(:,:)  ,ALLOCATABLE :: APD1X, APD1Z, APD2X, APD2Z ! for Green2
@@ -63,14 +65,14 @@ CONTAINS
   SUBROUTINE INITIALIZE_GREEN(VFace,Mesh,Depth,XM_add,NP_add,eps_zmin,IGreen)
 
   !INPUT/OUTPUT
-  TYPE(TVFace),                 INTENT(IN)  :: VFace         
+  TYPE(TVFace),                 INTENT(IN)  :: VFace
   TYPE(TMesh),                  INTENT(IN)  :: Mesh
   REAL,                         INTENT(IN)  :: Depth
   INTEGER,                      INTENT(IN)  :: NP_add !addition calc point
   REAL,DIMENSION(NP_add,3),     INTENT(IN)  :: XM_add !ie on waterline
                                                       !used in QPreprocessor
   REAL,                         INTENT(IN)  :: eps_zmin! factor for minimum z
-  TYPE(TGREEN),                 INTENT(OUT) :: IGreen  
+  TYPE(TGREEN),                 INTENT(OUT) :: IGreen
 
   !LOCAL
   INTEGER       :: I,J
@@ -82,10 +84,10 @@ CONTAINS
   ELSE
   IGREEN%IR=676
   IGREEN%JZ=124
-  ENDIF  
+  ENDIF
   IGREEN%NPINTE=251
   IGREEN%EPS_ZMIN=eps_zmin
-  
+
   ALLOCATE(IGREEN%FSP1(Mesh%Npanels+NP_add,Mesh%Npanels))
   ALLOCATE(IGREEN%FSM1(Mesh%Npanels+NP_add,Mesh%Npanels))
   ALLOCATE(IGREEN%VSP1(Mesh%Npanels+NP_add,Mesh%Npanels,3))
@@ -139,7 +141,7 @@ CONTAINS
     ! Thus, they are initialized only once at the beginning of the execution of the code.
     ! Other parameters are initialized in LISC below.
 
-    TYPE(TGREEN),                 INTENT(INOUT) :: IGreen  
+    TYPE(TGREEN),                 INTENT(INOUT) :: IGreen
 
     ! Local variables
     INTEGER :: I, J, K,JZ,IR,NPINTE
@@ -153,7 +155,7 @@ CONTAINS
     ALLOCATE(QQT(NPINTE),CQT(NPINTE))
        ! Initialize XZ
     DO J = 1, JZ
-      IF (FLAG_IGREEN==1) THEN 
+      IF (FLAG_IGREEN==1) THEN
         MIN_Z=-16.
         IGreen%XZ(J) = -AMIN1(10**(J/5.0-6), 10**(J/8.0-4.5), -MIN_Z)
       ELSE
@@ -233,9 +235,9 @@ CONTAINS
     ! Compute AMBDA and AR
 
     !INPUT/OUTPUT
-    TYPE(TGREEN),                 INTENT(INOUT) :: IGreen  
+    TYPE(TGREEN),                 INTENT(INOUT) :: IGreen
     REAL,                         INTENT(IN)    :: AK0,wavenumber
-   
+
     REAL, DIMENSION(31)     :: AMBDA, AR
 
     INTEGER :: I,J,NJ,NPP, NM

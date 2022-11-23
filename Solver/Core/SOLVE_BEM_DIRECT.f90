@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -23,8 +22,11 @@
 !   - J.C. Daubisse
 !   - R. Kurnia (2020)
 !--------------------------------------------------------------------------------------
+!
+! Resolution of the boundary elements problem
+!
+!--------------------------------------------------------------------------------------
 MODULE SOLVE_BEM_DIRECT
-  ! Resolution of the boundary elements problem
 
   USE Constants
   USE MMesh,              ONLY: TMesh
@@ -49,7 +51,7 @@ MODULE SOLVE_BEM_DIRECT
 
 
 CONTAINS
-  
+
   SUBROUTINE SOLVE_POTENTIAL_DIRECT              &
   ( VFace, Mesh, Env, omega, wavenumber, IGreen, &
     NVel, S,V,Vinv,ZIGB, ZIGS,Potential,SolverOpt,wd)
@@ -60,14 +62,14 @@ CONTAINS
   TYPE(TEnvironment),                             INTENT(IN)    :: Env
   REAL,                                           INTENT(IN)    :: omega, wavenumber
   TYPE(TGREEN),                                   INTENT(INOUT) :: IGreen
-  TYPE(TSolver),                                  INTENT(IN)    :: SolverOpt                             
+  TYPE(TSolver),                                  INTENT(IN)    :: SolverOpt
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(IN)    :: NVel
   COMPLEX, DIMENSION(Mesh%Npanels),               INTENT(OUT)   :: ZIGB, ZIGS ! Source distribution
   COMPLEX, DIMENSION(Mesh%Npanels,Mesh%Npanels,2**Mesh%Isym),                     &
                                                   INTENT(INOUT) :: V,S,Vinv ! Influence Coef
 
   COMPLEX, DIMENSION(Mesh%Npanels*2**Mesh%Isym),  INTENT(OUT)   :: Potential
-  
+
   INTEGER :: I, J,FLAG_CAL,ITERLID
   ! Return of GREEN_1 module
   REAL :: FSP, FSM
@@ -80,7 +82,7 @@ CONTAINS
   COMPLEX, DIMENSION(Mesh%NPanels, 2**Mesh%ISym) :: ZOL
   COMPLEX, DIMENSION(Mesh%Npanels) :: RHS ! temporary variable
   CHARACTER(LEN=*),                               INTENT(IN)  :: wd
-  
+
   ! IF (ABS(Omega) <= 1.E-4) THEN
   !   WRITE(*,*)'ABS(Omega)  = ',ABS(Omega),' < 1.E-4'
   !   STOP
@@ -141,7 +143,7 @@ CONTAINS
           ! Store into influence matrix
           S(I, J, 1) = FSP + SP                              ! Green function
           V(I, J, 1) = DOT_PRODUCT(Mesh%N(:, I), VSXP + VSP) ! Normal Gradient of the Green function
-          
+
           IF (Mesh%ISym == Y_SYMMETRY) THEN
             S(I, J, 2) = FSM + SM
             V(I, J, 2) = DOT_PRODUCT(Mesh%N(:, I), VSXM + VSM)
@@ -153,7 +155,7 @@ CONTAINS
   !=========================
   ! Solve the linear problem
   !=========================
-   IF (FLAG_CAL==1 .AND. (SolverOpt%ID .NE. ID_GMRES) ) THEN 
+   IF (FLAG_CAL==1 .AND. (SolverOpt%ID .NE. ID_GMRES) ) THEN
       ! Invert matrix V
       IF (SolverOpt%ID== ID_GAUSS) THEN
          CALL GAUSSZ(V(:,:,1),Mesh%NPanels, Vinv(:,:,1))
@@ -171,7 +173,7 @@ CONTAINS
   IF (Mesh%ISym == NO_Y_SYMMETRY) THEN
     IF (SolverOpt%ID .EQ. ID_GMRES) THEN
         CALL GMRES_SOLVER(V(:,:,1),NVEL(1:Mesh%NPanels), ZIGB(:), Mesh%NPanels,SolverOpt)
-    ELSE    
+    ELSE
         ZIGB(:) = MATMUL(Vinv(:, :,1), NVEL(1:Mesh%NPanels))
     ENDIF
         ZIGS(:) = CZERO
@@ -184,7 +186,7 @@ CONTAINS
            ZOL(:, 1)=0
         ENDIF
         RHS(:)=(NVEL(1:Mesh%NPanels) - NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2
-        IF (ANY(ABS(RHS)>0.)) THEN 
+        IF (ANY(ABS(RHS)>0.)) THEN
            CALL GMRES_SOLVER(V(:,:,2),RHS(:),ZOL(:, 2),  Mesh%NPanels,SolverOpt)
          ELSE
            ZOL(:, 2)=0
@@ -199,7 +201,7 @@ CONTAINS
       (NVEL(1:Mesh%NPanels) - NVEL(Mesh%NPanels+1:2*Mesh%NPanels))/2 &
       )
     ENDIF
-    
+
     ZIGB(:) = ZOL(:, 1) + ZOL(:, 2)
     ZIGS(:) = ZOL(:, 1) - ZOL(:, 2)
   END IF
@@ -219,7 +221,7 @@ CONTAINS
       MATMUL(S(:, :, 1) - S(:, :, 2), ZIGB(:))/2   &
       + MATMUL(S(:, :, 1) + S(:, :, 2), ZIGS(:))/2
   END IF
-  
+
   RETURN
   END SUBROUTINE
 

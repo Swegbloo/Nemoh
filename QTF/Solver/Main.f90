@@ -1,9 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!   NEMOH2 - second order (QTF) - May 2022
-!-----------------------------------------------------------------------------------
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -17,15 +14,18 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!-------------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------------
 !   Contributors list:
-!   - Gerard Delhommeau (13/11/2014, d'apres LA VERSION 1.1 d'AVRIL 1991             
+!   - Gerard Delhommeau (13/11/2014, d'apres LA VERSION 1.1 d'AVRIL 1991
 !     PROGRAMME StOK LABORATOIRE D'HYDRODYNAMIQUE NAVALE DE L'E.N.S.M. DE NANTES & SIREHNA )
-!     THESE DE CHEN XIAO-BO(1988) 
-!   - Adrien Combourieu, INNOSEA (adrien.combourieu@innosea.fr)  Version 2014 
+!     THESE DE CHEN XIAO-BO(1988)
+!   - Adrien Combourieu, INNOSEA (adrien.combourieu@innosea.fr)  Version 2014
 !   - Ruddy Kurnia (LHEEA,ECN) 2022
 !--------------------------------------------------------------------------------------
+!
+!   NEMOH2 - second order (QTF) - May 2022
 !   SOLVER
+!
 !--------------------------------------------------------------------------------------
 PROGRAM MAIN
 !
@@ -38,7 +38,7 @@ USE MReadInputFiles,    ONLY:Read_NP_GaussQuad,Read_Mechanical_Coefs,TMech,   &
                              Read_FirstOrderLoad,TLoad1,Read_Motion,TSource,  &
                              READ_POTENTIALS_VELOCITIES,TpotVel,              &
                              READ_GENERALIZED_NORMAL_BODY_dAREA,Read_Eps_Zmin,&
-                             TMeshFS,Read_Prepare_FreeSurface_Mesh        
+                             TMeshFS,Read_Prepare_FreeSurface_Mesh
 USE MEnvironment,       ONLY: TEnvironment,FunVect_inverseDispersion
 USE MLogFile
 USE Constants,          ONLY: CZERO
@@ -53,7 +53,7 @@ USE MQSolverOutputFiles !CONTAINS: OutFileDM,OutFileDP,...
 
 IMPLICIT NONE
 !
-INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved 
+INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
 !
 ! ------Declaration variables
         TYPE(TID)                       :: ID
@@ -66,15 +66,15 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
         REAL, ALLOCATABLE,DIMENSION(:)  :: w,kw,beta          ! vector of freq [rad/s],
                                                               ! wave numbers [rad/m],
                                                               ! direction angle [rad]
-        TYPE(TWLine)  :: WLine          ! Waterline 
-        TYPE(TVFace)  :: VFace          ! Face of body panel  
-        TYPE(TVFace)  :: VFaceFS        ! Face of free surface panel  
-        TYPE(TMech)   :: MechCoef       ! Mechanical Coef 
+        TYPE(TWLine)  :: WLine          ! Waterline
+        TYPE(TVFace)  :: VFace          ! Face of body panel
+        TYPE(TVFace)  :: VFaceFS        ! Face of free surface panel
+        TYPE(TMech)   :: MechCoef       ! Mechanical Coef
         TYPE(TLoad1)  :: Forces1        ! First order forces
         TYPE(TASYMP)  :: ASYMP_PARAM    ! parameters for asymptotic free surface force
-        TYPE(TSourceQ):: SOURCEDISTRQ   ! perturbion and radiation source distribution    
+        TYPE(TSourceQ):: SOURCEDISTRQ   ! perturbion and radiation source distribution
         INTEGER       :: NP_GQ          ! Number of point for Gauss Quad. Integration
-        INTEGER       :: Nintegration   ! Number of excitation force integration 
+        INTEGER       :: Nintegration   ! Number of excitation force integration
         INTEGER       :: Nradiation     ! Number of radiation problem
         INTEGER       :: Nbodies        ! Number of bodies
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:)    :: Motion       ! Complex RAO
@@ -84,12 +84,12 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
         TYPE(TPotVel)                           :: datPotVelQFS  ! data Pot & vel for QTF (FreeSurface)
 
         INTEGER                                 :: I,Ibeta1,Ibeta2,Iinteg,Ipanel,Ibeta2temp
-        INTEGER                                 :: Iw1,Iw2,IwQ 
+        INTEGER                                 :: Iw1,Iw2,IwQ
         INTEGER                                 :: NPFlow        ! Number of flow points
         INTEGER                                 :: NPFlowFS      ! Number of flow points (Free-surface)
         REAL,ALLOCATABLE,DIMENSION(:,:)         :: genNormal_dS  ! generalized Normal on panel
                                                            ! time the area of the panel
-        REAL,ALLOCATABLE,DIMENSION(:,:)         :: genNormalWLine_dGamma! generalized Normal 
+        REAL,ALLOCATABLE,DIMENSION(:,:)         :: genNormalWLine_dGamma! generalized Normal
                                                    !on wLine segment time the segm. length
         REAL,ALLOCATABLE,DIMENSION(:,:)         :: IntegAxis,StiffMat
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:,:)  :: BDisplaceQ!Body displacement
@@ -100,9 +100,9 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
         REAL                                    :: winputQ(3), BForwardSpeed,delwiter
         INTEGER                                 :: NwQ    ! Number of wave freq
         !---------
-        INTEGER                                 :: SwitchQuadHM,SwitchBiDir 
+        INTEGER                                 :: SwitchQuadHM,SwitchBiDir
         REAL                                    :: EPS_ZMIN
-        COMPLEX, ALLOCATABLE,DIMENSION(:,:,:)   :: QTF_DUOK ,QTF_HASBO   
+        COMPLEX, ALLOCATABLE,DIMENSION(:,:,:)   :: QTF_DUOK ,QTF_HASBO
         COMPLEX, ALLOCATABLE,DIMENSION(:,:,:)   :: QTF_HASFS,QTF_HASFS_ASYMP
         INTEGER                                 :: Iterm,ufile
         CHARACTER(LEN=1)                        :: strI
@@ -116,7 +116,7 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
 !
         WRITE(*,*) 'QTF Solver preparation...'
         CALL ReadTID(ID)
-        CALL ReadTMesh(Mesh,TRIM(ID%ID)//'/mesh/')  
+        CALL ReadTMesh(Mesh,TRIM(ID%ID)//'/mesh/')
         CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
         !
         QTFinputNem  =InpNEMOHCAL%qtfinput
@@ -131,15 +131,15 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
         SwitchBiDir  =InpNEMOHCAL%qtfinput%bidirection
         NwQ          =winputQ(1)
         BForwardSpeed=InpNEMOHCAL%qtfinput%body_forward_speed
-        NP_GQ        =Read_NP_GaussQuad(TRIM(ID%ID)) 
-        EPS_ZMIN     =Read_Eps_Zmin(TRIM(ID%ID)) 
+        NP_GQ        =Read_NP_GaussQuad(TRIM(ID%ID))
+        EPS_ZMIN     =Read_Eps_Zmin(TRIM(ID%ID))
         !
         CALL Prepare_FaceMesh(Mesh,NP_GQ,VFace)
         CALL Prepare_Waterline(VFace,EPS_ZMIN,Mesh%xy_diameter,Mesh%Npanels,WLine)
         !
         NPFlow   =(Mesh%Npanels+WLine%NWLineSeg)*2**Mesh%Isym !Number of flow point
         !
-!       -------------------------------------                      
+!       -------------------------------------
 !       Prepare Free-surface mesh
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
           CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID),MeshFS,QTFinputNem)
@@ -152,7 +152,7 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
         ALLOCATE(IntegAxis(3,Nintegration))
         ALLOCATE(StiffMat(Nintegration,Nintegration))
         ALLOCATE(Motion(Nw,Nradiation,Nbeta))
-              
+
         ALLOCATE(w(Nw),kw(Nw),beta(Nbeta))
         ALLOCATE(genNormal_dS(Nintegration,Mesh%Npanels*2**Mesh%Isym))
         ALLOCATE(genNormalWLine_dGamma(Nintegration,Wline%NWLineseg*2**Mesh%Isym))
@@ -165,7 +165,7 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
         ALLOCATE(QTF_HASFS(Nintegration,2,10))!2 is for QTF- and QTF+, 7 for all the terms
         ALLOCATE(QTF_HASFS_ASYMP(Nintegration,2,3))
-        ENDIF 
+        ENDIF
 
         !
         IntegAxis=IntegrationAXIS_FROM_MNEMOHCAL(InpNEMOHCAL)
@@ -177,11 +177,11 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
         CALL Read_Motion(TRIM(ID%ID),Nw,Nbeta,Nradiation,Motion)!Complex RAO
         CALL READ_POTENTIALS_VELOCITIES(TRIM(ID%ID),Nw,Nbeta,NRadiation,                 &
                 NPFlow,datPotVel,w,kw,beta,ID_BODY)
-        
+
         CALL READ_GENERALIZED_NORMAL_BODY_dAREA(TRIM(ID%ID),Mesh%Npanels*2**Mesh%Isym,   &
                                                           Nintegration,genNormal_dS)
         CALL CALC_GENERALIZED_NORMAL_WATERLINE_dSEGMENT(Mesh,Nintegration,WLine,         &
-                                                InpNEMOHCAL, genNormalWLine_dGamma)            
+                                                InpNEMOHCAL, genNormalWLine_dGamma)
         !READ Free-surface potentials and velocities
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
           CALL READ_POTENTIALS_VELOCITIES(TRIM(ID%ID),Nw,Nbeta,NRadiation,               &
@@ -189,12 +189,12 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
         ENDIF
 
         CALL Discretized_omega_wavenumber_for_QTF(Nw,w,kw,NwQ,winputQ(2:3),Nbeta,beta,   &
-                                                  BForwardSpeed,Env%depth,Env%g,Qfreq) 
-        
-        
+                                                  BForwardSpeed,Env%depth,Env%g,Qfreq)
+
+
         CALL PREPARE_POTENTIAL_VELOCITIES(Qfreq,Nw,w,Nbeta,beta,NPFlow,                  &
                 Nradiation,datPotVel,datPotVelQ,ID_BODY)
-        
+
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
          WRITE(*,*) 'QTF Solver preparation, Free-Surface mesh...'
          CALL PREPARE_POTENTIAL_VELOCITIES(Qfreq,Nw,w,Nbeta,beta,NPFlowFS,               &
@@ -214,7 +214,7 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
                                         w,Qfreq,RotAnglesQ)
         CALL PREPARE_TRANSLATION_MOTION(Motion,Nw,Nbeta,Nradiation,Nbodies,              &
                                         w,Qfreq,TransMotionQ)
-     
+
        CALL  INITIALIZE_OUTPUT_FILES(TRIM(ID%ID),InpNEMOHCAL%qtfinput%Ncontrib,ID_DEBUG)
 
        WRITE(*,*) 'QTF Solver preparation, Done!'
@@ -226,7 +226,7 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
 
         DO Ibeta1=1,Nbeta
            DO Ibeta2temp=1,Nbeta2
-                IF (SwitchBiDir==0) Ibeta2=Ibeta1 
+                IF (SwitchBiDir==0) Ibeta2=Ibeta1
                 IF (SwitchBiDir==1) Ibeta2=Ibeta2temp
 
                 WRITE(*,'(A,F8.3,A,F8.3,A)'),'beta1=', beta(Ibeta1)*180/PI,&
@@ -239,18 +239,18 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
                                 WRITE(*,'(A,F7.3,A,F7.3,A)')'w1-w2=',delwiter, ', w1+w2=', &
                                      Qfreq%wQ(Iw2,Ibeta2)+Qfreq%wQ(Iw1,Ibeta1), ' [rad/s]'
                         ENDIF
-                        
+
                         IF (Qfreq%wQ(Iw1,Ibeta1)-Qfreq%wQ(Iw2,Ibeta2).GT.1.01*delwiter) THEN
                           delwiter=Qfreq%wQ(Iw1,Ibeta1)-Qfreq%wQ(Iw2,Ibeta2)
-                          IF (Qfreq%wQ(Iw2,Ibeta2)+Qfreq%wQ(Iw1,Ibeta1).LE.w(Nw)) THEN 
+                          IF (Qfreq%wQ(Iw2,Ibeta2)+Qfreq%wQ(Iw1,Ibeta1).LE.w(Nw)) THEN
                              WRITE(*,'(A,F7.3,A,F7.3,A)'),'w1-w2=',delwiter, ', w1+w2=', &
                                      Qfreq%wQ(Iw2,Ibeta2)+Qfreq%wQ(Iw1,Ibeta1), ' [rad/s]'
                           ELSE
                             WRITE(*,'(A,F7.3,A)'),'w1-w2=',delwiter, ', w1+w2= --NA-- [rad/s]'
                           ENDIF
                         ENDIF
-                        
-                        IF (InpNEMOHCAL%qtfinput%Ncontrib.GE.1) THEN 
+
+                        IF (InpNEMOHCAL%qtfinput%Ncontrib.GE.1) THEN
                         CALL COMPUTATION_QTF_QUADRATIC(Iw1,Iw2,Ibeta1,Ibeta2,Nintegration,&
                                 Mesh,VFace,WLine,NwQ,Nbeta,NPFlow,Nbodies,Env%rho,Env%g,  &
                                 datPotVelQ,BdisplaceQ,genNormal_dS,genNormalWLine_dGamma, &
@@ -268,15 +268,15 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
                                    Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2), beta(Ibeta1),  &
                                    beta(Ibeta2),QTF_DUOK(:,:,Iterm))
                            ENDDO
-                         ENDIF 
+                         ENDIF
                         ENDIF
-                        
-                        IF (InpNEMOHCAL%qtfinput%Ncontrib.GE.2) THEN 
+
+                        IF (InpNEMOHCAL%qtfinput%Ncontrib.GE.2) THEN
                         CALL COMPUTATION_QTF_POTENTIAL_BODYFORCE(Iw1,Iw2,Ibeta1,Ibeta2,   &
                                 Nintegration,Mesh,VFace,WLine,NwQ,Nbeta,NPFlow,Nbodies,   &
                                 Env, datPotVelQ,BdisplaceQ,genNormal_dS,                  &
-                                Nw, w,Qfreq,beta,RotAnglesQ,QTF_HASBO)      
-                        
+                                Nw, w,Qfreq,beta,RotAnglesQ,QTF_HASBO)
+
                         CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHBM,OutFileHBP,Nintegration,&
                                 Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
                                 beta(Ibeta1),beta(Ibeta2), QTF_HASBO(:,:,7))
@@ -289,15 +289,15 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
                                   Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
                                   beta(Ibeta1),beta(Ibeta2),QTF_HASBO(:,:,Iterm))
                           ENDDO
-                         ENDIF 
+                         ENDIF
                         ENDIF
 
-                        IF (InpNEMOHCAL%qtfinput%Ncontrib.EQ.3) THEN 
-                        ! Finite domain Free surface force         
+                        IF (InpNEMOHCAL%qtfinput%Ncontrib.EQ.3) THEN
+                        ! Finite domain Free surface force
                         CALL COMPUTATION_QTF_POTENTIAL_FREESURFACEFORCE(Iw1,Iw2,Ibeta1,   &
                                 Ibeta2,Nintegration,MeshFS,NwQ,Nbeta,NPFlowFS,Nbodies,    &
-                                Env,datPotVelQFS,Nw,w,Qfreq,beta,QTF_HASFS)      
-                        
+                                Env,datPotVelQFS,Nw,w,Qfreq,beta,QTF_HASFS)
+
                         CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileHFSM,OutFileHFSP,          &
                                 Nintegration,Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),   &
                                 beta(Ibeta1),beta(Ibeta2), QTF_HASFS(:,:,10))
@@ -309,17 +309,17 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
                                     OutFileHFSP_term//strI//'.dat',Nintegration,              &
                                     Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
                                     beta(Ibeta1),beta(Ibeta2),QTF_HASFS(:,:,Iterm))
-                            ENDDO 
+                            ENDDO
                          ENDIF
-                        ! InFinite domain (Asymptotic) Free surface force         
+                        ! InFinite domain (Asymptotic) Free surface force
                         CALL COMPUTATION_QTF_POTENTIAL_FREESURFACEFORCE_ASYMP(Iw1,Iw2,    &
                                 Ibeta1,Ibeta2,Nintegration,NwQ,Nbeta,Env,Nw,w,Qfreq,      &
-                                beta,Mesh,ASYMP_PARAM,SOURCEDISTRQ,QTF_HASFS_ASYMP)      
+                                beta,Mesh,ASYMP_PARAM,SOURCEDISTRQ,QTF_HASFS_ASYMP)
 
                         CALL WRITE_QTF_DATA(TRIM(ID%ID),OutFileASYM,OutFileASYP,          &
                                 Nintegration,Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),   &
                                 beta(Ibeta1),beta(Ibeta2),QTF_HASFS_ASYMP(:,:,3))
-                        
+
                          IF (ID_DEBUG==1) THEN
                             DO Iterm=1,2
                             WRITE(strI,'(I0.1)') Iterm
@@ -327,14 +327,14 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
                                     OutFileASYP_term//strI//'.dat',Nintegration,              &
                                     Qfreq%wQ(Iw1,Ibeta1),Qfreq%wQ(Iw2,Ibeta2),                &
                                     beta(Ibeta1),beta(Ibeta2),QTF_HASFS_ASYMP(:,:,Iterm))
-                            ENDDO 
+                            ENDDO
                          ENDIF
                         ENDIF
                     ENDDO
                 ENDDO
            ENDDO
         ENDDO
-       
+
         CALL END_RECORD_TIME(tcpu_start,TRIM(ID%ID)//'/'//LogFILE)
         WRITE(LogTextToBeWritten,*) '---- DONE ---'
         CALL WRITE_LOGFILE(TRIM(ID%ID)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
@@ -350,7 +350,7 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
         DEALLOCATE(Motion,StiffMat,TransMotionQ,RotAnglesQ)
         DEALLOCATE(VFace%X,VFace%XM,VFace%N,VFace%A,VFace%tDis)
         DEALLOCATE(VFace%dXdXG_WGQ_per_A,VFace%XM_GQ)
-        DEALLOCATE(datPotVelQ%TotPot,datPotVelQ%TotVel) 
+        DEALLOCATE(datPotVelQ%TotPot,datPotVelQ%TotVel)
         DEALLOCATE(datPotVelQ%RadPot,datPotVelQ%RadVel)
         DEALLOCATE(Qfreq%wQ,Qfreq%kQ)
         DEALLOCATE(Qfreq%diffwQ,Qfreq%sumwQ)
@@ -372,6 +372,6 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
           DEALLOCATE(SOURCEDISTRQ%ZIGS_Per)
           DEALLOCATE(SOURCEDISTRQ%ZIGB_Rad)
           DEALLOCATE(SOURCEDISTRQ%ZIGS_Rad)
-        ENDIF 
+        ENDIF
 
 END PROGRAM

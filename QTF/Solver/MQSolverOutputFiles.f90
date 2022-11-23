@@ -1,6 +1,6 @@
-!-----------------------------------------------------------------------------------
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!--------------------------------------------------------------------------------------
+!
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 MODULE MQSolverOutputFiles
 
 USE  MFileDirectoryList!, ONLY:OutQTFDir,OutFileDM,OutFileDP,OutFileHBM,&
-                       !       OutFileHBP,make_directory 
+                       !       OutFileHBP,make_directory
 IMPLICIT NONE
 
 CONTAINS
@@ -30,7 +30,7 @@ CONTAINS
              CHARACTER(len=*)   :: workdir
              INTEGER            :: Iterm,contrib,ID_DEBUG
              CHARACTER(len=1)   :: strT
-             
+
              CALL make_directory(workdir//OutQTFDir)
              CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDM)
              CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDP)
@@ -47,7 +47,7 @@ CONTAINS
                    WRITE(strT,'(I0.1)') Iterm
                    CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDM_term//strT//'.dat')
                    CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileDP_term//strT//'.dat')
-                   
+
                    CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBM_term//strT//'.dat')
                    CALL WRITE_INIT_QTF_FILE(workdir//OutQTFDir//OutFileHBP_term//strT//'.dat')
                 ENDDO
@@ -88,10 +88,10 @@ CONTAINS
           OPEN(NEWUNIT=u2, FILE=wd//OutQTFDir//FileP, ACTION='WRITE',POSITION='APPEND')
 
           DO Iinteg=1,Ninteg
-             WRITE(u1,'(4(F12.3,X),I3,2(X,E14.7))')               & 
+             WRITE(u1,'(4(F12.3,X),I3,2(X,E14.7))')               &
                   w1,w2,beta1,beta2,Iinteg,                       &
                   REAL(QTFdat(Iinteg,1)),AIMAG(QTFdat(Iinteg,1))
-             WRITE(u2,'(4(F12.3,X),I3,2(X,E14.7))')               & 
+             WRITE(u2,'(4(F12.3,X),I3,2(X,E14.7))')               &
                   w1,w2,beta1,beta2,Iinteg,                       &
                   REAL(QTFdat(Iinteg,2)),AIMAG(QTFdat(Iinteg,2))
           ENDDO

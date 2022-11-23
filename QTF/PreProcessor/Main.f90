@@ -1,9 +1,6 @@
-!--------------------------------------------------------------------------------------
-!
-!   NEMOH2 - second order (QTF) - May 2022
 !-----------------------------------------------------------------------------------
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -19,10 +16,14 @@
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !-------------------------------------------------------------------------------------
 !   Contributors list:
-!   - Gerard Delhommeau (13/11/2014, d'apres LA VERSION 1.1 d'AVRIL 1991             
+!   - Gerard Delhommeau (13/11/2014, d'apres LA VERSION 1.1 d'AVRIL 1991
 !     PROGRAMME StOK LABORATOIRE D'HYDRODYNAMIQUE NAVALE DE L'E.N.S.M. DE NANTES & SIREHNA )
-!   - Adrien Combourieu, INNOSEA (adrien.combourieu@innosea.fr)  Version 2014 
+!   - Adrien Combourieu, INNOSEA (adrien.combourieu@innosea.fr)  Version 2014
 !   - Ruddy Kurnia (LHEEA,ECN) 2022
+!--------------------------------------------------------------------------------------
+!
+!   NEMOH2 - second order (QTF) - May 2022
+!
 !--------------------------------------------------------------------------------------
 
 PROGRAM Main
@@ -38,7 +39,7 @@ USE MReadInputFiles,    ONLY:Read_NP_GaussQuad,Read_Mechanical_Coefs,TMech,  &
                              TMeshFS,Read_Prepare_FreeSurface_Mesh
 USE M_INITIALIZE_GREEN, ONLY: TGREEN, INITIALIZE_GREEN
 USE MQpreprocessor
-USE MLogFile               
+USE MLogFile
 
 
 IMPLICIT NONE
@@ -53,12 +54,12 @@ IMPLICIT NONE
         INTEGER                         :: Nw,Nbeta           ! Number of Freq,direction
         REAL, ALLOCATABLE,DIMENSION(:)  :: w,beta             ! vector of freq [rad/s],
                                                               ! direction angle [rad]
-        TYPE(TWLine)  :: WLine          ! Waterline 
-        TYPE(TVFace)  :: VFace          ! Face of body panel       
-        TYPE(TMech)   :: MechCoef       ! MechCoef 
+        TYPE(TWLine)  :: WLine          ! Waterline
+        TYPE(TVFace)  :: VFace          ! Face of body panel
+        TYPE(TMech)   :: MechCoef       ! MechCoef
         TYPE(TLoad1)  :: Forces1        ! First order forces
         INTEGER       :: NP_GQ          ! Number of point for Gauss Quad. Integration
-        INTEGER       :: Nintegration   ! Number of excitation force integration 
+        INTEGER       :: Nintegration   ! Number of excitation force integration
         INTEGER       :: Nradiation     ! Number of radiation problem
         COMPLEX,ALLOCATABLE,DIMENSION(:,:,:) :: Motion
         TYPE(TSource) :: SOURCEDISTR                            !First order NEMOH solution
@@ -72,10 +73,10 @@ IMPLICIT NONE
 !   --- Initialize and read input datas -----------------------------------------------
 !
         CALL ReadTID(ID)
-        CALL ReadTMesh(Mesh,TRIM(ID%ID)//'/mesh/')  
+        CALL ReadTMesh(Mesh,TRIM(ID%ID)//'/mesh/')
         CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
         CALL Read_Mechanical_Coefs(TRIM(ID%ID),InpNEMOHCAL%Nbodies,MechCoef)
-!        
+!
         Nw          =InpNEMOHCAL%waveinput%NFreq
         Nbeta       =InpNEMOHCAL%waveinput%NBeta
         Nintegration=InpNEMOHCAL%Nintegtot
@@ -84,10 +85,10 @@ IMPLICIT NONE
         CALL Read_FirstOrderLoad(TRIM(ID%ID),Nw,Nbeta,Nintegration,Nradiation,Forces1)
         ALLOCATE(Motion(Nw,Nradiation,Nbeta))
         CALL Read_Motion(TRIM(ID%ID),Nw,Nbeta,Nradiation,Motion)!RAO
-!        
+!
         ALLOCATE(w(Nw),beta(Nbeta))
         CALL Discretized_Omega_and_Beta(1,InpNEMOHCAL%waveinput,Nw,Nbeta,w,beta)
-!        
+!
         NP_GQ=Read_NP_GaussQuad(TRIM(ID%ID))
         EPS_ZMIN=Read_Eps_Zmin(TRIM(ID%ID))
 !       Prepare Body Mesh
@@ -96,7 +97,7 @@ IMPLICIT NONE
 !
         CALL INITIALIZE_GREEN(VFace,Mesh,InpNEMOHCAL%Env%depth, &
                               WLine%XM,WLine%NWlineseg,EPS_ZMIN,IGreen)
-!       -------------------------------------                      
+!       -------------------------------------
 !       Prepare Free-surface mesh
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
           CALL Read_Prepare_FreeSurface_Mesh(TRIM(ID%ID),MeshFS,QTFinputNem)
@@ -106,35 +107,35 @@ IMPLICIT NONE
 !
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
         CALL WRITE_QTFLOGFILE(TRIM(ID%ID),beta,Nbeta,w,Nw,NP_GQ,EPS_ZMIN,                      &
-                InpNEMOHCAL%Nbodies,InpNEMOHCAL%Env%depth,Mesh%Npanels,MeshFS%Mesh%Npanels) 
+                InpNEMOHCAL%Nbodies,InpNEMOHCAL%Env%depth,Mesh%Npanels,MeshFS%Mesh%Npanels)
         ELSE
         CALL WRITE_QTFLOGFILE(TRIM(ID%ID),beta,Nbeta,w,Nw,NP_GQ,EPS_ZMIN,                      &
-                InpNEMOHCAL%Nbodies,InpNEMOHCAL%Env%depth,Mesh%Npanels,0) 
+                InpNEMOHCAL%Nbodies,InpNEMOHCAL%Env%depth,Mesh%Npanels,0)
         ENDIF
-        
+
         CALL START_RECORD_TIME(tcpu_start,TRIM(ID%ID)//'/'//LogFILE,IdAppend)
         WRITE(LogTextToBeWritten,*) '-------'
         CALL WRITE_LOGFILE(TRIM(ID%ID)//'/'//LogFILE,TRIM(LogTextToBeWritten),IdAppend,IdprintTerm)
 
         ALLOCATE(SOURCEDISTR%ZIGB(Mesh%Npanels,Nradiation+Nbeta))
         ALLOCATE(SOURCEDISTR%ZIGS(Mesh%Npanels,Nradiation+Nbeta))
-        
+
         CALL make_directory(TRIM(ID%ID)//'/'//PreprocDir)
-        
+
         IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
              IF (ID_DEBUG==1) CALL INITIALIZE_POTVELFS_OUTPUT_FILES                         &
                                 (ID%ID,MeshFS%Mesh%Npanels,MeshFS%Mesh%XM,MeshFS%Mesh%ISym, &
                                  MeshFS%BdyLine%NWlineseg,MeshFS%BdyLine%XM)
         ENDIF
-! ------Computing potentials and velocities--------------------------------------------------        
+! ------Computing potentials and velocities--------------------------------------------------
         DO I=1,Nw
             CALL Read_SourceDistribution(TRIM(ID%ID),I,Nw,Nradiation,Nbeta,                 &
                                          Mesh%Npanels,SourceDistr)
-            ! Calc Body Potentials                     
+            ! Calc Body Potentials
             CALL COMPUTE_POTENTIALS_AND_VELOCITIES(TRIM(ID%ID),                             &
                                          I,w(I),beta,Nbeta,Nradiation,InpNEMOHCAL%Env,Mesh, &
                                          VFace,WLine,IGreen,SourceDistr,Motion(I,:,:))
-           
+
            IF  (InpNEMOHCAL%qtfinput%Ncontrib==3) THEN
             ! Calc Free Surface Potentials
             CALL COMPUTE_POTENTIALS_AND_VELOCITIES_FS(TRIM(ID%ID),                          &

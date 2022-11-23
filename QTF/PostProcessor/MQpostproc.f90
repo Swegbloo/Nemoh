@@ -1,11 +1,5 @@
 !--------------------------------------------------------------------------------------
-!
-!   NEMOH2 - second order (QTF) - Postprocessing module
-!   MQpostproc
-!   Description:  read and write data
-!-----------------------------------------------------------------------------------
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -19,9 +13,15 @@
 !
 !    You should have received a copy of the GNU General Public License
 !    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-!-------------------------------------------------------------------------------------
+!--------------------------------------------------------------------------------------
 !   Contributors list:
 !    - Ruddy Kurnia (ECN)
+!--------------------------------------------------------------------------------------
+!
+!   NEMOH2 - second order (QTF) - Postprocessing module
+!   MQpostproc
+!   Description:  read and write data
+!
 !--------------------------------------------------------------------------------------
 !
 MODULE MQpostproc
@@ -37,7 +37,7 @@ CONTAINS
   SUBROUTINE READWRITE_QTFDATA(inpNEMCAL,wd)
           !Input variable
           TYPE(TNemCal),                 INTENT(IN) :: inpNEMCAL
-          CHARACTER(LEN=*),              INTENT(IN) :: wd              
+          CHARACTER(LEN=*),              INTENT(IN) :: wd
           !local variables
           REAL                                      :: betai,betaj
           REAL, DIMENSION(7)                        :: lineDUOK,lineHASBO,lineHASFS, &
@@ -57,20 +57,20 @@ CONTAINS
           CHARACTER*1,DIMENSION(2)                  :: str_MP
           CHARACTER(LEN=15)                         :: FreqVar1_text,FreqVar2_text
           REAL                                      :: FreqVar1,FreqVar2
-                  
+
           !CALL CHECK_QTF_DATA_EXIST(inpNEMCAL,wd)
           IDCONTRIB(1:3)=0
           DOF(:)=1      !DOF to be write
           !DOF(1)=1
           !DOF(3)=1
-          !DOF(5)=1       
+          !DOF(5)=1
           Nbeta= inpNEMCAL%waveinput%NBeta
           NwQ  = inpNEMCAL%qtfinput%omega(1)
           Ninteg=inpNEMCAL%Nintegtot
           SwitchBiDir=inpNEMCAL%qtfinput%bidirection
           Nbeta2=Nbeta
           IF (SwitchBiDir==0) Nbeta2=1
-          
+
           IF (inpNEMCAL%qtfinput%FreqTypeOutput==1) THEN
               FreqVar1_text='      w1[rad/s]'
               FreqVar2_text='      w2[rad/s]'
@@ -85,18 +85,18 @@ CONTAINS
           str_MP(1)='M'
           str_MP(2)='P'
           DO ID_MP=1,InpNEMCAL%qtfinput%switch_QTFP+1
-            !open output file 
+            !open output file
             OPEN(NEWUNIT=uo_m, FILE=TRIM(wd)//'/results/QTF/OUT_QTF'//str_MP(ID_MP)//'_N.dat',&
                      ACTION='WRITE')
             WRITE(uo_m,'(9(A,X))') FreqVar1_text, FreqVar2_text,'beta1 [deg]','beta2[deg]','DOF',&
                     'MOD(QTF)/rho/g','PHASE(QTF)[deg]','Re(QTF)/rho/g','Im(QTF)/rho/g'
 
-              DO IintegS=1,Ninteg  
+              DO IintegS=1,Ninteg
               !open QTF_DUOK file
                 IF (InpNEMCAL%qtfinput%switch_qtfduok==IDDUOK) THEN
                    OPEN(NEWUNIT=u1, FILE=TRIM(wd)//'/results/QTF/QTF'//str_MP(ID_MP)//'_DUOK.dat',&
                            STATUS='UNKNOWN', ACTION='READ')
-                   READ(u1,*) 
+                   READ(u1,*)
                    IDCONTRIB(1)=1
                 ENDIF
 
@@ -118,10 +118,10 @@ CONTAINS
                   IDCONTRIB(3)=1
                 ENDIF
 
-               
+
                 DO Ibeta1=1,Nbeta
                     DO Ibeta2temp=1,Nbeta2
-                    IF (SwitchBiDir==0) Ibeta2=Ibeta1 
+                    IF (SwitchBiDir==0) Ibeta2=Ibeta1
                     IF (SwitchBiDir==1) Ibeta2=Ibeta2temp
 
                     ALLOCATE(w(NwQ))
@@ -130,7 +130,7 @@ CONTAINS
                       DO IwQ=0,NwQ-1
                           DO Iw1=IwQ+1,NwQ
                            Iw2=Iw1-IwQ
-                           DO Iinteg=1,Ninteg 
+                           DO Iinteg=1,Ninteg
                             IF (Iinteg==IintegS) THEN
                              QTFtotR(Iw1,Iw2)=0
                              QTFtotI(Iw1,Iw2)=0
@@ -207,16 +207,15 @@ CONTAINS
             print*,'results/QTF/OUT_QTF',str_MP(ID_MP),'.dat saved!'
             CLOSE(uo_m)
           END DO
-         
+
   END SUBROUTINE
 
   LOGICAL FUNCTION  exist_file(inp,filename)
       TYPE(TNemCal),          INTENT(IN) :: inp
       CHARACTER(LEN=*),       INTENT(IN) :: filename
-          INQUIRE (FILE=filename, EXIST=exist_file)       
+          INQUIRE (FILE=filename, EXIST=exist_file)
           IF (.NOT.exist_file) THEN
                PRINT*,filename,' data is missing!'
           ENDIF
   END FUNCTION
 END MODULE
-

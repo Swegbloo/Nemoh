@@ -2,8 +2,7 @@
 !
 !   NEMOH - March 2022
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -25,7 +24,7 @@ MODULE CONSTANTS
 
       IMPLICIT NONE
 
-      REAL, PARAMETER           :: PI=4.*ATAN(1.), DPI=2.*PI, DPI2=2.*PI**2  
+      REAL, PARAMETER           :: PI=4.*ATAN(1.), DPI=2.*PI, DPI2=2.*PI**2
       COMPLEX, PARAMETER        :: II=CMPLX(0.,1.)
       REAL, PARAMETER           :: INFINITE_DEPTH=0.0
       INTEGER, PARAMETER        :: NO_Y_SYMMETRY=0, Y_SYMMETRY=1

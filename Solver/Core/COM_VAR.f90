@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -34,7 +33,7 @@
     ! depth of the domain
     REAL :: Depth
     ! Coordinates where the waves are measured
-    REAL :: XEFF,YEFF,ZEFF    
+    REAL :: XEFF,YEFF,ZEFF
 
     ! --- Geometrical quantities ---------------------------------------
     ! Mesh file
@@ -52,7 +51,7 @@
     INTEGER:: NSYMY
     !
     REAL :: ZER
-    ! DIST(I) is the maximum distance (projection on XY plane!) of a panel I from other points 
+    ! DIST(I) is the maximum distance (projection on XY plane!) of a panel I from other points
     REAL, DIMENSION(:), ALLOCATABLE :: DIST,TDIS
     !vertices of the panel, size NFA(no of facettes)
     INTEGER, DIMENSION(:), ALLOCATABLE :: M1,M2,M3,M4
@@ -68,7 +67,7 @@
     INTEGER:: NG
     ! Array for surface area of the panels
     REAL, DIMENSION(:), ALLOCATABLE :: AIRE
-    
+
     ! --- Boundary value problem ---------------------------------------
     ! normal velocity array as input
 !    REAL, DIMENSION(:), ALLOCATABLE :: NVEL
@@ -78,7 +77,7 @@
     COMPLEX, DIMENSION(:), ALLOCATABLE :: ZPB,ZPS
     ! Source distribution
     COMPLEX, DIMENSION(:), ALLOCATABLE :: ZIGB,ZIGS
-    
+
     ! --- Solver ------------------------------------------------------
     ! Which solver: (0) direct solver GAUSS ELIMINATION, (1) LU DECOMPOSITION (2): GMRES
     INTEGER:: Indiq_solver,mRestartGMRES,NITERGMRES
@@ -93,9 +92,9 @@
     !
     REAL :: FSP,FSM,VSXP,VSYP,VSZP,VSXM,VSYM,VSZM
     ! Variable for storage of Greens function
-    REAL :: SP1,SM1,SP2,SM2 
+    REAL :: SP1,SM1,SP2,SM2
     ! Variable for storage of Greens function
-    REAL :: VSXP1,VSXP2,VSYP1,VSYP2,VSZP1,VSZP2 
+    REAL :: VSXP1,VSXP2,VSYP1,VSYP2,VSZP1,VSZP2
     REAL :: VSXM1,VSXM2,VSYM1,VSYM2,VSZM1,VSZM2
     !Values used in interpolation of infinite part of the Greens function
     INTEGER,PARAMETER :: NPINTE=5001
@@ -106,5 +105,5 @@
     ! File for visualization of potential
 !     INTEGER :: Sav_potential		!AC: unused
     INTEGER :: Switch_Sources   !AC: Always save sources for now (for QTF), updated in INITIALIZATION.f90
-       
+
   END MODULE COM_VAR

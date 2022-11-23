@@ -1,7 +1,6 @@
 !--------------------------------------------------------------------------------------
 !
-!    Copyright (C) 2022 - Nantes Université, Ecole Centrale Nantes, CNRS,
-!						  LHEEA, UMR 6598, F-44000 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
 !    This program is free software: you can redistribute it and/or modify
 !    it under the terms of the GNU General Public License as published by
@@ -20,7 +19,7 @@
 !   - G. Delhommeau
 !   - P. Guével
 !   - J.C. Daubisse
-!   - J. Singh  
+!   - J. Singh
 !
 !--------------------------------------------------------------------------------------
 MODULE FREESURFACE
@@ -63,7 +62,7 @@ CONTAINS
     REAL,                             INTENT(IN) :: omega, wavenumber
     COMPLEX, DIMENSION(Mesh%NPanels), INTENT(IN) :: ZIGB, ZIGS ! Sources
     TYPE(TGREEN),                     INTENT(IN) :: IGreen
-    
+
     ! Local variables
     INTEGER :: j
     COMPLEX :: PHI
@@ -138,13 +137,13 @@ CONTAINS
 
     ! Inputs
     TYPE(TMesh),                      INTENT(IN) :: Mesh ! Mesh of the floating body
-    TYPE(TVFace),                     INTENT(IN) :: VFace! 
+    TYPE(TVFace),                     INTENT(IN) :: VFace!
     TYPE(TEnvironment),               INTENT(IN) :: Env
     REAL,                             INTENT(IN) :: omega, wavenumber
     COMPLEX, DIMENSION(Mesh%NPanels), INTENT(IN) :: ZIGB, ZIGS
     REAL,                             INTENT(IN) :: XC, YC, ZC
     TYPE(TGREEN),                     INTENT(IN) :: IGreen
-    
+
     ! Output
     COMPLEX,                          INTENT(OUT) :: PHI
 
