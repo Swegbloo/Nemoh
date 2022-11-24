@@ -14,6 +14,7 @@ output/
 *.mod
 *.swp
 ./Solver/Core/*.o
+build*
 # NEMOH1 tests
 Verification/1_Cylinder/mesh/
 Verification/1_Cylinder/results/
