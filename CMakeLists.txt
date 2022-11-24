@@ -26,4 +26,4 @@ add_subdirectory(QTF)
 
 include(CTest)
 
-add_subdirectory(Verification)
+add_subdirectory(Validation)
