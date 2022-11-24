@@ -22,6 +22,8 @@ add_subdirectory(preProcessor)
 add_subdirectory(postProcessor)
 add_subdirectory(Solver)
 
+add_subdirectory(QTF)
+
 include(CTest)
 
 add_subdirectory(Verification)
