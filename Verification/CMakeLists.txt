@@ -1,0 +1,6 @@
+add_subdirectory(1_Cylinder)
+add_subdirectory(2_2Bodies)
+add_subdirectory(3_NonSymmetrical)
+add_subdirectory(4_Postprocessing)
+add_subdirectory(5_QuickTests)
+add_subdirectory(6_box_coarsemesh)

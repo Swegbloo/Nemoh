@@ -21,3 +21,7 @@ add_subdirectory(Mesh)
 add_subdirectory(preProcessor)
 add_subdirectory(postProcessor)
 add_subdirectory(Solver)
+
+include(CTest)
+
+add_subdirectory(Verification)
