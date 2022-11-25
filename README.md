@@ -1,4 +1,9 @@
-NEMOH is a Boundary Element Methods (BEM) code dedicated to the computation of first order wave loads on offshore structures (added mass, radiation damping, diffraction forces). It has been developed by researchers at Ecole Centrale de Nantes for 30 years. It is still used in many of our research projects. Typical use is estimation of dynamic response of floating structures or performance assessment of wave energy converters.
+NEMOH is a Boundary Element Methods (BEM) code dedicated to the computation of first order wave loads on offshore structures (added mass, radiation damping, diffraction forces). It has been developed by researchers at Ecole Centrale de Nantes for more than 30 years. It is still used in many of our research projects. Typical uses include the estimation of dynamic response of floating structures or the performance assessment of wave energy converters.
+
+Copyright © 2022 Ecole Centrale de Nantes
+
+This product has been developed at [Ecole Centrale de Nantes](http://www.ec-nantes.fr) by
+G. Delhommeau, A. Babarit, J. Singh, P. Guével, J.C. Daubisse, R. Kurnia.
 
 ## Compilation
 
