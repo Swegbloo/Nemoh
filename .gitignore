@@ -6,3 +6,12 @@
 ./pythonRoutines/*.txt
 *.swp
 build*
+# Test files
+Validation/**/logfile.txt
+Validation/**/Normalvelocities.dat
+Validation/**/results/*
+Validation/**/mesh/*
+Validation/**/Motion/*
+Validation/**/logfileQTF.txt
+Validation/**/QTFPreprocOut/*
+Validation/7_QTF_Cylinder/**/Mechanics/*
