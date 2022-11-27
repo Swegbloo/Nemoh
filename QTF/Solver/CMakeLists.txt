@@ -3,7 +3,7 @@ set(PREPROC_SRC
     ${COMMON_SRC_DIR}/Logfile.f90
     ${COMMON_SRC_DIR}/Constants.f90
     ${COMMON_SRC_DIR}/Elementary_functions.f90
-    ${COMMON_SRC_DIR}/linear_interpolation_module.f90
+    ${EXTERNAL_SRC_DIR}/linear_interpolation_module.f90
     ${COMMON_SRC_DIR}/MCallInterp.f90
     ${COMMON_SRC_DIR}/Environment.f90
     ${COMMON_SRC_DIR}/MNemohCal.f90
