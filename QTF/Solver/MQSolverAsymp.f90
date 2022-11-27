@@ -30,8 +30,8 @@ MODULE MQSOLVERASYMP
 
 USE CONSTANTS          , ONLY:II,CZERO,PI
 USE MEnvironment,        ONLY:Fun_Dispersion
-USE Elementary_functions,ONLY:CIH,fun_BESSJ,   &
-                              Fun_KronDelta
+USE Elementary_functions,ONLY:CIH,Fun_KronDelta
+USE MBESSEL,             ONLY:fun_BESSJ  
 USE MROMBERG,            ONLY:romberg_trap
 IMPLICIT NONE
 
@@ -749,6 +749,4 @@ CONTAINS
      IF (l.NE. 0) eps=2
   END FUNCTION
 !!---------------------------------------------------------------------
-
-
 END MODULE
