@@ -1,9 +1,9 @@
 find_package(LAPACK REQUIRED)
 
 set(POSTPROC_SRC
-    ${CORE_SRC_DIR}/cPackgmres.f
-    ${CORE_SRC_DIR}/zPackgmres.f
-    ${CORE_SRC_DIR}/blas_rot.f
+    ${EXTERNAL_SRC_DIR}/GMRES_CERFACS/cPackgmres.f
+    ${EXTERNAL_SRC_DIR}/GMRES_CERFACS/zPackgmres.f
+    ${EXTERNAL_SRC_DIR}/GMRES_CERFACS/blas_rot.f
     ${CORE_SRC_DIR}/M_SOLVER.f90
     ${COMMON_SRC_DIR}/Constants.f90
     ${COMMON_SRC_DIR}/Elementary_functions.f90
