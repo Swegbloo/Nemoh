@@ -14,7 +14,7 @@ cmake -S. -Bbuild
 cmake --build build
 ```
 
-The resulting executables are in the `build/bin` directory.
+The resulting executables are in the `bin` directory.
 
 To compile only one of the executables, use the `--target` option of CMake.
 The available targets for Nemoh are:
