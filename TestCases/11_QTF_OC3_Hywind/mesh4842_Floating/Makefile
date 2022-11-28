@@ -16,4 +16,8 @@ run:
 clean:
 			rm -rf results/
 			rm -rf Normalvelocities.dat
-			rm -rf /QTFPreprocOut
+			rm -rf logfile.txt
+			rm -rf logfileQTF.txt
+			rm -rf Motion/
+			rm -rf QTFPreprocOut/
+

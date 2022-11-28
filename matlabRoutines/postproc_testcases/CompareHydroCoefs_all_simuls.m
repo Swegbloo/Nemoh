@@ -29,7 +29,7 @@ elseif TestCaseNo==5   %10a_QTF_SOFTWIND
 elseif TestCaseNo==6   %10b_QTF_SOFTWIND_FS
     dataparamNEMOH1_4
     IDRAO=1;
-elseif TestCaseNo==7   %10b_QTF_SOFTWIND_FS
+elseif TestCaseNo==7   %11_QTF_OC3_Hywind
     dataparamNEMOH1_7
     IDRAO=1;
 end
@@ -709,7 +709,7 @@ else
 end
   plot_properties
 
-ylabel(['arg(',ylab,'_{1}',ylabN,')']);
+ylabel(['arg(',ylab(2:end),'_{1}',ylabN(1:end-1),')']);
 hold on;
 if Idlimitaxes==1
     xlim([xlimval]);
@@ -740,7 +740,7 @@ else
 end
   plot_properties
 
-ylabel(['arg(',ylab,'_{2}',ylabN,')']);
+ylabel(['arg(',ylab(2:end),'_{1}',ylabN(1:end-1),')']);
 hold on;
 if Idlimitaxes==1
     xlim([xlimval]);
@@ -771,7 +771,7 @@ else
 end
   plot_properties
 
-ylabel(['arg(',ylab,'_{3}',ylabN,')']);
+ylabel(['arg(',ylab(2:end),'_{3}',ylabN(1:end-1),')']);
 hold on;
 if Idlimitaxes==1
     xlim([xlimval]);
@@ -802,7 +802,7 @@ else
 end
    plot_properties
 
-ylabel(['arg(',ylab,'_{4}',ylabN,')']);
+ylabel(['arg(',ylab(2:end),'_{4}',ylabN(1:end-1),')']);
 hold on;
 if Idlimitaxes==1
     xlim([xlimval]);
@@ -833,7 +833,7 @@ else
 end
  plot_properties
 
-ylabel(['arg(',ylab,'_{5}',ylabN,')']);
+ylabel(['arg(',ylab(2:end),'_{5}',ylabN(1:end-1),')']);
 hold on;
 if Idlimitaxes==1
     xlim([xlimval]);
@@ -864,7 +864,7 @@ else
 end
   plot_properties
 
-ylabel(['arg(',ylab,'_{6}',ylabN,')']);
+ylabel(['arg(',ylab(2:end),'_{6}',ylabN(1:end-1),')']);
 hold on;
 if Idlimitaxes==1
     xlim([xlimval]);
@@ -895,7 +895,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(FdatNem(:,7,IdbetaPlot))),lintype{II})
     end
        plot_properties
-   ylabel(['arg(',ylab,'_{1}',ylabN,')']);
+   ylabel(['arg(',ylab(2:end),'_{1}',ylabN(1:end-1),')']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
@@ -924,7 +924,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(FdatNem(:,9,IdbetaPlot))),lintype{II})
     end
       plot_properties
-   ylabel(['arg(',ylab,'_{3}',ylabN,')']);
+   ylabel(['arg(',ylab(2:end),'_{3}',ylabN(1:end-1),')']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
@@ -953,7 +953,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(FdatNem(:,11,IdbetaPlot))),lintype{II})
     end
     plot_properties
-   ylabel(['arg(',ylab,'_{5}',ylabN,')']);
+   ylabel(['arg(',ylab(2:end),'_{5}',ylabN(1:end-1),')']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);

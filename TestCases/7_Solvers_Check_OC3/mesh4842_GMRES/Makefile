@@ -10,6 +10,7 @@ run:
 
 # Delete results of the computations
 clean:
+			rm -rf mesh
 			rm -rf results/
 			rm -rf Normalvelocities.dat
-
+			rm -rf logfile.txt
