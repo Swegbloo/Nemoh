@@ -24,7 +24,7 @@ OC3_hywind-4842_Nem.dat				! Name of meshfile
 2 0. 0. 1. 0. 0. 0.000000			! Moment force in z direction about a point
 0									! Number of lines of additional information 
 --- Load cases to be solved -------------------------------------------------------------------------------------------------------
-1 100	0.0628		6.28			! Freq type 1,2,3=[rad/s,Hz,s], Number of wave frequencies, Min, and Max values
+1 65	0.0628		4.082			! Freq type 1,2,3=[rad/s,Hz,s], Number of wave frequencies, Min, and Max values
 1	0.000000	0.000000			! Number of wave directions, Min and Max (degrees)
 --- Post processing ---------------------------------------------------------------------------------------------------------------
 0	0.1	10.			! IRF 					 ! IRF calculation (0 for no calculation), time step and duration
@@ -41,7 +41,7 @@ OC3_hywind-4842_Nem.dat				! Name of meshfile
 NA 					! Name of free surface meshfile (Only for Contrib 3), type 'NA' if not applicable 
 0 	0	0			! Free surface QTF parameters: Re Nre NBessel (for Contrib 3)
 0 					! 1 Includes Hydrostatic terms of the quadratic first order motion, -[K]xi2_tilde
-3					! For QTFposProc, output freq type, 1,2,3=[rad/s,Hz,s]
+1					! For QTFposProc, output freq type, 1,2,3=[rad/s,Hz,s]
 1         			! For QTFposProc, 1 includes DUOK in total QTFs, 0 otherwise
 1         			! For QTFposProc, 1 includes HASBO in total QTFs, 0 otherwise 
 0         			! For QTFposProc, 1 includes HASFS+ASYMP in total QTFs, 0 otherwise

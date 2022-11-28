@@ -10,34 +10,40 @@ clc;clear;
 cd (pathstr);
 addpath(genpath(pathstr))
 %%%
-TestCaseNo=3;       
+TestCaseNo=1;
 if TestCaseNo==1        %8b_QTF_Cylinder
     dataparamQTF_1;
     qtftype='M';
-    betaID=[0 0]; 
-    maxValQTF=30;   
+    betaID=[0 0];
+    maxValQTF=30;
     Idwlim=1; wlimval=[0,pi];
 elseif TestCaseNo==2    %9_QTF_OC4_Semisubmersible
     dataparamQTF_2;
     qtftype='M';
     betaID=[0 30];      % choose beta1, beta2 !
-     maxValQTF=10;
+     maxValQTF=20;
      Idwlim=1; wlimval=[0,pi];
 elseif TestCaseNo==3     %10_QTF_SOFTWIND
     dataparamQTF_3;
     qtftype='M';
     betaID=[0 30];       % choose beta1, beta2 !
-     maxValQTF=20;
+     maxValQTF=20;%20;5;1000
      Idwlim=1; wlimval=[0,pi];
 elseif TestCaseNo==4     %10_QTF_SOFTWIND_FS
     dataparamQTF_4;
     qtftype='P';
     betaID=[0 0];        % choose beta1, beta2 !
-    maxValQTF=40;
+    maxValQTF=40;%40;10;2000
     Idwlim=1; wlimval=[0,2];
+elseif TestCaseNo==5     %11_QTF_OC3_Hywind
+    dataparamQTF_5;
+    qtftype='M';
+    betaID=[0 0];        % choose beta1, beta2 !
+    maxValQTF=6;%6,1,50
+    Idwlim=1; wlimval=[0,pi];
 end
  DOF=1;
-   
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Idwvar=0;%0=w rad/s,1=f 1/s,2=T s;
@@ -82,13 +88,13 @@ MinMaxAbs=[0,MinMaxReIm(2)];
 
 if DOF==1
   %  Contval=[10,20,40,60,100];
-   % Contval=[10,20,40,60]; 
-   % Contval=[10,20,30]; 
-      Contval=[2,5,10]; 
+   % Contval=[10,20,40,60];
+   % Contval=[10,20,30];
+      Contval=[2,5,10];
    %Contval=[0.2:0.1:1,1.5:0.5:5];
    %Contval=[0.2,0.5,1,2:1:10,12:2:26];
   % Contval=[0.2:0.1:0.5,0.6:0.2:1,1.5:0.5:5];
-   %Contval=[10,20];
+  % Contval=[10,20];
    %Contval=[2,5,10,15];
 elseif DOF==2
     %Contval=[5,10,20,40,50];
@@ -98,16 +104,18 @@ elseif DOF==2
 elseif DOF==3
   %  Contval=[5,10,20,40];
   %   Contval=[5,10,15];
-   Contval=[2,5,10,20];
+  % Contval=[2,5,10,20];
+    Contval=[1,2,4];
    % Contval=[0.5,1,2];
-    %Contval=[0.5,1,1.5];
+  %  Contval=[0.5,1,1.5];
 elseif (DOF==4)
     Contval=[100,200,300];
 elseif (DOF==5)
-   %  Contval=[500,1000,1500];
-  %  Contval=[100,200,400,800];
-     Contval=[100,200,400,600];
+  %   Contval=[500,1000,1500];
+    Contval=[100,200,400,800,1000];
+   %  Contval=[100,200,400,600];
   %  Contval=[10,20,40,80];
+   % Contval=[10,20,40];
 elseif (DOF==6)
     Contval=[200,500,1000];
 end
@@ -146,7 +154,7 @@ else
             QdatTotR=QdatTotR+QdatTotR_I;QdatTotI=QdatTotI+QdatTotI_I;
         end
     end
-    
+
     NHterm=length(IdNemHasfsTerm);
     for i=1:NHterm
         if (IdNemHasfsTerm(i)==1)
@@ -156,7 +164,7 @@ else
             QdatTotR=QdatTotR+QdatTotR_I;QdatTotI=QdatTotI+QdatTotI_I;
         end
     end
-    
+
     NHterm=length(IdNemAsympTerm);
     for i=1:NHterm
         if (IdNemAsympTerm(i)==1)
@@ -166,7 +174,7 @@ else
             QdatTotR=QdatTotR+QdatTotR_I;QdatTotI=QdatTotI+QdatTotI_I;
         end
     end
-    
+
     QdatTotMod=sqrt(QdatTotR.^2+QdatTotI.^2);
 end
 
@@ -231,7 +239,7 @@ if IDHYDROSTAR==1
     elseif Idwvar==2
         wH1=2*pi./wH1;
     end
-    
+
     if Idwlim==1
         IdwHi=closest(wH1,wlimval(1));
         IdwHf=closest(wH1,wlimval(2));
@@ -241,7 +249,7 @@ if IDHYDROSTAR==1
     end
     wH1=wH1(IdwHi:IdwHf);
     [wwH1,wwH2]=meshgrid(wH1,wH1);
-    
+
     if length(w1)==length(wH1)
     HSQTFTotRe=HSQTFTotRe(IdwHi:IdwHf,IdwHi:IdwHf)./rho/g;
     HSQTFTotIm=HSQTFTotIm(IdwHi:IdwHf,IdwHi:IdwHf)./rho/g;
@@ -251,10 +259,10 @@ if IDHYDROSTAR==1
     wwH1=ww1;
     wwH2=ww2;
     end
-    
+
     HSQTFTotMod=sqrt(HSQTFTotIm.^2+HSQTFTotRe.^2);
-    
-    
+
+
     if  IdMinMaxQTFReIm==0
     minTotR=min(min(min(QdatTotR)),min(min(HSQTFTotRe)));
     maxTotR=max(max(max(QdatTotR)),max(max(HSQTFTotRe)));
@@ -274,12 +282,12 @@ if IDHYDROSTAR==1
     NormalizedAbsDifTOTI(isnan( NormalizedAbsDifTOTI))=0;
     NormalizedAbsDifTOTMOD=abs((QdatTotMod-HSQTFTotMod))./max(max(abs(HSQTFTotMod)));
     NormalizedAbsDifTOTMOD(isnan( NormalizedAbsDifTOTMOD))=0;
-   
+
     QdiagR1_HS=diag(HSQTFTotRe,shiftdw1);
     QdiagI1_HS=diag(HSQTFTotIm,shiftdw1);
     QdiagA1_HS=diag(sqrt(HSQTFTotRe.^2+HSQTFTotIm.^2),shiftdw1);
     QdiagP1_HS=diag(atan(HSQTFTotIm./HSQTFTotRe),shiftdw1)./pi;
-    
+
     QdiagR2_HS=diag(HSQTFTotRe,shiftdw2);
     QdiagI2_HS=diag(HSQTFTotIm,shiftdw2);
     QdiagA2_HS=diag(sqrt(HSQTFTotRe.^2+HSQTFTotIm.^2),shiftdw2);
@@ -435,10 +443,10 @@ plot_properties;
 subplot(2,1,2)
 if IDHYDROSTAR==1
     plot(freqnorm2,QdiagR2_HS,'-b',freqnorm2,QdiagI2_HS,'-.b',freqnorm2,QdiagR2,'--r',freqnorm2,QdiagI2,':r');
-    
+
 else
     plot(freqnorm2,QdiagR2,'--r',freqnorm2,QdiagI2,':r');
-    
+
 end
 if Idwvar==0
     title([qtflabel,' for \Deltaw=',num2str(abs(shiftdw2)*dww,3)])
@@ -472,14 +480,14 @@ if IDHYDROSTAR==1
     end
     [WW1,WW2]=meshgrid(ww1,ww2);
     figure
-    
+
     diffQdatTotMod=HSQTFTotMod-QdatTotMod;
     subplot(1,3,2)
     surf(ww1,ww2,QdatTotMod,'edgecolor','none');
     ax=gca;
-    hold(ax,'on'); 
+    hold(ax,'on');
     if IdContval==1
-         funP_contour(ax,ww1,ww2,QdatTotMod,Contval,max(max(max(QdatTotMod))),'w',1.5);     
+         funP_contour(ax,ww1,ww2,QdatTotMod,Contval,max(max(max(QdatTotMod))),'w',1.5);
     else
         funP_contour(ax,ww1,ww2,QdatTotMod,[],max(max(max(QdatTotMod))),'w',1.5);
     end
@@ -497,13 +505,13 @@ if IDHYDROSTAR==1
     subplot(1,3,1)
     surf(ww1,ww2,HSQTFTotMod,'edgecolor','none');
     ax=gca;
-    hold(ax,'on'); 
+    hold(ax,'on');
     if IdContval==1
-        funP_contour(ax,ww1,ww2,HSQTFTotMod,Contval,max(max(max(HSQTFTotMod))),'w',1.5);     
+        funP_contour(ax,ww1,ww2,HSQTFTotMod,Contval,max(max(max(HSQTFTotMod))),'w',1.5);
     else
         funP_contour(ax,ww1,ww2,HSQTFTotMod,[],max(max(max(HSQTFTotMod))),'w',1.5);
     end
-    
+
     xlabel(w1lab);ylabel(w2lab);
     title(['HYDROSTAR'])
     caxis([minQMod, maxQMod])
@@ -553,8 +561,8 @@ if IDHYDROSTAR==1
     axis equal
     view(2)
     plot_properties;
-    
-    
+
+
     %% surf plot QTF total
     figure;
     subplot(3,3,1)
@@ -586,7 +594,7 @@ if IDHYDROSTAR==1
     if Idaxisij==1,axis ij;end
     axis equal
     view(2)
-    
+
     subplot(3,3,2)
     surf(ww1,ww2,QdatTotI,'edgecolor','none')
     title(['Im Tot'])
@@ -614,7 +622,7 @@ if IDHYDROSTAR==1
     if Idaxisij==1,axis ij;end
     axis equal
     view(2)
-    
+
     subplot(3,3,3)
     surf(ww1,ww2,QdatTotMod,'edgecolor','none')
     title(['Mod Tot'])
@@ -642,14 +650,14 @@ if IDHYDROSTAR==1
     if Idaxisij==1,axis ij;end
     axis equal
     view(2)
-    
+
 else
     %% [c,h]=contour plot QTF total
     minQMod=min(min(min(QdatTotMod)));
     maxQMod=max(max(max(QdatTotMod)));
-    
+
     figure
-    
+
     if IdContval==1
         [c,h]=contour(ww1,ww2,QdatTotMod,Contval,'ShowText','on','linewidth',1.5);
     else
@@ -666,14 +674,14 @@ else
     axis equal
     view(2)
     plot_properties;
-    
+
     %  cb=colorbar;
     %  ylabel(cb,qtflabel,'/\rhog')
     if Idaxisij==1,axis ij;end
     axis equal
     view(2)
     plot_properties;
-    
+
     %% surf plot QTF total
     if  IdMinMaxQTFReIm==0
     minTotI=min(min(QdatTotI));maxTotI=max(max(QdatTotI));
@@ -686,7 +694,7 @@ else
     maxTotR=maxTotI;%max(min(QdatTotR));
     minTotMod=minTotI;%min(min(QdatTotMod));
     maxTotMod=maxTotR;%max(max(QdatTotMod));
-    
+
     figure;
     subplot(1,3,1)
     surf(ww1,ww2,QdatTotR,'edgecolor','none')
@@ -699,8 +707,8 @@ else
     if Idaxisij==1,axis ij;end
     axis equal
     view(2)
-    
-    
+
+
     subplot(1,3,2)
     surf(ww1,ww2,QdatTotI,'edgecolor','none')
     title(['Im Tot'])
@@ -710,7 +718,7 @@ else
     if Idaxisij==1,axis ij;end
     axis equal
     view(2)
-    
+
     subplot(1,3,3)
     surf(ww1,ww2,QdatTotMod,'edgecolor','none')
     title(['Mod Tot'])
@@ -720,5 +728,5 @@ else
     if Idaxisij==1,axis ij;end
     axis equal
     view(2)
-    
+
 end

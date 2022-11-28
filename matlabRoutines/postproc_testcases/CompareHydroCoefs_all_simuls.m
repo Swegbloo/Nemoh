@@ -9,7 +9,7 @@ close all
 cd (pathstr);
 addpath(genpath(pathstr))
 
-TestCaseNo=5; 
+TestCaseNo=7;
 IDRAO=0;               % 0 or 1; 0 not computed
 if TestCaseNo==1       %3_NonSymmetrical
     dataparamNEMOH1_5;
@@ -19,16 +19,19 @@ elseif TestCaseNo==2   %8a_Cylinder_irregfreq
     IDRAO=0;
 elseif  TestCaseNo==3  %8b_QTF_Cylinder
     dataparamNEMOH1_1;
-    IDRAO=1; 
+    IDRAO=1;
 elseif TestCaseNo==4   %9_QTF_OC4_Semisubmersible
-    dataparamNEMOH1_2; 
-    IDRAO=1;   
+    dataparamNEMOH1_2;
+    IDRAO=1;
 elseif TestCaseNo==5   %10a_QTF_SOFTWIND
     dataparamNEMOH1_3;
-    IDRAO=1;      
-elseif TestCaseNo==6   %11b_QTF_SOFTWIND_FS
+    IDRAO=1;
+elseif TestCaseNo==6   %10b_QTF_SOFTWIND_FS
     dataparamNEMOH1_4
-    IDRAO=1;      
+    IDRAO=1;
+elseif TestCaseNo==7   %10b_QTF_SOFTWIND_FS
+    dataparamNEMOH1_7
+    IDRAO=1;
 end
 
 ID_MODES_PLOT=3;%1 all modes; 2= modes 1,3,5; 3= modes 1,3,5, 2,4,6
@@ -51,18 +54,18 @@ if IDHYDROSTAR==1
         elseif IDDOF==5,FHdof='my';
         elseif IDDOF==6,FHdof='mz';
         end
-        
+
         NHeader=22;
         for Idbeta=1:NbetaHdat
             datFH=fun_readMdirHydrostarOutput(...
                 ['./',hydrostarDir,'/',FHdof,'f1st.rao'],NHeader,Idbeta,NbetaHdat);
-            
+
             wwH=datFH(:,1);
             FdatH(:,IDDOF,Idbeta)=datFH(:,2);
             FdatH(:,IDDOF+6,Idbeta)=deg2rad(datFH(:,3));
         end
     end
-    
+
     AMatH=zeros(size(wwH,1),6,6);
     BMatH=zeros(size(wwH,1),6,6);
     for IDDOF=1:6
@@ -76,8 +79,8 @@ if IDHYDROSTAR==1
             BMatH(:,IDDOF,j)=datHB(:,2);
         end
     end
-    
-    
+
+
     if IDRAO==1
         for IDDOF=1:6
             if IDDOF==1,    RHdof='surge';
@@ -174,14 +177,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,1,1))),lintype{II})
     end
         plot_properties
-  
+
     ylabel([ylab,'_{11}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,7)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,2,1))),HySmb,...
@@ -190,7 +193,7 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,2,1))),lintype{II})
     end
          plot_properties
-   
+
     ylabel([ylab,'_{21}']);
     hold on;
     if Idlimitaxes==1
@@ -205,7 +208,7 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,2,2))),lintype{II})
     end
         plot_properties
-   
+
     ylabel([ylab,'_{22}']);
     hold on;
     if Idlimitaxes==1
@@ -219,13 +222,14 @@ if ID_MODES_PLOT==1
      else
         plot(axw,squeeze(squeeze(AmatNem(:,3,1))),lintype{II})
     end
+    plot_properties
     ylabel([ylab,'_{31}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,14)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,3,2))),HySmb,...
@@ -234,7 +238,7 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,3,2))),lintype{II})
     end
      plot_properties
-   
+
     ylabel([ylab,'_{32}']);
     hold on;
     if Idlimitaxes==1
@@ -249,7 +253,7 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,3,3))),lintype{II})
     end
     plot_properties
-   
+
     ylabel([ylab,'_{33}']);
     hold on;
     if Idlimitaxes==1
@@ -264,14 +268,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,4,1))),lintype{II})
     end
       plot_properties
-   
+
     ylabel([ylab,'_{41}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,20)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,4,2))),HySmb,...
@@ -280,14 +284,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,4,2))),lintype{II})
     end
        plot_properties
-  
+
     ylabel([ylab,'_{42}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,21)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,4,3))),HySmb,...
@@ -296,14 +300,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,4,3))),lintype{II})
     end
        plot_properties
-  
+
     ylabel([ylab,'_{43}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,22)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,4,4))),HySmb,...
@@ -312,14 +316,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,4,4))),lintype{II})
     end
     plot_properties
-   
+
     ylabel([ylab,'_{44}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,25)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,5,1))),HySmb,...
@@ -328,14 +332,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,5,1))),lintype{II})
     end
      plot_properties
-   
+
     ylabel([ylab,'_{51}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,26)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,5,2))),HySmb,...
@@ -344,14 +348,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,5,2))),lintype{II})
     end
      plot_properties
-  
+
     ylabel([ylab,'_{52}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,27)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,5,3))),HySmb,...
@@ -360,14 +364,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,5,3))),lintype{II})
     end
         plot_properties
-  
+
     ylabel([ylab,'_{53}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,28)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,5,4))),HySmb,...
@@ -376,14 +380,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,5,4))),lintype{II})
     end
      plot_properties
-   
+
     ylabel([ylab,'_{54}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,29)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,5,5))),HySmb,...
@@ -398,7 +402,7 @@ if ID_MODES_PLOT==1
     end
     xlabel(xlab)
     plot_properties
-    
+
     subplot(6,6,31)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,6,1))),HySmb,...
@@ -414,7 +418,7 @@ if ID_MODES_PLOT==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,32)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,6,2))),HySmb,...
@@ -429,7 +433,7 @@ if ID_MODES_PLOT==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,33)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,6,3))),HySmb,...
@@ -438,14 +442,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,6,3))),lintype{II})
     end
     plot_properties
-   
+
     ylabel([ylab,'_{63}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,34)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,6,4))),HySmb,...
@@ -454,14 +458,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,6,4))),lintype{II})
     end
        plot_properties
-   
+
     ylabel([ylab,'_{64}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,35)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,6,5))),HySmb,...
@@ -470,14 +474,14 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,6,5))),lintype{II})
     end
      plot_properties
-  
+
     ylabel([ylab,'_{65}']);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(6,6,36)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(AMatH(:,6,6))),HySmb,...
@@ -486,7 +490,7 @@ if ID_MODES_PLOT==1
         plot(axw,squeeze(squeeze(AmatNem(:,6,6))),lintype{II})
     end
       plot_properties
-   
+
     ylabel([ylab,'_{66}']);
     hold on;
     if Idlimitaxes==1
@@ -502,7 +506,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(AmatNem(:,1,1))),lintype{II})
     end
          plot_properties
-  
+
     ylabel([ylab,'_{11}']);
     hold on;
     if Idlimitaxes==1
@@ -517,7 +521,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(AmatNem(:,3,3))),lintype{II})
     end
         plot_properties
-  
+
     ylabel([ylab,'_{33}']);
     hold on;
     if Idlimitaxes==1
@@ -532,7 +536,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(AmatNem(:,3,1))),lintype{II})
     end
     plot_properties
-   
+
     ylabel([ylab,'_{31}']);
     hold on;
     if Idlimitaxes==1
@@ -547,7 +551,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(AmatNem(:,5,5))),lintype{II})
     end
       plot_properties
-   
+
     ylabel([ylab,'_{55}']);
     hold on;
     if Idlimitaxes==1
@@ -562,7 +566,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(AmatNem(:,5,1))),lintype{II})
     end
      plot_properties
- 
+
     ylabel([ylab,'_{51}']);
     hold on;
     if Idlimitaxes==1
@@ -577,7 +581,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(AmatNem(:,5,3))),lintype{II})
     end
       plot_properties
-   
+
     ylabel([ylab,'_{53}']);
     hold on;
     if Idlimitaxes==1
@@ -593,7 +597,7 @@ elseif ID_MODES_PLOT==3
         plot(axw,squeeze(squeeze(AmatNem(:,1,1))),lintype{II})
     end
         plot_properties
-  
+
     ylabel([ylab,'_{11}']);
     hold on;
     if Idlimitaxes==1
@@ -608,7 +612,7 @@ elseif ID_MODES_PLOT==3
         plot(axw,squeeze(squeeze(AmatNem(:,2,2))),lintype{II})
     end
       plot_properties
-   
+
     ylabel([ylab,'_{22}']);
     hold on;
     if Idlimitaxes==1
@@ -623,7 +627,7 @@ elseif ID_MODES_PLOT==3
         plot(axw,squeeze(squeeze(AmatNem(:,3,3))),lintype{II})
     end
       plot_properties
-   
+
     ylabel([ylab,'_{33}']);
     hold on;
     if Idlimitaxes==1
@@ -638,7 +642,7 @@ elseif ID_MODES_PLOT==3
         plot(axw,squeeze(squeeze(AmatNem(:,4,4))),lintype{II})
     end
       plot_properties
-   
+
     ylabel([ylab,'_{44}']);
     hold on;
     if Idlimitaxes==1
@@ -653,7 +657,7 @@ elseif ID_MODES_PLOT==3
         plot(axw,squeeze(squeeze(AmatNem(:,5,5))),lintype{II})
     end
      plot_properties
-   
+
     ylabel([ylab,'_{55}']);
     hold on;
     if Idlimitaxes==1
@@ -668,7 +672,7 @@ elseif ID_MODES_PLOT==3
         plot(axw,squeeze(squeeze(AmatNem(:,6,6))),lintype{II})
     end
       plot_properties
-  
+
     ylabel([ylab,'_{66}']);
     hold on;
     if Idlimitaxes==1
@@ -876,7 +880,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(FdatNem(:,1,IdbetaPlot))),lintype{II})
     end
       plot_properties
-   
+
     ylabel([ylab,'_{1}',ylabN]);
     hold on;
     if Idlimitaxes==1
@@ -897,7 +901,7 @@ elseif ID_MODES_PLOT==2
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(3,2,3)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(FdatH(:,3,IdbetaPlotH))),HySmb,...
@@ -926,7 +930,7 @@ elseif ID_MODES_PLOT==2
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
      subplot(3,2,5)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(FdatH(:,5,IdbetaPlotH))),HySmb,...
@@ -955,7 +959,7 @@ elseif ID_MODES_PLOT==2
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     elseif ID_MODES_PLOT==3
     subplot(3,2,1)
     if II==1 && IDHYDROSTAR==1
@@ -985,7 +989,7 @@ elseif ID_MODES_PLOT==2
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
     subplot(3,2,3)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(FdatH(:,3,IdbetaPlotH))),HySmb,...
@@ -1008,14 +1012,14 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(FdatNem(:,4,IdbetaPlot))),lintype{II})
     end
          plot_properties
-   
+
     ylabel([ylab,'_{4}',ylabN]);
     hold on;
     if Idlimitaxes==1
         xlim([xlimval]);
     end
     xlabel(xlab)
-    
+
      subplot(3,2,5)
     if II==1 && IDHYDROSTAR==1
         plot(axwH,squeeze(squeeze(FdatH(:,5,IdbetaPlotH))),HySmb,...
@@ -1024,7 +1028,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(FdatNem(:,5,IdbetaPlot))),lintype{II})
     end
      plot_properties
-   
+
     ylabel([ylab,'_{5}',ylabN]);
     hold on;
     if Idlimitaxes==1
@@ -1039,7 +1043,7 @@ elseif ID_MODES_PLOT==2
         plot(axw,squeeze(squeeze(FdatNem(:,6,IdbetaPlot))),lintype{II})
     end
         plot_properties
-   
+
    ylabel([ylab,'_{6}',ylabN]);
     hold on;
     if Idlimitaxes==1

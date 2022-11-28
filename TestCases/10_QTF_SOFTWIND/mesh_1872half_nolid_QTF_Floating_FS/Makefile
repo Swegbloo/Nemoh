@@ -4,9 +4,9 @@ bindir=../../../bin/
 
 # Build and run Sphere reference test case.
 run:
-		#	$(bindir)/preProc .
-		#	$(bindir)/solver .
-		#	$(bindir)/postProc .
+			$(bindir)/preProc .
+			$(bindir)/solver .
+			$(bindir)/postProc .
 			$(bindir)/QTFpreProc .
 			$(bindir)/QTFsolver .
 			$(bindir)/QTFpostProc .
