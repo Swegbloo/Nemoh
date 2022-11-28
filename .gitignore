@@ -6,6 +6,7 @@
 ./pythonRoutines/*.txt
 *.swp
 build*
+bin/*
 # Test files
 Validation/**/logfile.txt
 Validation/**/Normalvelocities.dat

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 
 project(Nemoh Fortran)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel")
     set(CMAKE_Fortran_FLAGS "-cpp")
