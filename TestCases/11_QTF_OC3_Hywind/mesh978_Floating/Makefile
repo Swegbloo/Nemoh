@@ -21,4 +21,3 @@ clean:
 			rm -rf Motion/
 			rm -rf QTFPreprocOut/
 			rm -rf fort.40
-
