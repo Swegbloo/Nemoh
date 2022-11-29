@@ -947,8 +947,8 @@ CONTAINS
           (Isym,Npanels,Mesh%XM,Mesh%A,depth,Nbessel,k2,ZIG_Per_Iw2)
   !Prepare Integral over radius of free surface (Rext,Infinity)
   DO Ibessel=1,Nbessel+1
-   IR1l(:,Ibessel)=Fun_IR1l(Ibessel,k1,k2,delk,sumk,Rf,NRf)
-   IR2l(:,Ibessel)=Fun_IR2l(Ibessel,k1,k2,delk,sumk,Rf,NRf)
+   IR1l(:,Ibessel)=Fun_IR1l(Ibessel-1,k1,k2,delk,sumk,Rf,NRf)
+   IR2l(:,Ibessel)=Fun_IR2l(Ibessel-1,k1,k2,delk,sumk,Rf,NRf)
    IF (delk.EQ.0)  IR1l(1,Ibessel)=0.
    IF (delk.EQ.0)  IR2l(1,Ibessel)=0.
   ENDDO

@@ -21,14 +21,15 @@
 !   - J.C. Daubisse
 !   - J. Singh
 !   - A. Babarit
-!
+!   - R. Kurnia
 !--------------------------------------------------------------------------------------
 MODULE KOCHIN
 
   USE Constants
   USE MMesh,        ONLY: TMesh
   USE MEnvironment, ONLY: TEnvironment
-
+  USE Elementary_functions,       ONLY: DOT_PRODUCT_COMPLEX
+  
   IMPLICIT NONE
 
   PUBLIC  :: COMPUTE_AND_WRITE_KOCHIN
@@ -65,11 +66,11 @@ CONTAINS
     ALLOCATE(HKochin(Ntheta))
     DO i = 1, NTheta
       CALL COMPUTE_ZS(Mesh, wavenumber, Env, Thetas(i), 1, ZS)
-      Hkochin(i) = DOT_PRODUCT(ZIGB, ZS)
+      Hkochin(i) = DOT_PRODUCT_COMPLEX(ZIGB, ZS,Mesh%NPanels)
 
       IF (Mesh%ISym == Y_SYMMETRY) THEN
         CALL COMPUTE_ZS(Mesh, wavenumber, Env, Thetas(i), -1, ZS)
-        Hkochin(i) = Hkochin(i) + DOT_PRODUCT(ZIGS, ZS)
+        Hkochin(i) = Hkochin(i) + DOT_PRODUCT_COMPLEX(ZIGS, ZS,Mesh%NPanels)
       END IF
 
       HKochin(i) = HKochin(i)/(4*PI)

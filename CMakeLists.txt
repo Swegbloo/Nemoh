@@ -16,6 +16,7 @@ endif()
 
 set(COMMON_SRC_DIR ${PROJECT_SOURCE_DIR}/Common)
 set(CORE_SRC_DIR ${PROJECT_SOURCE_DIR}/Solver/Core)
+set(EXTERNAL_SRC_DIR ${PROJECT_SOURCE_DIR}/external)
 
 add_subdirectory(Mesh)
 add_subdirectory(preProcessor)
@@ -26,4 +27,4 @@ add_subdirectory(QTF)
 
 include(CTest)
 
-add_subdirectory(Validation)
+add_subdirectory(TestCases)

@@ -1,9 +1,9 @@
 find_package(LAPACK REQUIRED)
 
 set(SOLVER_SRC
-    ${CORE_SRC_DIR}/cPackgmres.f
-    ${CORE_SRC_DIR}/zPackgmres.f
-    ${CORE_SRC_DIR}/blas_rot.f
+    ${EXTERNAL_SRC_DIR}/GMRES_CERFACS/cPackgmres.f
+    ${EXTERNAL_SRC_DIR}/GMRES_CERFACS/zPackgmres.f
+    ${EXTERNAL_SRC_DIR}/GMRES_CERFACS/blas_rot.f
     ${CORE_SRC_DIR}/OUTPUT.f90
     ${CORE_SRC_DIR}/M_SOLVER.f90
     ${CORE_SRC_DIR}/GREEN_1.f90

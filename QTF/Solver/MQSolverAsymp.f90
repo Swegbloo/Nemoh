@@ -30,8 +30,8 @@ MODULE MQSOLVERASYMP
 
 USE CONSTANTS          , ONLY:II,CZERO,PI
 USE MEnvironment,        ONLY:Fun_Dispersion
-USE Elementary_functions,ONLY:CIH,fun_BESSJ,   &
-                              Fun_KronDelta
+USE Elementary_functions,ONLY:CIH,Fun_KronDelta
+USE MBESSEL,             ONLY:fun_BESSJ  
 USE MROMBERG,            ONLY:romberg_trap
 IMPLICIT NONE
 
@@ -625,17 +625,17 @@ CONTAINS
           CnRad(2)=CnSnRad_sumk(1,nn)
           SnRad(2)=CnSnRad_sumk(2,nn)
           !for diff freq
-          Ivartheta(1)=Ivartheta(1)                                     &
-              +CONJG(CmPer)*CnRad(1)*cos(ll*beta)*Fun_Dlmn(1,ll,mm,nn)  &
-              +CONJG(CmPer)*SnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,nn,mm)  &
-              +CONJG(SmPer)*CnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,mm,nn)  &
-              +CONJG(SmPer)*SnRad(1)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,abs(ll))
+          Ivartheta(1)=Ivartheta(1)                                         &
+              +CONJG(CmPer)*CnRad(1)*cos(ll*beta)*Fun_Dlmn(1,ll,mm-1,nn-1)  &
+              +CONJG(CmPer)*SnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,nn-1,mm-1)  &
+              +CONJG(SmPer)*CnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,mm-1,nn-1)  &
+              +CONJG(SmPer)*SnRad(1)*cos(ll*beta)*Fun_Dlmn(0,nn-1,mm-1,abs(ll))
           !for sum freq
-          Ivartheta(2)=Ivartheta(2)                                     &
-              +CmPer*CnRad(2)*cos(ll*beta)*Fun_Dlmn(1,ll,mm,nn)         &
-              +CmPer*SnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,nn,mm)         &
-              +SmPer*CnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,mm,nn)         &
-              +SmPer*SnRad(2)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,abs(ll))
+          Ivartheta(2)=Ivartheta(2)                                         &
+              +CmPer*CnRad(2)*cos(ll*beta)*Fun_Dlmn(1,ll,mm-1,nn-1)         &
+              +CmPer*SnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,nn-1,mm-1)         &
+              +SmPer*CnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,mm-1,nn-1)         &
+              +SmPer*SnRad(2)*cos(ll*beta)*Fun_Dlmn(0,nn-1,mm-1,abs(ll))
         ENDDO
      ENDDO
   END FUNCTION
@@ -665,15 +665,15 @@ CONTAINS
           SnRad(2)=CnSnRad_sumk(2,nn)
 
           Ivartheta(1)=Ivartheta(1)                                     &
-              +CmPer*CnRad(1)*cos(ll*beta)*Fun_Dlmn(1,ll,mm,nn)         &
-              +CmPer*SnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,nn,mm)         &
-              +SmPer*CnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,mm,nn)         &
-              +SmPer*SnRad(1)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,abs(ll))
+              +CmPer*CnRad(1)*cos(ll*beta)*Fun_Dlmn(1,ll,mm-1,nn-1)     &
+              +CmPer*SnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,nn-1,mm-1)     &
+              +SmPer*CnRad(1)*sin(ll*beta)*Fun_Dlmn(0,ll,mm-1,nn-1)     &
+              +SmPer*SnRad(1)*cos(ll*beta)*Fun_Dlmn(0,nn-1,mm-1,abs(ll))
           Ivartheta(2)=Ivartheta(2)                                     &
-              +CmPer*CnRad(2)*cos(ll*beta)*Fun_Dlmn(1,ll,mm,nn)         &
-              +CmPer*SnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,nn,mm)         &
-              +SmPer*CnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,mm,nn)         &
-              +SmPer*SnRad(2)*cos(ll*beta)*Fun_Dlmn(0,nn,mm,abs(ll))
+              +CmPer*CnRad(2)*cos(ll*beta)*Fun_Dlmn(1,ll,mm-1,nn-1)     &
+              +CmPer*SnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,nn-1,mm-1)     &
+              +SmPer*CnRad(2)*sin(ll*beta)*Fun_Dlmn(0,ll,mm-1,nn-1)     &
+              +SmPer*SnRad(2)*cos(ll*beta)*Fun_Dlmn(0,nn-1,mm-1,abs(ll))
         ENDDO
      ENDDO
   END FUNCTION
@@ -749,6 +749,4 @@ CONTAINS
      IF (l.NE. 0) eps=2
   END FUNCTION
 !!---------------------------------------------------------------------
-
-
 END MODULE

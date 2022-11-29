@@ -8,11 +8,11 @@
 build*
 bin/*
 # Test files
-Validation/**/logfile.txt
-Validation/**/Normalvelocities.dat
-Validation/**/results/*
-Validation/**/mesh/*
-Validation/**/Motion/*
-Validation/**/logfileQTF.txt
-Validation/**/QTFPreprocOut/*
-Validation/7_QTF_Cylinder/**/Mechanics/*
+TestCases/**/logfile.txt
+TestCases/**/Normalvelocities.dat
+TestCases/**/results/*
+TestCases/**/mesh/*
+TestCases/**/Motion/*
+TestCases/**/logfileQTF.txt
+TestCases/**/QTFPreprocOut/*
+TestCases/8b_QTF_Cylinder/**/Mechanics/*
