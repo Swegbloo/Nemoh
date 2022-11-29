@@ -23,11 +23,17 @@ build-job:
       - bin/
       - build/
 
-test-job:
+test-nemoh1:
   stage: test
   script:
     - cd build
-    - ctest -V -j 20
+    - ctest -V -j 20 -L NEMOH1
+
+test-nemoh2:
+  stage: test
+  script:
+    - cd build
+    - ctest -V -j 20 -L NEMOH2
 
 release-job:
   stage: release
