@@ -1,4 +1,4 @@
-image: $CI_REGISTRY_IMAGE
+image: $CI_REGISTRY_IMAGE:linux
 
 stages:
     - build
@@ -13,27 +13,39 @@ workflow:
       when: always
     - when: never
 
-build-job:
+build-linux:
   stage: build
   script:
-    - cmake -S. -Bbuild
-    - cmake --build build
+    - cmake -S. -Bbuild_linux -DEXECUTABLES_OUTPUT_DIR=bin_linux
+    - cmake --build build_linux
   artifacts:
     paths:
-      - bin/
-      - build/
+      - bin_linux/
+      - build_linux/
+    expire_in: 1 week
+
+build-windows:
+  stage: build
+  image: $CI_REGISTRY_IMAGE:windows
+  script:
+    - cmake -S. -Bbuild_windows -DEXECUTABLES_OUTPUT_DIR=bin_windows
+    - cmake --build build_windows
+  artifacts:
+    paths:
+      - bin_windows/
+      - build_windows/
     expire_in: 1 week
 
 test-nemoh1:
   stage: test
   script:
-    - cd build
+    - cd build_linux
     - ctest -V -j 20 -L NEMOH1
 
 test-nemoh2:
   stage: test
   script:
-    - cd build
+    - cd build_linux
     - ctest -V -j 20 -L NEMOH2
 
 release-job:
@@ -42,15 +54,21 @@ release-job:
     - master
     - tags
   variables:
-    NEMOH_BIN_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/nemoh/${CI_COMMIT_TAG}/nemoh-linux-x64-${CI_COMMIT_TAG}.tar.gz"
+    NEMOH_LINUX_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/nemoh/${CI_COMMIT_TAG}/nemoh-linux-x64-${CI_COMMIT_TAG}.tar.gz"
+    NEMOH_WINDOWS_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/nemoh/${CI_COMMIT_TAG}/nemoh-windows-x64-${CI_COMMIT_TAG}.zip"
   script:
-    - tar -czf nemoh.tar.gz bin
-    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file nemoh.tar.gz $NEMOH_BIN_URL'
+    - tar -czf nemoh-linux.tar.gz -C bin_linux .
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file nemoh-linux.tar.gz $NEMOH_LINUX_URL'
+    - zip -D nemoh-windows.zip bin_windows/*
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file nemoh-windows.zip $NEMOH_WINDOWS_URL'
   release:
     tag_name: '$CI_COMMIT_TAG'
     description: '$CI_COMMIT_TAG'
     assets:
       links:
-        - name: linux-amd64
-        - url: $NEMOH_BIN_URL
-        - link_type: package
+        - name: linux-x64
+          url: $NEMOH_LINUX_URL
+          link_type: package
+        - name: windows-x64
+          url: $NEMOH_WINDOWS_URL
+          link_type: package
