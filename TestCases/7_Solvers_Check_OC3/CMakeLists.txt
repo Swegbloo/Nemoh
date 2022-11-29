@@ -1,5 +1,5 @@
 get_filename_component(TEST_BASE_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
-add_subdirectory(mesh4842_GaussElim)
-add_subdirectory(mesh4842_GMRES)
-add_subdirectory(mesh4842_LUdecomp)
+add_subdirectory(mesh978_GaussElim)
+add_subdirectory(mesh978_GMRES)
+add_subdirectory(mesh978_LUdecomp)

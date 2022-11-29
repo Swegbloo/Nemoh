@@ -1,0 +1,56 @@
+image: $CI_REGISTRY_IMAGE
+
+stages:
+    - build
+    - test
+    - release
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: always
+    - when: never
+
+build-job:
+  stage: build
+  script:
+    - cmake -S. -Bbuild
+    - cmake --build build
+  artifacts:
+    paths:
+      - bin/
+      - build/
+    expire_in: 1 week
+
+test-nemoh1:
+  stage: test
+  script:
+    - cd build
+    - ctest -V -j 20 -L NEMOH1
+
+test-nemoh2:
+  stage: test
+  script:
+    - cd build
+    - ctest -V -j 20 -L NEMOH2
+
+release-job:
+  stage: release
+  only:
+    - master
+    - tags
+  variables:
+    NEMOH_BIN_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/nemoh/${CI_COMMIT_TAG}/nemoh-linux-x64-${CI_COMMIT_TAG}.tar.gz"
+  script:
+    - tar -czf nemoh.tar.gz bin
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file nemoh.tar.gz $NEMOH_BIN_URL'
+  release:
+    tag_name: '$CI_COMMIT_TAG'
+    description: '$CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: linux-amd64
+        - url: $NEMOH_BIN_URL
+        - link_type: package

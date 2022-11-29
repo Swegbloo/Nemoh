@@ -1,5 +1,5 @@
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/mesh2200_Floating/. DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-set_number_of_frequencies(${CMAKE_CURRENT_BINARY_DIR} 10 5)
+set_number_of_frequencies(${CMAKE_CURRENT_BINARY_DIR} 3 2)
 
 get_filename_component(TEST_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 

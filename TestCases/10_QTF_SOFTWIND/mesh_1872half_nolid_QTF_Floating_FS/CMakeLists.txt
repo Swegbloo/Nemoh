@@ -1,5 +1,5 @@
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/. DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-set_number_of_frequencies(${CMAKE_CURRENT_BINARY_DIR} 10 3)
+set_number_of_frequencies(${CMAKE_CURRENT_BINARY_DIR} 3 2)
 
 set(TEST_NAME ${TEST_BASE_NAME}_B_FS)
 
