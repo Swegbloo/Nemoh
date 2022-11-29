@@ -6,7 +6,7 @@
 ./pythonRoutines/*.txt
 *.swp
 build*
-bin/*
+bin*
 # Test files
 TestCases/**/logfile.txt
 TestCases/**/Normalvelocities.dat
