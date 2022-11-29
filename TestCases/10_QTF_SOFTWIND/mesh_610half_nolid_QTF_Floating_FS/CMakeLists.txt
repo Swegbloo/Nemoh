@@ -1,7 +1,7 @@
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/. DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-set_number_of_frequencies(${CMAKE_CURRENT_BINARY_DIR} 10 5)
+set_number_of_frequencies(${CMAKE_CURRENT_BINARY_DIR} 3 2)
 
-set(TEST_NAME ${TEST_BASE_NAME}_A)
+set(TEST_NAME ${TEST_BASE_NAME}_B_FS)
 
 add_test(NAME ${TEST_NAME}_preProc COMMAND preProc .)
 add_test(NAME ${TEST_NAME}_solver COMMAND solver .)
