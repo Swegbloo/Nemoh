@@ -14,6 +14,10 @@ else()
 endif()
 message("CMAKE_RUNTIME_OUTPUT_DIRECTORY: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
+if(NOT DEFINED CMAKE_BUILD_TYPE)
+    set (CMAKE_BUILD_TYPE "Release")
+endif()
+
 if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel")
     set(CMAKE_Fortran_FLAGS "-cpp")
     # Other flags that may be useful: -r8 (force double-precision on all real numbers)

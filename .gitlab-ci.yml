@@ -16,7 +16,7 @@ workflow:
 build-linux:
   stage: build
   script:
-    - cmake -S. -Bbuild_linux -DEXECUTABLES_OUTPUT_DIR=bin_linux
+    - cmake -S. -Bbuild_linux -DEXECUTABLES_OUTPUT_DIR=bin_linux -DCMAKE_BUILD_TYPE=Release
     - cmake --build build_linux
   artifacts:
     paths:
@@ -28,7 +28,7 @@ build-windows:
   stage: build
   image: $CI_REGISTRY_IMAGE:windows
   script:
-    - cmake -S. -Bbuild_windows -DEXECUTABLES_OUTPUT_DIR=bin_windows
+    - cmake -S. -Bbuild_windows -DEXECUTABLES_OUTPUT_DIR=bin_windows -DCMAKE_BUILD_TYPE=Release
     - cmake --build build_windows
   artifacts:
     paths:
