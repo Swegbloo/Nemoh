@@ -14,3 +14,4 @@ clean:
 			rm -rf results/
 			rm -rf Normalvelocities.dat
 			rm -rf logfile.txt
+			rm -rf fort.40

@@ -9,7 +9,7 @@ close all
 cd (pathstr);
 addpath(genpath(pathstr))
 
-TestCaseNo=7;
+TestCaseNo=1;
 IDRAO=0;               % 0 or 1; 0 not computed
 if TestCaseNo==1       %3_NonSymmetrical
     dataparamNEMOH1_5;
