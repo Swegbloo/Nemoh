@@ -137,7 +137,7 @@ clean_11_QTF_OC3_Hywind:
 	$(MAKE) -C $(testdir)/11_QTF_OC3_Hywind/mesh978_Floating/ clean
 
 .PHONY: clean_all_testsNEMOH2
-clean_all_testsNEMOH1: clean_8b_QTF_Cylinder clean_9_oc4_semisub clean_10a_softwind \
+clean_all_testsNEMOH2: clean_8b_QTF_Cylinder clean_9_oc4_semisub clean_10a_softwind \
 						clean_10b_softwind_FS clean_11_QTF_OC3_Hywind
 
 .PHONY: clean_all_tests
