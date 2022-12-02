@@ -15,7 +15,7 @@ TestCases/**/mesh/*
 TestCases/**/Motion/*
 TestCases/**/logfileQTF.txt
 TestCases/**/QTFPreprocOut/*
-TestCases/8b_QTF_Cylinder/**/Mechanics/*
-TestCases/11_QTF_OC3_Hywind/**/Mechanics/*
-TestCases/11_QTF_OC3_Hywind/**/fort.40
-TestCases/7_Solvers_Check_OC3/**/fort.40
+TestCases/**/fort.40
+TestCases/**/Mechanics/*
+!TestCases/9_QTF_OC4_Semisubmersible/**/Mechanics/*
+!TestCases/10_QTF_SOFTWIND/**/Mechanics/*
