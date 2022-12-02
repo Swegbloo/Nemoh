@@ -1,41 +1,47 @@
 !--------------------------------------------------------------------------------------
 !
-!   Copyright 2014 Ecole Centrale de Nantes, 1 rue de la Noë, 44300 Nantes, France
+!    Copyright (C) 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598
 !
-!   Licensed under the Apache License, Version 2.0 (the "License");
-!   you may not use this file except in compliance with the License.
-!   You may obtain a copy of the License at
+!    This program is free software: you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by
+!    the Free Software Foundation, either version 3 of the License, or
+!    (at your option) any later version.
 !
-!       http://www.apache.org/licenses/LICENSE-2.0
+!    This program is distributed in the hope that it will be useful,
+!    but WITHOUT ANY WARRANTY; without even the implied warranty of
+!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!    GNU General Public License for more details.
 !
-!   Unless required by applicable law or agreed to in writing, software
-!   distributed under the License is distributed on an "AS IS" BASIS,
-!   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-!   See the License for the specific language governing permissions and
-!   limitations under the License. 
+!    You should have received a copy of the GNU General Public License
+!    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 !
 !   Contributors list:
-!   - A. Babarit  
+!   - A. Babarit
 !
 !--------------------------------------------------------------------------------------
 MODULE MIdentification
-! Definition of TYPE TID
-TYPE TID
-    CHARACTER*80 :: ID
-    INTEGER :: lID
-END TYPE TID
-!
-CONTAINS
-!   Read ID data from file
-    SUBROUTINE ReadTID(ID,file)
-    IMPLICIT NONE
-    CHARACTER*(*) :: file
-    TYPE(TID) :: ID
-    OPEN(10,FILE=file)
-    READ(10,*) ID%lID
-    READ(10,*) ID%ID
-    CLOSE(10)  
-    END SUBROUTINE
-!    
-END MODULE MIdentification
 
+  ! Definition of TYPE TID
+  TYPE TID
+    CHARACTER(LEN=80) :: ID
+    INTEGER :: lID
+  END TYPE TID
+
+CONTAINS
+
+  SUBROUTINE ReadTID(ID)
+    ! Read ID data from commad line argument
+
+    IMPLICIT NONE
+    TYPE(TID) :: ID
+
+    IF (COMMAND_ARGUMENT_COUNT() >= 1) THEN
+      CALL GET_COMMAND_ARGUMENT(1, ID%ID)
+    ELSE
+      ID%ID = "."
+    END IF
+    ID%lID = LEN(TRIM(ID%ID)) ! for legacy...
+
+  END SUBROUTINE
+
+END MODULE MIdentification
