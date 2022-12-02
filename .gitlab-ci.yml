@@ -53,12 +53,14 @@ test-nemoh1:
   script:
     - cd build_linux
     - ctest -V -j 20 -L NEMOH1
+  needs: ["build-linux"]
 
 test-nemoh2:
   stage: test
   script:
     - cd build_linux
     - ctest -V -j 20 -L NEMOH2
+  needs: ["build-linux"]
 
 release-job:
   stage: release
