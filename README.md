@@ -5,6 +5,12 @@ Copyright © 2022 Ecole Centrale de Nantes
 This product has been developed at [Ecole Centrale de Nantes](http://www.ec-nantes.fr) by
 G. Delhommeau, A. Babarit, J. Singh, P. Guével, J.C. Daubisse, R. Kurnia.
 
+## Pre-built binaries and documentation
+
+Pre-built binaries (executables) of all the Nemoh programs for Linux and Windows (x64) can be found in the `Releases` section of the project for each version (starting from v3.0.0), along with a PDF documentation.
+
+Alternatively, you can compile Nemoh by yourself using the following instructions.
+
 ## Compilation
 
 Compile all Nemoh executables using CMake (from the root of the repository):
@@ -35,9 +41,11 @@ The choice of the compiler is left to CMake, but can be overridden by setting th
 cmake -S. -Bbuild -DCMAKE_Fortran_COMPILER=gfortran
 ```
 
+Compilation was tested with GNU's `gfortran` and Intel's `ifort`.
+
 ## Testing
 
-After building, the tests can be run from the `build` directory:
+After building, the fast tests can be run from the `build` directory:
 
 ```shell
 ctest -V -j <N_concurrent>
@@ -60,3 +68,11 @@ Where label is one of the following:
 - `QTF`: only the computation of the QTF (depend on the prior non-QTF Nemoh computation)
 
 Tests with unsatisfied requirements will fail.
+
+In order to run the full test cases (matching reference data), Makefiles are provided in the `TestCases` directory and in each of the test cases' directories.
+
+## Bugs, improvements and questions
+
+Please use the GitLab Issues to report any bugs you might have encountered, to suggests improvements to the code and documentation and to ask questions.
+
+External contributions are welcome, but we suggest that you contact us beforehand to avoid conflicts with ongoing developments.
