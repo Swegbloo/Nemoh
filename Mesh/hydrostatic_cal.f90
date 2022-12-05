@@ -75,7 +75,7 @@
     NP=Mesh%Npoints
     NF=Mesh%Npanels
     Nsym=Mesh%Isym
-    OPEN(10,FILE='Mesh.cal')
+    OPEN(10,FILE=TRIM(ID%ID)//'/Mesh.cal')
     READ(10,*) DSCRPT%ID
     DSCRPT%lID=LNBLNK(DSCRPT%ID)
     READ(10,*)
