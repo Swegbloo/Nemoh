@@ -48,44 +48,10 @@ TestCasesDir=['.' filesep '..' filesep '..' filesep 'TestCases']; % needs to be 
 ID_PLOT_RESULTS=1;
 ID_QTF=0;
 ID_HydrosCal=0;     % A switch,1 computes hydrostatics, inertia, kH.
-% Check that executable files exist
-% Define where to look for executable files (default is in Nemoh parent folder)
-path   = ['.' filesep '..' filesep '..'];
-list   = dir(path);  %get info of files/folders in current directory
-dirnames  = {list([list.isdir]).name}; % directories names (including . and ..)
-dirnames  = dirnames(~(strcmp('.',dirnames)|strcmp('..',dirnames))); % remove . and .. directories names from list
-if isunix
-    for ci = 1:length(dirnames)
-        fileDir = char(dirnames(ci)); % current directory name
-        if isfile(fullfile(path,fileDir,'solver'))
-            bindir = fullfile(path,fileDir);
-        end
-    end
-    if exist('bindir','var')==0
-        error(['Binary/executable files not found in ' path])
-    end
-    if testcase >= 9 % we should check for QTF in same folder
-        if ~isfile(fullfile(bindir,'QTFsolver'))
-            error(['QTF binary/executable files not found in ' path])
-        end
-    end
-else
-    for ci = 1:length(dirnames)
-        fileDir = char(dirnames(ci)); % current directory name
-        if isfile(fullfile(path,fileDir,'solver.exe'))
-            bindir = fullfile(path,fileDir);
-        end
-    end
-    if exist('bindir','var')==0
-         error(['Binary/executable files not found in ' path])
-    end
-    if testcase >= 9 % we should check for QTF in same folder
-        if ~isfile(fullfile(bindir,'QTFsolver.exe'))
-            error(['QTF binary/executable files not found in ' path])
-        end
-    end
-end
-%
+
+% Check that Nemoh is available
+assert(FindingNemoh(ID_QTF, true))
+
 switch testcase
     case 1     % 1_Cylinder
         projdir=[TestCasesDir,filesep,'1_Cylinder'];
@@ -156,19 +122,19 @@ end
 
 %-------Launch Calculation------------
 if Nprojdir==1
-    [Idw,w,A,B,Fe]=Nemoh(bindir,projdir,ID_HydrosCal,ID_QTF); % Call the function Nemoh.m
+    [Idw,w,A,B,Fe]=Nemoh(projdir,ID_HydrosCal,ID_QTF); % Call the function Nemoh.m
 else
     for iproj=1:Nprojdir
-        [Idw,w,A,B,Fe]=Nemoh(bindir,projdir{iproj},ID_HydrosCal,ID_QTF); % Call the function Nemoh.m
+        [Idw,w,A,B,Fe]=Nemoh(projdir{iproj},ID_HydrosCal,ID_QTF); % Call the function Nemoh.m
     end
 end
 %% --- Computes QTFs --------------------
 if ID_QTF==1
     if Nprojdir==1
-        NemohQTF(bindir,projdir); % Call the function NemohQTF.m
+        NemohQTF(projdir); % Call the function NemohQTF.m
     else
         for iproj=1:Nprojdir
-            NemohQTF(bindir,projdir{iproj}); % Call the function NemohQTF.m
+            NemohQTF(projdir{iproj}); % Call the function NemohQTF.m
         end
     end
 end

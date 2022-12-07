@@ -19,36 +19,25 @@
 %   - R. Kurnia
 %--------------------------------------------------------------------------------------
 %
-% --> function []=NemohQTF(bindir,projdir)
+% --> function []=NemohQTF(projdir)
 %
 % Purpose: NEMOH Matlab wrapper for computing QTFs
 %
 % Inputs :
-% - bindir : Binary directory
 % - projdir: Project directory
 %
 %
-function NemohQTF(bindir,projdir)
+function NemohQTF(projdir)
 
 system(['mkdir ',projdir,filesep,'QTFPreprocOut']);
 system(['mkdir ',projdir,filesep,'results',filesep,'QTF']);
 
 % Calcul des coefficients hydrodynamiques
-l = isunix;
-if l == 1
-    fprintf('\n------ Starting QTF preproc ----------- \n');
-    system([bindir,filesep,'QTFpreProc ',projdir]);
-    fprintf('------ Computing QTFs ------------- \n');
-    system([bindir,filesep,'QTFsolver ',projdir]);
-    fprintf('------ Postprocessing results --- \n');
-    system([bindir,filesep,'QTFpostProc ',projdir]);
-else
-    fprintf('\n------ Starting QTF preproc ----------- \n');
-    system([bindir,filesep,'QTFpreProc.exe ',projdir]);
-    fprintf('------ Computing QTFs ------------- \n');
-    system([bindir,filesep,'QTFsolver.exe ',projdir]);
-    fprintf('------ Postprocessing results --- \n');
-    system([bindir,filesep,'QTFpostProc.exe ',projdir]);
-end
+fprintf('\n------ Starting QTF preproc ----------- \n');
+system(['QTFpreProc ',projdir]);
+fprintf('------ Computing QTFs ------------- \n');
+system(['QTFsolver ',projdir]);
+fprintf('------ Postprocessing results --- \n');
+system(['QTFpostProc ',projdir]);
 
 end

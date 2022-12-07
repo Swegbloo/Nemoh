@@ -19,7 +19,7 @@
 %-------------------------------------------------------------------------
 %
 % --> function Mesh(nBodies,n,X,tX,CG,nfobj,depth,wavefreq,wavedir,
-%                                                  QTFInput,bindir,projdir)
+%                                                  QTFInput,projdir)
 %
 % Purpose : Mesh generation of a symmetric body for use with Nemoh. Because
 %           of symmetry, only half of the body must be described.
@@ -35,7 +35,6 @@
 %   - wavefreq  : wave frequency [rad/s] input, [w1,w2,w3,...]
 %   - wavedir   : wave direction [deg] input, [beta1,beta2,beta3,...]
 %   - QTFInput  : QTF parameters input; [Switch 0 or 1, Contrib]
-%   - bindir    : path of the binaries/executables directory
 %   - projdir   : path of the project directory
 %
 % Outputs : produces NEMOH input files in the project directory. The files
@@ -43,7 +42,7 @@
 %           hydrostatic stiffness matrix KH.dat,Inertia.dat, Hydrostatics.dat
 %
 %
-function Mesh(nBodies,n,X,tX,CG,nfobj,depth,wavefreq,wavedir,QTFInput,bindir,projdir)
+function Mesh(nBodies,n,X,tX,CG,nfobj,depth,wavefreq,wavedir,QTFInput,projdir)
 status=close('all');
 system(['mkdir ',projdir]);
 system(['mkdir ',projdir,filesep,'mesh']);
@@ -114,12 +113,7 @@ for c=1:nBodies
     fprintf(fid,'%f \n',9.81);
     status=fclose(fid);
     %   Raffinement automatique du maillage et calculs hydrostatiques
-    l = isunix;
-    if l == 1
-        system([bindir,filesep,'mesh ',projdir]); %not yet tested
-    else
-        system([bindir,filesep,'mesh.exe ',projdir]);
-    end
+    system(['mesh ',projdir]); %not yet tested
     %   Visualisation du maillage
     clear x y z NN nftri tri u v w xu yv zw;
     fid=fopen([projdir,filesep,'mesh',filesep,'mesh',int2str(c),'.tec'],'r');

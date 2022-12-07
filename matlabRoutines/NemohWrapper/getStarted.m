@@ -38,8 +38,7 @@ clear all
 close all
 
 [pathstr,~,~] = fileparts(mfilename('fullpath'));
-cd (pathstr);
-addpath(genpath(pathstr))
+addpath(genpath(pathstr)); % include the subfolders in the Matlab PATH
 
 testcase=1;
 ID_PLOT_RESULTS=1;
@@ -47,43 +46,8 @@ ID_QTF=0; %flag to activate QTF computation (=1)
 
 outputdir=['.' filesep '..' filesep '..' filesep 'output'];   %updates this output files location
 
-% Check that executable files exist
-% Define where to look for executable files (default is in Nemoh parent folder)
-path   = ['.' filesep '..' filesep '..'];
-list   = dir(path);  %get info of files/folders in current directory
-dirnames  = {list([list.isdir]).name}; % directories names (including . and ..)
-dirnames  = dirnames(~(strcmp('.',dirnames)|strcmp('..',dirnames))); % remove . and .. directories names from list
-if isunix
-    for ci = 1:length(dirnames)
-        fileDir = char(dirnames(ci)); % current directory name
-        if isfile(fullfile(path,fileDir,'solver'))
-            bindir = fullfile(path,fileDir);
-        end
-    end
-    if exist('bindir','var')==0
-        error(['Binary/executable files not found in ' path])
-    end
-    if ID_QTF == 1 % we should check for QTF in same folder
-        if ~isfile(fullfile(bindir,'QTFsolver'))
-            error(['QTF binary/executable files not found in ' path])
-        end
-    end
-else
-    for ci = 1:length(dirnames)
-        fileDir = char(dirnames(ci)); % current directory name
-        if isfile(fullfile(path,fileDir,'solver.exe'))
-            bindir = fullfile(path,fileDir);
-        end
-    end
-    if exist('bindir','var')==0
-         error(['Binary/executable files not found in ' path])
-    end
-    if ID_QTF == 1 % we should check for QTF in same folder
-        if ~isfile(fullfile(bindir,'QTFsolver.exe'))
-            error(['QTF binary/executable files not found in ' path])
-        end
-    end
-end
+% Check that Nemoh is available
+assert(FindingNemoh(ID_QTF, true))
 
 switch testcase
     case 1
@@ -129,7 +93,7 @@ switch testcase
         wavedir=0;% angle of the incident waves
         depth=600; % water depth (m)
         QTFInput=[ID_QTF,2];%[Switch,Contrib]
-        Mesh(nBodies,ncoarse,X,tX,xyzCoG,nfobj,depth,w,wavedir,QTFInput,bindir,projdir);
+        Mesh(nBodies,ncoarse,X,tX,xyzCoG,nfobj,depth,w,wavedir,QTFInput,projdir);
         
     case 2
         %============ MESH WITH Mesh.m==================%
@@ -175,7 +139,7 @@ switch testcase
         wavedir=0;% angle of the incident waves
         depth=600; % water depth (m)
         QTFInput=[ID_QTF,2];%[Switch,Contrib]
-        Mesh(nBodies,ncoarse,X,tX,xyzCoG,nfobj,depth,w,wavedir,QTFInput,bindir,projdir);
+        Mesh(nBodies,ncoarse,X,tX,xyzCoG,nfobj,depth,w,wavedir,QTFInput,projdir);
         
     case 3
          %============ MESH WITH axiMesh.m==================%
@@ -204,7 +168,7 @@ switch testcase
         xyzCoG=[0,0,0];          % position of gravity centre
         QTFInput=[ID_QTF,2];     %[Switch,Contrib]
         
-        axiMesh(r,z,n,nang,npanelt,xyzCoG,depth,w,wavedir,QTFInput,bindir,projdir);% Call the function axiMesh.m
+        axiMesh(r,z,n,nang,npanelt,xyzCoG,depth,w,wavedir,QTFInput,projdir);% Call the function axiMesh.m
         
 end
 disp('Meshing done!')
@@ -212,10 +176,10 @@ disp('Check and adjust the produced Nemoh.cal in the project directory!')
 disp('Press enter for the NEMOH computation')
 pause;
 %-------Launch Calculation------------
-[Idw,w,A,B,Fe]=Nemoh(bindir,projdir,ID_HydrosCal,ID_QTF); % Call the function Nemoh.m
+[Idw,w,A,B,Fe]=Nemoh(projdir,ID_HydrosCal,ID_QTF); % Call the function Nemoh.m
 
 %% --- Computes QTFs --------------------
-if ID_QTF==1, NemohQTF(bindir,projdir);end % Call the function NemohQTF.m
+if ID_QTF==1, NemohQTF(projdir);end % Call the function NemohQTF.m
 
 %% ---------------------------------------
 if ID_PLOT_RESULTS==1 %Plot NEMOH1

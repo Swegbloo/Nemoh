@@ -20,12 +20,11 @@
 %   - R. Kurnia
 %--------------------------------------------------------------------------------------
 %
-% --> function [Idw,w,A,B,Fe]=Nemoh(bindir,projdir,ID_HydrosCal,ID_QTF)
+% --> function [Idw,w,A,B,Fe]=Nemoh(projdir,ID_HydrosCal,ID_QTF)
 %
 % Purpose: Matlab wrapper for calculation of hydrodynamic coefficients using Nemoh
 %
 % Inputs :
-% - bindir      : Binary directory path
 % - projdir     : Project directory path
 % - ID_HydrosCal: A switch to compute hydrostatics, 1 computed, 0 Not
 % - ID_QTF      : A switch to compute QTF, 1 computed, 0 Not
@@ -37,7 +36,7 @@
 % - Fe : Matrix (6xnBodies)xlength(w) of exciation forces (complex
 % values)
 %
-function [Idw,w,A,B,Fe]=Nemoh(bindir,projdir,ID_HydrosCal,ID_QTF)
+function [Idw,w,A,B,Fe]=Nemoh(projdir,ID_HydrosCal,ID_QTF)
 system(['mkdir ',projdir]);
 system(['mkdir ',projdir,filesep,'mesh']);
 system(['mkdir ',projdir,filesep,'results']);
@@ -50,30 +49,16 @@ if ID_QTF==1
 end
 
 % Calcul des coefficients hydrodynamiques
-l = isunix;
-if l == 1
-    fprintf('\n------ Starting NEMOH ----------- \n');
-    system([bindir,filesep,'preProc ',projdir]);
-    if ID_HydrosCal==1
-        fprintf('------ computes Hydrostatic ------------- \n');
-        system([bindir,filesep,'hydrosCal ',projdir]);
-    end
-    fprintf('------ Solving BVPs ------------- \n');
-    system([bindir,filesep,'solver ',projdir]);
-    fprintf('------ Postprocessing results --- \n');
-    system([bindir,filesep,'postProc ',projdir]);
-else
-    fprintf('\n------ Starting NEMOH ----------- \n');
-    system([bindir,filesep,'preProc.exe ',projdir]);
-    if ID_HydrosCal==1
-        fprintf('------ computes Hydrostatic ------------- \n');
-        system([bindir,filesep,'hydrosCal.exe ',projdir]);
-    end
-    fprintf('------ Solving BVPs ------------- \n');
-    system([bindir,filesep,'solver.exe ',projdir]);
-    fprintf('------ Postprocessing results --- \n');
-    system([bindir,filesep,'postProc.exe ',projdir]);
+fprintf('\n------ Starting NEMOH ----------- \n');
+system(['preProc ',projdir]);
+if ID_HydrosCal==1
+    fprintf('------ computes Hydrostatic ------------- \n');
+    system(['hydrosCal ',projdir]);
 end
+fprintf('------ Solving BVPs ------------- \n');
+system(['solver ',projdir]);
+fprintf('------ Postprocessing results --- \n');
+system(['postProc ',projdir]);
 %% Lecture des resultats CA CM Fe
 %clear Periode A B Famp Fphi Fe;
 

@@ -19,7 +19,7 @@
 %-------------------------------------------------------------------------
 %
 % --> function axiMesh(r,z,n,nang,npanelt,CoG,depth,wavefreq,wavedir,
-%                       QTFInput,bindir,projdir)
+%                       QTFInput,projdir)
 %
 % Purpose : Mesh generation of an axisymmetric body for use with Nemoh
 %
@@ -34,7 +34,6 @@
 %   - wavefreq  : wave frequency [rad/s] input, [w1,w2,w3,...]
 %   - wavedir   : wave direction [deg] input, [beta1,beta2,beta3,...]
 %   - QTFInput  : QTF parameters input; [Switch 0 or 1, Contrib]
-%   - bindir    : path of the binaries/executables directory
 %   - projdir   : path of the project directory
 
 % Outputs : produces NEMOH input files in the project directory. The files
@@ -44,7 +43,7 @@
 % Warning : z(i) must be greater than z(i+1)
 %
 %
-function axiMesh(r,z,n,nang,npanelt,CoG,depth,wavefreq,wavedir,QTFInput,bindir,projdir)
+function axiMesh(r,z,n,nang,npanelt,CoG,depth,wavefreq,wavedir,QTFInput,projdir)
 status=close('all');
 system(['mkdir ',projdir]);
 system(['mkdir ',projdir,filesep,'mesh']);
@@ -110,12 +109,7 @@ for i=1:nf
 end
 status=fclose(fid);
 % Raffinement automatique du maillage et calculs hydrostatiques
-l = isunix;
-if l == 1
-    system([bindir,filesep,'mesh ',projdir]);
-else
-    system([bindir,filesep,'mesh.exe ',projdir]);
-end
+system(['mesh ',projdir]);
 % if error due to mesh.cal please uncomment the line 83 and comment the line 84
 % The error due to the executables are not updated
 % yet.
