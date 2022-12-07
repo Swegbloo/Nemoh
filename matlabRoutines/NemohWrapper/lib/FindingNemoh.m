@@ -1,3 +1,15 @@
+%--------------------------------------------------------------------------------------
+%
+% --> function found = FindingNemoh(QTF, verbose)
+%
+% Purpose: Check that the Nemoh executables are in the system path, add
+% them otherwise.
+%
+% Inputs :
+% - QTF    : Whether to also include the QTF programs in the search
+% - verbose: Whether to output information about the search in the console
+%
+
 function found = FindingNemoh(QTF, verbose)
 
 if nargin<1 
