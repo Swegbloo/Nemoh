@@ -18,23 +18,23 @@
 %   Contributors list:
 %   - R. Kurnia
 %--------------------------------------------------------------------------------------
-%This m-file for running the provided NEMOH test-cases
-%The input files are already prepared in the TestCases folder
-%After running a test case, the results can be verified with the provided reference data
-%if Aquaplus data and a tecplot layout .lay are provided in the reference
-%folder, copy those files into /result/ then clicking .lay produces
-%comparison plots
-%if Hydrostar data is provided in the reference folder, uses matlab files in
-%postproc_testcase folder for the comparison plots.
+% This m-file for running the provided NEMOH test-cases
+% The input files are already prepared in the TestCases folder
+% After running a test case, the results can be verified with the provided reference data
+% if Aquaplus data and a tecplot layout .lay are provided in the reference
+% folder, copy those files into /result/ then clicking .lay produces
+% comparison plots
+% if Hydrostar data is provided in the reference folder, uses matlab files in
+% postproc_testcase folder for the comparison plots.
 %
-%For testcase 9 and 13, if the program stop due to error in Mesh.cal
-%location, please copy the Mesh.cal file from the testcase folder into the
-%folder as this m-file located.
-%This error due to a bug in previous executables! They will be updated
-%soon!
+% For testcase 9 and 13, if the program stop due to error in Mesh.cal
+% location, please copy the Mesh.cal file from the testcase folder into the
+% folder as this m-file located.
+% This error due to a bug in previous executables! They will be updated
+% soon!
 %
-%user has to specify the executables folder in bindir input below
-%user has to specify the TestCases folder in TestCasesDir input below
+% User has to specify the TestCases folder in TestCasesDir input below
+% User has to specify where to look for executables in path input below
 %-------------------------------------------------------------------------
 clc
 clear all
@@ -42,13 +42,50 @@ close all
 [pathstr,~,~] = fileparts(mfilename('fullpath'));
 cd (pathstr);
 addpath(genpath(pathstr))
-
+%
 testcase=1;
-bindir='.\..\..\..\bin_windows\';%updates this binary files location
-TestCasesDir='.\..\..\TestCases';
+TestCasesDir=['.' filesep '..' filesep '..' filesep 'TestCases']; % needs to be adjusted if you moved the present file
 ID_PLOT_RESULTS=1;
 ID_QTF=0;
 ID_HydrosCal=0;     % A switch,1 computes hydrostatics, inertia, kH.
+% Check that executable files exist
+% Define where to look for executable files (default is in Nemoh parent folder)
+path   = ['.' filesep '..' filesep '..'];
+list   = dir(path);  %get info of files/folders in current directory
+dirnames  = {list([list.isdir]).name}; % directories names (including . and ..)
+dirnames  = dirnames(~(strcmp('.',dirnames)|strcmp('..',dirnames))); % remove . and .. directories names from list
+if isunix
+    for ci = 1:length(dirnames)
+        fileDir = char(dirnames(ci)); % current directory name
+        if isfile(fullfile(path,fileDir,'solver'))
+            bindir = fullfile(path,fileDir);
+        end
+    end
+    if exist('bindir','var')==0
+        error(['Binary/executable files not found in ' path])
+    end
+    if testcase >= 9 % we should check for QTF in same folder
+        if ~isfile(fullfile(bindir,'QTFsolver'))
+            error(['QTF binary/executable files not found in ' path])
+        end
+    end
+else
+    for ci = 1:length(dirnames)
+        fileDir = char(dirnames(ci)); % current directory name
+        if isfile(fullfile(path,fileDir,'solver.exe'))
+            bindir = fullfile(path,fileDir);
+        end
+    end
+    if exist('bindir','var')==0
+         error(['Binary/executable files not found in ' path])
+    end
+    if testcase >= 9 % we should check for QTF in same folder
+        if ~isfile(fullfile(bindir,'QTFsolver.exe'))
+            error(['QTF binary/executable files not found in ' path])
+        end
+    end
+end
+%
 switch testcase
     case 1     % 1_Cylinder
         projdir=[TestCasesDir,filesep,'1_Cylinder'];

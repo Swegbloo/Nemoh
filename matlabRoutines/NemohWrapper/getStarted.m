@@ -18,20 +18,20 @@
 %   Contributors list:
 %   - R. Kurnia
 %--------------------------------------------------------------------------------------
-%This m-file for running NEMOH in MATLAB
-%It starts with refining a coarse mesh/aximesh
-%It produces Mesh.cal, Mesh.dat, Nemoh.cal
-%if process stop due to error in Mesh.cal location,
-%please go to lib/Mesh.m line, uncomment line 107 and comment line 108
-%please go to lib/axiMesh.m line, uncomment line 90 and comment line 91
-%this error due to a bug in previous executables! They will be updated
-%soon!
+% This m-file for running NEMOH in MATLAB
+% It starts with refining a coarse mesh/aximesh
+% It produces Mesh.cal, Mesh.dat, Nemoh.cal
+% if process stop due to error in Mesh.cal location,
+% please go to lib/Mesh.m line, uncomment line 107 and comment line 108
+% please go to lib/axiMesh.m line, uncomment line 90 and comment line 91
+% this error due to a bug in previous executables! They will be updated
+% soon!
 % After meshing done, user suggested to check or adjust the produced
 % Nemoh.cal if needed
-%After that software runs for NEMOH1 and NEMOH2 (QTF)
+% After that software runs for NEMOH1 and NEMOH2 (QTF)
 %
-%user has to specify the executables folder in bindir input below
-%user has to specify the output folder in outputdir input below
+% User has to specify the output folder in outputdir input below
+% User has to specify where to look for executables in path input below
 %--------------------------------------------------------------------------------------
 clc
 clear all
@@ -43,15 +43,53 @@ addpath(genpath(pathstr))
 
 testcase=1;
 ID_PLOT_RESULTS=1;
+ID_QTF=0; %flag to activate QTF computation (=1)
 
-bindir='.\..\..\..\bin_windows\';%updates this binary files location
-outputdir='.\..\..\..\output';   %updates this output files location
+outputdir=['.' filesep '..' filesep '..' filesep 'output'];   %updates this output files location
+
+% Check that executable files exist
+% Define where to look for executable files (default is in Nemoh parent folder)
+path   = ['.' filesep '..' filesep '..'];
+list   = dir(path);  %get info of files/folders in current directory
+dirnames  = {list([list.isdir]).name}; % directories names (including . and ..)
+dirnames  = dirnames(~(strcmp('.',dirnames)|strcmp('..',dirnames))); % remove . and .. directories names from list
+if isunix
+    for ci = 1:length(dirnames)
+        fileDir = char(dirnames(ci)); % current directory name
+        if isfile(fullfile(path,fileDir,'solver'))
+            bindir = fullfile(path,fileDir);
+        end
+    end
+    if exist('bindir','var')==0
+        error(['Binary/executable files not found in ' path])
+    end
+    if ID_QTF == 1 % we should check for QTF in same folder
+        if ~isfile(fullfile(bindir,'QTFsolver'))
+            error(['QTF binary/executable files not found in ' path])
+        end
+    end
+else
+    for ci = 1:length(dirnames)
+        fileDir = char(dirnames(ci)); % current directory name
+        if isfile(fullfile(path,fileDir,'solver.exe'))
+            bindir = fullfile(path,fileDir);
+        end
+    end
+    if exist('bindir','var')==0
+         error(['Binary/executable files not found in ' path])
+    end
+    if ID_QTF == 1 % we should check for QTF in same folder
+        if ~isfile(fullfile(bindir,'QTFsolver.exe'))
+            error(['QTF binary/executable files not found in ' path])
+        end
+    end
+end
+
 switch testcase
     case 1
         %============ MESH WITH Mesh.m==================%
         % RECTANGULAR BOX
         projdir=[outputdir,filesep,'RectangularLiu17'];
-        ID_QTF=0;
         ID_HydrosCal=0;     % A switch,1 computes hydrostatics, inertia, kH.
         % if RAO will be computed, see input in
         % Nemoh.cal, set ID_Hydroscal=1
@@ -97,7 +135,6 @@ switch testcase
         %============ MESH WITH Mesh.m==================%
         % RECTANGULAR BOX with lid panels for Ir. freq. removal
         projdir=[outputdir,filesep,'RectangularLiu17_IRR'];
-        ID_QTF=1;
         ID_HydrosCal=1;     % A switch,1 computes hydrostatics, inertia, kH.
         % if RAO will be computed, see input in
         % Nemoh.cal, set ID_Hydroscal=1
@@ -147,7 +184,6 @@ switch testcase
         ID_HydrosCal=0; % A switch,1 computes hydrostatics, inertia, kH.
         % if RAO will be computed, see input in
         % Nemoh.cal, set ID_Hydroscal=1
-        ID_QTF=0;
         
         nang=50;
         npanelt=600;
