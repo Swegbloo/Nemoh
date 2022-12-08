@@ -5,8 +5,10 @@
 ./pythonRoutines/*.pyc
 ./pythonRoutines/*.txt
 *.swp
+*.asv
 build*
 bin*
+output/
 # Test files
 TestCases/**/logfile.txt
 TestCases/**/Normalvelocities.dat

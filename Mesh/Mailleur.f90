@@ -113,7 +113,7 @@
 !**************************************************************
 
 SUBROUTINE plan(X1,X2,X3,X4,maille,noeud,n,facette,nf)
-
+  USE MIdentification
   INTEGER i,j,k
   INTEGER n,nf,ni,nj
   REAL X1,X2,X3,X4,Pi,Pf
@@ -126,8 +126,11 @@ SUBROUTINE plan(X1,X2,X3,X4,maille,noeud,n,facette,nf)
   REAL A1(3),A2(3),A3(3)
   ! REAL,PARAMETER :: njmn=3    ! Nombre minimum de points de discretisation
   INTEGER :: njmn
-
-  OPEN(10,FILE='Mesh.cal')
+  
+  TYPE(TID) :: ID
+  
+  CALL ReadTID(ID)
+  OPEN(10,FILE=TRIM(ID%ID)//'/Mesh.cal')
   DO i=1,5
     READ(10,*)
   END DO
