@@ -17,34 +17,29 @@
 %
 %   Contributors list:
 %   - R. Kurnia
+%
 %--------------------------------------------------------------------------------------
 % This m-file for running NEMOH in MATLAB
 % It starts with refining a coarse mesh/aximesh
 % It produces Mesh.cal, Mesh.dat, Nemoh.cal
-% if process stop due to error in Mesh.cal location,
-% please go to lib/Mesh.m line, uncomment line 107 and comment line 108
-% please go to lib/axiMesh.m line, uncomment line 90 and comment line 91
-% this error due to a bug in previous executables! They will be updated
-% soon!
 % After meshing done, user suggested to check or adjust the produced
 % Nemoh.cal if needed
 % After that software runs for NEMOH1 and NEMOH2 (QTF)
 %
 % User has to specify the output folder in outputdir input below
-% User has to specify where to look for executables in path input below
 %--------------------------------------------------------------------------------------
 clc
 clear all
 close all
 
 [pathstr,~,~] = fileparts(mfilename('fullpath'));
-addpath(genpath(pathstr)); % include the subfolders in the Matlab PATH
+addpath(genpath(pathstr)); % Include the subfolders in the Matlab PATH
 
-testcase=1;
-ID_PLOT_RESULTS=1;
-ID_QTF=0; %flag to activate QTF computation (=1)
+testcase = 1;
+ID_PLOT_RESULTS = 1;
+ID_QTF = 0; % Flag to activate QTF computation (0 or 1)
 
-outputdir=['.' filesep '..' filesep '..' filesep 'output'];   %updates this output files location
+outputdir = ['.' filesep '..' filesep '..' filesep 'output'];   % Update this output files location
 
 % Check that Nemoh is available
 assert(FindingNemoh(ID_QTF, true))

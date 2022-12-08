@@ -103,7 +103,6 @@ for c=1:nBodies
     fprintf('\n --> Number of nodes             : %g',nx(c));
     fprintf('\n --> Number of panels (max 2000) : %g \n',n(c));
     %   Creation des fichiers de calcul du maillage
-    %fid=fopen(['Mesh.cal'],'w');     %
     fid=fopen([projdir,filesep,'Mesh.cal'],'w');  %
     fprintf(fid,['mesh',int2str(c),'\n'],1);
     fprintf(fid,'1 \n %f 0. \n ',tX(c));

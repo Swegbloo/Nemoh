@@ -35,7 +35,7 @@
 %   - wavedir   : wave direction [deg] input, [beta1,beta2,beta3,...]
 %   - QTFInput  : QTF parameters input; [Switch 0 or 1, Contrib]
 %   - projdir   : path of the project directory
-
+%
 % Outputs : produces NEMOH input files in the project directory. The files
 %           are Mesh.cal, Nemoh.cal,input_solver.txt,[meshfile].dat,
 %           hydrostatic stiffness matrix KH.dat,Inertia.dat,Hydrostatics.dat
@@ -86,7 +86,6 @@ title('Characteristics of the discretisation');
 fprintf('\n --> Number of nodes             : %g',nx);
 fprintf('\n --> Number of panels (max 2000) : %g \n',nf);
 % Creation des fichiers de calcul du maillage
-%fid=fopen(['Mesh.cal'],'w');     %
 fid=fopen([projdir,filesep,'Mesh.cal'],'w');  %
 fprintf(fid,'axisym \n',1);
 fprintf(fid,'1 \n 0. 0. \n ');
@@ -110,9 +109,6 @@ end
 status=fclose(fid);
 % Raffinement automatique du maillage et calculs hydrostatiques
 system(['mesh ',projdir]);
-% if error due to mesh.cal please uncomment the line 83 and comment the line 84
-% The error due to the executables are not updated
-% yet.
 % Visualisation du maillage
 clear x y z NN nx nf nftri tri u v w;
 fid=fopen([projdir,filesep,'mesh',filesep,'axisym.tec'],'r');

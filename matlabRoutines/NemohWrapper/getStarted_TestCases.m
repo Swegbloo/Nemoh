@@ -17,6 +17,7 @@
 %
 %   Contributors list:
 %   - R. Kurnia
+%
 %--------------------------------------------------------------------------------------
 % This m-file for running the provided NEMOH test-cases
 % The input files are already prepared in the TestCases folder
@@ -27,14 +28,7 @@
 % if Hydrostar data is provided in the reference folder, uses matlab files in
 % postproc_testcase folder for the comparison plots.
 %
-% For testcase 9 and 13, if the program stop due to error in Mesh.cal
-% location, please copy the Mesh.cal file from the testcase folder into the
-% folder as this m-file located.
-% This error due to a bug in previous executables! They will be updated
-% soon!
-%
 % User has to specify the TestCases folder in TestCasesDir input below
-% User has to specify where to look for executables in path input below
 %-------------------------------------------------------------------------
 clc
 clear all
@@ -44,10 +38,10 @@ cd (pathstr);
 addpath(genpath(pathstr))
 %
 testcase=1;
-TestCasesDir=['.' filesep '..' filesep '..' filesep 'TestCases']; % needs to be adjusted if you moved the present file
-ID_PLOT_RESULTS=1;
-ID_QTF=0;
-ID_HydrosCal=0;     % A switch,1 computes hydrostatics, inertia, kH.
+TestCasesDir=['.' filesep '..' filesep '..' filesep 'TestCases']; % Needs to be adjusted if you moved the present file
+ID_PLOT_RESULTS = 1;
+ID_QTF = 0;
+ID_HydrosCal = 0;     % A switch,1 computes hydrostatics, inertia, kH.
 
 % Check that Nemoh is available
 assert(FindingNemoh(ID_QTF, true))
