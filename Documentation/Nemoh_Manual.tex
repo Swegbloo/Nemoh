@@ -1,5 +1,6 @@
 %\documentclass[12pt,a4paper]{report}
 \documentclass[12pt,a4paper,titlepage]{article}
+\usepackage[utf8]{inputenc}
 \usepackage[margin=1in]{geometry}
 \usepackage[english]{babel}
 \usepackage{amsmath}
@@ -22,13 +23,13 @@
 \begin{document}
 \title{NEMOH v3.0\\
 User Manual}
-\author{R. Kurnia and G. Ducrozet}
+\author{Ruddy Kurnia and Guillaume Ducrozet}
 \maketitle
-	
+
 \section*{Preamble}
 NEMOH is a Boundary Element Methods (BEM) code dedicated to the computation of wave loads on offshore structures (added mass, radiation damping, diffraction forces, etc.). It has been developed by researchers at Ecole Centrale de Nantes for 30 years. Since its first release in January 2014, NEMOH, as the world's first open-source BEM code, has been widely used by many researchers, and engineers. Typical use is the estimation of the dynamic response of floating structures or performance assessment of wave energy converters.
 
-Now together with this manual, we gladly release NEMOH v3.0 which includes all recent developments in the first-order module and a new extension module for computing quadratic transfer functions (QTFs). This release will be, to our knowledge, the sole and only open-source BEM software that provides the second-order module. 
+Now together with this manual, we gladly release NEMOH v3.0 which includes all recent developments in the first-order module and a new extension module for computing quadratic transfer functions (QTFs). This release will be, to our knowledge, the sole and only open-source BEM software that provides the second-order module.
 
 We sincerely hope that the use of this software, just as the design of it has been, will be fascinating, and challenging for academicians and practitioners in the ocean engineering community. We hope to receive comments and suggestions for further improvement and extension of the software that can be profitable for the community.
 \newpage
@@ -62,14 +63,14 @@ The present User Manual is organized as follows. Section \ref{Sec:Descrip_NEMOH}
 		\textbf{LICENSE}\\
 		\newline
 Copyright \copyright 2022 - LHEEA Lab., Ecole Centrale de Nantes, UMR CNRS 6598\\
-	
+
 NEMOH is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. \\
 
 This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\\
 
 You should have received a copy of the GNU General Public License along with this software.  If not, see \url{http://www.gnu.org/licenses/}.\\
 
-The software has been written by G. Delhommeau, P. Guevel, J.C. Daubisse, J. Singh, A. Babarit, R. Kurnia  
+The software has been written by G. Delhommeau, P. Guevel, J.C. Daubisse, J. Singh, A. Babarit, R. Kurnia
 
  }
 }
@@ -88,7 +89,7 @@ As sketched in Fig. \ref{fig:sketch}, we consider fluid domain in the Cartesian 
 
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=0.7,trim = 0mm 0mm 0mm 0mm, clip]{figures/Sketch.png}	
+\includegraphics[scale=0.7,trim = 0mm 0mm 0mm 0mm, clip]{figures/Sketch.png}
 \caption{Sketch definition of the system}\label{fig:sketch}
 \end{figure}
 
@@ -104,14 +105,14 @@ NEMOH1, the first-order solver, is based on the following modelling principles:
 \begin{align}\label{Eq:PhiHarm}
 \Phi(\bs x,t)=Re\left\lbrace\Phi^{(1)}(\bs x)e^{-i\omega t}\right\rbrace.
 \end{align}
-The total potential, $\Phi$, is the sum of the incident potential, the diffraction potential and the radiation potential. 
-The incident potential is defined as, with $k$ and $\omega$ related with the dispersion relation, $\vec{k}=k(\cos \beta,\sin \beta)$, $\beta$ is wave direction and $a$ is a unit wave amplitude, 
+The total potential, $\Phi$, is the sum of the incident potential, the diffraction potential and the radiation potential.
+The incident potential is defined as, with $k$ and $\omega$ related with the dispersion relation, $\vec{k}=k(\cos \beta,\sin \beta)$, $\beta$ is wave direction and $a$ is a unit wave amplitude,
 \begin{align}\label{Eq:PhiI}
 \Phi_{I}^{(1)}(\bs x)=-i\frac{a g}{\omega}\frac{\cosh(k(D+z))}{\cosh(kD)} e^{i\vec{k}\cdot \vec{x}}.
 \end{align}
 The radiation potential is defined as $\Phi_R(\bs x,t)=Re\left\lbrace \dot{\bs \xi}^{(1)}(t) \cdot \bs \psi(x)\right\rbrace$ where $\bs \psi(\bs x)$ is the normalized vector radiation potential.
 
-\item The three-dimensional linear potential flow problem around arbitrary body condition is reformulated in the Boundary Integral Equation (BIE) and transformed into the two-dimensional problem of the source distribution, $\sigma$, on the body surface, $S_B$, using Green's second identity and the appropriate Green function, $G(\bs x,\bs x')$. 
+\item The three-dimensional linear potential flow problem around arbitrary body condition is reformulated in the Boundary Integral Equation (BIE) and transformed into the two-dimensional problem of the source distribution, $\sigma$, on the body surface, $S_B$, using Green's second identity and the appropriate Green function, $G(\bs x,\bs x')$.
 \item The Green function is based on Delhommeau's formulation and is available for finite and infinite water-depth, see \cite{Delhommeau}.
 \item The source distribution depends on the considered boundary condition problem. For each frequency and wave direction, the diffraction source distribution, $\sigma_D(\bs x)$, depends on the position of the panels while the radiation source distribution, $\sigma_{R_j}(\bs x)$,  depends on the position of the panels and the considered degree of freedom $j$.
 
@@ -119,27 +120,27 @@ The radiation potential is defined as $\Phi_R(\bs x,t)=Re\left\lbrace \dot{\bs \
 \begin{align}
 \frac{1}{2}\sigma_{D,R_j}(\bs x)-\frac{1}{4\pi}\int_{S_B} \partial_n G(\bs x, \bs x') \sigma_{D,R_j}(\bs x') dS'=\mathcal{N}_{D,R_j}(\bs x). \label{Eq:BIE_source_distribution}
 \end{align}
-where $\mathcal{N}(\bs x)$ is the body normal condition. The diffraction normal condition is defined as $\mathcal{N}_D (\bs x)=-\partial_{n} \Phi_I^{(1)}(\bs x)$, the normalized radiation condition, $\mathcal{N}_R (\bs x)=\partial_{n} \Phi_{R_j}(\bs x)$, with $\Phi_{R_j}(\bs x)$ is the vector component-$j$ of the normalized radiation potential $\bs \psi(\bs x)$, explicitly $\bs \psi=(\Phi_{R_1},\Phi_{R_2},\cdots,\Phi_{R_{Ndof}})$. 
+where $\mathcal{N}(\bs x)$ is the body normal condition. The diffraction normal condition is defined as $\mathcal{N}_D (\bs x)=-\partial_{n} \Phi_I^{(1)}(\bs x)$, the normalized radiation condition, $\mathcal{N}_R (\bs x)=\partial_{n} \Phi_{R_j}(\bs x)$, with $\Phi_{R_j}(\bs x)$ is the vector component-$j$ of the normalized radiation potential $\bs \psi(\bs x)$, explicitly $\bs \psi=(\Phi_{R_1},\Phi_{R_2},\cdots,\Phi_{R_{Ndof}})$.
 
-\item The diffraction potential, $\Phi^{(1)}_{D}$, the normalized radiation  potential vector component-$j$, $\Phi_{R_j}$ and the corresponding velocities are then computed as follows, for the flow points in the fluid domain $\bs x \in S_B \cup V_{\Omega_F}$,
+\item The diffraction potential, $\Phi^{(1)}_{D}$, the normalized radiation potential vector component-$j$, $\Phi_{R_j}$ and the corresponding velocities are then computed as follows, for the flow points in the fluid domain $\bs x \in S_B \cup V_{\Omega_F}$,
 \begin{align} \label{Eq:BIE_Sol_Pot_Sb}
 \Phi^{(1)}_{D,R_j}(\bs x)=&-\frac{1}{4\pi}\int_{S_B} G(\bs x, \bs x') \sigma_{D,R_j}(\bs x') dS'\\
 \partial_{\bs x} \Phi^{(1)}_{D,R_j}(\bs x)=&\frac{1}{2}\sigma_{D,R_j}(\bs x)\bs{n}\delta_{\bs x \bs x'}-\frac{1}{4\pi}\int_{S_B} \partial_{\bs{x}} G(\bs x, \bs x') \sigma_{D,R_j}(\bs x') dS'
-\end{align}  
+\end{align}
 where the Kronecker delta $\delta_{\bs x \bs x'}=1 $ for $\bs x = \bs x'$, and $\delta_{\bs x \bs x'}=0$ otherwise.
 \item The hydrodynamic coefficients are then computed as follows, the excitation force is defined as
 \begin{align}
-\bs F_{exc}^{(1)}&=\rho \iint_{S_{B}} -i\omega\left[  \Phi_I^{(1)}+ \Phi_D^{(1)}\right]\bs \nu dS.
+\bs F_{exc}^{(1)}&=\rho \iint_{S_{B}} -i\omega\left[ \Phi_I^{(1)}+ \Phi_D^{(1)}\right]\bs \nu dS.
 \end{align}
 The added mass matrix and damping coefficient matrix components are computed as
 \begin{align}
-M^a_{ij}= -\rho \iint_{S_{B}}  \nu_{i} Re \left\lbrace\psi_{R_j} \right\rbrace dS\\
-B_{ij}= -\rho \omega \iint_{S_{B}} \nu_{i} Im \left\lbrace\psi_{R_j} \right\rbrace  dS.
+M^a_{ij}= -\rho \iint_{S_{B}} \nu_{i} Re \left\lbrace\psi_{R_j} \right\rbrace dS\\
+B_{ij}= -\rho \omega \iint_{S_{B}} \nu_{i} Im \left\lbrace\psi_{R_j} \right\rbrace dS.
 \end{align}
-\item  In post-processing, the radiation damping impulse response matrix function ($\bs{IRF}(t)$), the infinite frequency added mass matrix ($[\bs M^a](\infty)$), and the excitation force impulse response vector function ($\bs{IRF}_{ex}(t)$) are provided. They are computed as, 
+\item In post-processing, the radiation damping impulse response matrix function ($\bs{IRF}(t)$), the infinite frequency added mass matrix ($[\bs M^a](\infty)$), and the excitation force impulse response vector function ($\bs{IRF}_{ex}(t)$) are provided. They are computed as,
 \begin{align*}
 \bs{IRF}(t)&\approx\frac{2}{\pi}\int_0^{\omega_{max}}[\bs B](\omega)\cos(\omega t)d\omega, \\
-[\bs M^a](\infty)&\approx  \frac{1}{N_{\omega}}\sum_{i=1}^{N_{\omega}}[\bs M^a](\omega_i)+\int_0^{t_{max}}\bs{IRF}(t)\sin(\omega_i t)dt\\
+[\bs M^a](\infty)&\approx \frac{1}{N_{\omega}}\sum_{i=1}^{N_{\omega}}[\bs M^a](\omega_i)+\int_0^{t_{max}}\bs{IRF}(t)\sin(\omega_i t)dt\\
 \bs{IRF}_{exc}(t)&\approx\frac{1}{2\pi}\int_{-\omega_{max}}^{\omega_{max}}\bs F_{exc}(\omega)e^{-i\omega t}d\omega.
 \end{align*}
 where $\bs F_{exc}(-\omega)=\bs F^*_{exc}(\omega)$. Note that $\omega_{max}$ is a user-specified input, for better accuracy of $\bs{IRF}(t)$ make sure that $[\bs B ](\omega_{max})$ has reached an asymptotic value.
@@ -153,8 +154,8 @@ where $[\bs B_{add}]$ and $[\bs K_M]$ are user-specified additional damping and 
 NEMOH2, the second-order QTF module, is based on the following principles
 \begin{itemize}
 \item The second-order loads are composed of the quadratic part and the potential part, the detailed formulation is given in \cite{Kurnia22_JH,Kurnia22}.
-\item The quadratic part is based on the near-field method \cite{CHEN88}. 
-\item The potential part is based on the 
+\item The quadratic part is based on the near-field method \cite{CHEN88}.
+\item The potential part is based on the
 indirect method \cite{CHEN88,MOLIN79}.
 \end{itemize}
 
@@ -166,11 +167,11 @@ NEMOH1 uses the following numerical approach:
 \item Numerical implementation of the Green function is described in \cite{Babarit15}.
 \item Free-surface Green function integrands are pre-calculated with the discretized $\omega^2r/g\in [0,100]$ with 676 points in a constant scale and $\omega^2(z+z')/g \in [-251,-1.6\, 10^{-6}]$ with 130 points in logarithmic scale. A polynomial surface interpolation with the $5^{th}$ order Lagrange formula is used for interpolating any values in the specified interval.
 
-\item The specified points for the interpolation of the Green function are finer than in the previous release. However, an option to switch the two different tabulated Green function data is available in the source file \texttt{\textbackslash Solver\textbackslash Core\textbackslash INITIALIZE\_GREEN.f90} with the parameter FLAG\_IGREEN=1 or 2, 2 being the default. 
+\item The specified points for the interpolation of the Green function are finer than in the previous release. However, an option to switch the two different tabulated Green function data is available in the source file \texttt{\textbackslash Solver\textbackslash Core\textbackslash INITIALIZE\_GREEN.f90} with the parameter FLAG\_IGREEN=1 or 2, 2 being the default.
 
-\item Influence coefficients, the integration of $\partial_n G(\bs x, \bs x')$ over a body panel, is computed using  Gauss-quadrature integration with a user-input number of Gauss-quadrature points.
+\item Influence coefficients, the integration of $\partial_n G(\bs x, \bs x')$ over a body panel, is computed using Gauss-quadrature integration with a user-input number of Gauss-quadrature points.
 
-\item The source distributions on body panels are then obtained after solving the corresponding linear system. 
+\item The source distributions on body panels are then obtained after solving the corresponding linear system.
 
 \item The linear system is solved using a user-choice solver among the available ones, which are Gauss elimination, LU-decomposition (default) and GMRES-iterative solvers.
 
@@ -186,7 +187,7 @@ NEMOH1 uses the following numerical approach:
 NEMOH2 uses the following numerical approach
 \begin{itemize}
 \item The QTF module can be run only after the first order-hydrodynamic coefficients are computed in NEMOH1.
-\item In the potential part, the computation of the free-surface integral is an option: 
+\item In the potential part, the computation of the free-surface integral is an option:
 \begin{itemize}
     \item For the difference-frequency QTFs, it is in general acceptable not to compute the free-surface integral terms.
     \item For the sum-frequency QTFs, it is necessary to compute the free-surface integrals.
@@ -197,20 +198,20 @@ NEMOH2 uses the following numerical approach
 \item QTF computations have not been tested yet for the multi-bodies problem.
 \end{itemize}
 \ \\
-NEMOH related publications to be referred are  \cite{Babarit15} for the first order NEMOH and \cite{Philippe15,Kurnia22_JH,Kurnia22} for the QTF module. A publication related with this release is in preparation as in \cite{Kurnia23}.
+NEMOH related publications to be referred are \cite{Babarit15} for the first order NEMOH and \cite{Philippe15,Kurnia22_JH,Kurnia22} for the QTF module. A publication related with this release is in preparation as in \cite{Kurnia23}.
 \subsection{Units}
 NEMOH expects all quantities to be expressed in S.I. units: $m, kg, s, rad$ (meter, kilogram, seconds, radian, respectively). But some of the phase outputs may be expressed in $deg$ or $^{\circ}$, in this case it will be indicated in the file header.
 
-The force unit is [$N$], the moment unit is [$Nm$], added Mass [$kg$], damping coefficient [$kg/s$]. As the force output is normalized with the unit wave amplitude $a$ $[m]$, then the normalized force unit is [$N/m$] and the normalized moment is [$N$]. 
+The force unit is [$N$], the moment unit is [$Nm$], added Mass [$kg$], damping coefficient [$kg/s$]. As the force output is normalized with the unit wave amplitude $a$ $[m]$, then the normalized force unit is [$N/m$] and the normalized moment is [$N$].
 
-Response amplitude operator for translation motion has unit [$m/m$] and for rotation it is [$deg/m$]. 
+Response amplitude operator for translation motion has unit [$m/m$] and for rotation it is [$deg/m$].
 
 The force quadratic transfer function (QTF) has unit [$N/m^2$] and for the moment QTF it is [$N/m$]. The QTF output is normalized by $\rho g$ where the fluid density $\rho,\ [kg/m^3],$ and the gravitation constant $g,\ [m/s^2]$.
 
-\subsection{Software    features and capabilities}
+\subsection{Software features and capabilities}
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=0.6,trim = 0mm 0mm 0mm 0mm, clip]{figures/FlowChart.png}	
+\includegraphics[scale=0.6,trim = 0mm 0mm 0mm 0mm, clip]{figures/FlowChart.png}
 \caption{Global flowchart of NEMOH software}\label{fig:flowchart}
 \end{figure}
 
@@ -223,17 +224,17 @@ NEMOH mesh preprocessor, the executable file \texttt{\textbf{mesh}}, is for gene
 NEMOH1 solves the first-order potential flow problem. There are four modules: \texttt{\textbf{preProc}}, \texttt{\textbf{hydrosCal}}, \texttt{\textbf{solver}} and \texttt{\textbf{postProc}}, described as follows.
 \begin{itemize}
 \item \texttt{\textbf{preProc}}: processes the input mesh file and generates the body condition for each calculation case (diffraction and radiation). The outputs are used as input for \texttt{\textbf{solver}}.
-\item \texttt{\textbf{hydrosCal}}: computes hydrostatic parameters, i.e. stiffness matrix and inertia matrix. The output file will be used in the \texttt{\textbf{postProc}} for computing the RAOs. If the input mesh is generated by the NEMOH mesh preprocessor, \texttt{\textbf{mesh}}, the hydrostatic parameters are already computed and then it is not necessary to execute this program. 
-\item \texttt{\textbf{solver}}: solves the boundary value problems for each problem, diffraction and radiation, defined in the file \texttt{Normalvelocities.dat}, provided by the \texttt{\textbf{preProc}}. 
+\item \texttt{\textbf{hydrosCal}}: computes hydrostatic parameters, i.e. stiffness matrix and inertia matrix. The output file will be used in the \texttt{\textbf{postProc}} for computing the RAOs. If the input mesh is generated by the NEMOH mesh preprocessor, \texttt{\textbf{mesh}}, the hydrostatic parameters are already computed and then it is not necessary to execute this program.
+\item \texttt{\textbf{solver}}: solves the boundary value problems for each problem, diffraction and radiation, defined in the file \texttt{Normalvelocities.dat}, provided by the \texttt{\textbf{preProc}}.
 \begin{itemize}
-\item  The influence coefficients matrix is constructed with the infinite/finite depth Green function.
+\item The influence coefficients matrix is constructed with the infinite/finite depth Green function.
 \item If a finite depth is specified, then the finite depth green function is applied only for $\frac{\omega^2}{g}D<20$, otherwise infinite depth case is applied.
-\item The integration of the Green function on a panel for the influence coefficients is obtained by the Gauss-quadrature integration. The number of Gauss quadrature points is a user input. 
+\item The integration of the Green function on a panel for the influence coefficients is obtained by the Gauss-quadrature integration. The number of Gauss quadrature points is a user input.
 \item The minimum distance, $\epsilon$, between the flow and source points for the influence coefficient computation is user-specified.
 \item The source distributions are then obtained by solving the linear system. There are three options for the solver: Gauss elimination, LU-decomposition and GMRES.  If the GMRES solver \cite{GMRES} is used and the target tolerance is not achieved after the maximum number of iterations, the problem is automatically solved by LU-decomposition. License for using GMRES has to be obtained in \url{https://www.cerfacs.fr/algor/Softs/GMRES/license.html}.
 \end{itemize}
 
-\item \texttt{\textbf{postProc}}: post-processes the \texttt{\textbf{solver}}'s output files. The results are the excitation forces, added mass and damping coefficients. Optionally, the program computes 
+\item \texttt{\textbf{postProc}}: post-processes the \texttt{\textbf{solver}}'s output files. The results are the excitation forces, added mass and damping coefficients. Optionally, the program computes
 \begin{itemize}
 \item the radiation damping impulse response function, the infinite frequency added mass and the excitation force impulse response function,
 \item the Kochin coefficient,
@@ -244,7 +245,7 @@ NEMOH1 solves the first-order potential flow problem. There are four modules: \t
 \subsubsection{NEMOH2: 2nd-order QTF module}
 NEMOH2 computes the second-order wave loads that are expressed as Quadratic Transfer Function (QTF). It is suggested to verify the first-order results before running the QTF module. There are three modules in this program: \texttt{\textbf{QTFpreProc}}, \texttt{\textbf{QTFsolver}} and \texttt{\textbf{QTFpostProc}}, described as follows
 \begin{itemize}
-\item \texttt{\textbf{QTFpreProc}}: computes the perturbed potential, the total potential, the normalized radiation potential and the corresponding velocities on the body panels, the water-line and the free-surface panels. 
+\item \texttt{\textbf{QTFpreProc}}: computes the perturbed potential, the total potential, the normalized radiation potential and the corresponding velocities on the body panels, the water-line and the free-surface panels.
 \begin{itemize}
 \item The computation on free-surface panels requires possibly long computational time. Then, it is suggested not to compute the free-surface integral for the first execution of NEMOH2. This is controlled by the flag HASFS, which is available in the input file \texttt{Nemoh.cal}.
 \item In general, the free-surface integral may be negligible for the difference-frequency QTFs computation.
@@ -290,7 +291,7 @@ Before compiling, the following tools need to be available:
 \begin{itemize}
     \item A Fortran compiler. The code has been tested using:
     \begin{itemize}
-        \item gfortran, \url{https://gcc.gnu.org/wiki/GFortran}, 
+        \item gfortran, \url{https://gcc.gnu.org/wiki/GFortran},
         \item intel fortran compiler, \href{https://www.intel.com/content/www/us/en/developer/tools/oneapi/fortran-compiler.html#gs.jik1s6}{ifort}.
     \end{itemize}
     \item CMake, \url{https://cmake.org/}, a cross-platform tool for building and testing the software package.
@@ -337,11 +338,11 @@ Where label is one of the following:
 Tests with unsatisfied requirements will fail.
 
 \subsection{Running}
-The binary files of NEMOH1 and NEMOH2 have to be executed following the order provided in Sec. \ref{Sec:Execute}. %If the binary file exists but there is no access to be executed, in the command window type chmod +x 'binfile' that will add the executable access to the 'binfile'.  
+The binary files of NEMOH1 and NEMOH2 have to be executed following the order provided in Sec. \ref{Sec:Execute}. %If the binary file exists but there is no access to be executed, in the command window type chmod +x 'binfile' that will add the executable access to the 'binfile'.
 
 The following steps are for executing the binary files in the command window.
 \begin{itemize}
-\item Suppose a project directory, \emph{e.g.} \texttt{/NEMOH/projdir/}, that contains all the input files and that is in the same location as the binary directory, i.e \texttt{NEMOH/bin/}. 
+\item Suppose a project directory, \emph{e.g.} \texttt{/NEMOH/projdir/}, that contains all the input files and that is in the same location as the binary directory, i.e \texttt{NEMOH/bin/}.
 \item The program can be run depending on your current working directory in the command line. For example, the following commands are possible, with \texttt{\textbf{binfile}} being an executable file i.e. \texttt{\textbf{preProc}}, etc., as
 \begin{itemize}
 \item if you are in the \texttt{projdir}:
@@ -380,7 +381,7 @@ make run_10b_softwind_FS
 make run_11_QTF_OC3_Hywind.
 \end{lstlisting}
 
-Commands to clean the test cases are also available to clean all the output files. They can apply either to a specific tests case, \emph{e.g.} 
+Commands to clean the test cases are also available to clean all the output files. They can apply either to a specific tests case, \emph{e.g.}
 \begin{lstlisting}[language=bash,keywordstyle=\color{blue},basicstyle=\ttfamily\footnotesize,backgroundcolor=\color{lightgray}]
 make clean_1_cylinder
 \end{lstlisting}
@@ -400,12 +401,12 @@ Following is the list of the user's input files and the output files for each ex
 \begin{itemize}
 \item \texttt{\textbf{mesh}}
 \begin{itemize}
-\item User's input files: \texttt{projdir/Mesh.cal}, \texttt{projdir/geomInput}, 
+\item User's input files: \texttt{projdir/Mesh.cal}, \texttt{projdir/geomInput},
 \item Output files: \texttt{projdir/meshfile}, \texttt{projdir/mesh/[*.dat, *.tec]},
 \end{itemize}
 \item \texttt{\textbf{preProc}}
 \begin{itemize}
-\item User's input files: \texttt{projdir/Nemoh.cal}, \texttt{projdir/meshfile}, 
+\item User's input files: \texttt{projdir/Nemoh.cal}, \texttt{projdir/meshfile},
 \item Output files: \texttt{projdir/Normalvelocities.dat}, \\
   \hspace{2cm} \texttt{projdir/results/[FKForce.dat, FKForce.tec, index.dat]}, \\
   \hspace{2cm} \texttt{projdir/mesh/[L10.dat, L12.dat]},
@@ -417,13 +418,13 @@ Following is the list of the user's input files and the output files for each ex
 \end{itemize}
 \item \texttt{\textbf{solver}}
 \begin{itemize}
-\item User's input files: \texttt{projdir/Nemoh.cal}, \texttt{projdir/input\_solver.txt}  
+\item User's input files: \texttt{projdir/Nemoh.cal}, \texttt{projdir/input\_solver.txt}
 \item Output files: \texttt{projdir/results/Forces.dat},\\
 \texttt{projdir/results/sources} (if QTF will be computed, indicated in \texttt{Nemoh.cal})
 \end{itemize}
 \item \texttt{\textbf{postProc}}
 \begin{itemize}
-\item User's input files: \texttt{projdir/Nemoh.cal}, \\ \texttt{projdir/Mechanics/[Km.dat,Badd.dat]}  
+\item User's input files: \texttt{projdir/Nemoh.cal}, \\ \texttt{projdir/Mechanics/[Km.dat,Badd.dat]}
 \item Output files: \texttt{projdir/results/[ExcitationForce.tec,}\\
 \texttt{DiffractionForce.tec,RadiationCoefficients.tec,$\cdots$]},\\ \texttt{projdir/Motion/RAO.dat},
 \end{itemize}
@@ -449,14 +450,14 @@ As summary, following files are needed for the input, some depends on user-speci
 \item \texttt{Nemoh.cal} contains all NEMOH computation parameters
 \item \texttt{Mesh.cal} contains information of \texttt{geomInput} file. It is an input for \texttt{\textbf{mesh}} and \texttt{\textbf{hydrosCal}}.
 \item a \texttt{meshfile}, input for \texttt{\textbf{preProc}}, or \texttt{geomInput} file, input for \texttt{\textbf{mesh}}
-\item  \texttt{input\_solver.txt} contains \texttt{\textbf{solver}} parameters
+\item \texttt{input\_solver.txt} contains \texttt{\textbf{solver}} parameters
 \item \texttt{Km.dat} and \texttt{Badd.dat}, are the additional stiffness and damping matrices. These optional input are for \texttt{\textbf{postProc}}/\texttt{\textbf{QTFpreProc}}
 \item \texttt{{FSmeshfile}} contains the free-surface mesh if contrib=3 in \texttt{Nemoh.cal}.
 \end{itemize}
 \ \\
-NEMOH produces the following main output files, some depending on user-specified choice in \texttt{Nemoh.cal}, 
+NEMOH produces the following main output files, some depending on user-specified choice in \texttt{Nemoh.cal},
 \begin{itemize}
-\item hydrostatic files: inertia and stiffness matrices, 
+\item hydrostatic files: inertia and stiffness matrices,
 \item hydrodynamics coefficients: Froude-Krylov force, excitation force, added-mass, damping coefficient,
 \item Kochin function, free-surface elevation,
 \item Response Amplitude Operator (RAO),
@@ -469,13 +470,13 @@ Detail descriptions of the input/output files are discussed in the next subsecti
 
 \begin{figure}[ht]
 \centering
-\includegraphics[scale=0.8,trim = 0mm 0mm 12mm 0mm, clip]{figures/NemohCal.png}	
+\includegraphics[scale=0.8,trim = 0mm 0mm 12mm 0mm, clip]{figures/NemohCal.png}
 \caption{\texttt{Nemoh.cal} input file}\label{fig:NemohCal}
 \end{figure}
 
 \texttt{Nemoh.cal}: contains all computation parameters with the format as in Fig. \ref{fig:NemohCal}. The following parameters have to be specified:
 \begin{itemize}
-\item \emph{Environment}: fluid density, gravity constant, water-depth and wave reference point.  Specify $0.$ for infinite water depth case.
+\item \emph{Environment}: fluid density, gravity constant, water-depth and wave reference point. Specify $0.$ for infinite water depth case.
 \item \emph{Description of floating bodies}: number of bodies, name of the \texttt{meshfile}, number of points and number of panels, number of degrees of freedom, motion description, number of resulting generalized forces and its description.
 \begin{itemize}
 \item \texttt{meshfile} has to be provided in the folder \texttt{projdir/}
@@ -486,7 +487,7 @@ Detail descriptions of the input/output files are discussed in the next subsecti
 \item \emph{Load case to be solved}: contains wave frequency and wave direction parameter.
 \begin{itemize}
 \item Four wave frequency parameters have to be specified in a row. First, the frequency type, 1 for radial-frequency [rad/s], 2 for frequency [Hz] and 3 for period [s]. The second to fourth parameters are the number of frequencies/periods, and their minimum and maximum values.
-\item In the case of QTF computation, it is suggested that the computed first-order hydrodynamic coefficients in NEMOH1 cover all difference-frequencies and sum-frequencies intervals for the QTF computation. The suggested radial frequency interval is $\omega \in [\Delta \omega, \omega_{max}]$ with a step $\Delta \omega$,  $\omega_{max}=N_{\omega}\Delta \omega$ and $N_{\omega}$ is the total number of radial frequencies. The $\omega_{max}$ should be chosen as the maximum computed sum-frequencies, $\omega_1+\omega_2$.
+\item In the case of QTF computation, it is suggested that the computed first-order hydrodynamic coefficients in NEMOH1 cover all difference-frequencies and sum-frequencies intervals for the QTF computation. The suggested radial frequency interval is $\omega \in [\Delta \omega, \omega_{max}]$ with a step $\Delta \omega$, $\omega_{max}=N_{\omega}\Delta \omega$ and $N_{\omega}$ is the total number of radial frequencies. The $\omega_{max}$ should be chosen as the maximum computed sum-frequencies, $\omega_1+\omega_2$.
 \item The wave direction parameters are the number of directions, and the minimum and maximum angle directions [deg].
 \end{itemize}
 \item \emph{Post processing} contains parameters for Impulse Response Functions, pressure, Kochin, free surface elevation, RAO and frequency type output.
@@ -496,7 +497,7 @@ Detail descriptions of the input/output files are discussed in the next subsecti
 \item The Kochin parameters are a number of directions (specify 0 if it is not calculated), minimum and maximum values of angle directions [deg].
 \item The free surface parameters are the number of points in $x$-direction (specify 0 if it is not calculated) and $y$-direction, the dimension of the domain in $x$ and $y$ directions [m].
 \item A switch for RAO computation [0 is not calculated and 1 is calculated]. If QTF will be computed, the RAO has to be computed and then the switch has to be set to 1.
-\item Frequency output option: 1 for the radial frequency [rad/s], 2 for the frequency [Hz] and 3 for the period [s]. 
+\item Frequency output option: 1 for the radial frequency [rad/s], 2 for the frequency [Hz] and 3 for the period [s].
 \end{itemize}
 \item \emph{Quadratic Transfer Function (QTF)} contains following parameters
 \begin{itemize}
@@ -509,7 +510,7 @@ Detail descriptions of the input/output files are discussed in the next subsecti
 \item Switch 1 for adding to the quadratic QTF (DUOK) the Hydrostatic terms of the quadratic first-order motion, $-[\bs K] \tilde{\bs \xi}^{(2)}$, where, with $z_G$ is the vertical component of CoG,
 \begin{align*}
 \tilde{\bs\xi}^{(2)}=[0,0,z_G(\theta_1^{(1)2}+\theta_2^{(1)2})/2,\theta_2^{(1)}\theta_3^{(1)}/2,-\theta_3^{(1)}\theta_1^{(1)}/2,0]^T.
-\end{align*}  
+\end{align*}
 Note that this term is optional and needed only in QTFsolver. In other software this term is not always included, \emph{e.g.} HYDROSTAR \cite{HYDROSTAR} does not included it.
 \item Frequency output option: 1 for the radial frequency [rad/s], 2 for the frequency [Hz] and 3 for the period [s].
 \item In \texttt{\textbf{QTFpostproc}}, QTFs total is calculated with summation of all the terms. Option to exclude/include the terms are available with the corresponding switch for DUOK, HASBO and HASFS+ASYMP terms. Switch 1 to include, 0 to exclude. If Contrib=2, then HASFS+ASYMP switch has to be 0.
@@ -587,15 +588,15 @@ geomInput\_name &\ &\ &\ & Name of the geomInput file.\\
 0. &0. &\ &\ & Possible translation about x axis (first column)\\
 \    &\      &\     &\ & and y axis (second column)\\
 \hline
-0. &0. &-7 &\ & Coordinates of gravity centre \\ 
+0. &0. &-7 &\ & Coordinates of gravity centre \\
 \hline
-500. &\ &\ &\ & Target for the number of panels in refined mesh \\ 
+500. &\ &\ &\ & Target for the number of panels in refined mesh \\
 \hline
-2. &\ &\ &\ &  \\ 
+2. &\ &\ &\ &  \\
 \hline
-0. &\ &\ &\ &  \\ 
+0. &\ &\ &\ &  \\
 \hline
-1. &\ &\ &\ &  \\ 
+1. &\ &\ &\ &  \\
 \hline
 1025 &\ &\ &\ & water density $(kg/m^3)$\\
 \hline
@@ -609,7 +610,7 @@ geomInput\_name &\ &\ &\ & Name of the geomInput file.\\
 \texttt{input\_solver.txt} contains solver parameters with format as in Table \ref{tab:input_solver}. The parameters are described as follows.
 \begin{itemize}
 \item Number of Gauss Quadrature points, $N^2$, is used for the surface integration in the influence coefficients. User specifies an integer value of $N\in [1,4]$, default $N=2$.
-\item Minimum z of flow and source points is defined with a factor  $\epsilon_{zmin}$ multiplied by the maximal horizontal distance between two point of the mesh, default $\epsilon_{zmin}=0.001$. 
+\item Minimum z of flow and source points is defined with a factor  $\epsilon_{zmin}$ multiplied by the maximal horizontal distance between two point of the mesh, default $\epsilon_{zmin}=0.001$.
 \item Three linear-system solvers are available; 1 Gauss elimination, 2 LU Decomposition, 3 GMRES iterative solver.
 \item If GMRES solver is chosen then the three parameters, the restart parameter, the relative tolerance and the maximum number of iterations, have to be specified. If the tolerance is not achieved after the maximum iteration exceeded then LU decomposition solves the system directly.\\
 \end{itemize}
@@ -637,14 +638,14 @@ geomInput\_name &\ &\ &\ & Name of the geomInput file.\\
 \texttt{Km.dat} and \texttt{Badd.dat} are additional stiffness matrix and damping coefficient matrix. The files contains the matrix components with size $(Nbody\cdot Nradiation)\times (Nbody\cdot Nradiation)$.\\
 
 \noindent
-\texttt{FSmeshfile} contains all the free-surface mesh information  with a format as shown in Table \ref{tab:FSmeshfile}. Quadrilateral panels discretized free-surface area in between the body waterline, $R_B$, and the exterior radius $R_e$. Waterline on $R_B$ and $R_e$ has to discretized by line segments.
+\texttt{FSmeshfile} contains all the free-surface mesh information with a format as shown in Table \ref{tab:FSmeshfile}. Quadrilateral panels discretized free-surface area in between the body waterline, $R_B$, and the exterior radius $R_e$. Waterline on $R_B$ and $R_e$ has to discretized by line segments.
 
 \begin{table}[ht]
 \begin{center}
 \caption{\texttt{FSmeshfile} format (Free surface mesh file)}\label{tab:FSmeshfile}
 \begin{tabular}{ccccl}
 \hline
-1 & 5000&4900&400& This row contais the free-surface computation parameters.\\ 
+1 & 5000&4900&400& This row contais the free-surface computation parameters.\\
 \ &\ &\ &\ &  First column is 1 if half symmetric free surface mesh\\
 \ &\ &\ &\ & specified, 0 otherwise.\\
 \ &\ &\ &\ &  Column 2-4 are Number of points, Number of panels,\\
@@ -679,8 +680,8 @@ geomInput\_name &\ &\ &\ & Name of the geomInput file.\\
 
 The following hydrodynamic coefficients are produced in Tecplot format, which can be opened by the Tecplot program or by a simple text-editor program,
 \begin{itemize}
-\item \texttt{FKForce.tec}, \texttt{DiffractionForce.tec} and \texttt{ExcitationForce.tec} are the output files of the Froude-Krylov, the diffraction and the excitation forces respectively. The output file format is given in Table \ref{tab:WaveForce}. The file contains the absolute value and the phase [deg] of the force for each 'frequency' $f$. The force is given for each specified force axis (i.e. surge, heave, pitch) for each body. The 'frequency' is given based on the chosen type, [rad/s, Hz, s], of the post-processing parameter in \texttt{Nemoh.cal}, except the Froude-Krylov force, which is only in the radial frequency [rad/s]. 
-\item \texttt{RadiationCoefficients.tec} is the output file for added mass and damping coefficients with format as in Table \ref{tab:addedmass_damping_coeffs}. The radiation coefficients are given for each $DoF$, each force axis and for each frequency. The frequency is given based on the chosen 'frequency' type, [rad/s, Hz, s], of the post-processing parameter in \texttt{Nemoh.cal}. 
+\item \texttt{FKForce.tec}, \texttt{DiffractionForce.tec} and \texttt{ExcitationForce.tec} are the output files of the Froude-Krylov, the diffraction and the excitation forces respectively. The output file format is given in Table \ref{tab:WaveForce}. The file contains the absolute value and the phase [deg] of the force for each 'frequency' $f$. The force is given for each specified force axis (i.e. surge, heave, pitch) for each body. The 'frequency' is given based on the chosen type, [rad/s, Hz, s], of the post-processing parameter in \texttt{Nemoh.cal}, except the Froude-Krylov force, which is only in the radial frequency [rad/s].
+\item \texttt{RadiationCoefficients.tec} is the output file for added mass and damping coefficients with format as in Table \ref{tab:addedmass_damping_coeffs}. The radiation coefficients are given for each $DoF$, each force axis and for each frequency. The frequency is given based on the chosen 'frequency' type, [rad/s, Hz, s], of the post-processing parameter in \texttt{Nemoh.cal}.
 \end{itemize}
 The hydrodynamic coefficients are also produced in the \textit{.dat} files, i.e. \textit{CA.dat} for the damping coefficients, \textit{CM.dat} for the added mass coefficients, \textit{Fe.dat} for the excitation force and \textit{FKForce.dat} for the excitation force. The frequency type of the output files is only radial frequency [rad/s]. These output files are used as input files for the QTF module. \\
 
@@ -809,7 +810,7 @@ $x_{Npanel}$ &$y_{Npanel}$ &$z_{Npanel}$ &$|P(\bs x_{Npanel})|$ & $\angle P(\bs 
 \hline
 \end{tabular}
 \end{center}
-\end{table}  
+\end{table}
     \item \texttt{kochin.00XXX.dat} is an output file of the Kochin function on a prescribed direction for the problem-XXX. In each file, depending on the diffraction/radiation problem, the computed absolute value of the Kochin, $|\mathcal{H}|$, and the phase, $\angle \mathcal{H}$, (rad) are saved for each direction, $\vartheta$. The format of the output file is given in Table \ref{tab:kochin}.
 \begin{table}[ht]
 \begin{center}
@@ -826,7 +827,7 @@ $\vartheta_{N\vartheta}$ &$|\mathcal{H}(\vartheta_{N\vartheta})|$ & $\angle \mat
 \end{tabular}
 \end{center}
 \end{table}
-    \item \texttt{freesurface.00XXX.dat} is an output file of the free-surface elevation on a prescribed free-surface domain for the problem-XXX. In each file, depending on the diffraction/radiation problem, the computed absolute value of the free-surface elevation, $|\eta|$, and the phase, $\angle \eta$, (rad) are saved for each free-surface panel position. The format of the output file is given in Table \ref{tab:freesurface}. 
+    \item \texttt{freesurface.00XXX.dat} is an output file of the free-surface elevation on a prescribed free-surface domain for the problem-XXX. In each file, depending on the diffraction/radiation problem, the computed absolute value of the free-surface elevation, $|\eta|$, and the phase, $\angle \eta$, (rad) are saved for each free-surface panel position. The format of the output file is given in Table \ref{tab:freesurface}.
 \begin{table}[ht]
 \begin{center}
 \caption{Output file format of \texttt{freesurface.00XXX.dat}}\label{tab:freesurface}
@@ -881,7 +882,7 @@ Following Matlab directories, containing a set of functions, are provided in \te
 \section{Test-cases}\label{Sec:Testcase}
 The following test cases are provided for verification with the original Aquaplus software (which is the ancestor of NEMOH) and/or HYDROSTAR commercial software \cite{HYDROSTAR}. Note that Tecplot's layout files \texttt{.lay} are provided in the relevant test case folder for plotting in Tecplot.
 \begin{itemize}
-\item {\textbf{1\_Cylinder}}: half-symmetric body mesh, deep water case, wave direction $0^{\circ}$. The results are shown in Fig. \ref{fig:Cylinder}. 
+\item {\textbf{1\_Cylinder}}: half-symmetric body mesh, deep water case, wave direction $0^{\circ}$. The results are shown in Fig. \ref{fig:Cylinder}.
 \begin{figure}[h!t]
 \centering
 %\includegraphics[scale=0.8,trim = 0mm 0mm 0mm 0mm, clip]{figures/Ver_Cylinder.eps}
@@ -891,17 +892,17 @@ The following test cases are provided for verification with the original Aquaplu
 \item \textbf{2\_2Bodies}: half-symmetric body mesh, two different bodies, water depth $20$ m, wave direction $45^{\circ}$. The results are shown in Fig. \ref{fig:2Bodies}.
 \begin{figure}[h!t]
 \centering
-\includegraphics[width=\textwidth,trim = 0mm 0mm 0mm 0mm, clip]{figures/Ver_2Bodies.eps}	
+\includegraphics[width=\textwidth,trim = 0mm 0mm 0mm 0mm, clip]{figures/Ver_2Bodies.eps}
 \caption{Comparison of the first order results between NEMOH and AQUAPLUS for the test case \textbf{2\_2Bodies}}\label{fig:2Bodies}
 \end{figure}
-\item \textbf{3\_Nonsymmetrical}: full non-symmetrical body mesh, deep-water, wave direction $0^{\circ}$. Comparison of NEMOH results against Aquaplus are shown in Fig. \ref{fig:NonSymmetrical}, a slight difference are observed in the results.  Added mass and damping coefficients comparison between NEMOH and HYDROSTAR are shown in Fig. \ref{fig:NonSymmetrical_massdamp} and for the excitation force is in Fig. \ref{fig:NonSymmetrical_excforce}. Good agreement between NEMOH and HYDROSTAR is achieved. 
+\item \textbf{3\_Nonsymmetrical}: full non-symmetrical body mesh, deep-water, wave direction $0^{\circ}$. Comparison of NEMOH results against Aquaplus are shown in Fig. \ref{fig:NonSymmetrical}, a slight difference are observed in the results.  Added mass and damping coefficients comparison between NEMOH and HYDROSTAR are shown in Fig. \ref{fig:NonSymmetrical_massdamp} and for the excitation force is in Fig. \ref{fig:NonSymmetrical_excforce}. Good agreement between NEMOH and HYDROSTAR is achieved.
 \begin{figure}[h!t]
 \centering
 \subfigure{
-\includegraphics[scale=0.6,trim = 0mm 0mm 0mm 0mm, clip]{figures/Ver_NonSymmetrical_1.eps}	
+\includegraphics[scale=0.6,trim = 0mm 0mm 0mm 0mm, clip]{figures/Ver_NonSymmetrical_1.eps}
 }
 \subfigure{
-\includegraphics[scale=0.6,trim = 0mm 0mm 0mm 0mm, clip]{figures/Ver_NonSymmetrical_2.eps}	
+\includegraphics[scale=0.6,trim = 0mm 0mm 0mm 0mm, clip]{figures/Ver_NonSymmetrical_2.eps}
 }
 \caption{Comparison of the first order results between NEMOH and AQUAPLUS for the test case \textbf{3\_Nonsymmetrical}}\label{fig:NonSymmetrical}
 \end{figure}
@@ -909,17 +910,17 @@ The following test cases are provided for verification with the original Aquaplu
 \begin{figure}[h!tbp]
 \centering
 \subfigure[added mass]{
-\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Ver_NonSymmetrical_addedmass.eps}	
+\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Ver_NonSymmetrical_addedmass.eps}
 }
 \subfigure[damping coefficients]{
-\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Ver_NonSymmetrical_dampcoef.eps}	
+\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Ver_NonSymmetrical_dampcoef.eps}
 }
 \caption{Comparison of added mass and damping coefficients between NEMOH, red dashed-line, and HYDROSTAR, blue solid-line, for the test case \textbf{3\_Nonsymmetrical}}\label{fig:NonSymmetrical_massdamp}
 \end{figure}
 
 \begin{figure}[h!tbp]
 \centering
-\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Ver_NonSymmetrical_excitationforce.eps}	
+\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Ver_NonSymmetrical_excitationforce.eps}
 \caption{Comparison of excitation force between NEMOH, red dashed-line, and HYDROSTAR, blue solid-line, for the test case \textbf{3\_Nonsymmetrical}}\label{fig:NonSymmetrical_excforce}
 \end{figure}
 
@@ -928,10 +929,10 @@ The following test cases are provided for verification with the original Aquaplu
 \begin{figure}[h!tbp]
 \centering
 \subfigure{
-\includegraphics[width=\linewidth,trim = 0mm 0mm 50mm 0mm, clip]{figures/Ver_PostProcessing.eps}	
+\includegraphics[width=\linewidth,trim = 0mm 0mm 50mm 0mm, clip]{figures/Ver_PostProcessing.eps}
 }\\
 \subfigure{
-\includegraphics[width=0.4\linewidth,trim = 160mm 50mm 0mm 0mm, clip]{figures/Ver_PostProcessing.eps}	
+\includegraphics[width=0.4\linewidth,trim = 160mm 50mm 0mm 0mm, clip]{figures/Ver_PostProcessing.eps}
 }
 \caption{Comparison of the diffracted wave elevation, the diffraction Kochin function between NEMOH and AQUAPLUS, test case \textbf{4\_Postprocessing}}\label{fig:PostProcessing}
 \end{figure}
@@ -947,7 +948,7 @@ The following test cases are provided for verification with the original Aquaplu
 \begin{figure}[h!tbp]
 \centering
 %\subfigure{
-\includegraphics[scale=0.5,trim = 0mm 0mm 0mm 0mm, clip]{figures/Cylinder/mesh.eps}	
+\includegraphics[scale=0.5,trim = 0mm 0mm 0mm 0mm, clip]{figures/Cylinder/mesh.eps}
 %}
 \caption{Body boundary mesh for the Cylinder used for test case \textbf{8a\_Cylinder\_irregfreq} and \textbf{8b\_QTF\_Cylinder}.}\label{fig:meshesCylinder}
 \end{figure}
@@ -955,10 +956,10 @@ The following test cases are provided for verification with the original Aquaplu
 \begin{figure}[h!tbp]
 \centering
 \subfigure[added mass]{
-\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Cylinder/addedmass.eps}	
+\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Cylinder/addedmass.eps}
 }
 \subfigure[damping coefficients]{
-\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Cylinder/dampcoef.eps}	
+\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Cylinder/dampcoef.eps}
 }
 \caption{Comparison of added mass and damping coefficients between NEMOH without irregular frequencies removal (IRR), green dash-dotted line, NEMOH with IRR, red dashed-line and HYDROSTAR with IRR, blue solid-line, for the test-case \textbf{8a\_Cylinder\_irregfreq}}\label{fig:Cylinder_IRR_addedmass_dampcoef}
 \end{figure}
@@ -966,7 +967,7 @@ The following test cases are provided for verification with the original Aquaplu
 \begin{figure}[h!tbp]
 \centering
 
-\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Cylinder/excForce.eps}	
+\includegraphics[scale=0.5,trim = 10mm 0mm 30mm 0mm, clip]{figures/Cylinder/excForce.eps}
 
 \caption{Comparison of excitation force between NEMOH without irregular frequencies removal (IRR), green dash-dotted line, NEMOH with IRR, red dashed-line and HYDROSTAR with IRR, blue solid-line, for the test-case 8a\_Cylinder\_irregfreq}\label{fig:Cylinder_IRR_excforce}
 \end{figure}
@@ -983,13 +984,13 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 \begin{figure}[h!tbp]
 	\centering
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 72mm 25mm 59mm, clip]{figures/Cylinder/QTFsurge.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 72mm 25mm 59mm, clip]{figures/Cylinder/QTFsurge.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 71mm, clip]{figures/Cylinder/QTFheave.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 71mm, clip]{figures/Cylinder/QTFheave.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 62mm 20mm 71mm, clip]{figures/Cylinder/QTFpitch.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 62mm 20mm 71mm, clip]{figures/Cylinder/QTFpitch.eps}
 }
 	\caption{Density plots of the normalized surge difference frequency QTF magnitude (without the free-surface integrals) for the floating Cylinder (test case \textbf{8b\_QTF\_Cylinder}); on the top, middle and bottom rows are for surge, heave and pitch, respectively. HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.}\label{fig:QTFM_Cylinder}
 \end{figure}
@@ -997,13 +998,13 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 \begin{figure}[h!tbp]
 	\centering
 \subfigure{
-	\includegraphics[scale=0.5,trim = 5mm 10mm 5mm 56mm, clip]{figures/Cylinder/QTFsurge_diag.eps}	
+	\includegraphics[scale=0.5,trim = 5mm 10mm 5mm 56mm, clip]{figures/Cylinder/QTFsurge_diag.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.5,trim = 5mm 10mm 5mm 56mm, clip]{figures/Cylinder/QTFheave_diag.eps}	
+	\includegraphics[scale=0.5,trim = 5mm 10mm 5mm 56mm, clip]{figures/Cylinder/QTFheave_diag.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.5,trim =1mm 2mm 5mm 56mm, clip]{figures/Cylinder/QTFpitch_diag.eps}	
+	\includegraphics[scale=0.5,trim =1mm 2mm 5mm 56mm, clip]{figures/Cylinder/QTFpitch_diag.eps}
 }
 	\caption{Comparison of the off-diagonal difference frequency QTF for the Cylinder (test case \textbf{8b\_QTF\_Cylinder}) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line). On the top-left is for surge, on the top-right for heave (the first off-diagonal) and the bottom for pitch (the third off-diagonal)}\label{fig:QTFM_diag_Cylinder}
 \end{figure}
@@ -1013,7 +1014,7 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 \begin{figure}[h!tbp]
 \centering
 %\subfigure{
-\includegraphics[scale=0.5,trim = 50mm 15mm 50mm 18mm, clip]{figures/OC4/bodymesh.eps}	
+\includegraphics[scale=0.5,trim = 50mm 15mm 50mm 18mm, clip]{figures/OC4/bodymesh.eps}
 %}
 \caption{Body boundary mesh for for the OC4-platform used for test case \textbf{9\_QTF\_OC4\_Semisubmersible}.}\label{fig:meshesOC4}
 \end{figure}
@@ -1023,13 +1024,13 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 \begin{figure}[h!tbp]
 	\centering
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 59mm, clip]{figures/OC4/QTFM_Surge_beta030.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 59mm, clip]{figures/OC4/QTFM_Surge_beta030.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 71mm, clip]{figures/OC4/QTFM_Heave_beta030.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 71mm, clip]{figures/OC4/QTFM_Heave_beta030.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 62mm 20mm 71mm, clip]{figures/OC4/QTFM_Pitch_beta030.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 62mm 20mm 71mm, clip]{figures/OC4/QTFM_Pitch_beta030.eps}
 }
 	\caption{Density plots of the normalized bi-directional, $(\beta_1,\beta_2)=(0^{\circ},30^{\circ})$, surge difference frequency QTF magnitude (without the free-surface integrals) for the floating OC4-semisubmersible platform (test case \textbf{9\_QTF\_OC4\_Semisubmersible}); on the top, middle and bottom rows are for surge, heave and pitch, respectively. HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.}\label{fig:QTFM_OC4}
 \end{figure}
@@ -1037,13 +1038,13 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 \begin{figure}[h!tbp]
 	\centering
 \subfigure{
-	\includegraphics[scale=0.5,trim = 3mm 10mm 5mm 56mm, clip]{figures/OC4/QTFM_Surge_beta030_diag.eps}	
+	\includegraphics[scale=0.5,trim = 3mm 10mm 5mm 56mm, clip]{figures/OC4/QTFM_Surge_beta030_diag.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.5,trim = 5mm 10mm 5mm 56mm, clip]{figures/OC4/QTFM_Heave_beta030_diag.eps}	
+	\includegraphics[scale=0.5,trim = 5mm 10mm 5mm 56mm, clip]{figures/OC4/QTFM_Heave_beta030_diag.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.5,trim =1mm 2mm 5mm 56mm, clip]{figures/OC4/QTFM_Pitch_beta030_diag.eps}	
+	\includegraphics[scale=0.5,trim =1mm 2mm 5mm 56mm, clip]{figures/OC4/QTFM_Pitch_beta030_diag.eps}
 }
 	\caption{Comparison of the off-diagonal bi-directional, $(\beta_1,\beta_2)=(0^{\circ},30^{\circ})$, difference frequency QTF for the OC4-semisubmersible platform (test case \textbf{9\_QTF\_OC4\_Semisubmersible})between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line). On the top-left is for surge, on the top-right for heave (the first off-diagonal) and the bottom for pitch (the third off-diagonal)}\label{fig:QTFM_diag_OC4}
 \end{figure}
@@ -1053,10 +1054,10 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 \begin{figure}[h!tbp]
 \centering
 \subfigure{
-\includegraphics[scale=0.45,trim = 160mm 8mm 180mm 18mm, clip]{figures/Softwind/bodymesh.eps}	
+\includegraphics[scale=0.45,trim = 160mm 8mm 180mm 18mm, clip]{figures/Softwind/bodymesh.eps}
 }
 \subfigure{
-\includegraphics[scale=0.45,trim = 120mm 8mm 170mm 16mm, clip]{figures/Softwind/FSmesh.eps}	
+\includegraphics[scale=0.45,trim = 120mm 8mm 170mm 16mm, clip]{figures/Softwind/FSmesh.eps}
 }
 \caption{Body boundary mesh and free surface mesh for the SOFTWIND platform, used in test cases \textbf{10a\_QTF\_SOFTWIND} and  \textbf{10b\_QTF\_SOFTWIND\_FS}}\label{fig:meshesSoftwind}
 \end{figure}
@@ -1066,13 +1067,13 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 \begin{figure}[h!tbp]
 	\centering
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 72mm 25mm 59mm, clip]{figures/Softwind/QTFM_Surge_beta030.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 72mm 25mm 59mm, clip]{figures/Softwind/QTFM_Surge_beta030.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 71mm, clip]{figures/Softwind/QTFM_Heave_beta030.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 71mm, clip]{figures/Softwind/QTFM_Heave_beta030.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 62mm 20mm 71mm, clip]{figures/Softwind/QTFM_Pitch_beta030.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 62mm 20mm 71mm, clip]{figures/Softwind/QTFM_Pitch_beta030.eps}
 }
 	\caption{Density plots of the normalized bi-directional, $(\beta_1,\beta_2)=(0^{\circ},30^{\circ})$, surge difference frequency QTF magnitude (without the free-surface integrals) for the floating SOFTWIND platform (test case \textbf{10a\_QTF\_SOFTWIND}); on the top, middle and bottom rows are for surge, heave and pitch, respectively. HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.}\label{fig:QTFM_SOFTWIND}
 \end{figure}
@@ -1080,13 +1081,13 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 \begin{figure}[h!tbp]
 	\centering
 \subfigure{
-	\includegraphics[scale=0.5,trim = 5mm 10mm 5mm 56mm, clip]{figures/Softwind/QTFM_Surge_beta030_diag.eps}	
+	\includegraphics[scale=0.5,trim = 5mm 10mm 5mm 56mm, clip]{figures/Softwind/QTFM_Surge_beta030_diag.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.5,trim = 5mm 10mm 5mm 56mm, clip]{figures/Softwind/QTFM_Heave_beta030_diag.eps}	
+	\includegraphics[scale=0.5,trim = 5mm 10mm 5mm 56mm, clip]{figures/Softwind/QTFM_Heave_beta030_diag.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.5,trim =1mm 2mm 5mm 56mm, clip]{figures/Softwind/QTFM_Pitch_beta030_diag.eps}	
+	\includegraphics[scale=0.5,trim =1mm 2mm 5mm 56mm, clip]{figures/Softwind/QTFM_Pitch_beta030_diag.eps}
 }
 	\caption{Comparison of the off-diagonal bi-directional, $(\beta_1,\beta_2)=(0^{\circ},30^{\circ})$, difference frequency QTF for the SOFTWIND platform (test case \textbf{10a\_QTF\_SOFTWIND}) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line). On the top-left is for surge, on the top-right for heave (the first off-diagonal) and the bottom for pitch (the third off-diagonal)}\label{fig:QTFM_diag_softwind}
 \end{figure}
@@ -1100,13 +1101,13 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 \begin{figure}[h!tbp]
 	\centering
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 59mm, clip]{figures/Softwind/QTFP_Surge_beta00.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 59mm, clip]{figures/Softwind/QTFP_Surge_beta00.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 71mm, clip]{figures/Softwind/QTFP_Heave_beta00.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 71mm, clip]{figures/Softwind/QTFP_Heave_beta00.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 62mm 20mm 71mm, clip]{figures/Softwind/QTFP_Pitch_beta00.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 62mm 20mm 71mm, clip]{figures/Softwind/QTFP_Pitch_beta00.eps}
 }
 	\caption{Density plots of the normalized sum-frequency full QTF magnitude (including the free-surface integrals) for the floating SOFTWIND platform (test case \textbf{10b\_QTF\_SOFTWIND\_FS}); on the top, middle and bottom row are for surge, heave and pitch, respectively. HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference in the right column.}\label{fig:QTFP_SOFTWIND}
 \end{figure}
@@ -1114,13 +1115,13 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 \begin{figure}[h!tbp]
 	\centering
 \subfigure{
-	\includegraphics[scale=0.5,trim = 2mm 10mm 5mm 56mm, clip]{figures/Softwind/QTFP_Surge_beta00_diag.eps}	
+	\includegraphics[scale=0.5,trim = 2mm 10mm 5mm 56mm, clip]{figures/Softwind/QTFP_Surge_beta00_diag.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.5,trim = 2mm 10mm 5mm 56mm, clip]{figures/Softwind/QTFP_Heave_beta00_diag.eps}	
+	\includegraphics[scale=0.5,trim = 2mm 10mm 5mm 56mm, clip]{figures/Softwind/QTFP_Heave_beta00_diag.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.5,trim = 2mm 10mm 5mm 56mm, clip]{figures/Softwind/QTFP_Pitch_beta00_diag.eps}	
+	\includegraphics[scale=0.5,trim = 2mm 10mm 5mm 56mm, clip]{figures/Softwind/QTFP_Pitch_beta00_diag.eps}
 }
 	\caption{Comparison of the off-diagonal sum-frequency full QTF for SOFTWIND platform (test case \textbf{10b\_QTF\_SOFTWIND\_FS}) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line). On the top-left is for surge, on the top-right for heave (the first off-diagonal) and the bottom for pitch (the third off-diagonal)}\label{fig:QTFP_SOFTWIND_DIAG}
 \end{figure}
@@ -1131,8 +1132,8 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 
 \begin{figure}[h!tbp]
 %\subfigure{
-\includegraphics[scale=0.5,trim = 160mm 0mm 160mm 0mm, clip]{figures/OC3_HYWIND/bodyMesh.eps}	
-%} 
+\includegraphics[scale=0.5,trim = 160mm 0mm 160mm 0mm, clip]{figures/OC3_HYWIND/bodyMesh.eps}
+%}
 \caption{Body boundary mesh for OC3-HYWIND platform, test case \textbf{11\_QTF\_OC3\_Hywind}.}\label{fig:meshesHYWIND}
 \end{figure}
 
@@ -1142,17 +1143,17 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 	\includegraphics[scale=0.4,trim = 20mm 72mm 25mm 59mm, clip]{figures/OC3_HYWIND/QTFM_Surge.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 71mm, clip]{figures/OC3_HYWIND/QTFM_Heave.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 72mm 20mm 71mm, clip]{figures/OC3_HYWIND/QTFM_Heave.eps}
 }
 \subfigure{
-	\includegraphics[scale=0.4,trim = 20mm 62mm 20mm 71mm, clip]{figures/OC3_HYWIND/QTFM_Pitch.eps}	
+	\includegraphics[scale=0.4,trim = 20mm 62mm 20mm 71mm, clip]{figures/OC3_HYWIND/QTFM_Pitch.eps}
 }
 	\caption{Density plots of the normalized surge difference frequency QTF magnitude (without the free-surface integrals) for the floating OC3-HYWIND platform (test case \textbf{11\_QTF\_OC3\_Hywind}); on the top, middle and bottom rows are for surge, heave and pitch, respectively. HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.}\label{fig:QTFM_OC3_HYWIND}
 \end{figure}
 \begin{figure}[ht!]
 	\centering
 \subfigure{
-	\includegraphics[scale=0.5,trim = 5mm 56mm 5mm 0mm, clip]{figures/OC3_HYWIND/QTFM_Surge_diag.eps}	
+	\includegraphics[scale=0.5,trim = 5mm 56mm 5mm 0mm, clip]{figures/OC3_HYWIND/QTFM_Surge_diag.eps}
 }
 \subfigure{
 	\includegraphics[scale=0.5,trim = 5mm 56mm 5mm 0mm, clip]{figures/OC3_HYWIND/QTFM_Heave_diag.eps}
@@ -1163,7 +1164,7 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 	\caption{Comparison of the off-diagonal difference frequency QTF for the OC3-HYWIND platform (test case \textbf{11\_QTF\_OC3\_Hywind}) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line). On the top-left is for surge, on the top-right for heave (the first off-diagonal) and the bottom for pitch (the third off-diagonal)}\label{fig:QTFM_diag_OC3_HYWIND}
 \end{figure}
 
-Full description of the QTF test-cases results is reported in \citep{Kurnia22_JH,Kurnia22}. Note that the QTF comparisons between NEMOH and HYDROSTAR for the bidirectional case are in good agreement only if the direction is switched, in NEMOH $\beta=(\beta_1,\beta_2)$ and in Hydrostar $\beta=(\beta_2,\beta_1)$; further investigation regarding this is needed. The imaginary part of QTFs have also a difference sign between NEMOH and HYDROSTAR that may be due to different conventions of the incident potential. 
+Full description of the QTF test-cases results is reported in \citep{Kurnia22_JH,Kurnia22}. Note that the QTF comparisons between NEMOH and HYDROSTAR for the bidirectional case are in good agreement only if the direction is switched, in NEMOH $\beta=(\beta_1,\beta_2)$ and in Hydrostar $\beta=(\beta_2,\beta_1)$; further investigation regarding this is needed. The imaginary part of QTFs have also a difference sign between NEMOH and HYDROSTAR that may be due to different conventions of the incident potential.
 
 \FloatBarrier
 
