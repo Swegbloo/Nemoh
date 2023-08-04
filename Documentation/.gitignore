@@ -9,3 +9,4 @@
 *.fdb_latexmk
 *.bbl
 *-eps-converted-to.pdf
+*.synctex.gz
