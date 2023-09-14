@@ -1,10 +1,5 @@
 image: $CI_REGISTRY_IMAGE:linux
 
-stages:
-    - build
-    - test
-    - release
-
 workflow:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
@@ -70,8 +65,8 @@ test-nemoh2:
     - ctest -V -j 20 -L NEMOH2
   needs: ["build-linux"]
 
-release-job:
-  stage: release
+release:
+  stage: deploy
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
   variables:
