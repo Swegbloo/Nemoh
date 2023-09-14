@@ -1,19 +1,12 @@
 image: $CI_REGISTRY_IMAGE:linux
 
-stages:
-    - build
-    - test
-    - release
-
 workflow:
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: always
-    - if: $CI_COMMIT_TAG
-      when: always
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "web"
-      when: always
-    - when: never
+    - if: $CI_PIPELINE_SOURCE == "push"
+      when: never
 
 build-linux:
   stage: build
@@ -52,6 +45,10 @@ build-doc:
 
 test-nemoh1:
   stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+      when: manual
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
   script:
     - cd build_linux
     - ctest -V -j 20 -L NEMOH1
@@ -59,21 +56,28 @@ test-nemoh1:
 
 test-nemoh2:
   stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+      when: manual
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
   script:
     - cd build_linux
     - ctest -V -j 20 -L NEMOH2
   needs: ["build-linux"]
 
-release-job:
-  stage: release
+release:
+  stage: deploy
   rules:
-    - if: $CI_COMMIT_TAG
-      when: always
-    - when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
+      variables:
+        RELEASE_TAG: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG == null
+      variables:
+        RELEASE_TAG: test
   variables:
-    NEMOH_LINUX_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/nemoh/${CI_COMMIT_TAG}/nemoh-linux-x64-${CI_COMMIT_TAG}.tar.gz"
-    NEMOH_WINDOWS_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/nemoh/${CI_COMMIT_TAG}/nemoh-windows-x64-${CI_COMMIT_TAG}.zip"
-    NEMOH_DOC_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/nemoh/${CI_COMMIT_TAG}/Nemoh_Manual_${CI_COMMIT_TAG}.pdf"
+    NEMOH_LINUX_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/nemoh/${RELEASE_TAG}/nemoh-linux-x64-${RELEASE_TAG}.tar.gz"
+    NEMOH_WINDOWS_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/nemoh/${RELEASE_TAG}/nemoh-windows-x64-${RELEASE_TAG}.zip"
+    NEMOH_DOC_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/nemoh/${RELEASE_TAG}/Nemoh_Manual_${RELEASE_TAG}.pdf"
   script:
     - tar -czf nemoh-linux.tar.gz -C bin_linux .
     - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file nemoh-linux.tar.gz $NEMOH_LINUX_URL'
@@ -81,8 +85,8 @@ release-job:
     - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file nemoh-windows.zip $NEMOH_WINDOWS_URL'
     - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file Documentation/build/Nemoh.pdf $NEMOH_DOC_URL'
   release:
-    tag_name: '$CI_COMMIT_TAG'
-    description: '$CI_COMMIT_TAG'
+    tag_name: '$RELEASE_TAG'
+    description: '$RELEASE_TAG'
     assets:
       links:
         - name: linux-x64
