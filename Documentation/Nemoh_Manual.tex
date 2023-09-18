@@ -137,12 +137,12 @@ The added mass matrix and damping coefficient matrix components are computed as
 M^a_{ij}= -\rho \iint_{S_{B}} \nu_{i} Re \left\lbrace\psi_{R_j} \right\rbrace dS\\
 B_{ij}= -\rho \omega \iint_{S_{B}} \nu_{i} Im \left\lbrace\psi_{R_j} \right\rbrace dS.
 \end{align}
-\item In post-processing, the radiation damping impulse response matrix function ($\bs{IRF}(t)$), the infinite frequency added mass matrix ($[\bs M^a](\infty)$), and the excitation force impulse response vector function ($\bs{IRF}_{ex}(t)$) are provided. They are computed as,
-\begin{align*}
+\item In post-processing, the radiation damping impulse response matrix function ($\bs{IRF}(t)$), the infinite frequency added mass matrix ($[\bs M^a](\infty)$), and the excitation force impulse response vector function ($\bs{IRF}_{ex}(t)$) are provided. They are computed as, 
+\begin{align}
 \bs{IRF}(t)&\approx\frac{2}{\pi}\int_0^{\omega_{max}}[\bs B](\omega)\cos(\omega t)d\omega, \\
-[\bs M^a](\infty)&\approx \frac{1}{N_{\omega}}\sum_{i=1}^{N_{\omega}}[\bs M^a](\omega_i)+\int_0^{t_{max}}\bs{IRF}(t)\sin(\omega_i t)dt\\
+[\bs M^a](\infty)&\approx  \frac{1}{N_{\omega}}\sum_{i=1}^{N_{\omega}}[\bs M^a](\omega_i)+\frac{1}{\omega_i}\int_0^{t_{max}}\bs{IRF}(t)\sin(\omega_i t)dt\\
 \bs{IRF}_{exc}(t)&\approx\frac{1}{2\pi}\int_{-\omega_{max}}^{\omega_{max}}\bs F_{exc}(\omega)e^{-i\omega t}d\omega.
-\end{align*}
+\end{align}
 where $\bs F_{exc}(-\omega)=\bs F^*_{exc}(\omega)$. Note that $\omega_{max}$ is a user-specified input, for better accuracy of $\bs{IRF}(t)$ make sure that $[\bs B ](\omega_{max})$ has reached an asymptotic value.
 \item Response Amplitude Operators (RAO) are obtained by solving the following equation of motion
 \begin{align}\label{Eq:RAO}
