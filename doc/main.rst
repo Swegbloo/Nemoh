@@ -50,7 +50,7 @@ Notations
 As sketched in Fig. `1 <#fig:sketch>`__, we consider fluid domain in the Cartesian coordinate :math:`\boldsymbol x=(\vec{x},z)` with :math:`\vec{x}=(x,y)` the horizontal coordinates perpendicular to the :math:`z` axis in the opposite direction of gravity :math:`\boldsymbol g`. Free-surface boundary :math:`S_F` is defined by the free surface elevation at time :math:`t`, denoted as :math:`\eta(\vec{x},t)` with respect to the mean water level at :math:`z=0`. The fluid velocity potential is denoted as :math:`\Phi(\boldsymbol x,t)` with :math:`\boldsymbol x` in fluid domain :math:`V_{\Omega}`.
 
 .. figure:: figures/Sketch.png
-   name: fig:sketch
+   :name: fig:sketch
 
    Sketch definition of the system
 
@@ -228,7 +228,7 @@ Software features and capabilities
 ----------------------------------
 
 .. figure:: figures/FlowChart.png
-   name: fig:flowchart
+   :name: fig:flowchart
 
    Global flowchart of NEMOH software
 
@@ -548,7 +548,7 @@ User’s input files
 ~~~~~~~~~~~~~~~~~~
 
 .. figure:: figures/NemohCal.png
-   name: fig:NemohCal
+   :name: fig:NemohCal
 
    ``Nemoh.cal`` input file
 
@@ -1203,15 +1203,15 @@ The following test cases are provided for verification with the original Aquaplu
 
 -  **1_Cylinder**: half-symmetric body mesh, deep water case, wave direction :math:`0^{\circ}`. The results are shown in Fig. `4 <#fig:Cylinder>`__.
 
-   .. figure:: figures/Ver_Cylinder.eps
-      name: fig:Cylinder
+   .. figure:: figures/Ver_Cylinder.svg
+      :name: fig:Cylinder
 
       Comparison of the first order results between NEMOH and AQUAPLUS for the test case **1_Cylinder**
 
 -  **2_2Bodies**: half-symmetric body mesh, two different bodies, water depth :math:`20` m, wave direction :math:`45^{\circ}`. The results are shown in Fig. `5 <#fig:2Bodies>`__.
 
-   .. figure:: figures/Ver_2Bodies.eps
-      name: fig:2Bodies
+   .. figure:: figures/Ver_2Bodies.svg
+      :name: fig:2Bodies
 
       Comparison of the first order results between NEMOH and AQUAPLUS for the test case **2_2Bodies**
 
@@ -1223,8 +1223,8 @@ The following test cases are provided for verification with the original Aquaplu
    .. container:: float
       :name: fig:NonSymmetrical_massdamp
 
-   .. figure:: figures/Ver_NonSymmetrical_excitationforce.eps
-      name: fig:NonSymmetrical_excforce
+   .. figure:: figures/Ver_NonSymmetrical_excitationforce.svg
+      :name: fig:NonSymmetrical_excforce
 
       Comparison of excitation force between NEMOH, red dashed-line, and HYDROSTAR, blue solid-line, for the test case **3_Nonsymmetrical**
 
@@ -1233,7 +1233,7 @@ The following test cases are provided for verification with the original Aquaplu
    .. container:: float
       :name: fig:PostProcessing
 
-      | 
+      |
 
 -  **5_QuickTest** shows a quantitative comparison of force and free-surface for the first-frequency diffraction problem. The comparison results are shown in the command window for all the test cases inside the directory ``5_QuickTest``.
 
@@ -1243,16 +1243,16 @@ The following test cases are provided for verification with the original Aquaplu
 
 -  **8a_Cylinder_irregfreq** shows the results with and without irregular frequencies removal (IRR) method. The results are verified against HYDROSTAR with IRR and shown in Fig. `11 <#fig:Cylinder_IRR_addedmass_dampcoef>`__ for the added mass and damping coefficients and in Fig. `12 <#fig:Cylinder_IRR_excforce>`__ for the excitation forces. The mesh used was obtained using GMSH :raw-latex:`\cite{gmsh}` and is shown in Fig. `10 <#fig:meshesCylinder>`__.
 
-   .. figure:: figures/Cylinder/mesh.eps
-      name: fig:meshesCylinder
+   .. figure:: figures/Cylinder/mesh.svg
+      :name: fig:meshesCylinder
 
       Body boundary mesh for the Cylinder used for test case **8a_Cylinder_irregfreq** and **8b_QTF_Cylinder**.
 
    .. container:: float
       :name: fig:Cylinder_IRR_addedmass_dampcoef
 
-   .. figure:: figures/Cylinder/excForce.eps
-      name: fig:Cylinder_IRR_excforce
+   .. figure:: figures/Cylinder/excForce.svg
+      :name: fig:Cylinder_IRR_excforce
 
       Comparison of excitation force between NEMOH without irregular frequencies removal (IRR), green dash-dotted line, NEMOH with IRR, red dashed-line and HYDROSTAR with IRR, blue solid-line, for the test-case 8a_Cylinder_irregfreq
 
@@ -1268,8 +1268,8 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 
 -  **9_QTF_OC4_Semisubmersible**: full body mesh with lid panels, CoG :math:`(0,0,0)`, water depth 200 m, wave direction :math:`0^{\circ}` and :math:`30^{\circ}`, bi-directional QTF, the difference-frequency QTF DUOK+HASBO. The results are shown in the density plot, Fig. `16 <#fig:QTFM_OC4>`__ and in the off-diagonal line plot, Fig. `17 <#fig:QTFM_diag_OC4>`__, of the bi-directional QTF :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`. The mesh used was obtained using GMSH :raw-latex:`\cite{gmsh}` and is shown in Fig. `15 <#fig:meshesOC4>`__.
 
-   .. figure:: figures/OC4/bodymesh.eps
-      name: fig:meshesOC4
+   .. figure:: figures/OC4/bodymesh.svg
+      :name: fig:meshesOC4
 
       Body boundary mesh for for the OC4-platform used for test case **9_QTF_OC4_Semisubmersible**.
 
@@ -1300,8 +1300,8 @@ The following test cases are provided for the QTF verification with HYDROSTAR so
 
 -  **11_QTF_OC3_Hywind**: full body mesh with lid panels, CoG :math:`(0,0,0)`, water depth 320 m, wave direction :math:`0^{\circ}`, NEMOH1 uses GMRES solver, the difference-frequency QTF DUOK+HASBO. The results are shown in the density plot, Fig. `24 <#fig:QTFM_OC3_HYWIND>`__ and in the off-diagonal line plot, Fig. `25 <#fig:QTFM_diag_OC3_HYWIND>`__, of the difference-frequency QTF. The mesh used was obtained using GMSH :raw-latex:`\cite{gmsh}` and is shown in Fig. `23 <#fig:meshesHYWIND>`__.
 
-.. figure:: figures/OC3_HYWIND/bodyMesh.eps
-   name: fig:meshesHYWIND
+.. figure:: figures/OC3_HYWIND/bodyMesh.svg
+   :name: fig:meshesHYWIND
 
    Body boundary mesh for OC3-HYWIND platform, test case **11_QTF_OC3_Hywind**.
 
