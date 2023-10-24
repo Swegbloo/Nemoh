@@ -33,7 +33,7 @@ release = '3.0.1'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
+extensions = ["sphinxcontrib.bibtex"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -64,4 +64,9 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
 
+# Automatic numbering of figures
 numfig = True
+
+# Bibliography
+bibtex_bibfiles = ['bibliography.bib']
+bibtex_reference_style = 'author_year'
