@@ -10,11 +10,5 @@ Welcome to Nemoh's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   main
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
