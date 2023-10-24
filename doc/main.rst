@@ -624,33 +624,33 @@ User’s input files
 .. table:: ``meshfile`` format
    :name: tab:meshfile
 
-   ======= ======= ======= ======= ============================================================================================================
+   ======= ============= ============= ============= ============================================================================================================
    File contents                   Signification
-   =============================== ============================================================================================================
-   2       1                       First column must be a 2. Second column is 1 for a symmetric (about $xOz$) body half-mesh, 0 otherwise.
-   1       $x_1$   $y_1$   $z_1$   Table of nodes: first column is the node ID, other 3 are the coordinates $(x,y,z)$ of each node, listed as rows.
-   ...     ...     ...     ...      
-   0       0\.     0\.     0\.     Last line of the table of nodes.
-   1       2       3       4       Table of connectivities: node IDs of each panel listed as rows.
-   ...     ...     ...     ...      
-   0       0       0       0       Last line of the table of connectivities.
-   ======= ======= ======= ======= ============================================================================================================
+   ================================================= ============================================================================================================
+   2       1                                         First column must be a 2. Second column is 1 for a symmetric (about :math:`xOz`) body half-mesh, 0 otherwise.
+   1       :math:`x_1`   :math:`y_1`   :math:`z_1`   Table of nodes: first column is the node ID, other 3 are the coordinates :math:`(x,y,z)` of each node, listed as rows.
+   ...     ...           ...           ...            
+   0       0\.           0\.           0\.           Last line of the table of nodes.
+   1       2             3             4             Table of connectivities: node IDs of each panel listed as rows.
+   ...     ...           ...           ...            
+   0       0             0             0             Last line of the table of connectivities.
+   ======= ============= ============= ============= ============================================================================================================
 
 | ``geomInput``: contain coarse description of mesh, that are number of nodes, number of panels, table of nodes and table of connectivities. The input file has to follow the format as shown in Table `2 <#tab:geomInput>`__.
 
 .. table:: ``geomInput`` file format
    :name: tab:geomInput
 
-   ======= ======= ======= ==== ==================================================================
+   ============= ============= ============= ==== ==================================================================
    File contents                Signification
-   ============================ ==================================================================
-   100                          Total number of nodes.
-   25                           Total number of panels.
-   $x_1$   $y_1$   $z_1$        Table of nodes: coordinates $(x,y,z)$ of each node listed as rows.
-   ...     ...     ...     ...   
-   1       2       3       4    Table of connectivities: node IDs of each panel listed as rows.
-   ...     ...     ...     ...   
-   ======= ======= ======= ==== ==================================================================
+   ============================================== ==================================================================
+   100                                            Total number of nodes.
+   25                                             Total number of panels.
+   :math:`x_1`   :math:`y_1`   :math:`z_1`        Table of nodes: coordinates :math:`(x,y,z)` of each node listed as rows.
+   ...           ...           ...           ...   
+   1             2             3             4    Table of connectivities: node IDs of each panel listed as rows.
+   ...           ...           ...           ...   
+   ============= ============= ============= ==== ==================================================================
 
 | ``Mesh.cal:`` contains mesh and environmental parameters with a format as in Table `3 <#tab:meshcal>`__. This file is used as input for **``mesh``** and **``hydroCal``**. All the parameters are used in **``mesh``**. Only center of gravity, water density, and gravity are used in **``hydroCal``**.
 
@@ -661,15 +661,15 @@ User’s input files
    File contents           Signification
    ======================= ==================================================================
    geomInput_name          Name of the geomInput file.
-   0                       1 for a symmetric (about $xOz$) body half-mesh, 0 otherwise.
+   0                       1 for a symmetric (about :math:`xOz`) body half-mesh, 0 otherwise.
    0\.             0\.     Translation about x and y axis (respectively)
    0\.             0\. -7  Coordinates of gravity centre
    500\.                   Target for the number of panels in refined mesh
    2\.                      
    0\.                      
    1\.                      
-   1025                    Water density $(kg/m^3)$
-   9.81                    Gravity acceleration $(m/s^2)$
+   1025                    Water density :math:`(kg/m^3)`
+   9.81                    Gravity acceleration :math:`(m/s^2)`
    =============== === === ==================================================================
 
 ``input_solver.txt`` contains solver parameters with format as in Table `4 <#tab:input_solver>`__. The parameters are described as follows.
@@ -688,7 +688,7 @@ User’s input files
    =========== ===== ===== =====================================================================================
    File contents           Signification
    ======================= =====================================================================================
-   2                       Gauss quadrature order N=\[1,4\] for surface integration, resulting in $N^2$ nodes.
+   2                       Gauss quadrature order N=\[1,4\] for surface integration, resulting in :math:`N^2` nodes.
    0.001                   eps_zmin for determining minimum z of flow and source points of panel.
    1                       Solver option: 0 for GAUSS ELIM., 1 for LU DECOMP., 2 for GMRES.
    10          1e-5  1000  GMRES parameters: restart parameter, relative tolerance and max number of iterations.
@@ -700,19 +700,19 @@ User’s input files
 .. table:: ``FSmeshfile`` format (Free surface mesh file)
    :name: tab:FSmeshfile
 
-   ======= ======= ======= ======= ============================================================================================================
+   ======= ============= ============= ============= ============================================================================================================
    File contents                   Signification
-   =============================== ============================================================================================================
-   1       5000    4900     400    Free-surface computation parameters: first column is 1 for a symmetric (about $xOz$) body half-mesh, 0 otherwise. Column 2-4 are number of nodes, number of panels and number of segments for the waterline, respectively.
-   1       $x_1$   $y_1$   $z_1$   Table of nodes: first column is the node ID, other 3 are the coordinates $(x,y,z)$ of each node, listed as rows.
-   ...     ...     ...     ...      
-   0       0\.     0\.     0\.     Last line of the table of nodes.
-   1       2       3       4       Table of connectivities: node IDs of each panel listed as rows.
-   ...     ...     ...     ...      
-   4901    4902                    Table of connectivities for the waterline: node IDs of each segment listed as rows.
-   ...     ...     ...     ...      
-   0       0       0       0       Last line of the table of connectivities.
-   ======= ======= ======= ======= ============================================================================================================
+   ================================================= ============================================================================================================
+   1       5000          4900           400          Free-surface computation parameters: first column is 1 for a symmetric (about :math:`xOz`) body half-mesh, 0 otherwise. Column 2-4 are number of nodes, number of panels and number of segments for the waterline, respectively.
+   1       :math:`x_1`   :math:`y_1`   :math:`z_1`   Table of nodes: first column is the node ID, other 3 are the coordinates :math:`(x,y,z)` of each node, listed as rows.
+   ...     ...           ...           ...            
+   0       0\.           0\.           0\.           Last line of the table of nodes.
+   1       2             3             4             Table of connectivities: node IDs of each panel listed as rows.
+   ...     ...           ...           ...            
+   4901    4902                                      Table of connectivities for the waterline: node IDs of each segment listed as rows.
+   ...     ...           ...           ...            
+   0       0             0             0             Last line of the table of connectivities.
+   ======= ============= ============= ============= ============================================================================================================
 
 Output files
 ~~~~~~~~~~~~
@@ -730,64 +730,64 @@ The following hydrodynamic coefficients are produced in Tecplot format, which ca
 .. table:: Output file format of Froude-Krylov, diffraction and excitation forces
    :name: tab:WaveForce
 
-   ========== ================= ====================== ========== ========== ======================== ================================
-   $f_1$      $|F_1(f_1)|$      $\angle F_1(f_1)$      $\cdots$   $\cdots$   $|F_{Ninteg}(f_1)|$      $\angle F_{Ninteg}(f_1)$
-   $f_2$      $|F_1(f_2)|$      $\angle F_1(f_2)$      $\cdots$   $\cdots$   $|F_{Ninteg}(f_2)|$      $\angle F_{Ninteg}(f_2)$
-   $\vdots$   $\vdots$          $\vdots$               $\vdots$   $\vdots$   $\vdots$                 $\vdots$
-   $f_{Nf}$   $|F_1(f_{Nf})|$   $\angle F_1(f_{Nf})$   $\cdots$   $\cdots$   $|F_{Ninteg}(f_{Nf})|$   $\angle F_{Ninteg}(f_{Nf})$
-   ========== ================= ====================== ========== ========== ======================== ================================
+   ================ ======================= ============================ ================ ================ ============================== ================================
+   :math:`f_1`      :math:`|F_1(f_1)|`      :math:`\angle F_1(f_1)`      :math:`\cdots`   :math:`\cdots`   :math:`|F_{Ninteg}(f_1)|`      :math:`\angle F_{Ninteg}(f_1)`
+   :math:`f_2`      :math:`|F_1(f_2)|`      :math:`\angle F_1(f_2)`      :math:`\cdots`   :math:`\cdots`   :math:`|F_{Ninteg}(f_2)|`      :math:`\angle F_{Ninteg}(f_2)`
+   :math:`\vdots`   :math:`\vdots`          :math:`\vdots`               :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                 :math:`\vdots`
+   :math:`f_{Nf}`   :math:`|F_1(f_{Nf})|`   :math:`\angle F_1(f_{Nf})`   :math:`\cdots`   :math:`\cdots`   :math:`|F_{Ninteg}(f_{Nf})|`   :math:`\angle F_{Ninteg}(f_{Nf})`
+   ================ ======================= ============================ ================ ================ ============================== ================================
 
 
 .. table:: Output file format of the radiation coefficients
    :name: tab:addedmass_damping_coeffs
 
-   ============== =========================== ======================== ========== ========== ================================ ================================
-   $f_1$          $M^a_{11}(f_1)$             $B_{11}(f_1)$            $\cdots$   $\cdots$   $M^a_{1Ninteg}(f_1)$             $B_{1Ninteg}(f_1)$
-   $f_2$          $M^a_{11}(f_2)$             $B_{11}(f_2)$            $\cdots$   $\cdots$   $M^a_{1Ninteg}(f_2)$             $B_{1Ninteg}(f_2)$
-   $\vdots$       $\vdots$                    $\vdots$                 $\vdots$   $\vdots$   $\vdots$                         $\vdots$
-   $f_{N_f}$      $M^a_{11}(f_{N_f})$         $B_{11}(f_{N_f})$        $\cdots$   $\cdots$   $M^a_{1Ninteg}(f_{N_f})$         $B_{1Ninteg}(f_{N_f})$
-   $f_1$          $M^a_{21}(f_1)$             $B_{21}(f_1)$            $\cdots$   $\cdots$   $M^a_{2Ninteg}(f_1)$             $B_{2Ninteg}(f_1)$
-   $\vdots$       $\vdots$                    $\vdots$                 $\vdots$   $\vdots$   $\vdots$                         $\vdots$
-   $f_{N_f}$      $M^a_{21}(f_{N_f})$         $B_{21}(f_{N_f})$        $\cdots$   $\cdots$   $M^a_{2Ninteg}(f_{N_f})$         $B_{2Ninteg}(f_{N_f})$
-   $\vdots$       $\vdots$                    $\vdots$                 $\vdots$   $\vdots$   $\vdots$                         $\vdots$
-   $f_{N_f}$      $M^a_{N_{DoF}1}(f_{N_f})$   $B_{N_{DoF}1}(f_{N_f})$  $\cdots$   $\cdots$   $M^a_{N_{DoF}Ninteg}(f_{N_f})$   $B_{N_{DoF}Ninteg}(f_{N_f})$
-   ============== =========================== ======================== ========== ========== ================================ ================================
+   ==================== ================================= ============================== ================ ================ ====================================== ================================
+   :math:`f_1`          :math:`M^a_{11}(f_1)`             :math:`B_{11}(f_1)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1Ninteg}(f_1)`             :math:`B_{1Ninteg}(f_1)`
+   :math:`f_2`          :math:`M^a_{11}(f_2)`             :math:`B_{11}(f_2)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1Ninteg}(f_2)`             :math:`B_{1Ninteg}(f_2)`
+   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                         :math:`\vdots`
+   :math:`f_{N_f}`      :math:`M^a_{11}(f_{N_f})`         :math:`B_{11}(f_{N_f})`        :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1Ninteg}(f_{N_f})`         :math:`B_{1Ninteg}(f_{N_f})`
+   :math:`f_1`          :math:`M^a_{21}(f_1)`             :math:`B_{21}(f_1)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{2Ninteg}(f_1)`             :math:`B_{2Ninteg}(f_1)`
+   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                         :math:`\vdots`
+   :math:`f_{N_f}`      :math:`M^a_{21}(f_{N_f})`         :math:`B_{21}(f_{N_f})`        :math:`\cdots`   :math:`\cdots`   :math:`M^a_{2Ninteg}(f_{N_f})`         :math:`B_{2Ninteg}(f_{N_f})`
+   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                         :math:`\vdots`
+   :math:`f_{N_f}`      :math:`M^a_{N_{DoF}1}(f_{N_f})`   :math:`B_{N_{DoF}1}(f_{N_f})`  :math:`\cdots`   :math:`\cdots`   :math:`M^a_{N_{DoF}Ninteg}(f_{N_f})`   :math:`B_{N_{DoF}Ninteg}(f_{N_f})`
+   ==================== ================================= ============================== ================ ================ ====================================== ================================
 
 | ``RAO.dat`` is the output file of the response amplitude operator with the file format as in Table. `8 <#tab:RAO>`__. The output file gives the absolute value and the phase of RAO for each degree of freedom and each frequency. The frequency is given based on the chosen ’frequency’ type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``. Only radial frequency output file will be produced in the case of the QTF computed.
 
 .. table:: Output file format of ``RAO.dat``
    :name: tab:RAO
 
-   ================ ==================== ========== ==================== ========================= ========== =========================
-   $f_1$            $|\xi_1(f_1)|$       $\cdots$   $|\xi_6(f_1)|$       $\angle \xi_1(f_1)$       $\cdots$   $\angle \xi_6(f_1)$
-   $\vdots$         $\vdots$             $\vdots$   $\vdots$             $\vdots$                  $\vdots$   $\vdots$
-   $f_{N_f}$        $|\xi_1(f_{N_f})|$   $\cdots$   $|\xi_6(f_{N_f})|$   $\angle \xi_1(f_{N_f})$   $\cdots$   $\angle \xi_6(f_{N_f})$
-   ================ ==================== ========== ==================== ========================= ========== =========================
+   ====================== ========================== ================ ========================== =============================== ================ =========================
+   :math:`f_1`            :math:`|\xi_1(f_1)|`       :math:`\cdots`   :math:`|\xi_6(f_1)|`       :math:`\angle \xi_1(f_1)`       :math:`\cdots`   :math:`\angle \xi_6(f_1)`
+   :math:`\vdots`         :math:`\vdots`             :math:`\vdots`   :math:`\vdots`             :math:`\vdots`                  :math:`\vdots`   :math:`\vdots`
+   :math:`f_{N_f}`        :math:`|\xi_1(f_{N_f})|`   :math:`\cdots`   :math:`|\xi_6(f_{N_f})|`   :math:`\angle \xi_1(f_{N_f})`   :math:`\cdots`   :math:`\angle \xi_6(f_{N_f})`
+   ====================== ========================== ================ ========================== =============================== ================ =========================
 
 | ``IRF.tec`` and ``IRF_excForce.tec`` are the impulse response functions for the radiation damping and the excitation force, respectively. The radiation damping IRF has the file format as in Table `9 <#tab:IRF>`__ and the excitation force IRF as in Table `10 <#tab:IRFExcF>`__.
 
 .. table:: Output file format of ``IRF.tec``
    :name: tab:IRF
 
-   ============ ========================== ======================= ========== ============= =============================== ================================
-   $t_1$        $M^a_{11}(\infty)$         $IRF_{11}(t_1)$         $\cdots$   $\cdots$      $M^a_{1Ninteg}(\infty)$         $IRF_{1Ninteg}(t_1)$
-   $t_2$        $M^a_{11}(\infty)$         $IRF_{11}(t_2)$         $\cdots$   $\cdots$      $M^a_{1Ninteg}(\infty)$         $IRF_{1Ninteg}(t_2)$
-   $\vdots$     $\vdots$                   $\vdots$                $\vdots$   $\vdots$      $\vdots$                        $\vdots$
-   $t_1$        $M^a_{21}(\infty)$         $IRF_{21}(t_1)$         $\cdots$   $\cdots$      $M^a_{2Ninteg}(\infty)$         $IRF_{2Ninteg}(t_1)$
-   $\vdots$     $\vdots$                   $\vdots$                $\vdots$   $\vdots$      $\vdots$                        $\vdots$
-   $t_N$        $M^a_{N_{DoF}1}(\infty)$   $IRF_{N_{DoF}1}(t_N)$   $\cdots$   $\cdots$      $M^a_{N_{DoF}Ninteg}(\infty)$   $IRF_{N_{DoF}Ninteg}(t_N)$
-   ============ ========================== ======================= ========== ============= =============================== ================================
+   ================== ================================ ============================= ================ =================== ===================================== ================================
+   :math:`t_1`        :math:`M^a_{11}(\infty)`         :math:`IRF_{11}(t_1)`         :math:`\cdots`   :math:`\cdots`      :math:`M^a_{1Ninteg}(\infty)`         :math:`IRF_{1Ninteg}(t_1)`
+   :math:`t_2`        :math:`M^a_{11}(\infty)`         :math:`IRF_{11}(t_2)`         :math:`\cdots`   :math:`\cdots`      :math:`M^a_{1Ninteg}(\infty)`         :math:`IRF_{1Ninteg}(t_2)`
+   :math:`\vdots`     :math:`\vdots`                   :math:`\vdots`                :math:`\vdots`   :math:`\vdots`      :math:`\vdots`                        :math:`\vdots`
+   :math:`t_1`        :math:`M^a_{21}(\infty)`         :math:`IRF_{21}(t_1)`         :math:`\cdots`   :math:`\cdots`      :math:`M^a_{2Ninteg}(\infty)`         :math:`IRF_{2Ninteg}(t_1)`
+   :math:`\vdots`     :math:`\vdots`                   :math:`\vdots`                :math:`\vdots`   :math:`\vdots`      :math:`\vdots`                        :math:`\vdots`
+   :math:`t_N`        :math:`M^a_{N_{DoF}1}(\infty)`   :math:`IRF_{N_{DoF}1}(t_N)`   :math:`\cdots`   :math:`\cdots`      :math:`M^a_{N_{DoF}Ninteg}(\infty)`   :math:`IRF_{N_{DoF}Ninteg}(t_N)`
+   ================== ================================ ============================= ================ =================== ===================================== ================================
 
 
 .. table:: Output file format of ``IRF_excForce.tec``
    :name: tab:IRFExcF
 
-   ========== ================ ========== ========================
-   $t_1$      $IRF_{1}(t_1)$   $\cdots$   $IRF_{Ninteg}(t_1)$
-   $t_2$      $IRF_{1}(t_2)$   $\cdots$   $IRF_{Ninteg}(t_2)$
-   $\vdots$   $\vdots$         $\vdots$   $\vdots$
-   $t_N$      $IRF_{1}(t_N)$   $\cdots$   $IRF_{Ninteg}(t_N)$
-   ========== ================ ========== ========================
+   ================ ====================== ================ ========================
+   :math:`t_1`      :math:`IRF_{1}(t_1)`   :math:`\cdots`   :math:`IRF_{Ninteg}(t_1)`
+   :math:`t_2`      :math:`IRF_{1}(t_2)`   :math:`\cdots`   :math:`IRF_{Ninteg}(t_2)`
+   :math:`\vdots`   :math:`\vdots`         :math:`\vdots`   :math:`\vdots`
+   :math:`t_N`      :math:`IRF_{1}(t_N)`   :math:`\cdots`   :math:`IRF_{Ninteg}(t_N)`
+   ================ ====================== ================ ========================
 
 ``pressure.00XXX.dat``, ``kochin.00XXX.dat`` and ``freesurface.00XXX.dat`` are output files of pressure, Kochin and free surface, respectively, for a specific problem-XXX. The problem number is defined as in order of the diffraction problem (:math:`Nbeta`), the radiation problem (:math:`Ndof`) and for each frequency. So problem-001 is the, first frequency and first wave direction, diffraction problem. Suppose :math:`Nbeta=1`, then problem-002 is the first frequency radiation problem DoF 1. If :math:`Ndof=6` then problem-008 is the second frequency diffraction problem.
 
@@ -796,45 +796,45 @@ The following hydrodynamic coefficients are produced in Tecplot format, which ca
 .. table:: Output file format of ``pressure.00XXX.dat``
    :name: tab:pressure
 
-   ============== ============== ============== =============================== ====================================
-   $x_1$          $y_1$          $z_1$          $|P(\boldsymbol x_1)|$          $\angle P(\boldsymbol x_1)$
-   ...            ...            ...            ...                             ...
-   $x_{Npanel}$   $y_{Npanel}$   $z_{Npanel}$   $|P(\boldsymbol x_{Npanel})|$   $\angle P(\boldsymbol x_{Npanel})$
-   ============== ============== ============== =============================== ====================================
+   ==================== ==================== ==================== ===================================== ====================================
+   :math:`x_1`          :math:`y_1`          :math:`z_1`          :math:`|P(\boldsymbol x_1)|`          :math:`\angle P(\boldsymbol x_1)`
+   :math:`\vdots`       :math:`\vdots`       :math:`\vdots`       :math:`\vdots`                        :math:`\vdots`
+   :math:`x_{Npanel}`   :math:`y_{Npanel}`   :math:`z_{Npanel}`   :math:`|P(\boldsymbol x_{Npanel})|`   :math:`\angle P(\boldsymbol x_{Npanel})`
+   ==================== ==================== ==================== ===================================== ====================================
 
 -  ``kochin.00XXX.dat`` is an output file of the Kochin function on a prescribed direction for the problem-XXX. In each file, depending on the diffraction/radiation problem, the computed absolute value of the Kochin, :math:`|\mathcal{H}|`, and the phase, :math:`\angle \mathcal{H}`, (rad) are saved for each direction, :math:`\vartheta`. The format of the output file is given in Table `12 <#tab:kochin>`__.
 
 .. table:: Output file format of *kochin.00XXX.dat*
    :name: tab:kochin
 
-   ========================== ========================================= ===============================================
-   $\vartheta_1$              $|\mathcal{H}(\vartheta_1)|$              $\angle \mathcal{H}(\vartheta_1)$
-   ...                        ...                                       ...
-   $\vartheta_{N\vartheta}$   $|\mathcal{H}(\vartheta_{N\vartheta})|$   $\angle \mathcal{H}(\vartheta_{N\vartheta})$
-   ========================== ========================================= ===============================================
+   ================================ =============================================== ===============================================
+   :math:`\vartheta_1`              :math:`|\mathcal{H}(\vartheta_1)|`              :math:`\angle \mathcal{H}(\vartheta_1)`
+   :math:`\vdots`                   :math:`\vdots`                                  :math:`\vdots`
+   :math:`\vartheta_{N\vartheta}`   :math:`|\mathcal{H}(\vartheta_{N\vartheta})|`   :math:`\angle \mathcal{H}(\vartheta_{N\vartheta})`
+   ================================ =============================================== ===============================================
 
 -  ``freesurface.00XXX.dat`` is an output file of the free-surface elevation on a prescribed free-surface domain for the problem-XXX. In each file, depending on the diffraction/radiation problem, the computed absolute value of the free-surface elevation, :math:`|\eta|`, and the phase, :math:`\angle \eta`, (rad) are saved for each free-surface panel position. The format of the output file is given in Table `13 <#tab:freesurface>`__.
 
 .. table:: Output file format of ``freesurface.00XXX.dat``
    :name: tab:freesurface
 
-   ============== ============== ============================ ================================= =============================== ==================================
-   $x_1$          $y_1$          $|\eta(\vec{x}_1)|$          $\angle \eta(\vec{x}_1)$          $Re[ \eta(\vec{x}_1)]$          $Im[ \eta(\vec{x}_1)]$
-   ...            ...             ...                          ...                                ...                           ...
-   $x_{Npanel}$   $y_{Npanel}$   $|\eta(\vec{x}_{Npanel})|$   $\angle \eta(\vec{x}_{Npanel})$   $Re[ \eta(\vec{x}_{Npanel})]$   $Im[ \eta(\vec{x}_{Npanel})]$
-   ============== ============== ============================ ================================= =============================== ==================================
+   ==================== ==================== ================================== ======================================= ===================================== ==================================
+   :math:`x_1`          :math:`y_1`          :math:`|\eta(\vec{x}_1)|`          :math:`\angle \eta(\vec{x}_1)`          :math:`Re[ \eta(\vec{x}_1)]`          :math:`Im[ \eta(\vec{x}_1)]`
+   :math:`\vdots`       :math:`\vdots`       :math:`\vdots`                     :math:`\vdots`                          :math:`\vdots`                        :math:`\vdots`
+   :math:`x_{Npanel}`   :math:`y_{Npanel}`   :math:`|\eta(\vec{x}_{Npanel})|`   :math:`\angle \eta(\vec{x}_{Npanel})`   :math:`Re[ \eta(\vec{x}_{Npanel})]`   :math:`Im[ \eta(\vec{x}_{Npanel})]`
+   ==================== ==================== ================================== ======================================= ===================================== ==================================
 
 ``OUT_QTFM_N.dat`` and ``OUT_QTFP_N.dat`` are the output files of difference- and sum-frequencies QTF. The QTF results are either the total QTF or parts of the QTF terms that depend on the user choice QTF post-processing parameters in ``Nemoh.cal``. The QTF values are given in the absolute value with the phase in deg and real-imaginary parts. The QTF values are normalized by :math:`\rho g`. The ’frequency’ type, [rad/s, Hz, s], depends on the user choice in the ``Nemoh.cal``. The format of the output file is given in Table `14 <#tab:QTF>`__. Only the lower triangular part of the QTF matrix is saved in the file. The full difference-frequency QTF matrix can be constructed with the lower triangular part of the matrix and the upper triangular part which is in conjugate-symmetric with the lower part. The upper triangular part of the sum-frequency QTF is symmetric with the lower triangular part. A Matlab file for reading this output file is provided in ``matlabRoutines/`` and will be described in the next section.
 
 .. table:: Output file format of ``OUT_QTFM_N.dat`` and ``OUT_QTFP_N.dat``
    :name: tab:QTF
 
-   ============== ================ ===================== ===================== ============== ================ ============== ================== ======================
-   $f_{1_1}$      $f_{2_1}$        $\beta_{1_1}$         $\beta_{2_1}$         $DoF_1$        $|QTF|/\rho g$   $\angle QTF$   $Re[QTF]/\rho g$   $Im[QTF]/\rho g$
-   $f_{1_2}$      $f_{2_1}$        $\beta_{1_1}$         $\beta_{2_1}$         $DoF_1$        $|QTF|/\rho g$   $\angle QTF$   $Re[QTF]/\rho g$   $Im[QTF]/\rho g$
-   $\vdots$       $\vdots$         $\vdots$              $\vdots$              $\vdots$       $\vdots$         $\vdots$       $\vdots$           $\vdots$
-   $f_{1_{Nf}}$   $f_{2_{Nf}}$     $\beta_{1_{Nbeta}}$   $\beta_{2_{Nbeta}}$   $DoF_{NDof}$   $|QTF|/\rho g$   $\angle QTF$   $Re[QTF]/\rho g$   $Im[QTF]/\rho g$
-   ============== ================ ===================== ===================== ============== ================ ============== ================== ======================
+   ==================== ====================== =========================== =========================== ==================== ====================== ==================== ======================== ======================
+   :math:`f_{1_1}`      :math:`f_{2_1}`        :math:`\beta_{1_1}`         :math:`\beta_{2_1}`         :math:`DoF_1`        :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
+   :math:`f_{1_2}`      :math:`f_{2_1}`        :math:`\beta_{1_1}`         :math:`\beta_{2_1}`         :math:`DoF_1`        :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
+   :math:`\vdots`       :math:`\vdots`         :math:`\vdots`              :math:`\vdots`              :math:`\vdots`       :math:`\vdots`         :math:`\vdots`       :math:`\vdots`           :math:`\vdots`
+   :math:`f_{1_{Nf}}`   :math:`f_{2_{Nf}}`     :math:`\beta_{1_{Nbeta}}`   :math:`\beta_{2_{Nbeta}}`   :math:`DoF_{NDof}`   :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
+   ==================== ====================== =========================== =========================== ==================== ====================== ==================== ======================== ======================
 
 .. _`Sec:MatlabFiles`:
 
