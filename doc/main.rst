@@ -12,8 +12,8 @@ Introduction
 
 This document is the Manual of NEMOH Software in version v3.0 Released on 2nd December 2022. It serves as a guide for using, installing and running the software.
 
-| NEMOH in its original version is an open-source potential flow boundary element solver for computing first-order hydrodynamic coefficients in the frequency domain. NEMOH v3.0 includes the treatment of irregular frequencies, has an extended module to post-process the first-order hydrodynamic results, and compute complete Quadratic Transfer Functions (QTFs).
-| The new developments/extensions in this NEMOH v3.0 are summarised as follows.
+NEMOH in its original version is an open-source potential flow boundary element solver for computing first-order hydrodynamic coefficients in the frequency domain. NEMOH v3.0 includes the treatment of irregular frequencies, has an extended module to post-process the first-order hydrodynamic results, and compute complete Quadratic Transfer Functions (QTFs).
+The new developments/extensions in this NEMOH v3.0 are summarised as follows.
 
 -  GNU General Public v3 license is used instead of Apache.
 
@@ -27,7 +27,7 @@ This document is the Manual of NEMOH Software in version v3.0 Released on 2nd De
 
 -  Two new options of the linear system solvers, LU decomposition and GMRES iterative solver, are available for enhanced computational efficiency.
 
--  | Full difference- and sum-frequencies QTF module.
+-  Full difference- and sum-frequencies QTF module.
 
 The present User Manual is organized as follows. Section `2 <#Sec:Descrip_NEMOH>`__ describes briefly the mathematical background and the capabilities of the software; it is advised to read this Section before continuing to the rest of the manual. Section `3 <#Sec:Getstarted>`__ describes the installation procedure, how to run the codes, and includes a description of the input and output files. Section `4 <#Sec:MatlabFiles>`__ describes supporting Matlab files such as a NEMOH wrapper, a mesh converter and the routines to post-process the test cases. Finally, Section `5 <#Sec:Testcase>`__ describes briefly test cases that will show the capabilities of the code and its use. For new NEMOH users, they can be used as the first elements for setting up a new configuration.
 
@@ -41,8 +41,8 @@ Modelling and Numerical aspects
 
 This section provides background information on NEMOH v3.0 with a focus on basic scientific ideas.
 
-| NEMOH v3.0 contains two main modules. First, NEMOH1 solves linear diffraction and radiation problems of wave-structure interaction using a 3-D boundary element method in the frequency domain. Second, NEMOH2, an extended module for computing difference- and sum- frequencies Quadratic Transfer Functions (QTFs) for fixed or floating structures.
-| The following subsections describe the underlying modelling and numerical approaches used in NEMOH.
+NEMOH v3.0 contains two main modules. First, NEMOH1 solves linear diffraction and radiation problems of wave-structure interaction using a 3-D boundary element method in the frequency domain. Second, NEMOH2, an extended module for computing difference- and sum- frequencies Quadratic Transfer Functions (QTFs) for fixed or floating structures.
+The following subsections describe the underlying modelling and numerical approaches used in NEMOH.
 
 Notations
 ~~~~~~~~~
@@ -154,8 +154,8 @@ NEMOH1, the first-order solver, is based on the following modelling principles:
 
    where :math:`[\boldsymbol B_{add}]` and :math:`[\boldsymbol K_M]` are user-specified additional damping and stiffness matrices.
 
-|  
-| NEMOH2, the second-order QTF module, is based on the following principles
+
+NEMOH2, the second-order QTF module, is based on the following principles
 
 -  The second-order loads are composed of the quadratic part and the potential part, the detailed formulation is given in :cite:t:`Kurnia22_JH,Kurnia22`.
 
@@ -191,8 +191,8 @@ NEMOH1 uses the following numerical approach:
 
 -  The software can solve multi-bodies problems, as well as multi-directional waves.
 
-|  
-| NEMOH2 uses the following numerical approach
+
+NEMOH2 uses the following numerical approach
 
 -  The QTF module can be run only after the first order-hydrodynamic coefficients are computed in NEMOH1.
 
@@ -210,8 +210,8 @@ NEMOH1 uses the following numerical approach:
 
 -  QTF computations have not been tested yet for the multi-bodies problem.
 
-|  
-| NEMOH related publications to be referred are :cite:t:`Babarit15` for the first order NEMOH and :cite:t:`Philippe15,Kurnia22_JH,Kurnia22` for the QTF module. A publication related with this release is in preparation as in :cite:t:`Kurnia23`.
+
+NEMOH related publications to be referred are :cite:t:`Babarit15` for the first order NEMOH and :cite:t:`Philippe15,Kurnia22_JH,Kurnia22` for the QTF module. A publication related with this release is in preparation as in :cite:t:`Kurnia23`.
 
 Units
 -----
@@ -303,8 +303,8 @@ This section describes the installation procedure and how to run the codes. It a
 Executable files
 ----------------
 
-| Executable/binary files are provided in the ``Release`` section of the `GitLab project <https://gitlab.com/lheea/Nemoh>`__. They can be used directly without the need to do the compilation procedure described in the next subsection. Windows and Linux executable files are provided. In the case of a compilation on your computer, executable files will be located in the ``bin/`` folder.
-| The following executable files are available:
+Executable/binary files are provided in the ``Release`` section of the `GitLab project <https://gitlab.com/lheea/Nemoh>`__. They can be used directly without the need to do the compilation procedure described in the next subsection. Windows and Linux executable files are provided. In the case of a compilation on your computer, executable files will be located in the ``bin/`` folder.
+The following executable files are available:
 
 -  NEMOH1: **``mesh``**, **``preProc``**, **``hydrosCal``**, **``solver``**, **``postProc``**,
 
@@ -411,8 +411,8 @@ The following steps are for executing the binary files in the command window.
 
          ./binfile ./../projdir
 
-| Before executing the binary files, the input files are needed. These are described in the next subsection.
-| Finally, a set of test cases are provided. The results are presented in Sec. `5 <#Sec:Testcase>`__ and we provide here the methodology to run those tests. The first possibility is to run each of the cases in the command line, following the above instructions. This applies to both Windows and Linux environments.
+Before executing the binary files, the input files are needed. These are described in the next subsection.
+Finally, a set of test cases are provided. The results are presented in Sec. `5 <#Sec:Testcase>`__ and we provide here the methodology to run those tests. The first possibility is to run each of the cases in the command line, following the above instructions. This applies to both Windows and Linux environments.
 
 To simplify the procedure for Linux platforms, ``Makefile`` is provided in the ``TestCases/`` directory. It is then possible to run the NEMOH1 test cases by executing the following commands in a Terminal (each line being a test case):
 
@@ -468,9 +468,9 @@ Following is the list of the user’s input files and the output files for each 
 
    -  User’s input files: ``projdir/Nemoh.cal``, ``projdir/meshfile``,
 
-   -  | Output files: ``projdir/Normalvelocities.dat``,
-      | ``projdir/results/[FKForce.dat, FKForce.tec, index.dat]``,
-      | ``projdir/mesh/[L10.dat, L12.dat]``,
+   -  Output files: ``projdir/Normalvelocities.dat``,
+      ``projdir/results/[FKForce.dat, FKForce.tec, index.dat]``,
+      ``projdir/mesh/[L10.dat, L12.dat]``,
 
 -  **``hydrosCal``**
 
@@ -482,22 +482,22 @@ Following is the list of the user’s input files and the output files for each 
 
    -  User’s input files: ``projdir/Nemoh.cal``, ``projdir/input_solver.txt``
 
-   -  | Output files: ``projdir/results/Forces.dat``,
-      | ``projdir/results/sources`` (if QTF will be computed, indicated in ``Nemoh.cal``)
+   -  Output files: ``projdir/results/Forces.dat``,
+      ``projdir/results/sources`` (if QTF will be computed, indicated in ``Nemoh.cal``)
 
 -  **``postProc``**
 
-   -  | User’s input files: ``projdir/Nemoh.cal``,
-      | ``projdir/Mechanics/[Km.dat,Badd.dat]``
+   -  User’s input files: ``projdir/Nemoh.cal``,
+      ``projdir/Mechanics/[Km.dat,Badd.dat]``
 
-   -  | Output files: ``projdir/results/[ExcitationForce.tec,``
-      | ``DiffractionForce.tec,RadiationCoefficients.tec,``\ :math:`\cdots`\ ``]``,
-      | ``projdir/Motion/RAO.dat``,
+   -  Output files: ``projdir/results/[ExcitationForce.tec,``
+      ``DiffractionForce.tec,RadiationCoefficients.tec,``\ :math:`\cdots`\ ``]``,
+      ``projdir/Motion/RAO.dat``,
 
 -  **``QTFpreProc``**
 
-   -  | User’s input files: ``projdir/Nemoh.cal``, ``projdir/FSmeshfile`` (If the free-surface integral, HASFS flag, is computed),
-      | ``projdir/Mechanics/[Km.dat,Badd.dat]``
+   -  User’s input files: ``projdir/Nemoh.cal``, ``projdir/FSmeshfile`` (If the free-surface integral, HASFS flag, is computed),
+      ``projdir/Mechanics/[Km.dat,Badd.dat]``
 
    -  Output files: ``projdir/QTFPreprocOut/*.bin``,
 
@@ -513,8 +513,8 @@ Following is the list of the user’s input files and the output files for each 
 
    -  Output files: ``projdir/results/QTF/[OUT_QTFM_N.dat,OUT_QTFP_N.dat]``
 
-|  
-| As summary, following files are needed for the input, some depends on user-specified choice in ``Nemoh.cal``:
+
+As summary, following files are needed for the input, some depends on user-specified choice in ``Nemoh.cal``:
 
 -  ``Nemoh.cal`` contains all NEMOH computation parameters
 
@@ -528,8 +528,8 @@ Following is the list of the user’s input files and the output files for each 
 
 -  ``FSmeshfile`` contains the free-surface mesh if contrib=3 in ``Nemoh.cal``.
 
-|  
-| NEMOH produces the following main output files, some depending on user-specified choice in ``Nemoh.cal``,
+
+NEMOH produces the following main output files, some depending on user-specified choice in ``Nemoh.cal``,
 
 -  hydrostatic files: inertia and stiffness matrices,
 
@@ -541,8 +541,8 @@ Following is the list of the user’s input files and the output files for each 
 
 -  Total difference- and sum-frequencies QTFs.
 
-|  
-| Detail descriptions of the input/output files are discussed in the next subsections.
+
+Detail descriptions of the input/output files are discussed in the next subsections.
 
 User’s input files
 ~~~~~~~~~~~~~~~~~~
@@ -616,10 +616,10 @@ User’s input files
 
    -  In **``QTFpostproc``**, QTFs total is calculated with summation of all the terms. Option to exclude/include the terms are available with the corresponding switch for DUOK, HASBO and HASFS+ASYMP terms. Switch 1 to include, 0 to exclude. If Contrib=2, then HASFS+ASYMP switch has to be 0.
 
- 
 
-| ``meshfile``: contains all the mesh information with a format as shown in Table `1 <#tab:meshfile>`__. Lid panels (:math:`z=0`) of the structure may be included in this file to activate the irregular frequencies removal method. This mesh file may be generated by NEMOH **``mesh``** preprocessor or by an external mesh generator.
-  External mesh generators, *e.g.* the open-source software GMSH :cite:p:`GMSH`, may be used to generate mesh files but they must be adapted to the NEMOH format. A Matlab file for converting GMSH mesh file to the NEMOH format is provided in the dedicated repository. The Matlab file will be described in the next section.
+
+``meshfile``: contains all the mesh information with a format as shown in Table `1 <#tab:meshfile>`__. Lid panels (:math:`z=0`) of the structure may be included in this file to activate the irregular frequencies removal method. This mesh file may be generated by NEMOH **``mesh``** preprocessor or by an external mesh generator.
+External mesh generators, *e.g.* the open-source software GMSH :cite:p:`GMSH`, may be used to generate mesh files but they must be adapted to the NEMOH format. A Matlab file for converting GMSH mesh file to the NEMOH format is provided in the dedicated repository. The Matlab file will be described in the next section.
 
 .. table:: ``meshfile`` format
    :name: tab:meshfile
@@ -627,16 +627,16 @@ User’s input files
    ======= ============= ============= ============= ============================================================================================================
    File contents                   Signification
    ================================================= ============================================================================================================
-   2       1                                         First column must be a 2. Second column is 1 for a symmetric (about :math:`xOz`) body half-mesh, 0 otherwise.
+   2       1                                         First column must be a 2. Second column is 1 for a symmetric (about :math:`xOz`) body half-mesh, 0 otherwise.
    1       :math:`x_1`   :math:`y_1`   :math:`z_1`   Table of nodes: first column is the node ID, other 3 are the coordinates :math:`(x,y,z)` of each node, listed as rows.
-   ...     ...           ...           ...            
+   ...     ...           ...           ...
    0       0\.           0\.           0\.           Last line of the table of nodes.
    1       2             3             4             Table of connectivities: node IDs of each panel listed as rows.
-   ...     ...           ...           ...            
+   ...     ...           ...           ...
    0       0             0             0             Last line of the table of connectivities.
    ======= ============= ============= ============= ============================================================================================================
 
-| ``geomInput``: contain coarse description of mesh, that are number of nodes, number of panels, table of nodes and table of connectivities. The input file has to follow the format as shown in Table `2 <#tab:geomInput>`__.
+``geomInput``: contain coarse description of mesh, that are number of nodes, number of panels, table of nodes and table of connectivities. The input file has to follow the format as shown in Table `2 <#tab:geomInput>`__.
 
 .. table:: ``geomInput`` file format
    :name: tab:geomInput
@@ -644,15 +644,15 @@ User’s input files
    ============= ============= ============= ==== ==================================================================
    File contents                Signification
    ============================================== ==================================================================
-   100                                            Total number of nodes.
-   25                                             Total number of panels.
-   :math:`x_1`   :math:`y_1`   :math:`z_1`        Table of nodes: coordinates :math:`(x,y,z)` of each node listed as rows.
-   ...           ...           ...           ...   
+   100                                            Total number of nodes.
+   25                                             Total number of panels.
+   :math:`x_1`   :math:`y_1`   :math:`z_1`        Table of nodes: coordinates :math:`(x,y,z)` of each node listed as rows.
+   ...           ...           ...           ...
    1             2             3             4    Table of connectivities: node IDs of each panel listed as rows.
-   ...           ...           ...           ...   
+   ...           ...           ...           ...
    ============= ============= ============= ==== ==================================================================
 
-| ``Mesh.cal:`` contains mesh and environmental parameters with a format as in Table `3 <#tab:meshcal>`__. This file is used as input for **``mesh``** and **``hydroCal``**. All the parameters are used in **``mesh``**. Only center of gravity, water density, and gravity are used in **``hydroCal``**.
+``Mesh.cal:`` contains mesh and environmental parameters with a format as in Table `3 <#tab:meshcal>`__. This file is used as input for **``mesh``** and **``hydroCal``**. All the parameters are used in **``mesh``**. Only center of gravity, water density, and gravity are used in **``hydroCal``**.
 
 .. table:: ``Mesh.cal`` file format
    :name: tab:meshcal
@@ -660,16 +660,16 @@ User’s input files
    =============== === === ==================================================================
    File contents           Signification
    ======================= ==================================================================
-   geomInput_name          Name of the geomInput file.
-   0                       1 for a symmetric (about :math:`xOz`) body half-mesh, 0 otherwise.
-   0\.             0\.     Translation about x and y axis (respectively)
+   geomInput_name          Name of the geomInput file.
+   0                       1 for a symmetric (about :math:`xOz`) body half-mesh, 0 otherwise.
+   0\.             0\.     Translation about x and y axis (respectively)
    0\.             0\. -7  Coordinates of gravity centre
-   500\.                   Target for the number of panels in refined mesh
-   2\.                      
-   0\.                      
-   1\.                      
-   1025                    Water density :math:`(kg/m^3)`
-   9.81                    Gravity acceleration :math:`(m/s^2)`
+   500\.                   Target for the number of panels in refined mesh
+   2\.
+   0\.
+   1\.
+   1025                    Water density :math:`(kg/m^3)`
+   9.81                    Gravity acceleration :math:`(m/s^2)`
    =============== === === ==================================================================
 
 ``input_solver.txt`` contains solver parameters with format as in Table `4 <#tab:input_solver>`__. The parameters are described as follows.
@@ -680,7 +680,7 @@ User’s input files
 
 -  Three linear-system solvers are available; 1 Gauss elimination, 2 LU Decomposition, 3 GMRES iterative solver.
 
--  | If GMRES solver is chosen then the three parameters, the restart parameter, the relative tolerance and the maximum number of iterations, have to be specified. If the tolerance is not achieved after the maximum iteration exceeded then LU decomposition solves the system directly.
+-  If GMRES solver is chosen then the three parameters, the restart parameter, the relative tolerance and the maximum number of iterations, have to be specified. If the tolerance is not achieved after the maximum iteration exceeded then LU decomposition solves the system directly.
 
 .. table:: ``input_solver.txt`` file format
    :name: tab:input_solver
@@ -688,14 +688,14 @@ User’s input files
    =========== ===== ===== =====================================================================================
    File contents           Signification
    ======================= =====================================================================================
-   2                       Gauss quadrature order N=\[1,4\] for surface integration, resulting in :math:`N^2` nodes.
-   0.001                   eps_zmin for determining minimum z of flow and source points of panel.
-   1                       Solver option: 0 for GAUSS ELIM., 1 for LU DECOMP., 2 for GMRES.
+   2                       Gauss quadrature order N=\[1,4\] for surface integration, resulting in :math:`N^2` nodes.
+   0.001                   eps_zmin for determining minimum z of flow and source points of panel.
+   1                       Solver option: 0 for GAUSS ELIM., 1 for LU DECOMP., 2 for GMRES.
    10          1e-5  1000  GMRES parameters: restart parameter, relative tolerance and max number of iterations.
    =========== ===== ===== =====================================================================================
 
-| ``Km.dat`` and ``Badd.dat`` are additional stiffness matrix and damping coefficient matrix. The files contains the matrix components with size :math:`(Nbody\cdot Nradiation)\times (Nbody\cdot Nradiation)`.
-| ``FSmeshfile`` contains all the free-surface mesh information with a format as shown in Table `5 <#tab:FSmeshfile>`__. Quadrilateral panels discretized free-surface area in between the body waterline, :math:`R_B`, and the exterior radius :math:`R_e`. Waterline on :math:`R_B` and :math:`R_e` has to discretized by line segments.
+``Km.dat`` and ``Badd.dat`` are additional stiffness matrix and damping coefficient matrix. The files contains the matrix components with size :math:`(Nbody\cdot Nradiation)\times (Nbody\cdot Nradiation)`.
+``FSmeshfile`` contains all the free-surface mesh information with a format as shown in Table `5 <#tab:FSmeshfile>`__. Quadrilateral panels discretized free-surface area in between the body waterline, :math:`R_B`, and the exterior radius :math:`R_e`. Waterline on :math:`R_B` and :math:`R_e` has to discretized by line segments.
 
 .. table:: ``FSmeshfile`` format (Free surface mesh file)
    :name: tab:FSmeshfile
@@ -705,12 +705,12 @@ User’s input files
    ================================================= ============================================================================================================
    1       5000          4900           400          Free-surface computation parameters: first column is 1 for a symmetric (about :math:`xOz`) body half-mesh, 0 otherwise. Column 2-4 are number of nodes, number of panels and number of segments for the waterline, respectively.
    1       :math:`x_1`   :math:`y_1`   :math:`z_1`   Table of nodes: first column is the node ID, other 3 are the coordinates :math:`(x,y,z)` of each node, listed as rows.
-   ...     ...           ...           ...            
+   ...     ...           ...           ...
    0       0\.           0\.           0\.           Last line of the table of nodes.
    1       2             3             4             Table of connectivities: node IDs of each panel listed as rows.
-   ...     ...           ...           ...            
-   4901    4902                                      Table of connectivities for the waterline: node IDs of each segment listed as rows.
-   ...     ...           ...           ...            
+   ...     ...           ...           ...
+   4901    4902                                      Table of connectivities for the waterline: node IDs of each segment listed as rows.
+   ...     ...           ...           ...
    0       0             0             0             Last line of the table of connectivities.
    ======= ============= ============= ============= ============================================================================================================
 
@@ -725,7 +725,7 @@ The following hydrodynamic coefficients are produced in Tecplot format, which ca
 
 -  ``RadiationCoefficients.tec`` is the output file for added mass and damping coefficients with format as in Table `7 <#tab:addedmass_damping_coeffs>`__. The radiation coefficients are given for each :math:`DoF`, each force axis and for each frequency. The frequency is given based on the chosen ’frequency’ type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``.
 
-| The hydrodynamic coefficients are also produced in the *.dat* files, i.e. *CA.dat* for the damping coefficients, *CM.dat* for the added mass coefficients, *Fe.dat* for the excitation force and *FKForce.dat* for the excitation force. The frequency type of the output files is only radial frequency [rad/s]. These output files are used as input files for the QTF module.
+The hydrodynamic coefficients are also produced in the *.dat* files, i.e. *CA.dat* for the damping coefficients, *CM.dat* for the added mass coefficients, *Fe.dat* for the excitation force and *FKForce.dat* for the excitation force. The frequency type of the output files is only radial frequency [rad/s]. These output files are used as input files for the QTF module.
 
 .. table:: Output file format of Froude-Krylov, diffraction and excitation forces
    :name: tab:WaveForce
@@ -753,7 +753,7 @@ The following hydrodynamic coefficients are produced in Tecplot format, which ca
    :math:`f_{N_f}`      :math:`M^a_{N_{DoF}1}(f_{N_f})`   :math:`B_{N_{DoF}1}(f_{N_f})`  :math:`\cdots`   :math:`\cdots`   :math:`M^a_{N_{DoF}Ninteg}(f_{N_f})`   :math:`B_{N_{DoF}Ninteg}(f_{N_f})`
    ==================== ================================= ============================== ================ ================ ====================================== ================================
 
-| ``RAO.dat`` is the output file of the response amplitude operator with the file format as in Table. `8 <#tab:RAO>`__. The output file gives the absolute value and the phase of RAO for each degree of freedom and each frequency. The frequency is given based on the chosen ’frequency’ type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``. Only radial frequency output file will be produced in the case of the QTF computed.
+``RAO.dat`` is the output file of the response amplitude operator with the file format as in Table. `8 <#tab:RAO>`__. The output file gives the absolute value and the phase of RAO for each degree of freedom and each frequency. The frequency is given based on the chosen ’frequency’ type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``. Only radial frequency output file will be produced in the case of the QTF computed.
 
 .. table:: Output file format of ``RAO.dat``
    :name: tab:RAO
@@ -764,7 +764,7 @@ The following hydrodynamic coefficients are produced in Tecplot format, which ca
    :math:`f_{N_f}`        :math:`|\xi_1(f_{N_f})|`   :math:`\cdots`   :math:`|\xi_6(f_{N_f})|`   :math:`\angle \xi_1(f_{N_f})`   :math:`\cdots`   :math:`\angle \xi_6(f_{N_f})`
    ====================== ========================== ================ ========================== =============================== ================ =========================
 
-| ``IRF.tec`` and ``IRF_excForce.tec`` are the impulse response functions for the radiation damping and the excitation force, respectively. The radiation damping IRF has the file format as in Table `9 <#tab:IRF>`__ and the excitation force IRF as in Table `10 <#tab:IRFExcF>`__.
+``IRF.tec`` and ``IRF_excForce.tec`` are the impulse response functions for the radiation damping and the excitation force, respectively. The radiation damping IRF has the file format as in Table `9 <#tab:IRF>`__ and the excitation force IRF as in Table `10 <#tab:IRFExcF>`__.
 
 .. table:: Output file format of ``IRF.tec``
    :name: tab:IRF
