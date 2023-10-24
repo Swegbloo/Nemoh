@@ -798,7 +798,7 @@ The following hydrodynamic coefficients are produced in Tecplot format, which ca
 
    ============== ============== ============== =============================== ====================================
    $x_1$          $y_1$          $z_1$          $|P(\boldsymbol x_1)|$          $\angle P(\boldsymbol x_1)$
-   ⋮              ⋮               ⋮              ⋮                                ⋮
+   ...            ...            ...            ...                             ...
    $x_{Npanel}$   $y_{Npanel}$   $z_{Npanel}$   $|P(\boldsymbol x_{Npanel})|$   $\angle P(\boldsymbol x_{Npanel})$
    ============== ============== ============== =============================== ====================================
 
@@ -809,7 +809,7 @@ The following hydrodynamic coefficients are produced in Tecplot format, which ca
 
    ========================== ========================================= ===============================================
    $\vartheta_1$              $|\mathcal{H}(\vartheta_1)|$              $\angle \mathcal{H}(\vartheta_1)$
-   ⋮                          ⋮                                          ⋮
+   ...                        ...                                       ...
    $\vartheta_{N\vartheta}$   $|\mathcal{H}(\vartheta_{N\vartheta})|$   $\angle \mathcal{H}(\vartheta_{N\vartheta})$
    ========================== ========================================= ===============================================
 
@@ -820,7 +820,7 @@ The following hydrodynamic coefficients are produced in Tecplot format, which ca
 
    ============== ============== ============================ ================================= =============================== ==================================
    $x_1$          $y_1$          $|\eta(\vec{x}_1)|$          $\angle \eta(\vec{x}_1)$          $Re[ \eta(\vec{x}_1)]$          $Im[ \eta(\vec{x}_1)]$
-   ⋮              ⋮               ⋮                            ⋮                                  ⋮                               ⋮
+   ...            ...             ...                          ...                                ...                           ...
    $x_{Npanel}$   $y_{Npanel}$   $|\eta(\vec{x}_{Npanel})|$   $\angle \eta(\vec{x}_{Npanel})$   $Re[ \eta(\vec{x}_{Npanel})]$   $Im[ \eta(\vec{x}_{Npanel})]$
    ============== ============== ============================ ================================= =============================== ==================================
 
