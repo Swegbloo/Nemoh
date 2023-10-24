@@ -547,12 +547,71 @@ Detail descriptions of the input/output files are discussed in the next subsecti
 User’s input files
 ~~~~~~~~~~~~~~~~~~
 
-.. _`fig:NemohCal`:
-.. figure:: figures/NemohCal.png
+.. table:: ``Nemoh.cal`` input file
+   :name: tab:NemohCal
 
-   ``Nemoh.cal`` input file
+   =============== ===== ===== ===== ===== ===== ===== ==================================================================
+   File contents                                       Signification
+   =================================================== ==================================================================
+   \--- Environment ---------------------------------- *Section header*
+   --------------------------------------------------- ------------------------------------------------------------------
+   1025\.                                              Fluid density :math:`\rho` :math:`[kg/m^3]`
+   9.81                                                Gravitional acceleration :math:`g` :math:`[m/s^2]`
+   200\.                                               Water depth :math:`d` :math:`[m]`
+   0\.             0\.                                 Wave measurement location :math:`(x_{eff},y_{eff})` :math:`[m]`
+   \--- Description of floating bodies --------------- *Section header*
+   --------------------------------------------------- ------------------------------------------------------------------
+   1                                                   Number of bodies
+   \--- Body 1 --------------------------------------- *Section header*
+   --------------------------------------------------- ------------------------------------------------------------------
+   mesh.dat                                            Name of mesh file
+   657             610                                 Number of nodes and number of panels in mesh
+   6                                                   Number of degrees of freedom
+   1               1\.   0\.   0\.   0\.   0\.   0\.   Surge
+   1               0\.   1\.   0\.   0\.   0\.   0\.   Sway
+   1               0\.   0\.   1\.   0\.   0\.   0\.   Heave
+   2               1\.   0\.   0\.   0\.   0\.   -5\.  Roll about a point (here :math:`(0,0,-5.)`)
+   2               0\.   1\.   0\.   0\.   0\.   -5\.  Pitch about a point (here :math:`(0,0,-5.)`)
+   2               0\.   0\.   1\.   0\.   0\.   -5\.  Yaw about a point (here :math:`(0,0,-5.)`)
+   ...                                                 *This line is repeated for each degree of freedom*
+   6                                                   Number of resulting generalised forces
+   1               1\.   0\.   0\.   0\.   0\.   0\.   Force in x direction
+   1               0\.   1\.   0\.   0\.   0\.   0\.   Force in y direction
+   1               0\.   0\.   1\.   0\.   0\.   0\.   Force in z direction
+   2               1\.   0\.   0\.   0\.   0\.   -5\.  Moment force in x direction about a point (here :math:`(0,0,-5.)`)
+   2               0\.   1\.   0\.   0\.   0\.   -5\.  Moment force in y direction about a point (here :math:`(0,0,-5.)`)
+   2               0\.   0\.   1\.   0\.   0\.   -5\.  Moment force in z direction about a point (here :math:`(0,0,-5.)`)
+   ...                                                 *This line is repeated for each generalised forces*
+   0                                                   Number of lines of additional information
+   ...                                                 *This section is repeated for each body*
+   \--- Load cases ----------------------------------- *Section header*
+   --------------------------------------------------- ------------------------------------------------------------------
+   1               100   0.062 6.28                    Input frequency unit: 1 for *rad/s*, 2 for *Hz* and 3 for *s*, Number of wave frequencies, Min, and Max
+   2               0     30                            Number of wave directions, Min and Max (degrees)
+   \--- Post processing ------------------------------ *Section header*
+   --------------------------------------------------- ------------------------------------------------------------------
+   0               0.1   10\.                          IRF (Impulse Response Function) flag (0/1), time step and duration
+   0                                                   Pressure output flag (0/1)
+   0               0\.   180\.                         Kochin functions: number of directions of calculation (0 to deactivate), Min and Max (degrees)
+   0               50    400\. 400\.                   Free surface elevation output: number of points in x direction (0 to deactivate) and y direction and (x,y) dimensions of domain
+   1                                                   RAO (Response Amplitude Operator) flag (0/1)
+   1                                                   Output requency unit, 1 for *rad/s*, 2 for *Hz* and 3 for *s*
+   \-- QTF ------------------------------------------- *Section header*
+   --------------------------------------------------- ------------------------------------------------------------------
+   1                                                   QTF (Quadratic Transfer Function) flag (0/1)
+   65              0.062 4.082                         Number of radial frequencies, Min, and Max values for the QTF computation
+   1                                                   Bidirectional QTF computation flag (0/1)
+   2                                                   Contributing terms: 1 DUOK, 2 DUOK+HASBO, 3 Full QTF (DUOK+HASBO+HASFS+ASYMP)
+   NA                                                  Name of free surface meshfile (**only for full QTF**), 'NA' if not applicable
+   0               0     0                             Free surface QTF parameters: Re, Nre and NBessel (**only for full QTF**)
+   0                                                   Include hydrostatic terms of the quadratic first order motion (:math:`-[\boldsymbol K] \tilde{\boldsymbol\xi}^{(2)}`), flag (0/1)
+   1                                                   For QTFposProc: output frequency unit, 1 for *rad/s*, 2 for *Hz* and 3 for *s*
+   1                                                   For QTFposProc: include DUOK in total QTF, flag (0/1)
+   1                                                   For QTFposProc: include HASBO in total QTF, flag (0/1)
+   0                                                   For QTFposProc (**only for full QTF**): include HASFS+ASYMP in total QTF, flag (0/1)
+   =============== ===== ===== ===== ===== ===== ===== ==================================================================
 
-``Nemoh.cal``: contains all computation parameters with the format as in :numref:`fig:NemohCal`. The following parameters have to be specified:
+``Nemoh.cal``: contains all computation parameters with the format as in :numref:`tab:NemohCal`. The following parameters have to be specified:
 
 -  *Environment*: fluid density, gravity constant, water-depth and wave reference point. Specify :math:`0.` for infinite water depth case.
 
