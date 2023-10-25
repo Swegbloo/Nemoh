@@ -36,9 +36,9 @@ NEMOH1, the first-order solver, is based on the following modelling principles:
 -  The harmonic fluid potential is defined as
 
    .. math::
+      :label: Eq:PhiHarm
 
       \begin{aligned}
-      \label{Eq:PhiHarm}
       \Phi(\boldsymbol x,t)=Re\left\lbrace\Phi^{(1)}(\boldsymbol x)e^{-i\omega t}\right\rbrace.
       \end{aligned}
 
@@ -46,9 +46,9 @@ NEMOH1, the first-order solver, is based on the following modelling principles:
    The incident potential is defined as, with :math:`k` and :math:`\omega` related with the dispersion relation, :math:`\vec{k}=k(\cos \beta,\sin \beta)`, :math:`\beta` is wave direction and :math:`a` is a unit wave amplitude,
 
    .. math::
+      :label: Eq:PhiI
 
       \begin{aligned}
-      \label{Eq:PhiI}
       \Phi_{I}^{(1)}(\boldsymbol x)=-i\frac{a g}{\omega}\frac{\cosh(k(D+z))}{\cosh(kD)} e^{i\vec{k}\cdot \vec{x}}.
       \end{aligned}
 
@@ -63,9 +63,10 @@ NEMOH1, the first-order solver, is based on the following modelling principles:
 -  Then, the BIE for :math:`\boldsymbol x \in S_B`, is expressed as, with flow points :math:`\boldsymbol x` and source points :math:`\boldsymbol x'`,
 
    .. math::
+      :label: Eq:BIE_source_distribution
 
       \begin{aligned}
-      \frac{1}{2}\sigma_{D,R_j}(\boldsymbol x)-\frac{1}{4\pi}\int_{S_B} \partial_n G(\boldsymbol x, \boldsymbol x') \sigma_{D,R_j}(\boldsymbol x') dS'=\mathcal{N}_{D,R_j}(\boldsymbol x). \label{Eq:BIE_source_distribution}
+      \frac{1}{2}\sigma_{D,R_j}(\boldsymbol x)-\frac{1}{4\pi}\int_{S_B} \partial_n G(\boldsymbol x, \boldsymbol x') \sigma_{D,R_j}(\boldsymbol x') dS'=\mathcal{N}_{D,R_j}(\boldsymbol x).
       \end{aligned}
 
    where :math:`\mathcal{N}(\boldsymbol x)` is the body normal condition. The diffraction normal condition is defined as :math:`\mathcal{N}_D (\boldsymbol x)=-\partial_{n} \Phi_I^{(1)}(\boldsymbol x)`, the normalized radiation condition, :math:`\mathcal{N}_R (\boldsymbol x)=\partial_{n} \Phi_{R_j}(\boldsymbol x)`, with :math:`\Phi_{R_j}(\boldsymbol x)` is the vector component-:math:`j` of the normalized radiation potential :math:`\boldsymbol\psi(\boldsymbol x)`, explicitly :math:`\boldsymbol\psi=(\Phi_{R_1},\Phi_{R_2},\cdots,\Phi_{R_{Ndof}})`.
@@ -73,9 +74,9 @@ NEMOH1, the first-order solver, is based on the following modelling principles:
 -  The diffraction potential, :math:`\Phi^{(1)}_{D}`, the normalized radiation potential vector component-:math:`j`, :math:`\Phi_{R_j}` and the corresponding velocities are then computed as follows, for the flow points in the fluid domain :math:`\boldsymbol x \in S_B \cup V_{\Omega_F}`,
 
    .. math::
+      :label: Eq:BIE_Sol_Pot_Sb
 
       \begin{aligned}
-       \label{Eq:BIE_Sol_Pot_Sb}
       \Phi^{(1)}_{D,R_j}(\boldsymbol x)=&-\frac{1}{4\pi}\int_{S_B} G(\boldsymbol x, \boldsymbol x') \sigma_{D,R_j}(\boldsymbol x') dS'\\
       \partial_{\boldsymbol x} \Phi^{(1)}_{D,R_j}(\boldsymbol x)=&\frac{1}{2}\sigma_{D,R_j}(\boldsymbol x)\boldsymbol{n}\delta_{\boldsymbol x \boldsymbol x'}-\frac{1}{4\pi}\int_{S_B} \partial_{\boldsymbol{x}} G(\boldsymbol x, \boldsymbol x') \sigma_{D,R_j}(\boldsymbol x') dS'
       \end{aligned}
@@ -114,9 +115,9 @@ NEMOH1, the first-order solver, is based on the following modelling principles:
 -  Response Amplitude Operators (RAO) are obtained by solving the following equation of motion
 
    .. math::
+      :label: Eq:RAO
 
       \begin{aligned}
-      \label{Eq:RAO}
       \left[-[\boldsymbol M+\boldsymbol M^a(\omega)]\omega^2-i\omega[\boldsymbol B(\omega)+\boldsymbol B_{add}]+[\boldsymbol K_h+\boldsymbol K_M]\right]\mathcal{\boldsymbol\xi}(\omega)=\boldsymbol F_{exc}(\omega)
       \end{aligned}
 
@@ -137,7 +138,7 @@ Numerical Methods
 
 NEMOH1 uses the following numerical approach:
 
--  The BIE, Eq. `[Eq:BIE_source_distribution] <#Eq:BIE_source_distribution>`__, is discretised using the constant panel method with quadrilateral mesh. This leads to a linear system with the influence coefficients matrix. The mesh is user-specified with the normal direction towards fluid.
+-  The BIE, Eq. :eq:`Eq:BIE_source_distribution`, is discretised using the constant panel method with quadrilateral mesh. This leads to a linear system with the influence coefficients matrix. The mesh is user-specified with the normal direction towards fluid.
 
 -  Numerical implementation of the Green function is described in :cite:t:`Babarit15`.
 
@@ -155,7 +156,7 @@ NEMOH1 uses the following numerical approach:
 
 -  For free-surface piercing bodies problem, the irregular frequencies removal (IRR) method is applied by the user providing lid panels at :math:`z=0`. Then, the extended boundary integral equation will be solved :cite:p:`Babarit15,Malenica98`. As in :cite:t:`Malenica98`, the IRR may be influenced by the input parameter :math:`\epsilon` in ``input_solver.txt`` that shifts the lid panels from :math:`z=0` to :math:`z=-\epsilon d_B` where :math:`d_B` is a maximum horizontal distance of points on the body. :math:`d_B` is computed by the software.
 
--  RAO in Eq. `[Eq:RAO] <#Eq:RAO>`__ is obtained by applying the inverse matrix using LU-decomposition.
+-  RAO in Eq. :eq:`Eq:RAO` is obtained by applying the inverse matrix using LU-decomposition.
 
 -  The software can solve multi-bodies problems, as well as multi-directional waves.
 
