@@ -174,4 +174,3 @@ Following Matlab directories, containing a set of functions, are provided in ``m
 -  ``GMSHconverter``: There are two codes, first, for converting body mesh file output from GMSH to NEMOH, DIODORE and HYDROSTAR formats and second, for converting free-surface mesh file output from GMSH to NEMOH and HYDROSTAR formats.
 
 -  ``postproc_testcases``: There are two main codes for plotting results from NEMOH and HYDROSTAR. First, for plotting hydrodynamic coefficients results and second for plotting QTF results. This code can be executed after all data in one specific test cases are obtained.
--
