@@ -1,4 +1,3 @@
-.. _`Sec:Getstarted`:
 
 ###############
 Getting-started
@@ -6,7 +5,6 @@ Getting-started
 
 This section describes the installation procedure and how to run the codes. It also includes a description of input-output files.
 
-.. _`Sec:Execute`:
 
 ****************
 Executable files
@@ -19,7 +17,7 @@ The following executable files are available:
 
 -  NEMOH2: **``QTFpreProc``**, **``QTFsolver``**, **``QTFpostProc``**.
 
-Note that a Matlab wrapper is provided to use those executable files in a Matlab environment. More details are provided in :ref:`Sec:MatlabFiles`.
+Note that a Matlab wrapper is provided to use those executable files in a Matlab environment. More details are provided in :ref:`getting-started:supporting matlab files`.
 
 ************
 Installation
@@ -102,7 +100,7 @@ Tests with unsatisfied requirements will fail.
 Running
 *******
 
-The binary files of NEMOH1 and NEMOH2 have to be executed following the order provided in :ref:`Sec:Execute`.
+The binary files of NEMOH1 and NEMOH2 have to be executed following the order provided in :ref:`getting-started:executable files`.
 
 The following steps are for executing the binary files in the command window.
 
@@ -123,7 +121,7 @@ The following steps are for executing the binary files in the command window.
          ./binfile ./../projdir
 
 Before executing the binary files, the input files are needed. These are described in the next subsection.
-Finally, a set of test cases are provided. The results are presented in :ref:`Sec:Testcase` and we provide here the methodology to run those tests. The first possibility is to run each of the cases in the command line, following the above instructions. This applies to both Windows and Linux environments.
+Finally, a set of test cases are provided. The results are presented in :ref:`test-cases:test cases` and we provide here the methodology to run those tests. The first possibility is to run each of the cases in the command line, following the above instructions. This applies to both Windows and Linux environments.
 
 To simplify the procedure for Linux platforms, ``Makefile`` is provided in the ``TestCases/`` directory. It is then possible to run the NEMOH1 test cases by executing the following commands in a Terminal (each line being a test case):
 
@@ -162,9 +160,8 @@ Or to remove a range of test cases
    make clean_all_testsNEMOH2
    make clean_all_tests
 
-The description and the benchmark results of those test cases are described in :ref:`Sec:Testcase`.
+The description and the benchmark results of those test cases are described in :ref:`test-cases:test cases`.
 
-.. _`Sec:MatlabFiles`:
 
 ***********************
 Supporting Matlab files

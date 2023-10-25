@@ -20,5 +20,3 @@ The new developments/extensions in this NEMOH v3.0 are summarised as follows.
 -  Two new options of the linear system solvers, LU decomposition and GMRES iterative solver, are available for enhanced computational efficiency.
 
 -  Full difference- and sum-frequencies QTF module.
-
-The present User Manual is organized as follows. Section :ref:`Sec:Descrip_NEMOH` describes briefly the mathematical background and the capabilities of the software; it is advised to read this Section before continuing to the rest of the manual. Section :ref:`Sec:Getstarted` describes the installation procedure, how to run the codes, and includes a description of the input and output files. Section :ref:`Sec:MatlabFiles` describes supporting Matlab files such as a NEMOH wrapper, a mesh converter and the routines to post-process the test cases. Finally, Section :ref:`Sec:Testcase` describes briefly test cases that will show the capabilities of the code and its use. For new NEMOH users, they can be used as the first elements for setting up a new configuration.

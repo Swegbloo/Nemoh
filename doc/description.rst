@@ -1,4 +1,3 @@
-.. _`Sec:Descrip_NEMOH`:
 
 #########################
 Description of NEMOH v3.0
