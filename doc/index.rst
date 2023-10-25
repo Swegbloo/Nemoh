@@ -16,7 +16,7 @@ We sincerely hope that the use of this software, just as the design of it has be
    :maxdepth: 2
    :caption: Contents:
 
-   main
+   introduction
    description
    getting-started
    input-output
