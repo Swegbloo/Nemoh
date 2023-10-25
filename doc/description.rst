@@ -18,6 +18,7 @@ Notations
 As sketched in :numref:`fig:sketch`, we consider fluid domain in the Cartesian coordinate :math:`\boldsymbol x=(\vec{x},z)` with :math:`\vec{x}=(x,y)` the horizontal coordinates perpendicular to the :math:`z` axis in the opposite direction of gravity :math:`\boldsymbol g`. Free-surface boundary :math:`S_F` is defined by the free surface elevation at time :math:`t`, denoted as :math:`\eta(\vec{x},t)` with respect to the mean water level at :math:`z=0`. The fluid velocity potential is denoted as :math:`\Phi(\boldsymbol x,t)` with :math:`\boldsymbol x` in fluid domain :math:`V_{\Omega}`.
 
 .. figure:: figures/Sketch.png
+   :align: center
    :name: fig:sketch
 
    Sketch definition of the system
@@ -200,6 +201,7 @@ Software features and capabilities
 
 .. _`fig:flowchart`:
 .. figure:: figures/FlowChart.png
+   :align: center
 
    Global flowchart of NEMOH software
 
