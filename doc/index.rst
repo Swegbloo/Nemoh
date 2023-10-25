@@ -14,7 +14,7 @@ Now together with this manual, we gladly release NEMOH v3.0 which includes all r
 We sincerely hope that the use of this software, just as the design of it has been, will be fascinating, and challenging for academicians and practitioners in the ocean engineering community. We hope to receive comments and suggestions for further improvement and extension of the software that can be profitable for the community.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    introduction
