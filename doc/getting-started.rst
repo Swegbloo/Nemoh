@@ -1,6 +1,6 @@
 
 ###############
-Getting-started
+Getting started
 ###############
 
 This section describes the installation procedure and how to run the codes. It also includes a description of input-output files.

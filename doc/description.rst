@@ -1,7 +1,7 @@
 
-#########################
-Description of NEMOH v3.0
-#########################
+###########
+Description
+###########
 
 *******************************
 Modelling and Numerical aspects
