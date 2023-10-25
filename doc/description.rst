@@ -145,7 +145,7 @@ NEMOH1 uses the following numerical approach:
 
 -  Free-surface Green function integrands are pre-calculated with the discretized :math:`\omega^2r/g\in [0,100]` with 676 points in a constant scale and :math:`\omega^2(z+z')/g \in [-251,-1.6\, 10^{-6}]` with 130 points in logarithmic scale. A polynomial surface interpolation with the :math:`5^{th}` order Lagrange formula is used for interpolating any values in the specified interval.
 
--  The specified points for the interpolation of the Green function are finer than in the previous release. However, an option to switch the two different tabulated Green function data is available in the source file ``\Solver\Core\INITIALIZE_GREEN.f90`` with the parameter FLAG_IGREEN=1 or 2, 2 being the default.
+-  The specified points for the interpolation of the Green function are finer than in the previous release. However, an option to switch the two different tabulated Green function data is available in the source file ``/Solver/Core/INITIALIZE_GREEN.f90`` with the parameter FLAG_IGREEN=1 or 2, 2 being the default.
 
 -  Influence coefficients, the integration of :math:`\partial_n G(\boldsymbol x, \boldsymbol x')` over a body panel, is computed using Gauss-quadrature integration with a user-input number of Gauss-quadrature points.
 
