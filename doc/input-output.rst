@@ -278,7 +278,7 @@ External mesh generators, *e.g.* the open-source software GMSH :cite:p:`GMSH`, m
    9.81                    Gravity acceleration :math:`(m/s^2)`
    =============== === === ==================================================================
 
-``input_solver.txt`` contains solver parameters with format as in Table `4 <#tab:input_solver>`__. The parameters are described as follows.
+``input_solver.txt`` contains solver parameters with format as in Table :numref:`tab:input_solver`. The parameters are described as follows.
 
 -  Number of Gauss Quadrature points, :math:`N^2`, is used for the surface integration in the influence coefficients. User specifies an integer value of :math:`N\in [1,4]`, default :math:`N=2`.
 
@@ -330,7 +330,7 @@ The following hydrodynamic coefficients are produced in Tecplot format, which ca
 
 -  ``FKForce.tec``, ``DiffractionForce.tec`` and ``ExcitationForce.tec`` are the output files of the Froude-Krylov, the diffraction and the excitation forces respectively. The output file format is given in :numref:`tab:WaveForce`. The file contains the absolute value and the phase [deg] of the force for each ’frequency’ :math:`f`. The force is given for each specified force axis (i.e. surge, heave, pitch) for each body. The ’frequency’ is given based on the chosen type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``, except the Froude-Krylov force, which is only in the radial frequency [rad/s].
 
--  ``RadiationCoefficients.tec`` is the output file for added mass and damping coefficients with format as in Table `7 <#tab:addedmass_damping_coeffs>`__. The radiation coefficients are given for each :math:`DoF`, each force axis and for each frequency. The frequency is given based on the chosen ’frequency’ type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``.
+-  ``RadiationCoefficients.tec`` is the output file for added mass and damping coefficients with format as in Table :numref:`tab:addedmass_damping_coeffs`. The radiation coefficients are given for each :math:`DoF`, each force axis and for each frequency. The frequency is given based on the chosen ’frequency’ type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``.
 
 The hydrodynamic coefficients are also produced in the *.dat* files, i.e. *CA.dat* for the damping coefficients, *CM.dat* for the added mass coefficients, *Fe.dat* for the excitation force and *FKForce.dat* for the excitation force. The frequency type of the output files is only radial frequency [rad/s]. These output files are used as input files for the QTF module.
 
@@ -360,7 +360,7 @@ The hydrodynamic coefficients are also produced in the *.dat* files, i.e. *CA.da
    :math:`f_{N_f}`      :math:`M^a_{N_{DoF}1}(f_{N_f})`   :math:`B_{N_{DoF}1}(f_{N_f})`  :math:`\cdots`   :math:`\cdots`   :math:`M^a_{N_{DoF}Ninteg}(f_{N_f})`   :math:`B_{N_{DoF}Ninteg}(f_{N_f})`
    ==================== ================================= ============================== ================ ================ ====================================== ================================
 
-``RAO.dat`` is the output file of the response amplitude operator with the file format as in Table. `8 <#tab:RAO>`__. The output file gives the absolute value and the phase of RAO for each degree of freedom and each frequency. The frequency is given based on the chosen ’frequency’ type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``. Only radial frequency output file will be produced in the case of the QTF computed.
+``RAO.dat`` is the output file of the response amplitude operator with the file format as in Table. :numref:`tab:RAO`. The output file gives the absolute value and the phase of RAO for each degree of freedom and each frequency. The frequency is given based on the chosen ’frequency’ type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``. Only radial frequency output file will be produced in the case of the QTF computed.
 
 .. table:: Output file format of ``RAO.dat``
    :name: tab:RAO
