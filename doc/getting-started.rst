@@ -13,9 +13,9 @@ Executable files
 Executable/binary files are provided in the ``Release`` section of the `GitLab project <https://gitlab.com/lheea/Nemoh>`__. They can be used directly without the need to do the compilation procedure described in the next subsection. Windows and Linux executable files are provided. In the case of a compilation on your computer, executable files will be located in the ``bin/`` folder.
 The following executable files are available:
 
--  NEMOH1: **``mesh``**, **``preProc``**, **``hydrosCal``**, **``solver``**, **``postProc``**,
+-  NEMOH1: ``mesh``, ``preProc``, ``hydrosCal``, ``solver``, ``postProc``,
 
--  NEMOH2: **``QTFpreProc``**, **``QTFsolver``**, **``QTFpostProc``**.
+-  NEMOH2: ``QTFpreProc``, ``QTFsolver``, ``QTFpostProc``.
 
 Note that a Matlab wrapper is provided to use those executable files in a Matlab environment. More details are provided in :ref:`getting-started:supporting matlab files`.
 
@@ -106,7 +106,7 @@ The following steps are for executing the binary files in the command window.
 
 -  Suppose a project directory, *e.g.* ``/NEMOH/projdir/``, that contains all the input files and that is in the same location as the binary directory, i.e ``NEMOH/bin/``.
 
--  The program can be run depending on your current working directory in the command line. For example, the following commands are possible, with **``binfile``** being an executable file i.e. **``preProc``**, etc., as
+-  The program can be run depending on your current working directory in the command line. For example, the following commands are possible, with ``binfile`` being an executable file i.e. ``preProc``, etc., as
 
    -  if you are in the ``projdir``:
 

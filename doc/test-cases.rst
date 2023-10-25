@@ -87,7 +87,7 @@ Shows a quantitative comparison of force and free-surface for the first-frequenc
 6_box_coarsemesh
 ****************
 
-Shows the procedure for running the code starting with the executable **``mesh``** with a coarse description mesh file, ``meshbox``. No reference data is given in this test case.
+Shows the procedure for running the code starting with the executable ``mesh`` with a coarse description mesh file, ``meshbox``. No reference data is given in this test case.
 
 *******************
 7_Solvers_Check_OC3
