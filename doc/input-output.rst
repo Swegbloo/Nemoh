@@ -1,5 +1,6 @@
+############
 Input/Output
-============
+############
 
 Following is the list of the user’s input files and the output files for each executable file:
 
@@ -89,8 +90,9 @@ NEMOH produces the following main output files, some depending on user-specified
 
 Detail descriptions of the input/output files are discussed in the next subsections.
 
+******************
 User’s input files
-~~~~~~~~~~~~~~~~~~
+******************
 
 .. table:: ``Nemoh.cal`` input file
    :name: tab:NemohCal
@@ -318,8 +320,9 @@ External mesh generators, *e.g.* the open-source software GMSH :cite:p:`GMSH`, m
    0       0             0             0             Last line of the table of connectivities.
    ======= ============= ============= ============= ============================================================================================================
 
+************
 Output files
-~~~~~~~~~~~~
+************
 
 Hydrostatic output files such as inertia and stiffness matrices are produced by **``mesh``**, if ``geomInput`` is prescribed, or by **``hydroCal``**, if ``meshfile`` is prescribed. The files contain the matrix components with size :math:`(Nbody\cdot Nradiation)\times (Nbody\cdot Nradiation)`.
 

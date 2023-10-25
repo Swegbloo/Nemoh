@@ -1,14 +1,16 @@
 .. _`Sec:Getstarted`:
 
+###############
 Getting-started
-===============
+###############
 
 This section describes the installation procedure and how to run the codes. It also includes a description of input-output files.
 
 .. _`Sec:Execute`:
 
+****************
 Executable files
-----------------
+****************
 
 Executable/binary files are provided in the ``Release`` section of the `GitLab project <https://gitlab.com/lheea/Nemoh>`__. They can be used directly without the need to do the compilation procedure described in the next subsection. Windows and Linux executable files are provided. In the case of a compilation on your computer, executable files will be located in the ``bin/`` folder.
 The following executable files are available:
@@ -19,8 +21,9 @@ The following executable files are available:
 
 Note that a Matlab wrapper is provided to use those executable files in a Matlab environment. More details are provided in Sec. `4 <#Sec:MatlabFiles>`__.
 
+************
 Installation
-------------
+************
 
 This procedure is intended for a developer to perform the compilation after changing the source code. Users may skip this step.
 
@@ -31,12 +34,12 @@ As a first preliminary step, it is necessary to install the following external l
 -  LAPACK, https://netlib.org/lapack/
 
 Windows platform
-~~~~~~~~~~~~~~~~
+================
 
 An updated manual will provide the details of the compilation on a Windows platform.
 
 Linux platform
-~~~~~~~~~~~~~~
+==============
 
 Before compiling, the following tools need to be available:
 
@@ -95,8 +98,9 @@ Where label is one of the following:
 
 Tests with unsatisfied requirements will fail.
 
+*******
 Running
--------
+*******
 
 The binary files of NEMOH1 and NEMOH2 have to be executed following the order provided in Sec. `3.1 <#Sec:Execute>`__.
 
@@ -162,8 +166,9 @@ The description and the benchmark results of those test cases are described in S
 
 .. _`Sec:MatlabFiles`:
 
+***********************
 Supporting Matlab files
------------------------
+***********************
 
 Following Matlab directories, containing a set of functions, are provided in ``matlabRoutines/``,
 

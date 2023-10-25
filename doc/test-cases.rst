@@ -1,7 +1,8 @@
 .. _`Sec:Testcase`:
 
+##########
 Test-cases
-==========
+##########
 
 The following test cases are provided for verification with the original Aquaplus software (which is the ancestor of NEMOH) and/or HYDROSTAR commercial software :cite:p:`HYDROSTAR`. Note that Tecplot’s layout files ``.lay`` are provided in the relevant test case folder for plotting in Tecplot.
 

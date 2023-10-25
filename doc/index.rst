@@ -3,8 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+#################################
 Welcome to Nemoh's documentation!
-=================================
+#################################
 
 NEMOH is a Boundary Element Methods (BEM) code dedicated to the computation of wave loads on offshore structures (added mass, radiation damping, diffraction forces, etc.). It has been developed by researchers at Ecole Centrale de Nantes for 30 years. Since its first release in January 2014, NEMOH, as the world’s first open-source BEM code, has been widely used by many researchers, and engineers. Typical use is the estimation of the dynamic response of floating structures or performance assessment of wave energy converters.
 

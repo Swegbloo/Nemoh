@@ -1,10 +1,12 @@
 .. _`Sec:Descrip_NEMOH`:
 
+#########################
 Description of NEMOH v3.0
-=========================
+#########################
 
+*******************************
 Modelling and Numerical aspects
--------------------------------
+*******************************
 
 This section provides background information on NEMOH v3.0 with a focus on basic scientific ideas.
 
@@ -12,7 +14,7 @@ NEMOH v3.0 contains two main modules. First, NEMOH1 solves linear diffraction an
 The following subsections describe the underlying modelling and numerical approaches used in NEMOH.
 
 Notations
-~~~~~~~~~
+=========
 
 As sketched in :numref:`fig:sketch`, we consider fluid domain in the Cartesian coordinate :math:`\boldsymbol x=(\vec{x},z)` with :math:`\vec{x}=(x,y)` the horizontal coordinates perpendicular to the :math:`z` axis in the opposite direction of gravity :math:`\boldsymbol g`. Free-surface boundary :math:`S_F` is defined by the free surface elevation at time :math:`t`, denoted as :math:`\eta(\vec{x},t)` with respect to the mean water level at :math:`z=0`. The fluid velocity potential is denoted as :math:`\Phi(\boldsymbol x,t)` with :math:`\boldsymbol x` in fluid domain :math:`V_{\Omega}`.
 
@@ -26,7 +28,7 @@ The floating body has 6 degrees of freedom (DoF), :math:`\boldsymbol\xi=(\boldsy
 On the body hull :math:`S_B`, the wetted part is defined as a function :math:`z=\zeta(\vec{x},t)`. The normalized normal vector is defined as directed toward the fluid domain, :math:`\boldsymbol n=-\boldsymbol N/|\boldsymbol N|` with :math:`\boldsymbol N=\left(-\nabla_2\zeta,1 \right)` where :math:`\nabla_2` is the two-dimensional gradient in :math:`\vec{x}`. Then the six-dimensional generalized normal vector is defined as :math:`\boldsymbol\nu=(\boldsymbol n,\boldsymbol r \times \boldsymbol n)^T`, with :math:`( )^T` the matrix transpose operator.
 
 Modelling
-~~~~~~~~~
+=========
 
 NEMOH1, the first-order solver, is based on the following modelling principles:
 
@@ -132,7 +134,7 @@ NEMOH2, the second-order QTF module, is based on the following principles
    indirect method :cite:p:`CHEN88,MOLIN79`.
 
 Numerical Methods
-~~~~~~~~~~~~~~~~~
+=================
 
 NEMOH1 uses the following numerical approach:
 
@@ -180,8 +182,9 @@ NEMOH2 uses the following numerical approach
 
 NEMOH related publications to be referred are :cite:t:`Babarit15` for the first order NEMOH and :cite:t:`Philippe15,Kurnia22_JH,Kurnia22` for the QTF module. A publication related with this release is in preparation as in :cite:t:`Kurnia23`.
 
+*****
 Units
------
+*****
 
 NEMOH expects all quantities to be expressed in S.I. units: :math:`m, kg, s, rad` (meter, kilogram, seconds, radian, respectively). But some of the phase outputs may be expressed in :math:`deg` or :math:`^{\circ}`, in this case it will be indicated in the file header.
 
@@ -191,8 +194,9 @@ Response amplitude operator for translation motion has unit [:math:`m/m`] and fo
 
 The force quadratic transfer function (QTF) has unit [:math:`N/m^2`] and for the moment QTF it is [:math:`N/m`]. The QTF output is normalized by :math:`\rho g` where the fluid density :math:`\rho,\ [kg/m^3],` and the gravitation constant :math:`g,\ [m/s^2]`.
 
+**********************************
 Software features and capabilities
-----------------------------------
+**********************************
 
 .. _`fig:flowchart`:
 .. figure:: figures/FlowChart.png
@@ -202,12 +206,12 @@ Software features and capabilities
 :numref:`fig:flowchart` shows a global overview of the software. There are three main programs: a mesh preprocessor, NEMOH1 and NEMOH2. The program features and capabilities are described as follows.
 
 Mesh Preprocessor
-~~~~~~~~~~~~~~~~~
+=================
 
 NEMOH mesh preprocessor, the executable file **``mesh``**, is for generating the NEMOH mesh file with a given geometry input file and an input ``Mesh.cal`` file. This **``mesh``** is not a meshing code but allows the user to refine an existing mesh and to calculate properties such as displacement, buoyancy center, and hydrostatic stiffness. It also makes estimates of masses and inertia matrix. The concept with this program is to write by hand a coarse description of the body under consideration in a ``GeomInput`` file and to have **``mesh``** make the refined mesh for NEMOH calculations.
 
 NEMOH1: 1st-order solver
-~~~~~~~~~~~~~~~~~~~~~~~~
+========================
 
 NEMOH1 solves the first-order potential flow problem. There are four modules: **``preProc``**, **``hydrosCal``**, **``solver``** and **``postProc``**, described as follows.
 
@@ -238,7 +242,7 @@ NEMOH1 solves the first-order potential flow problem. There are four modules: **
    -  the motion response amplitude operator (RAO). For the RAO computation, additional stiffness matrix :math:`[\boldsymbol K_m]` and additional damping :math:`[\boldsymbol B_{add}]` can be user-specified in the ``Mechanics/`` folder.
 
 NEMOH2: 2nd-order QTF module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+============================
 
 NEMOH2 computes the second-order wave loads that are expressed as Quadratic Transfer Function (QTF). It is suggested to verify the first-order results before running the QTF module. There are three modules in this program: **``QTFpreProc``**, **``QTFsolver``** and **``QTFpostProc``**, described as follows
 
