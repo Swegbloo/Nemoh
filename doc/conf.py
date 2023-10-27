@@ -78,3 +78,4 @@ bibtex_reference_style = 'author_year'
 
 # Prefix document name to automatic section labels
 autosectionlabel_prefix_document = True
+autosectionlabel_maxdepth = 4

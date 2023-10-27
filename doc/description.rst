@@ -195,9 +195,9 @@ Response amplitude operator for translation motion has unit [:math:`m/m`] and fo
 
 The force quadratic transfer function (QTF) has unit [:math:`N/m^2`] and for the moment QTF it is [:math:`N/m`]. The QTF output is normalized by :math:`\rho g` where the fluid density :math:`\rho,\ [kg/m^3],` and the gravitation constant :math:`g,\ [m/s^2]`.
 
-**********************************
-Software features and capabilities
-**********************************
+*****************
+Software features
+*****************
 
 .. _`fig:flowchart`:
 .. figure:: figures/FlowChart.png
