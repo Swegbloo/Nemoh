@@ -121,13 +121,13 @@ The following assumes you use ``bash`` as your terminal.
 For the current terminal session only
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1. Add Nemoh programs' location to the ``PATH`` environment variable:
+#. Add Nemoh programs' location to the ``PATH`` environment variable:
 
    .. code:: bash
 
       export PATH=$PATH:<nemoh-programs-path>
 
-2. Check that you system finds the programs:
+#. Check that you system finds the programs:
 
    .. code:: bash
 
@@ -138,15 +138,15 @@ For the current terminal session only
 For all future terminal sessions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1. Set your ``bash`` profile:
+#. Set your ``bash`` profile:
 
    .. code:: bash
 
       echo "export PATH=$PATH:<nemoh-programs-path>" >> ~/.bashrc
 
-2. Restart the terminal
+#. Restart the terminal
 
-3. Check that you system finds the programs:
+#. Check that you system finds the programs:
 
    .. code:: bash
 
@@ -162,13 +162,13 @@ The following assumes you use ``cmd`` (standard command prompt) as your terminal
 For the current terminal session only
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1. Add Nemoh programs' location to the ``path`` environment variable:
+#. Add Nemoh programs' location to the ``path`` environment variable:
 
    .. code:: winbatch
 
       set path=%path%;C:<nemoh-programs-path>
 
-2. Check that you system finds the programs:
+#. Check that you system finds the programs:
 
    .. code:: winbatch
 
@@ -179,15 +179,15 @@ For the current terminal session only
 For all future terminal sessions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1. Permanently add Nemoh programs' location to the ``path`` environment variable:
+#. Permanently add Nemoh programs' location to the ``path`` environment variable:
 
    .. code:: winbatch
 
       setx path "%path%;<nemoh-programs-path>"
 
-2. Restart the terminal
+#. Restart the terminal
 
-2.  Check that you system finds the programs in a new terminal:
+#.  Check that you system finds the programs in a new terminal:
 
    .. code:: winbatch
 
