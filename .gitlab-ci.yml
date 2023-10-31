@@ -93,3 +93,15 @@ release:
         - name: documentation
           url: $NEMOH_DOC_URL
           link_type: other
+
+pages:
+  stage: deploy
+  script:
+    - cd doc
+    - make html | tee sphinx.log
+  artifacts:
+    paths:
+      - doc/_build/html
+      - doc/sphinx.log
+  # rules:
+  #   - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
