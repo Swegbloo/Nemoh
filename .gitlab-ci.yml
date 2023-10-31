@@ -91,5 +91,6 @@ pages:
     paths:
       - doc/_build/html
       - doc/sphinx.log
+  publish: doc/_build/html
   # rules:
   #   - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
