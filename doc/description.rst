@@ -44,7 +44,7 @@ NEMOH1, the first-order solver, is based on the following modelling principles:
       \end{aligned}
 
    The total potential, :math:`\Phi`, is the sum of the incident potential, the diffraction potential and the radiation potential.
-   The incident potential is defined as, with :math:`k` and :math:`\omega` related with the dispersion relation, :math:`\vec{k}=k(\cos \beta,\sin \beta)`, :math:`\beta` is wave direction and :math:`a` is a unit wave amplitude,
+   The incident potential is defined as, with :math:`k` and :math:`\omega` related with the dispersion relation, :math:`\vec{k}=k(\cos \beta,\sin \beta)`, :math:`\beta` is the wave direction and :math:`a` is a unit wave amplitude,
 
    .. math::
       :label: Eq:PhiI
@@ -153,7 +153,7 @@ NEMOH1 uses the following numerical approach:
 
 -  The linear system is solved using a user-choice solver among the available ones, which are Gauss elimination, LU-decomposition (default) and GMRES-iterative solvers.
 
--  The GMRES solver code :cite:p:`GMRES` from `CERFACS <https://www.cerfacs.fr/algor/Softs/GMRES/index.html>`__ is embedded in NEMOH solver module. For using the GMRES solver, the user has to obtain a license in https://www.cerfacs.fr/algor/Softs/GMRES/license.html.
+-  The GMRES solver code :cite:p:`GMRES` from `CERFACS <https://www.cerfacs.fr/algor/Softs/GMRES/index.html>`__ is embedded in NEMOH solver module. For using the GMRES solver, the user has to obtain a license at https://www.cerfacs.fr/algor/Softs/GMRES/license.html.
 
 -  For free-surface piercing bodies problem, the irregular frequencies removal (IRR) method is applied by the user providing lid panels at :math:`z=0`. Then, the extended boundary integral equation will be solved :cite:p:`Babarit15,Malenica98`. As in :cite:t:`Malenica98`, the IRR may be influenced by the input parameter :math:`\epsilon` in ``input_solver.txt`` that shifts the lid panels from :math:`z=0` to :math:`z=-\epsilon d_B` where :math:`d_B` is a maximum horizontal distance of points on the body. :math:`d_B` is computed by the software.
 
