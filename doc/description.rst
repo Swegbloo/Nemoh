@@ -232,7 +232,7 @@ NEMOH2 uses the following numerical approach
 -  QTF computations have not been tested yet for the multi-bodies problem.
 
 
-NEMOH related publications to be referred are :cite:t:`Babarit15` for the first order NEMOH and :cite:t:`Philippe15,Kurnia22_JH,Kurnia22` for the QTF module. A publication related with this release is in preparation as in :cite:t:`Kurnia23`.
+NEMOH related publications to be referred are :cite:t:`Babarit15` for the first order NEMOH and :cite:t:`Philippe15,Kurnia22_JH,Kurnia22,Kurnia23` for the QTF module.
 
 *****
 Units
