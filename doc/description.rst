@@ -15,6 +15,35 @@ The following subsections describe the underlying modelling and numerical approa
 Notations
 =========
 
+Symbols
+^^^^^^^
+
+.. table:: List of Symbols
+   :name: tab:symbols
+
+   ================= ================== ====================================================================================
+   Symbol            Unit               Description
+   =========================================================================================================================
+   :math:`D`         [m]                Water depth
+   :math:`T`         [s]                Wave period
+   :math:`\omega`    [rad/s]            Wave radial frequency, :math:`\omega = 2\pi/T`
+   :math:`\lambda`   [m]                Wave length
+   :math:`k`         [rad/m]            Wave number, :math:`k = 2\pi/\lambda`
+   :math:`\beta`     [rad]              Wave propagation direction
+   :math:`t`         [s]                Time
+   :math:`p`         [Pa]               Pressure
+   :math:`\phi`      [m:sup:`2`/s]      Velocity potential
+   :math:`\vec{V}`   [m/s]              Velocity, :math:`\vec{V} = \vec{\nabla}\phi`
+   :math:`g`         [m.s:sup:`-2`]     Gravitational acceleration
+   :math:`\rho`      [kg/m:sup:`3`]     Water density
+   :math:`a`         [m]                Wave amplitude
+   :math:`\eta`      [m]                Free surface elevation
+   ================= ================== ====================================================================================
+
+
+Frames
+^^^^^^
+
 As sketched in :numref:`fig:sketch`, we consider fluid domain in the Cartesian coordinate :math:`\boldsymbol x=(\vec{x},z)` with :math:`\vec{x}=(x,y)` the horizontal coordinates perpendicular to the :math:`z` axis in the opposite direction of gravity :math:`\boldsymbol g`. Free-surface boundary :math:`S_F` is defined by the free surface elevation at time :math:`t`, denoted as :math:`\eta(\vec{x},t)` with respect to the mean water level at :math:`z=0`. The fluid velocity potential is denoted as :math:`\Phi(\boldsymbol x,t)` with :math:`\boldsymbol x` in fluid domain :math:`V_{\Omega}`.
 
 .. figure:: figures/Sketch.png
@@ -26,6 +55,28 @@ As sketched in :numref:`fig:sketch`, we consider fluid domain in the Cartesian c
 The floating body has 6 degrees of freedom (DoF), :math:`\boldsymbol\xi=(\boldsymbol{X},\boldsymbol{\theta})` where the positions, :math:`\boldsymbol{X}=(X,Y,Z)` and the orientations, :math:`\boldsymbol{\theta}=(\theta_1,\theta_2,\theta_3)` are determined at the center of gravity (COG). Displacements of points at the hull are specified by a body of vector :math:`\boldsymbol r` with respect to the COG as :math:`\boldsymbol{\mathcal{X}}=\boldsymbol{X}+R(\boldsymbol{r})`. :math:`R` is a rotation operator where :math:`R(\boldsymbol r)\approx \boldsymbol\theta \times \boldsymbol r`. The velocity of the points at the hull is expressed as :math:`\dot{\boldsymbol{\mathcal{X}}}`.
 
 On the body hull :math:`S_B`, the wetted part is defined as a function :math:`z=\zeta(\vec{x},t)`. The normalized normal vector is defined as directed toward the fluid domain, :math:`\boldsymbol n=-\boldsymbol N/|\boldsymbol N|` with :math:`\boldsymbol N=\left(-\nabla_2\zeta,1 \right)` where :math:`\nabla_2` is the two-dimensional gradient in :math:`\vec{x}`. Then the six-dimensional generalized normal vector is defined as :math:`\boldsymbol\nu=(\boldsymbol n,\boldsymbol r \times \boldsymbol n)^T`, with :math:`( )^T` the matrix transpose operator.
+
+
+Expression of physical quantities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+All time-varying physical quantities are represented in the frequency domain as harmonic complex numbers for the linear part.
+A quantity :math:`X` is conveniently written in the exponential form:
+
+.. math::
+
+   X(\mathbf{x},t) = a |X(\mathbf{x}, \omega)| \mathrm{e}^{-i(\omega t - \angle X(\mathbf{x}, \omega))}
+
+and its time-domain equivalent :math:`\underline{X}` is its real part:
+
+.. math::
+
+   \underline{X}(\mathbf{x},t) = \Re(X(\mathbf{x},t)) = a |X(\mathbf{x}, \omega)| \cos(\omega t - \angle X(\mathbf{x}, \omega))
+
+.. note::
+
+   :math:`X` may depend on spatial coordinates :math:`\mathbf{x}` or not, respectfully if it represents a field (free surface elevation, pressure, velocity potential) or a scalar (forces, motions).
+
 
 Modelling
 =========
