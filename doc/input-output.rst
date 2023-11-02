@@ -228,6 +228,9 @@ Main input file ``Nemoh.cal``
    0                                                   For QTFposProc (**only for full QTF**): include ``HASFS+ASYMP`` in total QTF, flag (0/1)
    =============== ===== ===== ===== ===== ===== ===== ==================================================================
 
+.. warning::
+   It is strongly recommended to use the same point for all rotations and moments when computing the RAO (and QTF).
+   The inertia, added damping and added stiffness matrices must also be provided at the same reference point.
 
 .. note::
    When the frequencies needed for the QTF were not computed by the 1st order solver (NEMOH1), the values are interpolated.
@@ -239,6 +242,7 @@ Main input file ``Nemoh.cal``
    The suggested radial frequency interval is :math:`\omega \in [\Delta \omega, \omega_{max}]` with a step :math:`\Delta \omega` and :math:`\omega_{max}=N_{\omega}\Delta \omega`, where :math:`N_{\omega}` is the number of radial frequencies.
 
    :math:`\omega_{max}` should be chosen as the maximum computed sum-frequencies :math:`\omega_1+\omega_2`, that is :math:`{\omega_{max}}_{QTF}\leq\omega_{max}/2`.
+
 
 The meaning of the QTF contributing terms parameter is as follows:
 
