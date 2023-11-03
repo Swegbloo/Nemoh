@@ -44,7 +44,7 @@ Symbols
 Frames
 ^^^^^^
 
-As sketched in :numref:`fig:sketch`, we consider fluid domain in the Cartesian coordinate :math:`\boldsymbol x=(\vec{x},z)` with :math:`\vec{x}=(x,y)` the horizontal coordinates perpendicular to the :math:`z` axis in the opposite direction of gravity :math:`\boldsymbol g`. Free-surface boundary :math:`S_F` is defined by the free surface elevation at time :math:`t`, denoted as :math:`\eta(\vec{x},t)` with respect to the mean water level at :math:`z=0`. The fluid velocity potential is denoted as :math:`\Phi(\boldsymbol x,t)` with :math:`\boldsymbol x` in fluid domain :math:`V_{\Omega}`.
+As sketched in :numref:`fig:sketch`, we consider fluid domain in the Cartesian coordinate :math:`\boldsymbol x=(\mathbf{x},z)` with :math:`\mathbf{x}=(x,y)` the horizontal coordinates perpendicular to the :math:`z` axis in the opposite direction of gravity :math:`\boldsymbol g`. Free-surface boundary :math:`S_F` is defined by the free surface elevation at time :math:`t`, denoted as :math:`\eta(\mathbf{x},t)` with respect to the mean water level at :math:`z=0`. The fluid velocity potential is denoted as :math:`\Phi(\boldsymbol x,t)` with :math:`\boldsymbol x` in fluid domain :math:`V_{\Omega}`.
 
 .. figure:: figures/Sketch.png
    :align: center
@@ -54,24 +54,29 @@ As sketched in :numref:`fig:sketch`, we consider fluid domain in the Cartesian c
 
 The floating body has 6 degrees of freedom (DoF), :math:`\boldsymbol\xi=(\boldsymbol{X},\boldsymbol{\theta})` where the positions, :math:`\boldsymbol{X}=(X,Y,Z)` and the orientations, :math:`\boldsymbol{\theta}=(\theta_1,\theta_2,\theta_3)` are determined at the center of gravity (COG). Displacements of points at the hull are specified by a body of vector :math:`\boldsymbol r` with respect to the COG as :math:`\boldsymbol{\mathcal{X}}=\boldsymbol{X}+R(\boldsymbol{r})`. :math:`R` is a rotation operator where :math:`R(\boldsymbol r)\approx \boldsymbol\theta \times \boldsymbol r`. The velocity of the points at the hull is expressed as :math:`\dot{\boldsymbol{\mathcal{X}}}`.
 
-On the body hull :math:`S_B`, the wetted part is defined as a function :math:`z=\zeta(\vec{x},t)`. The normalized normal vector is defined as directed toward the fluid domain, :math:`\boldsymbol n=-\boldsymbol N/|\boldsymbol N|` with :math:`\boldsymbol N=\left(-\nabla_2\zeta,1 \right)` where :math:`\nabla_2` is the two-dimensional gradient in :math:`\vec{x}`. Then the six-dimensional generalized normal vector is defined as :math:`\boldsymbol\nu=(\boldsymbol n,\boldsymbol r \times \boldsymbol n)^T`, with :math:`( )^T` the matrix transpose operator.
+On the body hull :math:`S_B`, the wetted part is defined as a function :math:`z=\zeta(\mathbf{x},t)`. The normalized normal vector is defined as directed toward the fluid domain, :math:`\boldsymbol n=-\boldsymbol N/|\boldsymbol N|` with :math:`\boldsymbol N=\left(-\nabla_2\zeta,1 \right)` where :math:`\nabla_2` is the two-dimensional gradient in :math:`\mathbf{x}`. Then the six-dimensional generalized normal vector is defined as :math:`\boldsymbol\nu=(\boldsymbol n,\boldsymbol r \times \boldsymbol n)^T`, with :math:`( )^T` the matrix transpose operator.
 
 
 Expression of physical quantities
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-All time-varying physical quantities are represented in the frequency domain as harmonic complex numbers for the linear part.
-A quantity :math:`X` is conveniently written in the exponential form:
+All time-varying physical quantities are represented in the frequency domain as harmonic complex numbers for the first-order part, proportional to the wave amplitude :math:`a`, e.g. quantity :math:`X` is written:
 
 .. math::
 
-   X(\mathbf{x},t) = a |X(\mathbf{x}, \omega)| \mathrm{e}^{-i(\omega t - \angle X(\mathbf{x}, \omega))}
+   X(\mathbf{x},t) = a X(\mathbf{x}, \omega) \mathrm{e}^{-i \omega t}
+
+:math:`X(\mathbf{x}, \omega)` is conveniently written in the exponential form:
+
+.. math::
+
+   X(\mathbf{x}, \omega) = |X(\mathbf{x}, \omega)| \mathrm{e}^{i \angle X(\mathbf{x}, \omega)}
 
 and its time-domain equivalent :math:`\underline{X}` is its real part:
 
 .. math::
 
-   \underline{X}(\mathbf{x},t) = \Re(X(\mathbf{x},t)) = a |X(\mathbf{x}, \omega)| \cos(\omega t - \angle X(\mathbf{x}, \omega))
+   \underline{X}(\mathbf{x},t) = \Re\left\lbrace X(\mathbf{x},t)\right\rbrace = \Re\left\lbrace a |X(\mathbf{x}, \omega)| \mathrm{e}^{-i(\omega t - \angle X(\mathbf{x}, \omega))} \right\rbrace = a |X(\mathbf{x}, \omega)| \cos(\omega t - \angle X(\mathbf{x}, \omega))
 
 .. note::
 
@@ -91,20 +96,48 @@ NEMOH1, the first-order solver, is based on the following modelling principles:
       :label: Eq:PhiHarm
 
       \begin{aligned}
-      \Phi(\boldsymbol x,t)=Re\left\lbrace\Phi^{(1)}(\boldsymbol x)e^{-i\omega t}\right\rbrace.
+      \Phi(\mathbf{x},t)=\Re\left\lbrace a \Phi^{(1)}(\mathbf{x}, \omega)\mathrm{e}^{-i\omega t}\right\rbrace.
       \end{aligned}
 
    The total potential, :math:`\Phi`, is the sum of the incident potential, the diffraction potential and the radiation potential.
-   The incident potential is defined as, with :math:`k` and :math:`\omega` related with the dispersion relation, :math:`\vec{k}=k(\cos \beta,\sin \beta)`, :math:`\beta` is the wave direction and :math:`a` is a unit wave amplitude,
+
+-  The incident wave is modelled using Airy's theory. In this framework, the incident wave elevation is written:
+
+   .. math::
+      :label: eq:eta_I
+
+      \eta_I(\mathbf{x}, \omega) = \mathrm{e}^{\mathbf{k}\cdot\mathbf{x}}
+
+   where :math:`a` is the wave amplitude and :math:`\beta` is the wave direction.
+   :math:`\mathbf{k}=k(\cos(\beta),\sin(\beta),0)` is the wave number vector, related to the radial frequency :math:`\omega` by the dispersion relation:
+
+   .. math::
+      :label: eq:dispersion
+
+      \omega^2 = g k \tanh(k D) \xrightarrow[D \longrightarrow \infty]{} g k
+
+   The incident potential is defined as:
 
    .. math::
       :label: Eq:PhiI
 
-      \begin{aligned}
-      \Phi_{I}^{(1)}(\boldsymbol x)=-i\frac{a g}{\omega}\frac{\cosh(k(D+z))}{\cosh(kD)} e^{i\vec{k}\cdot \vec{x}}.
-      \end{aligned}
+      \Phi_I^{(1)}(\mathbf{x}, \omega)= - i \frac{g}{\omega} f_0(z) \mathrm{e}^{i \mathbf{k} \cdot \mathbf{x}}
 
-   The radiation potential is defined as :math:`\Phi_R(\boldsymbol x,t)=Re\left\lbrace \dot{\boldsymbol\xi}^{(1)}(t) \cdot \boldsymbol\psi(x)\right\rbrace` where :math:`\boldsymbol\psi(\boldsymbol x)` is the normalized vector radiation potential.
+   where:
+
+   .. math::
+      :label: eq:f_0
+
+      f_0(z) = \frac{\cosh(k(D + z))}{\cosh(k D)} \xrightarrow[D \longrightarrow \infty]{} \mathrm{e}^{k z}
+
+   The resulting incident pressure is:
+
+   .. math::
+      :label: eq:pressure
+
+      p_I(\mathbf{x}, \omega) = \rho g f_0(z) \mathrm{e}^{\mathbf{k}\cdot\mathbf{x}}
+
+-  The radiation potential is defined as :math:`\Phi_R(\boldsymbol x,t)=Re\left\lbrace \dot{\boldsymbol\xi}^{(1)}(t) \cdot \boldsymbol\psi(x)\right\rbrace` where :math:`\boldsymbol\psi(\boldsymbol x)` is the normalized vector radiation potential.
 
 -  The three-dimensional linear potential flow problem around arbitrary body condition is reformulated in the Boundary Integral Equation (BIE) and transformed into the two-dimensional problem of the source distribution, :math:`\sigma`, on the body surface, :math:`S_B`, using Green’s second identity and the appropriate Green function, :math:`G(\boldsymbol x,\boldsymbol x')`.
 
