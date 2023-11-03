@@ -392,7 +392,7 @@ Free surface mesh file
 Matrix files
 ============
 
-``Km.dat`` and ``Badd.dat`` are additional stiffness matrix and damping coefficient matrix. The files contains the matrix components with size :math:`(Nbody\cdot Nradiation)\times (Nbody\cdot Nradiation)`.
+``Km.dat`` and ``Badd.dat`` are additional stiffness matrix and damping coefficient matrix. The files contains the matrix components with size :math:`(N_{body}\cdot N_{DoF})\times (N_{body}\cdot N_{DoF})`.
 
 
 ************
@@ -402,7 +402,7 @@ Output files
 Inertia and hydrostatic stiffness
 =================================
 
-Hydrostatic output files such as inertia and stiffness matrices are produced by ``mesh``, if ``<geomInput-file>`` is prescribed, or by ``hydroCal``, if ``meshfile`` is prescribed. The files contain the matrix components with size :math:`(Nbody\cdot Nradiation)\times (Nbody\cdot Nradiation)`.
+Hydrostatic output files such as inertia and stiffness matrices are produced by ``mesh``, if ``<geomInput-file>`` is prescribed, or by ``hydroCal``, if ``meshfile`` is prescribed. The files contain the matrix components with size :math:`(N_{body}\cdot N_{DoF})\times (N_{body}\cdot N_{DoF})`.
 
 Forces
 ======
@@ -412,12 +412,12 @@ Forces
 .. table:: Output file format of Froude-Krylov, diffraction and excitation forces
    :name: tab:WaveForce
 
-   ================ ======================= ============================ ================ ================ ============================== ================================
-   :math:`f_1`      :math:`|F_1(f_1)|`      :math:`\angle F_1(f_1)`      :math:`\cdots`   :math:`\cdots`   :math:`|F_{Ninteg}(f_1)|`      :math:`\angle F_{Ninteg}(f_1)`
-   :math:`f_2`      :math:`|F_1(f_2)|`      :math:`\angle F_1(f_2)`      :math:`\cdots`   :math:`\cdots`   :math:`|F_{Ninteg}(f_2)|`      :math:`\angle F_{Ninteg}(f_2)`
-   :math:`\vdots`   :math:`\vdots`          :math:`\vdots`               :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                 :math:`\vdots`
-   :math:`f_{Nf}`   :math:`|F_1(f_{Nf})|`   :math:`\angle F_1(f_{Nf})`   :math:`\cdots`   :math:`\cdots`   :math:`|F_{Ninteg}(f_{Nf})|`   :math:`\angle F_{Ninteg}(f_{Nf})`
-   ================ ======================= ============================ ================ ================ ============================== ================================
+   ================ ======================= ============================ ================ ================ ================================== =====================================
+   :math:`f_1`      :math:`|F_1(f_1)|`      :math:`\angle F_1(f_1)`      :math:`\cdots`   :math:`\cdots`   :math:`|F_{N_{forces}}(f_1)|`      :math:`\angle F_{N_{forces}}(f_1)`
+   :math:`f_2`      :math:`|F_1(f_2)|`      :math:`\angle F_1(f_2)`      :math:`\cdots`   :math:`\cdots`   :math:`|F_{N_{forces}}(f_2)|`      :math:`\angle F_{N_{forces}}(f_2)`
+   :math:`\vdots`   :math:`\vdots`          :math:`\vdots`               :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                     :math:`\vdots`
+   :math:`f_{N_f}`   :math:`|F_1(f_{N_f})|`   :math:`\angle F_1(f_{N_f})`   :math:`\cdots`   :math:`\cdots`   :math:`|F_{N_{forces}}(f_{N_f})|`   :math:`\angle F_{N_{forces}}(f_{N_f})`
+   ================ ======================= ============================ ================ ================ ================================== =====================================
 
 
 Radiation coefficients
@@ -430,17 +430,17 @@ The hydrodynamic coefficients are also produced in the *.dat* files, i.e. *CA.da
 .. table:: Output file format of the radiation coefficients
    :name: tab:addedmass_damping_coeffs
 
-   ==================== ================================= ============================== ================ ================ ====================================== ================================
-   :math:`f_1`          :math:`M^a_{11}(f_1)`             :math:`B_{11}(f_1)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1Ninteg}(f_1)`             :math:`B_{1Ninteg}(f_1)`
-   :math:`f_2`          :math:`M^a_{11}(f_2)`             :math:`B_{11}(f_2)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1Ninteg}(f_2)`             :math:`B_{1Ninteg}(f_2)`
-   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                         :math:`\vdots`
-   :math:`f_{N_f}`      :math:`M^a_{11}(f_{N_f})`         :math:`B_{11}(f_{N_f})`        :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1Ninteg}(f_{N_f})`         :math:`B_{1Ninteg}(f_{N_f})`
-   :math:`f_1`          :math:`M^a_{21}(f_1)`             :math:`B_{21}(f_1)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{2Ninteg}(f_1)`             :math:`B_{2Ninteg}(f_1)`
-   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                         :math:`\vdots`
-   :math:`f_{N_f}`      :math:`M^a_{21}(f_{N_f})`         :math:`B_{21}(f_{N_f})`        :math:`\cdots`   :math:`\cdots`   :math:`M^a_{2Ninteg}(f_{N_f})`         :math:`B_{2Ninteg}(f_{N_f})`
-   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                         :math:`\vdots`
-   :math:`f_{N_f}`      :math:`M^a_{N_{DoF}1}(f_{N_f})`   :math:`B_{N_{DoF}1}(f_{N_f})`  :math:`\cdots`   :math:`\cdots`   :math:`M^a_{N_{DoF}Ninteg}(f_{N_f})`   :math:`B_{N_{DoF}Ninteg}(f_{N_f})`
-   ==================== ================================= ============================== ================ ================ ====================================== ================================
+   ==================== ================================= ============================== ================ ================ ========================================== ================================
+   :math:`f_1`          :math:`M^a_{11}(f_1)`             :math:`B_{11}(f_1)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1N_{forces}}(f_1)`             :math:`B_{1N_{forces}}(f_1)`
+   :math:`f_2`          :math:`M^a_{11}(f_2)`             :math:`B_{11}(f_2)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1N_{forces}}(f_2)`             :math:`B_{1N_{forces}}(f_2)`
+   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                             :math:`\vdots`
+   :math:`f_{N_f}`      :math:`M^a_{11}(f_{N_f})`         :math:`B_{11}(f_{N_f})`        :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1N_{forces}}(f_{N_f})`         :math:`B_{1N_{forces}}(f_{N_f})`
+   :math:`f_1`          :math:`M^a_{21}(f_1)`             :math:`B_{21}(f_1)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{2N_{forces}}(f_1)`             :math:`B_{2N_{forces}}(f_1)`
+   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                             :math:`\vdots`
+   :math:`f_{N_f}`      :math:`M^a_{21}(f_{N_f})`         :math:`B_{21}(f_{N_f})`        :math:`\cdots`   :math:`\cdots`   :math:`M^a_{2N_{forces}}(f_{N_f})`         :math:`B_{2N_{forces}}(f_{N_f})`
+   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                             :math:`\vdots`
+   :math:`f_{N_f}`      :math:`M^a_{N_{DoF}1}(f_{N_f})`   :math:`B_{N_{DoF}1}(f_{N_f})`  :math:`\cdots`   :math:`\cdots`   :math:`M^a_{N_{DoF}N_{forces}}(f_{N_f})`   :math:`B_{N_{DoF}N_{forces}}(f_{N_f})`
+   ==================== ================================= ============================== ================ ================ ========================================== ================================
 
 
 Response Amplitude Operator
@@ -466,25 +466,25 @@ Impulse Response Functions
 .. table:: Output file format of ``IRF.tec``
    :name: tab:IRF
 
-   ================== ================================ ============================= ================ =================== ===================================== ================================
-   :math:`t_1`        :math:`M^a_{11}(\infty)`         :math:`IRF_{11}(t_1)`         :math:`\cdots`   :math:`\cdots`      :math:`M^a_{1Ninteg}(\infty)`         :math:`IRF_{1Ninteg}(t_1)`
-   :math:`t_2`        :math:`M^a_{11}(\infty)`         :math:`IRF_{11}(t_2)`         :math:`\cdots`   :math:`\cdots`      :math:`M^a_{1Ninteg}(\infty)`         :math:`IRF_{1Ninteg}(t_2)`
-   :math:`\vdots`     :math:`\vdots`                   :math:`\vdots`                :math:`\vdots`   :math:`\vdots`      :math:`\vdots`                        :math:`\vdots`
-   :math:`t_1`        :math:`M^a_{21}(\infty)`         :math:`IRF_{21}(t_1)`         :math:`\cdots`   :math:`\cdots`      :math:`M^a_{2Ninteg}(\infty)`         :math:`IRF_{2Ninteg}(t_1)`
-   :math:`\vdots`     :math:`\vdots`                   :math:`\vdots`                :math:`\vdots`   :math:`\vdots`      :math:`\vdots`                        :math:`\vdots`
-   :math:`t_N`        :math:`M^a_{N_{DoF}1}(\infty)`   :math:`IRF_{N_{DoF}1}(t_N)`   :math:`\cdots`   :math:`\cdots`      :math:`M^a_{N_{DoF}Ninteg}(\infty)`   :math:`IRF_{N_{DoF}Ninteg}(t_N)`
-   ================== ================================ ============================= ================ =================== ===================================== ================================
+   ================== ================================ ============================= ================ =================== ========================================= ====================================
+   :math:`t_1`        :math:`M^a_{11}(\infty)`         :math:`IRF_{11}(t_1)`         :math:`\cdots`   :math:`\cdots`      :math:`M^a_{1N_{forces}}(\infty)`         :math:`IRF_{1N_{forces}}(t_1)`
+   :math:`t_2`        :math:`M^a_{11}(\infty)`         :math:`IRF_{11}(t_2)`         :math:`\cdots`   :math:`\cdots`      :math:`M^a_{1N_{forces}}(\infty)`         :math:`IRF_{1N_{forces}}(t_2)`
+   :math:`\vdots`     :math:`\vdots`                   :math:`\vdots`                :math:`\vdots`   :math:`\vdots`      :math:`\vdots`                            :math:`\vdots`
+   :math:`t_1`        :math:`M^a_{21}(\infty)`         :math:`IRF_{21}(t_1)`         :math:`\cdots`   :math:`\cdots`      :math:`M^a_{2N_{forces}}(\infty)`         :math:`IRF_{2N_{forces}}(t_1)`
+   :math:`\vdots`     :math:`\vdots`                   :math:`\vdots`                :math:`\vdots`   :math:`\vdots`      :math:`\vdots`                            :math:`\vdots`
+   :math:`t_N`        :math:`M^a_{N_{DoF}1}(\infty)`   :math:`IRF_{N_{DoF}1}(t_N)`   :math:`\cdots`   :math:`\cdots`      :math:`M^a_{N_{DoF}N_{forces}}(\infty)`   :math:`IRF_{N_{DoF}N_{forces}}(t_N)`
+   ================== ================================ ============================= ================ =================== ========================================= ====================================
 
 
 .. table:: Output file format of ``IRF_excForce.tec``
    :name: tab:IRFExcF
 
-   ================ ====================== ================ ========================
-   :math:`t_1`      :math:`IRF_{1}(t_1)`   :math:`\cdots`   :math:`IRF_{Ninteg}(t_1)`
-   :math:`t_2`      :math:`IRF_{1}(t_2)`   :math:`\cdots`   :math:`IRF_{Ninteg}(t_2)`
+   ================ ====================== ================ =============================
+   :math:`t_1`      :math:`IRF_{1}(t_1)`   :math:`\cdots`   :math:`IRF_{N_{forces}}(t_1)`
+   :math:`t_2`      :math:`IRF_{1}(t_2)`   :math:`\cdots`   :math:`IRF_{N_{forces}}(t_2)`
    :math:`\vdots`   :math:`\vdots`         :math:`\vdots`   :math:`\vdots`
-   :math:`t_N`      :math:`IRF_{1}(t_N)`   :math:`\cdots`   :math:`IRF_{Ninteg}(t_N)`
-   ================ ====================== ================ ========================
+   :math:`t_N`      :math:`IRF_{1}(t_N)`   :math:`\cdots`   :math:`IRF_{N_{forces}}(t_N)`
+   ================ ====================== ================ =============================
 
 
 Field results
@@ -517,11 +517,11 @@ The format of the output file is given in :numref:`tab:pressure`.
 .. table:: Output file format of ``pressure.<id>.dat``
    :name: tab:pressure
 
-   ==================== ==================== ==================== ===================================== ====================================
-   :math:`x_1`          :math:`y_1`          :math:`z_1`          :math:`|P(\boldsymbol x_1)|`          :math:`\angle P(\boldsymbol x_1)`
-   :math:`\vdots`       :math:`\vdots`       :math:`\vdots`       :math:`\vdots`                        :math:`\vdots`
-   :math:`x_{Npanel}`   :math:`y_{Npanel}`   :math:`z_{Npanel}`   :math:`|P(\boldsymbol x_{Npanel})|`   :math:`\angle P(\boldsymbol x_{Npanel})`
-   ==================== ==================== ==================== ===================================== ====================================
+   ======================= ======================= ======================= ======================================== ===========================================
+   :math:`x_1`             :math:`y_1`             :math:`z_1`             :math:`|P(\boldsymbol x_1)|`             :math:`\angle P(\boldsymbol x_1)`
+   :math:`\vdots`          :math:`\vdots`          :math:`\vdots`          :math:`\vdots`                           :math:`\vdots`
+   :math:`x_{N_{panel}}`   :math:`y_{N_{panel}}`   :math:`z_{N_{panel}}`   :math:`|P(\boldsymbol x_{N_{panel}})|`   :math:`\angle P(\boldsymbol x_{N_{panel}})`
+   ======================= ======================= ======================= ======================================== ===========================================
 
 
 Kochin functions
@@ -534,11 +534,11 @@ The format of the output file is given in :numref:`tab:kochin`.
 .. table:: Output file format of *kochin.<id>.dat*
    :name: tab:kochin
 
-   ================================ =============================================== ===============================================
+   ================================ =============================================== ==================================================
    :math:`\vartheta_1`              :math:`|\mathcal{H}(\vartheta_1)|`              :math:`\angle \mathcal{H}(\vartheta_1)`
    :math:`\vdots`                   :math:`\vdots`                                  :math:`\vdots`
    :math:`\vartheta_{N\vartheta}`   :math:`|\mathcal{H}(\vartheta_{N\vartheta})|`   :math:`\angle \mathcal{H}(\vartheta_{N\vartheta})`
-   ================================ =============================================== ===============================================
+   ================================ =============================================== ==================================================
 
 
 Free surface elevation
@@ -551,11 +551,11 @@ The format of the output file is given in :numref:`tab:freesurface`.
 .. table:: Output file format of ``freesurface.<id>.dat``
    :name: tab:freesurface
 
-   ==================== ==================== ================================== ======================================= ===================================== ==================================
-   :math:`x_1`          :math:`y_1`          :math:`|\eta(\vec{x}_1)|`          :math:`\angle \eta(\vec{x}_1)`          :math:`Re[ \eta(\vec{x}_1)]`          :math:`Im[ \eta(\vec{x}_1)]`
-   :math:`\vdots`       :math:`\vdots`       :math:`\vdots`                     :math:`\vdots`                          :math:`\vdots`                        :math:`\vdots`
-   :math:`x_{Npanel}`   :math:`y_{Npanel}`   :math:`|\eta(\vec{x}_{Npanel})|`   :math:`\angle \eta(\vec{x}_{Npanel})`   :math:`Re[ \eta(\vec{x}_{Npanel})]`   :math:`Im[ \eta(\vec{x}_{Npanel})]`
-   ==================== ==================== ================================== ======================================= ===================================== ==================================
+   ======================= ======================= ===================================== ========================================== ======================================== ======================================
+   :math:`x_1`             :math:`y_1`             :math:`|\eta(\vec{x}_1)|`             :math:`\angle \eta(\vec{x}_1)`             :math:`Re[ \eta(\vec{x}_1)]`             :math:`Im[ \eta(\vec{x}_1)]`
+   :math:`\vdots`          :math:`\vdots`          :math:`\vdots`                        :math:`\vdots`                             :math:`\vdots`                           :math:`\vdots`
+   :math:`x_{N_{panel}}`   :math:`y_{N_{panel}}`   :math:`|\eta(\vec{x}_{N_{panel}})|`   :math:`\angle \eta(\vec{x}_{N_{panel}})`   :math:`Re[ \eta(\vec{x}_{N_{panel}})]`   :math:`Im[ \eta(\vec{x}_{N_{panel}})]`
+   ======================= ======================= ===================================== ========================================== ======================================== ======================================
 
 
 Quadratic Transfer Function
@@ -572,9 +572,9 @@ A Matlab file for reading this output file is provided in ``matlabRoutines/``.
 .. table:: Output file format of ``OUT_QTFM_N.dat`` and ``OUT_QTFP_N.dat``
    :name: tab:QTF
 
-   ==================== ====================== =========================== =========================== ==================== ====================== ==================== ======================== ======================
-   :math:`f_{1_1}`      :math:`f_{2_1}`        :math:`\beta_{1_1}`         :math:`\beta_{2_1}`         :math:`DoF_1`        :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
-   :math:`f_{1_2}`      :math:`f_{2_1}`        :math:`\beta_{1_1}`         :math:`\beta_{2_1}`         :math:`DoF_1`        :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
-   :math:`\vdots`       :math:`\vdots`         :math:`\vdots`              :math:`\vdots`              :math:`\vdots`       :math:`\vdots`         :math:`\vdots`       :math:`\vdots`           :math:`\vdots`
-   :math:`f_{1_{Nf}}`   :math:`f_{2_{Nf}}`     :math:`\beta_{1_{Nbeta}}`   :math:`\beta_{2_{Nbeta}}`   :math:`DoF_{NDof}`   :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
-   ==================== ====================== =========================== =========================== ==================== ====================== ==================== ======================== ======================
+   ==================== ====================== =========================== =========================== ======================= ====================== ==================== ======================== ======================
+   :math:`f_{1_1}`      :math:`f_{2_1}`        :math:`\beta_{1_1}`         :math:`\beta_{2_1}`         :math:`DoF_1`           :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
+   :math:`f_{1_2}`      :math:`f_{2_1}`        :math:`\beta_{1_1}`         :math:`\beta_{2_1}`         :math:`DoF_1`           :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
+   :math:`\vdots`       :math:`\vdots`         :math:`\vdots`              :math:`\vdots`              :math:`\vdots`          :math:`\vdots`         :math:`\vdots`       :math:`\vdots`           :math:`\vdots`
+   :math:`f_{1_{N_f}}`   :math:`f_{2_{N_f}}`     :math:`\beta_{1_{Nbeta}}`   :math:`\beta_{2_{Nbeta}}`   :math:`DoF_{N_{DoF}}`   :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
+   ==================== ====================== =========================== =========================== ======================= ====================== ==================== ======================== ======================

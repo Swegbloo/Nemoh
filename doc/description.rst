@@ -64,7 +64,7 @@ All time-varying physical quantities are represented in the frequency domain as 
 
 .. math::
 
-   X(\mathbf{x},t) = a X(\mathbf{x}, \omega) \mathrm{e}^{-i \omega t}
+   \widehat{X}(\mathbf{x},t) = a X(\mathbf{x}, \omega) \mathrm{e}^{-i \omega t}
 
 :math:`X(\mathbf{x}, \omega)` is conveniently written in the exponential form:
 
@@ -72,11 +72,11 @@ All time-varying physical quantities are represented in the frequency domain as 
 
    X(\mathbf{x}, \omega) = |X(\mathbf{x}, \omega)| \mathrm{e}^{i \angle X(\mathbf{x}, \omega)}
 
-and its time-domain equivalent :math:`\underline{X}` is its real part:
+and its time-domain equivalent :math:`\widetilde{X}` is its real part:
 
 .. math::
 
-   \underline{X}(\mathbf{x},t) = \Re\left\lbrace X(\mathbf{x},t)\right\rbrace = \Re\left\lbrace a |X(\mathbf{x}, \omega)| \mathrm{e}^{-i(\omega t - \angle X(\mathbf{x}, \omega))} \right\rbrace = a |X(\mathbf{x}, \omega)| \cos(\omega t - \angle X(\mathbf{x}, \omega))
+   \widetilde{X}(\mathbf{x},t) = \Re\left\lbrace \widehat{X}(\mathbf{x},t)\right\rbrace = \Re\left\lbrace a |X(\mathbf{x}, \omega)| \mathrm{e}^{-i(\omega t - \angle X(\mathbf{x}, \omega))} \right\rbrace = a |X(\mathbf{x}, \omega)| \cos(\omega t - \angle X(\mathbf{x}, \omega))
 
 .. note::
 
@@ -154,7 +154,7 @@ NEMOH1, the first-order solver, is based on the following modelling principles:
       \frac{1}{2}\sigma_{D,R_j}(\boldsymbol x)-\frac{1}{4\pi}\int_{S_B} \partial_n G(\boldsymbol x, \boldsymbol x') \sigma_{D,R_j}(\boldsymbol x') dS'=\mathcal{N}_{D,R_j}(\boldsymbol x).
       \end{aligned}
 
-   where :math:`\mathcal{N}(\boldsymbol x)` is the body normal condition. The diffraction normal condition is defined as :math:`\mathcal{N}_D (\boldsymbol x)=-\partial_{n} \Phi_I^{(1)}(\boldsymbol x)`, the normalized radiation condition, :math:`\mathcal{N}_R (\boldsymbol x)=\partial_{n} \Phi_{R_j}(\boldsymbol x)`, with :math:`\Phi_{R_j}(\boldsymbol x)` is the vector component-:math:`j` of the normalized radiation potential :math:`\boldsymbol\psi(\boldsymbol x)`, explicitly :math:`\boldsymbol\psi=(\Phi_{R_1},\Phi_{R_2},\cdots,\Phi_{R_{Ndof}})`.
+   where :math:`\mathcal{N}(\boldsymbol x)` is the body normal condition. The diffraction normal condition is defined as :math:`\mathcal{N}_D (\boldsymbol x)=-\partial_{n} \Phi_I^{(1)}(\boldsymbol x)`, the normalized radiation condition, :math:`\mathcal{N}_R (\boldsymbol x)=\partial_{n} \Phi_{R_j}(\boldsymbol x)`, with :math:`\Phi_{R_j}(\boldsymbol x)` is the vector component-:math:`j` of the normalized radiation potential :math:`\boldsymbol\psi(\boldsymbol x)`, explicitly :math:`\boldsymbol\psi=(\Phi_{R_1},\Phi_{R_2},\cdots,\Phi_{R_{N_{DoF}}})`.
 
 -  The diffraction potential, :math:`\Phi^{(1)}_{D}`, the normalized radiation potential vector component-:math:`j`, :math:`\Phi_{R_j}` and the corresponding velocities are then computed as follows, for the flow points in the fluid domain :math:`\boldsymbol x \in S_B \cup V_{\Omega_F}`,
 
