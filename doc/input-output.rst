@@ -407,17 +407,19 @@ Hydrostatic output files such as inertia and stiffness matrices are produced by 
 Forces
 ======
 
-``FKForce.tec``, ``DiffractionForce.tec`` and ``ExcitationForce.tec`` are the output files of the Froude-Krylov, the diffraction and the excitation forces respectively. The output file format is given in :numref:`tab:WaveForce`. The file contains the absolute value and the phase [deg] of the force for each ’frequency’ :math:`f`. The force is given for each specified force axis (i.e. surge, heave, pitch) for each body. The ’frequency’ is given based on the chosen type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``, except the Froude-Krylov force, which is only in the radial frequency [rad/s].
+``FKForce.tec``, ``DiffractionForce.tec`` and ``ExcitationForce.tec`` are the output files of the Froude-Krylov, the diffraction and the excitation forces respectively. The output file format is given in :numref:`tab:WaveForce`.
+The file contains the absolute value and the phase [deg] of the force for each ’frequency’ :math:`\omega`. The force is given for each specified force axis (i.e. surge, heave, pitch) for each body.
+The ’frequency’ is given based on the chosen type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``, except the Froude-Krylov force, which is only in the radial frequency [rad/s].
 
 .. table:: Output file format of Froude-Krylov, diffraction and excitation forces
    :name: tab:WaveForce
 
-   ================ ======================= ============================ ================ ================ ================================== =====================================
-   :math:`f_1`      :math:`|F_1(f_1)|`      :math:`\angle F_1(f_1)`      :math:`\cdots`   :math:`\cdots`   :math:`|F_{N_{forces}}(f_1)|`      :math:`\angle F_{N_{forces}}(f_1)`
-   :math:`f_2`      :math:`|F_1(f_2)|`      :math:`\angle F_1(f_2)`      :math:`\cdots`   :math:`\cdots`   :math:`|F_{N_{forces}}(f_2)|`      :math:`\angle F_{N_{forces}}(f_2)`
-   :math:`\vdots`   :math:`\vdots`          :math:`\vdots`               :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                     :math:`\vdots`
-   :math:`f_{N_f}`   :math:`|F_1(f_{N_f})|`   :math:`\angle F_1(f_{N_f})`   :math:`\cdots`   :math:`\cdots`   :math:`|F_{N_{forces}}(f_{N_f})|`   :math:`\angle F_{N_{forces}}(f_{N_f})`
-   ================ ======================= ============================ ================ ================ ================================== =====================================
+   =========================== ================================== ======================================= ================ ================ ============================================= ================================================
+   :math:`\omega_1`            :math:`|F_1(\omega_1)|`            :math:`\angle F_1(\omega_1)`            :math:`\cdots`   :math:`\cdots`   :math:`|F_{N_{forces}}(\omega_1)|`            :math:`\angle F_{N_{forces}}(\omega_1)`
+   :math:`\omega_2`            :math:`|F_1(\omega_2)|`            :math:`\angle F_1(\omega_2)`            :math:`\cdots`   :math:`\cdots`   :math:`|F_{N_{forces}}(\omega_2)|`            :math:`\angle F_{N_{forces}}(\omega_2)`
+   :math:`\vdots`              :math:`\vdots`                     :math:`\vdots`                          :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                                :math:`\vdots`
+   :math:`\omega_{N_\omega}`   :math:`|F_1(\omega_{N_\omega})|`   :math:`\angle F_1(\omega_{N_\omega})`   :math:`\cdots`   :math:`\cdots`   :math:`|F_{N_{forces}}(\omega_{N_\omega})|`   :math:`\angle F_{N_{forces}}(\omega_{N_\omega})`
+   =========================== ================================== ======================================= ================ ================ ============================================= ================================================
 
 
 Radiation coefficients
@@ -430,17 +432,17 @@ The hydrodynamic coefficients are also produced in the *.dat* files, i.e. *CA.da
 .. table:: Output file format of the radiation coefficients
    :name: tab:addedmass_damping_coeffs
 
-   ==================== ================================= ============================== ================ ================ ========================================== ================================
-   :math:`f_1`          :math:`M^a_{11}(f_1)`             :math:`B_{11}(f_1)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1N_{forces}}(f_1)`             :math:`B_{1N_{forces}}(f_1)`
-   :math:`f_2`          :math:`M^a_{11}(f_2)`             :math:`B_{11}(f_2)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1N_{forces}}(f_2)`             :math:`B_{1N_{forces}}(f_2)`
-   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                             :math:`\vdots`
-   :math:`f_{N_f}`      :math:`M^a_{11}(f_{N_f})`         :math:`B_{11}(f_{N_f})`        :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1N_{forces}}(f_{N_f})`         :math:`B_{1N_{forces}}(f_{N_f})`
-   :math:`f_1`          :math:`M^a_{21}(f_1)`             :math:`B_{21}(f_1)`            :math:`\cdots`   :math:`\cdots`   :math:`M^a_{2N_{forces}}(f_1)`             :math:`B_{2N_{forces}}(f_1)`
-   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                             :math:`\vdots`
-   :math:`f_{N_f}`      :math:`M^a_{21}(f_{N_f})`         :math:`B_{21}(f_{N_f})`        :math:`\cdots`   :math:`\cdots`   :math:`M^a_{2N_{forces}}(f_{N_f})`         :math:`B_{2N_{forces}}(f_{N_f})`
-   :math:`\vdots`       :math:`\vdots`                    :math:`\vdots`                 :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                             :math:`\vdots`
-   :math:`f_{N_f}`      :math:`M^a_{N_{DoF}1}(f_{N_f})`   :math:`B_{N_{DoF}1}(f_{N_f})`  :math:`\cdots`   :math:`\cdots`   :math:`M^a_{N_{DoF}N_{forces}}(f_{N_f})`   :math:`B_{N_{DoF}N_{forces}}(f_{N_f})`
-   ==================== ================================= ============================== ================ ================ ========================================== ================================
+   ============================== =========================================== ======================================== ================ ================ ==================================================== ====================================================
+   :math:`\omega_1`               :math:`M^a_{11}(\omega_1)`                  :math:`B_{11}(\omega_1)`                 :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1N_{forces}}(\omega_1)`                  :math:`B_{1N_{forces}}(\omega_1)`
+   :math:`\omega_2`               :math:`M^a_{11}(\omega_2)`                  :math:`B_{11}(\omega_2)`                 :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1N_{forces}}(\omega_2)`                  :math:`B_{1N_{forces}}(\omega_2)`
+   :math:`\vdots`                 :math:`\vdots`                              :math:`\vdots`                           :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                                       :math:`\vdots`
+   :math:`\omega_{N_\omega}`      :math:`M^a_{11}(\omega_{N_\omega})`         :math:`B_{11}(\omega_{N_\omega})`        :math:`\cdots`   :math:`\cdots`   :math:`M^a_{1N_{forces}}(\omega_{N_\omega})`         :math:`B_{1N_{forces}}(\omega_{N_\omega})`
+   :math:`\omega_1`               :math:`M^a_{21}(\omega_1)`                  :math:`B_{21}(\omega_1)`                 :math:`\cdots`   :math:`\cdots`   :math:`M^a_{2N_{forces}}(\omega_1)`                  :math:`B_{2N_{forces}}(\omega_1)`
+   :math:`\vdots`                 :math:`\vdots`                              :math:`\vdots`                           :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                                       :math:`\vdots`
+   :math:`\omega_{N_\omega}`      :math:`M^a_{21}(\omega_{N_\omega})`         :math:`B_{21}(\omega_{N_\omega})`        :math:`\cdots`   :math:`\cdots`   :math:`M^a_{2N_{forces}}(\omega_{N_\omega})`         :math:`B_{2N_{forces}}(\omega_{N_\omega})`
+   :math:`\vdots`                 :math:`\vdots`                              :math:`\vdots`                           :math:`\vdots`   :math:`\vdots`   :math:`\vdots`                                       :math:`\vdots`
+   :math:`\omega_{N_\omega}`      :math:`M^a_{N_{DoF}1}(\omega_{N_\omega})`   :math:`B_{N_{DoF}1}(\omega_{N_\omega})`  :math:`\cdots`   :math:`\cdots`   :math:`M^a_{N_{DoF}N_{forces}}(\omega_{N_\omega})`   :math:`B_{N_{DoF}N_{forces}}(\omega_{N_\omega})`
+   ============================== =========================================== ======================================== ================ ================ ==================================================== ====================================================
 
 
 Response Amplitude Operator
@@ -451,11 +453,11 @@ Response Amplitude Operator
 .. table:: Output file format of ``RAO.dat``
    :name: tab:RAO
 
-   ====================== ========================== ================ ========================== =============================== ================ =========================
-   :math:`f_1`            :math:`|\xi_1(f_1)|`       :math:`\cdots`   :math:`|\xi_6(f_1)|`       :math:`\angle \xi_1(f_1)`       :math:`\cdots`   :math:`\angle \xi_6(f_1)`
-   :math:`\vdots`         :math:`\vdots`             :math:`\vdots`   :math:`\vdots`             :math:`\vdots`                  :math:`\vdots`   :math:`\vdots`
-   :math:`f_{N_f}`        :math:`|\xi_1(f_{N_f})|`   :math:`\cdots`   :math:`|\xi_6(f_{N_f})|`   :math:`\angle \xi_1(f_{N_f})`   :math:`\cdots`   :math:`\angle \xi_6(f_{N_f})`
-   ====================== ========================== ================ ========================== =============================== ================ =========================
+   =========================== ==================================== ================ ==================================== ========================================= ================ =============================================
+   :math:`\omega_1`            :math:`|\xi_1(\omega_1)|`            :math:`\cdots`   :math:`|\xi_6(\omega_1)|`            :math:`\angle \xi_1(\omega_1)`            :math:`\cdots`   :math:`\angle \xi_6(\omega_1)`
+   :math:`\vdots`              :math:`\vdots`                       :math:`\vdots`   :math:`\vdots`                       :math:`\vdots`                            :math:`\vdots`   :math:`\vdots`
+   :math:`\omega_{N_\omega}`   :math:`|\xi_1(\omega_{N_\omega})|`   :math:`\cdots`   :math:`|\xi_6(\omega_{N_\omega})|`   :math:`\angle \xi_1(\omega_{N_\omega})`   :math:`\cdots`   :math:`\angle \xi_6(\omega_{N_\omega})`
+   =========================== ==================================== ================ ==================================== ========================================= ================ =============================================
 
 
 Impulse Response Functions
@@ -572,9 +574,9 @@ A Matlab file for reading this output file is provided in ``matlabRoutines/``.
 .. table:: Output file format of ``OUT_QTFM_N.dat`` and ``OUT_QTFP_N.dat``
    :name: tab:QTF
 
-   ==================== ====================== =========================== =========================== ======================= ====================== ==================== ======================== ======================
-   :math:`f_{1_1}`      :math:`f_{2_1}`        :math:`\beta_{1_1}`         :math:`\beta_{2_1}`         :math:`DoF_1`           :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
-   :math:`f_{1_2}`      :math:`f_{2_1}`        :math:`\beta_{1_1}`         :math:`\beta_{2_1}`         :math:`DoF_1`           :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
-   :math:`\vdots`       :math:`\vdots`         :math:`\vdots`              :math:`\vdots`              :math:`\vdots`          :math:`\vdots`         :math:`\vdots`       :math:`\vdots`           :math:`\vdots`
-   :math:`f_{1_{N_f}}`   :math:`f_{2_{N_f}}`     :math:`\beta_{1_{Nbeta}}`   :math:`\beta_{2_{Nbeta}}`   :math:`DoF_{N_{DoF}}`   :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
-   ==================== ====================== =========================== =========================== ======================= ====================== ==================== ======================== ======================
+   =============================== ================================= =========================== =========================== ======================= ====================== ==================== ======================== ======================
+   :math:`\omega_{1_1}`            :math:`\omega_{2_1}`              :math:`\beta_{1_1}`         :math:`\beta_{2_1}`         :math:`DoF_1`           :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
+   :math:`\omega_{1_2}`            :math:`\omega_{2_1}`              :math:`\beta_{1_1}`         :math:`\beta_{2_1}`         :math:`DoF_1`           :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
+   :math:`\vdots`                  :math:`\vdots`                    :math:`\vdots`              :math:`\vdots`              :math:`\vdots`          :math:`\vdots`         :math:`\vdots`       :math:`\vdots`           :math:`\vdots`
+   :math:`\omega_{1_{N_\omega}}`   :math:`\omega_{2_{N_\omega}}`     :math:`\beta_{1_{Nbeta}}`   :math:`\beta_{2_{Nbeta}}`   :math:`DoF_{N_{DoF}}`   :math:`|QTF|/\rho g`   :math:`\angle QTF`   :math:`Re[QTF]/\rho g`   :math:`Im[QTF]/\rho g`
+   =============================== ================================= =========================== =========================== ======================= ====================== ==================== ======================== ======================
