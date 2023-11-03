@@ -270,7 +270,7 @@ The hydrostatic terms of the quadratic first-order motion :math:`-[\boldsymbol K
 
 with :math:`z_G` the vertical component of CoG. Note that this term is optional and needed only in ``QTFsolver``. This term is not always included in other software, *e.g.* HYDROSTAR :cite:p:`HYDROSTAR` does not included it.
 
-``QTFpostproc``computes the total QTF by summing all the terms specified in ``Nemoh.cal``, provided the required terms were computed.
+``QTFpostproc`` computes the total QTF by summing all the terms specified in ``Nemoh.cal``, provided the required terms were computed.
 
 Mesh file
 =========
@@ -342,7 +342,7 @@ Geometry file
 Numerical parameters input file ``input_solver.txt``
 ====================================================
 
-``input_solver.txt`` contains solver parameters with format as in Table :numref:`tab:input_solver`. The parameters are described as follows.
+``input_solver.txt`` contains solver parameters with format as in :numref:`tab:input_solver`. The parameters are described as follows.
 
 -  Number of Gauss Quadrature points, :math:`N^2`, is used for the surface integration in the influence coefficients. User specifies an integer value of :math:`N\in [1,4]`, default :math:`N=2`.
 
@@ -423,7 +423,7 @@ Forces
 Radiation coefficients
 ======================
 
-``RadiationCoefficients.tec`` is the output file for added mass and damping coefficients with format as in Table :numref:`tab:addedmass_damping_coeffs`. The radiation coefficients are given for each :math:`DoF`, each force axis and for each frequency. The frequency is given based on the chosen frequency/period unit (*rad/s*, *Hz* or *s*) in ``Nemoh.cal``.
+``RadiationCoefficients.tec`` is the output file for added mass and damping coefficients with format as in :numref:`tab:addedmass_damping_coeffs`. The radiation coefficients are given for each :math:`DoF`, each force axis and for each frequency. The frequency is given based on the chosen frequency/period unit (*rad/s*, *Hz* or *s*) in ``Nemoh.cal``.
 
 The hydrodynamic coefficients are also produced in the *.dat* files, i.e. *CA.dat* for the damping coefficients, *CM.dat* for the added mass coefficients, *Fe.dat* for the excitation force and *FKForce.dat* for the excitation force. The frequency type of the output files is only radial frequency [rad/s]. These output files are used as input files for the QTF modulus.
 
@@ -446,7 +446,7 @@ The hydrodynamic coefficients are also produced in the *.dat* files, i.e. *CA.da
 Response Amplitude Operator
 ===========================
 
-``RAO.dat`` is the output file of the response amplitude operator with the file format as in Table. :numref:`tab:RAO`. The output file gives the absolute value and the phase of RAO for each degree of freedom and each frequency. The frequency is given based on the chosen ’frequency’ type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``. Only radial frequency output file will be produced in the case of the QTF computed.
+``RAO.dat`` is the output file of the response amplitude operator with the file format as in :numref:`tab:RAO`. The output file gives the absolute value and the phase of RAO for each degree of freedom and each frequency. The frequency is given based on the chosen ’frequency’ type, [rad/s, Hz, s], of the post-processing parameter in ``Nemoh.cal``. Only radial frequency output file will be produced in the case of the QTF computed.
 
 .. table:: Output file format of ``RAO.dat``
    :name: tab:RAO
