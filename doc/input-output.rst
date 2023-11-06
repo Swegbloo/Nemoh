@@ -284,7 +284,7 @@ The ``<mesh-file>`` contains all the mesh information with a format as shown in 
    Optionally, for surface-piercing bodies, a "lid" may be added to close the open internal surface at :math:`z=0` and avoid irregular frequencies.
 
 External mesh generators, *e.g.* the open-source software GMSH :cite:p:`GMSH`, may be used to generate mesh files but they must be adapted to the Nemoh format.
-Using the Python tool `meshmagick <https://github.com/LHEEA/meshmagick>`_ is recommended for this.
+Using the Python tool `meshmagick <https://github.com/LHEEA/meshmagick>`_ is recommended for this (``mar`` format).
 Alternatively, a Matlab file for converting GMSH mesh file to the Nemoh format is provided in the dedicated directory (see :ref:`getting-started:Supporting Matlab files`).
 
 .. table:: ``meshfile`` format
@@ -330,7 +330,9 @@ All the parameters are used in ``mesh``. Only center of gravity, water density, 
 Geometry file
 =============
 
-``<geomInput-file>`` contains a geometric description of the body in the form of a (very) coarse mesh, that are number of nodes, number of panels, table of nodes and table of connectivities. The input file has to follow the format as shown in :numref:`tab:geomInput`.
+``<geomInput-file>`` contains a geometric description of the body in the form of a (very) coarse mesh, that are number of nodes, number of panels, table of nodes and table of connectivities.
+The input file has to follow the format as shown in :numref:`tab:geomInput`.
+This format can also be converted from other popular mesh formats using `meshmagick <https://github.com/LHEEA/meshmagick>`_ (``nem`` format).
 
 .. note::
 
