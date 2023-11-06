@@ -284,7 +284,8 @@ The ``<mesh-file>`` contains all the mesh information with a format as shown in 
    Optionally, for surface-piercing bodies, a "lid" may be added to close the open internal surface at :math:`z=0` and avoid irregular frequencies.
 
 External mesh generators, *e.g.* the open-source software GMSH :cite:p:`GMSH`, may be used to generate mesh files but they must be adapted to the Nemoh format.
-Using the Python tool `meshmagick <https://github.com/LHEEA/meshmagick>`_ is recommended for this. Alternatively, a Matlab file for converting GMSH mesh file to the Nemoh format is provided in the dedicated directory (see :ref:`getting-started:Supporting Matlab files`).
+Using the Python tool `meshmagick <https://github.com/LHEEA/meshmagick>`_ is recommended for this.
+Alternatively, a Matlab file for converting GMSH mesh file to the Nemoh format is provided in the dedicated directory (see :ref:`getting-started:Supporting Matlab files`).
 
 .. table:: ``meshfile`` format
    :name: tab:meshfile
@@ -305,7 +306,8 @@ Using the Python tool `meshmagick <https://github.com/LHEEA/meshmagick>`_ is rec
 Geometry meshing input file ``Mesh.cal``
 ========================================
 
-``Mesh.cal:`` contains mesh and environmental parameters with a format as in :numref:`tab:meshcal`. This file is used as input for ``mesh`` and ``hydroCal``. All the parameters are used in ``mesh``. Only center of gravity, water density, and gravity are used in ``hydroCal``.
+``Mesh.cal:`` contains mesh and environmental parameters with a format as in :numref:`tab:meshcal`. This file is used as input for ``mesh`` and ``hydrosCal``.
+All the parameters are used in ``mesh``. Only center of gravity, water density, and gravity are used in ``hydrosCal``.
 
 .. table:: ``Mesh.cal`` file format
    :name: tab:meshcal
@@ -412,7 +414,7 @@ Output files
 Inertia and hydrostatic stiffness
 =================================
 
-Hydrostatic output files such as inertia and stiffness matrices are produced by ``mesh``, if ``<geomInput-file>`` is prescribed, or by ``hydroCal``, if ``meshfile`` is prescribed. The files contain the matrix components with size :math:`(N_{body}\cdot N_{DoF})\times (N_{body}\cdot N_{DoF})`.
+Hydrostatic output files such as inertia and stiffness matrices are produced by ``mesh``, if ``<geomInput-file>`` is prescribed, or by ``hydrosCal``, if ``meshfile`` is prescribed. The files contain the matrix components with size :math:`(N_{body}\cdot N_{DoF})\times (N_{body}\cdot N_{DoF})`.
 
 Forces
 ======
