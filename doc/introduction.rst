@@ -2,10 +2,10 @@
 Introduction
 ############
 
-This document is the Manual of NEMOH Software in version v3.0 Released on 2nd December 2022. It serves as a guide for using, installing and running the software.
+This document is the Manual of Nemoh Software in version v3.0 Released on 2nd December 2022. It serves as a guide for using, installing and running the software.
 
-NEMOH in its original version is an open-source potential flow boundary element solver for computing first-order hydrodynamic coefficients in the frequency domain. NEMOH v3.0 includes the treatment of irregular frequencies, has an extended module to post-process the first-order hydrodynamic results, and compute complete Quadratic Transfer Functions (QTFs).
-The new developments/extensions in this NEMOH v3.0 are summarised as follows.
+Nemoh in its original version is an open-source potential flow boundary element solver for computing first-order hydrodynamic coefficients in the frequency domain. Nemoh v3.0 includes the treatment of irregular frequencies, has an extended module to post-process the first-order hydrodynamic results, and compute complete Quadratic Transfer Functions (QTFs).
+The new developments/extensions in this Nemoh v3.0 are summarised as follows.
 
 -  GNU General Public v3 license is used instead of Apache.
 

@@ -7,10 +7,10 @@ Description
 Modelling and Numerical aspects
 *******************************
 
-This section provides background information on NEMOH v3.0 with a focus on basic scientific ideas.
+This section provides background information on Nemoh v3.0 with a focus on basic scientific ideas.
 
-NEMOH v3.0 contains two main modules. First, NEMOH1 solves linear diffraction and radiation problems of wave-structure interaction using a 3-D boundary element method in the frequency domain. Second, NEMOH2, an extended module for computing difference- and sum- frequencies Quadratic Transfer Functions (QTFs) for fixed or floating structures.
-The following subsections describe the underlying modelling and numerical approaches used in NEMOH.
+Nemoh v3.0 contains two main modules. First, Nemoh1 solves linear diffraction and radiation problems of wave-structure interaction using a 3-D boundary element method in the frequency domain. Second, Nemoh2, an extended module for computing difference- and sum- frequencies Quadratic Transfer Functions (QTFs) for fixed or floating structures.
+The following subsections describe the underlying modelling and numerical approaches used in Nemoh.
 
 Notations
 =========
@@ -86,7 +86,7 @@ and its time-domain equivalent :math:`\widetilde{X}` is its real part:
 Modelling
 =========
 
-NEMOH1, the first-order solver, is based on the following modelling principles:
+Nemoh1, the first-order solver, is based on the following modelling principles:
 
 -  Potential flow theory for an inviscid and incompressible fluid in irrotational motion. The set of equations solved looks for unknowns satisfying free-surface conditions, impermeable bottom condition, diffraction and radiation conditions on the body hull and radiation wave condition in the far field.
 
@@ -209,7 +209,7 @@ NEMOH1, the first-order solver, is based on the following modelling principles:
    where :math:`[\boldsymbol B_{add}]` and :math:`[\boldsymbol K_M]` are user-specified additional damping and stiffness matrices.
 
 
-NEMOH2, the second-order QTF module, is based on the following principles
+Nemoh2, the second-order QTF module, is based on the following principles
 
 -  The second-order loads are composed of the quadratic part and the potential part, the detailed formulation is given in :cite:t:`Kurnia22_JH,Kurnia22`.
 
@@ -221,7 +221,7 @@ NEMOH2, the second-order QTF module, is based on the following principles
 Numerical Methods
 =================
 
-NEMOH1 uses the following numerical approach:
+Nemoh1 uses the following numerical approach:
 
 -  The BIE, Eq. :eq:`Eq:BIE_source_distribution`, is discretised using the constant panel method with quadrilateral mesh. This leads to a linear system with the influence coefficients matrix. The mesh is user-specified with the normal direction towards fluid.
 
@@ -237,7 +237,7 @@ NEMOH1 uses the following numerical approach:
 
 -  The linear system is solved using a user-choice solver among the available ones, which are Gauss elimination, LU-decomposition (default) and GMRES-iterative solvers.
 
--  The GMRES solver code :cite:p:`GMRES` from `CERFACS <https://www.cerfacs.fr/algor/Softs/GMRES/index.html>`__ is embedded in NEMOH solver module. For using the GMRES solver, the user has to obtain a license at https://www.cerfacs.fr/algor/Softs/GMRES/license.html.
+-  The GMRES solver code :cite:p:`GMRES` from `CERFACS <https://www.cerfacs.fr/algor/Softs/GMRES/index.html>`__ is embedded in Nemoh solver module. For using the GMRES solver, the user has to obtain a license at https://www.cerfacs.fr/algor/Softs/GMRES/license.html.
 
 -  For free-surface piercing bodies problem, the irregular frequencies removal (IRR) method is applied by the user providing lid panels at :math:`z=0`. Then, the extended boundary integral equation will be solved :cite:p:`Babarit15,Malenica98`. As in :cite:t:`Malenica98`, the IRR may be influenced by the input parameter :math:`\epsilon` in ``input_solver.txt`` that shifts the lid panels from :math:`z=0` to :math:`z=-\epsilon d_B` where :math:`d_B` is a maximum horizontal distance of points on the body. :math:`d_B` is computed by the software.
 
@@ -246,9 +246,9 @@ NEMOH1 uses the following numerical approach:
 -  The software can solve multi-bodies problems, as well as multi-directional waves.
 
 
-NEMOH2 uses the following numerical approach
+Nemoh2 uses the following numerical approach
 
--  The QTF module can be run only after the first order-hydrodynamic coefficients are computed in NEMOH1.
+-  The QTF module can be run only after the first order-hydrodynamic coefficients are computed in Nemoh1.
 
 -  In the potential part, the computation of the free-surface integral is an option:
 
@@ -256,7 +256,7 @@ NEMOH2 uses the following numerical approach
 
    -  For the sum-frequency QTFs, it is necessary to compute the free-surface integrals.
 
--  Important notice: the computation with the free-surface integral still has an issue if the lid body panels exist (cf. IRR method). For now, the user is suggested not to specify the lid body panels in the mesh file input for NEMOH1 computation if he wants to compute the full QTFs with the free surface integral.
+-  Important notice: the computation with the free-surface integral still has an issue if the lid body panels exist (cf. IRR method). For now, the user is suggested not to specify the lid body panels in the mesh file input for Nemoh1 computation if he wants to compute the full QTFs with the free surface integral.
 
 -  For the free-surface integral, a quadrilateral free-surface mesh has to be specified.
 
@@ -265,13 +265,13 @@ NEMOH2 uses the following numerical approach
 -  QTF computations have not been tested yet for the multi-bodies problem.
 
 
-NEMOH related publications to be referred are :cite:t:`Babarit15` for the first order NEMOH and :cite:t:`Philippe15,Kurnia22_JH,Kurnia22,Kurnia23` for the QTF module.
+Nemoh related publications to be referred are :cite:t:`Babarit15` for the first order Nemoh and :cite:t:`Philippe15,Kurnia22_JH,Kurnia22,Kurnia23` for the QTF module.
 
 *****
 Units
 *****
 
-NEMOH expects all quantities to be expressed in S.I. units: :math:`m, kg, s, rad` (meter, kilogram, seconds, radian, respectively). But some of the phase outputs may be expressed in :math:`deg` or :math:`^{\circ}`, in this case it will be indicated in the file header.
+Nemoh expects all quantities to be expressed in S.I. units: :math:`m, kg, s, rad` (meter, kilogram, seconds, radian, respectively). But some of the phase outputs may be expressed in :math:`deg` or :math:`^{\circ}`, in this case it will be indicated in the file header.
 
 The force unit is [:math:`N`], the moment unit is [:math:`Nm`], added Mass [:math:`kg`], damping coefficient [:math:`kg/s`]. As the force output is normalized with the unit wave amplitude :math:`a` :math:`[m]`, then the normalized force unit is [:math:`N/m`] and the normalized moment is [:math:`N`].
 
@@ -287,23 +287,23 @@ Software features
 .. figure:: figures/FlowChart.png
    :align: center
 
-   Global flowchart of NEMOH software
+   Global flowchart of Nemoh software
 
-:numref:`fig:flowchart` shows a global overview of the software. There are three main programs: a mesh preprocessor, NEMOH1 and NEMOH2. The program features and capabilities are described as follows.
+:numref:`fig:flowchart` shows a global overview of the software. There are three main programs: a mesh preprocessor, Nemoh1 and Nemoh2. The program features and capabilities are described as follows.
 
 Mesh Preprocessor
 =================
 
-NEMOH mesh preprocessor, the executable file ``mesh``, is for generating the NEMOH mesh file with a given geometry input file and an input ``Mesh.cal`` file. This ``mesh`` is not a meshing code but allows the user to refine an existing mesh and to calculate properties such as displacement, buoyancy center, and hydrostatic stiffness. It also makes estimates of masses and inertia matrix. The concept with this program is to write by hand a coarse description of the body under consideration in a ``GeomInput`` file and to have ``mesh`` make the refined mesh for NEMOH calculations.
+Nemoh mesh preprocessor, the executable file ``mesh``, is for generating the Nemoh mesh file with a given geometry input file and an input ``Mesh.cal`` file. This ``mesh`` is not a meshing code but allows the user to refine an existing mesh and to calculate properties such as displacement, buoyancy center, and hydrostatic stiffness. It also makes estimates of masses and inertia matrix. The concept with this program is to write by hand a coarse description of the body under consideration in a ``GeomInput`` file and to have ``mesh`` make the refined mesh for Nemoh calculations.
 
-NEMOH1: 1st-order solver
+Nemoh1: 1st-order solver
 ========================
 
-NEMOH1 solves the first-order potential flow problem. There are four modules: ``preProc``, ``hydrosCal``, ``solver`` and ``postProc``, described as follows.
+Nemoh1 solves the first-order potential flow problem. There are four modules: ``preProc``, ``hydrosCal``, ``solver`` and ``postProc``, described as follows.
 
 -  ``preProc``: processes the input mesh file and generates the body condition for each calculation case (diffraction and radiation). The outputs are used as input for ``solver``.
 
--  ``hydrosCal``: computes hydrostatic parameters, i.e. stiffness matrix and inertia matrix. The output file will be used in the ``postProc`` for computing the RAOs. If the input mesh is generated by the NEMOH mesh preprocessor, ``mesh``, the hydrostatic parameters are already computed and then it is not necessary to execute this program.
+-  ``hydrosCal``: computes hydrostatic parameters, i.e. stiffness matrix and inertia matrix. The output file will be used in the ``postProc`` for computing the RAOs. If the input mesh is generated by the Nemoh mesh preprocessor, ``mesh``, the hydrostatic parameters are already computed and then it is not necessary to execute this program.
 
 -  ``solver``: solves the boundary value problems for each problem, diffraction and radiation, defined in the file ``Normalvelocities.dat``, provided by the ``preProc``.
 
@@ -327,22 +327,22 @@ NEMOH1 solves the first-order potential flow problem. There are four modules: ``
 
    -  the motion response amplitude operator (RAO). For the RAO computation, additional stiffness matrix :math:`[\boldsymbol K_m]` and additional damping :math:`[\boldsymbol B_{add}]` can be user-specified in the ``Mechanics/`` folder.
 
-NEMOH2: 2nd-order QTF module
+Nemoh2: 2nd-order QTF module
 ============================
 
-NEMOH2 computes the second-order wave loads that are expressed as Quadratic Transfer Function (QTF). It is suggested to verify the first-order results before running the QTF module. There are three modules in this program: ``QTFpreProc``, ``QTFsolver`` and ``QTFpostProc``, described as follows
+Nemoh2 computes the second-order wave loads that are expressed as Quadratic Transfer Function (QTF). It is suggested to verify the first-order results before running the QTF module. There are three modules in this program: ``QTFpreProc``, ``QTFsolver`` and ``QTFpostProc``, described as follows
 
 -  ``QTFpreProc``: computes the perturbed potential, the total potential, the normalized radiation potential and the corresponding velocities on the body panels, the water-line and the free-surface panels.
 
-   -  The computation on free-surface panels requires possibly long computational time. Then, it is suggested not to compute the free-surface integral for the first execution of NEMOH2. This is controlled by the flag HASFS, which is available in the input file ``Nemoh.cal``.
+   -  The computation on free-surface panels requires possibly long computational time. Then, it is suggested not to compute the free-surface integral for the first execution of Nemoh2. This is controlled by the flag HASFS, which is available in the input file ``Nemoh.cal``.
 
    -  In general, the free-surface integral may be negligible for the difference-frequency QTFs computation.
 
-   -  The potential on the waterline is rather sensitive with the :math:`\epsilon` value. For default, :math:`\epsilon=0.001`, it can be adjusted in ``input_solver.txt``. The :math:`\epsilon` can be set differently for NEMOH1 and NEMOH2. Further investigation into this is needed.
+   -  The potential on the waterline is rather sensitive with the :math:`\epsilon` value. For default, :math:`\epsilon=0.001`, it can be adjusted in ``input_solver.txt``. The :math:`\epsilon` can be set differently for Nemoh1 and Nemoh2. Further investigation into this is needed.
 
    -  In case the body lid panels exist, the influence coefficients are affected and give a somewhat larger error for higher frequencies on the free-surface potentials and velocities. This also needs to be investigated.
 
-   -  For now, in the case of full-QTFs computation, the user is suggested not to specify the lid body panels in a mesh file input for NEMOH1 computation.
+   -  For now, in the case of full-QTFs computation, the user is suggested not to specify the lid body panels in a mesh file input for Nemoh1 computation.
 
 -  ``QTFsolver``: computes the quadratic part and the potential part of the second order loads. The free-surface integrals in the potential part QTF are optionnally computed (flag HASFS in ``Nemoh.cal``).
 

@@ -86,7 +86,7 @@ Where ``<N_ concurrent>`` is the number of simultaneous workers (processes). The
 
 Where label is one of the following:
 
--  ``NEMOH1``: only the non-QTF test cases
+-  ``Nemoh1``: only the non-QTF test cases
 
 -  ``PREPROC``: only the pre-processing operations
 
@@ -94,7 +94,7 @@ Where label is one of the following:
 
 -  ``POSTPROC``: only the post-processing operations (depend on the pre-processing and solving tests)
 
--  ``NEMOH2``: only the QTF test cases
+-  ``Nemoh2``: only the QTF test cases
 
 -  ``QTF``: only the computation of the QTF (depend on the prior non-QTF Nemoh computation)
 
@@ -207,12 +207,12 @@ Executable files
 
 Nemoh is made of the following executables files (programs):
 
--  NEMOH1: ``mesh``, ``preProc``, ``hydrosCal``, ``solver``, ``postProc``,
+-  Nemoh1: ``mesh``, ``preProc``, ``hydrosCal``, ``solver``, ``postProc``,
 
--  NEMOH2: ``QTFpreProc``, ``QTFsolver``, ``QTFpostProc``.
+-  Nemoh2: ``QTFpreProc``, ``QTFsolver``, ``QTFpostProc``.
 
 
-The programs of NEMOH1 and NEMOH2 normally have to be executed following this order.
+The programs of Nemoh1 and Nemoh2 normally have to be executed following this order.
 See :ref:`description:Software features` for details about each program's purpose, and :ref:`input-output:Input/Output` for what files are used and outputted by each program.
 
 Any Nemoh program (``<program>``) can be executed directly in the project directory as:
@@ -235,7 +235,7 @@ The project directory should contain the input files described in :ref:`input-ou
 Running the test cases
 ======================
 
-To simplify the procedure for Linux platforms (or Windows with Make), a ``Makefile`` is provided in the ``TestCases/`` directory. It is then possible to run the NEMOH1 test cases by executing the following commands in a Terminal (each line being a test case):
+To simplify the procedure for Linux platforms (or Windows with Make), a ``Makefile`` is provided in the ``TestCases/`` directory. It is then possible to run the Nemoh1 test cases by executing the following commands in a Terminal (each line being a test case):
 
 .. code:: bash
 
@@ -268,8 +268,8 @@ Or to remove a range of test cases
 
 .. code:: bash
 
-   make clean_all_testsNEMOH1
-   make clean_all_testsNEMOH2
+   make clean_all_testsNemoh1
+   make clean_all_testsNemoh2
    make clean_all_tests
 
 The description and the benchmark results of those test cases are described in :ref:`test-cases:test cases`.
@@ -289,8 +289,8 @@ Supporting Matlab files
 
 The following directories, containing a set of Matlab functions, are provided in ``matlabRoutines/``:
 
--  ``NemohWrapper``: This is for running NEMOH executables in MATLAB environment.
+-  ``NemohWrapper``: This is for running Nemoh executables in MATLAB environment.
 
--  ``GMSHconverter``: There are two codes, first, for converting body mesh file output from GMSH to NEMOH, DIODORE and HydroSTAR formats and second, for converting free-surface mesh file output from GMSH to NEMOH and HydroSTAR formats.
+-  ``GMSHconverter``: There are two codes, first, for converting body mesh file output from GMSH to Nemoh, DIODORE and HydroSTAR formats and second, for converting free-surface mesh file output from GMSH to Nemoh and HydroSTAR formats.
 
--  ``postproc_testcases``: There are two main codes for plotting results from NEMOH and HydroSTAR. First, for plotting hydrodynamic coefficients results and second for plotting QTF results. This code can be executed after all data in one specific test cases are obtained.
+-  ``postproc_testcases``: There are two main codes for plotting results from Nemoh and HydroSTAR. First, for plotting hydrodynamic coefficients results and second for plotting QTF results. This code can be executed after all data in one specific test cases are obtained.
