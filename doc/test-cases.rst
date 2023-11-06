@@ -3,13 +3,18 @@
 Test cases
 ##########
 
-The following test cases are provided for verification with the original Aquaplus software (which is the ancestor of NEMOH) and/or HYDROSTAR commercial software :cite:p:`HYDROSTAR`. Note that Tecplot’s layout files ``.lay`` are provided in the relevant test case folder for plotting in Tecplot.
+The following test cases are provided for verification with the original Aquaplus software (which is the ancestor of NEMOH) and/or HYDROSTAR commercial software :cite:p:`HYDROSTAR`.
+The input data for each case is available in the ``TestCases`` directory of the repository.
+
+.. note:: Tecplot layout files (``.lay``) are provided in the relevant test case folders for easier plotting of the comparisons in Tecplot.
 
 **********
 1_Cylinder
 **********
 
-Half-symmetric body mesh, deep water case, wave direction :math:`0^{\circ}`. The results are shown in :numref:`fig:Cylinder`.
+This example is a floating vertical cylinder with the usual 6 degrees of freedom (surge, sway, heave, roll, pitch, yaw).
+It features a half-symmetric body mesh, deep water, and a wave direction :math:`\beta = 0^{\circ}`.
+The results are shown in :numref:`fig:Cylinder`.
 
 .. _`fig:Cylinder`:
 .. figure:: figures/Ver_Cylinder.svg
@@ -21,7 +26,10 @@ Half-symmetric body mesh, deep water case, wave direction :math:`0^{\circ}`. The
 2_2Bodies
 *********
 
-Half-symmetric body mesh, two different bodies, water depth :math:`20` m, wave direction :math:`45^{\circ}`. The results are shown in :numref:`fig:2Bodies`.
+This example deals with the hydrodynamic interactions between two bodies.
+The bodies are both cubes, and on of them is rotated by 45° degrees around the z axis.
+Each body has the usual 6 degrees of freedom (surge, sway, heave, roll, pitch, yaw).
+It features half-symmetric body meshes, two different bodies, a water depth :math:`D=20` m and a wave direction :math:`\beta=45^{\circ}`. The results are shown in :numref:`fig:2Bodies`.
 
 .. _`fig:2Bodies`:
 .. figure:: figures/Ver_2Bodies.svg
@@ -33,7 +41,12 @@ Half-symmetric body mesh, two different bodies, water depth :math:`20` m, wave d
 3_Nonsymmetrical
 ****************
 
-Full non-symmetrical body mesh, deep-water, wave direction :math:`0^{\circ}`. Comparison of NEMOH results against Aquaplus are shown in :numref:`fig:NonSymmetrical_1` and :numref:`fig:NonSymmetrical_2`, a slight difference are observed in the results. Added mass and damping coefficients comparison between NEMOH and HYDROSTAR are shown in :numref:`fig:NonSymmetrical_mass` and :numref:`fig:NonSymmetrical_damp`, and for the excitation force is in :numref:`fig:NonSymmetrical_excforce`. Good agreement between NEMOH and HYDROSTAR is achieved.
+This example deals with a body for which the (xOz) plane is not a symmetry plane.
+The body has the usual 6 degrees of freedom (surge, sway, heave, roll, pitch, yaw).
+It features a full non-symmetrical body mesh, deep water and a wave direction :math:`\beta=0^{\circ}`.
+Comparisons of NEMOH results against Aquaplus are shown in :numref:`fig:NonSymmetrical_1` and :numref:`fig:NonSymmetrical_2`, a slight difference is observed in the results.
+Added mass and damping coefficients comparison between NEMOH and HYDROSTAR are shown in :numref:`fig:NonSymmetrical_mass` and :numref:`fig:NonSymmetrical_damp`, and for the excitation force is in :numref:`fig:NonSymmetrical_excforce`.
+Good agreement between NEMOH and HYDROSTAR is achieved.
 
 .. _`fig:NonSymmetrical_1`:
 .. figure:: figures/Ver_NonSymmetrical_1.svg
@@ -69,7 +82,18 @@ Full non-symmetrical body mesh, deep-water, wave direction :math:`0^{\circ}`. Co
 4_Postprocessing
 ****************
 
-Half-symmetric body mesh, water depth :math:`10` m, wave direction :math:`0^{\circ}`. This test case shows a comparison of the free-surface elevation and the Kochin function. The results are shown in :numref:`fig:PostProcessing`. The phase difference, :math:`\pm \pi/2`, of wave elevation between NEMOH and AQUAPLUS is due to different conventions of the incident potential.
+This example displays some of the postprocessing capabilities of NEMOH, namely:
+
+- Computation of free surface elevation
+- Computation of far field coefficients (Kochin functions)
+- Computation of the IRF (Impulse Response Function)
+
+.. note:: Nemoh's postprocessing capabilities also include RAO (Response Amplitude Operator) computation and pressure outputting, not featured in this test.
+
+The body is a cube with the usual 6 degrees of freedom (surge, sway, heave, roll, pitch, yaw).
+It featutres a half-symmetric body mesh, a water depth :math:`D=10` m and a wave direction :math:`\beta=0^{\circ}`.
+This test case shows a comparison of the free-surface elevation and the Kochin function. The results are shown in :numref:`fig:PostProcessing`.
+The phase difference :math:`\pm \pi/2` of wave elevation between NEMOH and AQUAPLUS is due to different conventions of the incident potential.
 
 .. _`fig:PostProcessing`:
 .. figure:: figures/Ver_PostProcessing.svg
