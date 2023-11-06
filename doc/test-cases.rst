@@ -3,7 +3,7 @@
 Test cases
 ##########
 
-The following test cases are provided for verification with the original Aquaplus software (which is the ancestor of NEMOH) and/or HYDROSTAR commercial software :cite:p:`HYDROSTAR`.
+The following test cases are provided for verification with the original Aquaplus software (which is the ancestor of NEMOH) and/or HydroSTAR commercial software :cite:p:`HYDROSTAR`.
 The input data for each case is available in the ``TestCases`` directory of the repository.
 
 .. note:: Tecplot layout files (``.lay``) are provided in the relevant test case folders for easier plotting of the comparisons in Tecplot.
@@ -45,8 +45,8 @@ This example deals with a body for which the (xOz) plane is not a symmetry plane
 The body has the usual 6 degrees of freedom (surge, sway, heave, roll, pitch, yaw).
 It features a full non-symmetrical body mesh, deep water and a wave direction :math:`\beta=0^{\circ}`.
 Comparisons of NEMOH results against Aquaplus are shown in :numref:`fig:NonSymmetrical_1` and :numref:`fig:NonSymmetrical_2`, a slight difference is observed in the results.
-Added mass and damping coefficients comparison between NEMOH and HYDROSTAR are shown in :numref:`fig:NonSymmetrical_mass` and :numref:`fig:NonSymmetrical_damp`, and for the excitation force is in :numref:`fig:NonSymmetrical_excforce`.
-Good agreement between NEMOH and HYDROSTAR is achieved.
+Added mass and damping coefficients comparison between NEMOH and HydroSTAR are shown in :numref:`fig:NonSymmetrical_mass` and :numref:`fig:NonSymmetrical_damp`, and for the excitation force is in :numref:`fig:NonSymmetrical_excforce`.
+Good agreement between NEMOH and HydroSTAR is achieved.
 
 .. _`fig:NonSymmetrical_1`:
 .. figure:: figures/Ver_NonSymmetrical_1.svg
@@ -64,19 +64,19 @@ Good agreement between NEMOH and HYDROSTAR is achieved.
 .. figure:: figures/Ver_NonSymmetrical_addedmass.svg
    :align: center
 
-   Comparison of added mass coefficients between NEMOH, red dashed-line, and HYDROSTAR, blue solid-line, for the test case **3_Nonsymmetrical**
+   Comparison of added mass coefficients between NEMOH, red dashed-line, and HydroSTAR, blue solid-line, for the test case **3_Nonsymmetrical**
 
 .. _`fig:NonSymmetrical_damp`:
 .. figure:: figures/Ver_NonSymmetrical_dampcoef.svg
    :align: center
 
-   Comparison of damping coefficients between NEMOH, red dashed-line, and HYDROSTAR, blue solid-line, for the test case **3_Nonsymmetrical**
+   Comparison of damping coefficients between NEMOH, red dashed-line, and HydroSTAR, blue solid-line, for the test case **3_Nonsymmetrical**
 
 .. _`fig:NonSymmetrical_excforce`:
 .. figure:: figures/Ver_NonSymmetrical_excitationforce.svg
    :align: center
 
-   Comparison of excitation force between NEMOH, red dashed-line, and HYDROSTAR, blue solid-line, for the test case **3_Nonsymmetrical**
+   Comparison of excitation force between NEMOH, red dashed-line, and HydroSTAR, blue solid-line, for the test case **3_Nonsymmetrical**
 
 ****************
 4_Postprocessing
@@ -123,7 +123,7 @@ Tests the performance of the three difference linear solvers, Gauss elimination,
 8a_Cylinder_irregfreq
 *********************
 
-Shows the results with and without irregular frequencies removal (IRR) method. The results are verified against HYDROSTAR with IRR and shown in :numref:`fig:Cylinder_IRR_addedmass` and :numref:`fig:Cylinder_IRR_dampcoef` for the added mass and damping coefficients and in :numref:`fig:Cylinder_IRR_excforce` for the excitation forces. The mesh used was obtained using GMSH :cite:p:`GMSH` and is shown in :numref:`fig:meshesCylinder`.
+Shows the results with and without irregular frequencies removal (IRR) method. The results are verified against HydroSTAR with IRR and shown in :numref:`fig:Cylinder_IRR_addedmass` and :numref:`fig:Cylinder_IRR_dampcoef` for the added mass and damping coefficients and in :numref:`fig:Cylinder_IRR_excforce` for the excitation forces. The mesh used was obtained using GMSH :cite:p:`GMSH` and is shown in :numref:`fig:meshesCylinder`.
 
 .. _`fig:meshesCylinder`:
 .. figure:: figures/Cylinder/mesh.svg
@@ -135,21 +135,21 @@ Shows the results with and without irregular frequencies removal (IRR) method. T
 .. figure:: figures/Cylinder/addedmass.svg
    :align: center
 
-   Comparison of added masscoefficients between NEMOH without irregular frequencies removal (IRR), green dash-dotted line, NEMOH with IRR, red dashed-line and HYDROSTAR with IRR, blue solid-line, for the test-case **8a_Cylinder_irregfreq**
+   Comparison of added masscoefficients between NEMOH without irregular frequencies removal (IRR), green dash-dotted line, NEMOH with IRR, red dashed-line and HydroSTAR with IRR, blue solid-line, for the test-case **8a_Cylinder_irregfreq**
 
 .. _`fig:Cylinder_IRR_dampcoef`:
 .. figure:: figures/Cylinder/dampcoef.svg
    :align: center
 
-   Comparison of damping coefficients between NEMOH without irregular frequencies removal (IRR), green dash-dotted line, NEMOH with IRR, red dashed-line and HYDROSTAR with IRR, blue solid-line, for the test-case **8a_Cylinder_irregfreq**
+   Comparison of damping coefficients between NEMOH without irregular frequencies removal (IRR), green dash-dotted line, NEMOH with IRR, red dashed-line and HydroSTAR with IRR, blue solid-line, for the test-case **8a_Cylinder_irregfreq**
 
 .. _`fig:Cylinder_IRR_excforce`:
 .. figure:: figures/Cylinder/excForce.svg
    :align: center
 
-   Comparison of excitation force between NEMOH without irregular frequencies removal (IRR), green dash-dotted line, NEMOH with IRR, red dashed-line and HYDROSTAR with IRR, blue solid-line, for the test-case 8a_Cylinder_irregfreq
+   Comparison of excitation force between NEMOH without irregular frequencies removal (IRR), green dash-dotted line, NEMOH with IRR, red dashed-line and HydroSTAR with IRR, blue solid-line, for the test-case 8a_Cylinder_irregfreq
 
-The following test cases are provided for the QTF verification with HYDROSTAR software :cite:p:`HYDROSTAR`.
+The following test cases are provided for the QTF verification with HydroSTAR software :cite:p:`HYDROSTAR`.
 
 ***************
 8b_QTF_Cylinder
@@ -161,37 +161,37 @@ Full body mesh with lid panels, CoG :math:`(0,0,0)`, deep water, wave direction 
 .. figure:: figures/Cylinder/QTFsurge.svg
    :align: center
 
-   Density plots of the normalized surge difference frequency QTF magnitude (without the free-surface integrals) for the floating Cylinder (test case **8b_QTF_Cylinder**. HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized surge difference frequency QTF magnitude (without the free-surface integrals) for the floating Cylinder (test case **8b_QTF_Cylinder**. HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_Cylinder_heave`:
 .. figure:: figures/Cylinder/QTFheave.svg
    :align: center
 
-   Density plots of the normalized heave difference frequency QTF magnitude (without the free-surface integrals) for the floating Cylinder (test case **8b_QTF_Cylinder**. HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized heave difference frequency QTF magnitude (without the free-surface integrals) for the floating Cylinder (test case **8b_QTF_Cylinder**. HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_Cylinder_pitch`:
 .. figure:: figures/Cylinder/QTFpitch.svg
    :align: center
 
-   Density plots of the normalized pitch difference frequency QTF magnitude (without the free-surface integrals) for the floating Cylinder (test case **8b_QTF_Cylinder**. HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized pitch difference frequency QTF magnitude (without the free-surface integrals) for the floating Cylinder (test case **8b_QTF_Cylinder**. HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_diag_Cylinder_surge`:
 .. figure:: figures/Cylinder/QTFsurge_diag.svg
    :align: center
 
-   Comparison of the surge off-diagonal difference frequency QTF for the Cylinder (test case **8b_QTF_Cylinder**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the surge off-diagonal difference frequency QTF for the Cylinder (test case **8b_QTF_Cylinder**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 .. _`fig:QTFM_diag_Cylinder_heave`:
 .. figure:: figures/Cylinder/QTFheave_diag.svg
    :align: center
 
-   Comparison of the heave off-diagonal difference frequency QTF for the Cylinder (test case **8b_QTF_Cylinder**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the heave off-diagonal difference frequency QTF for the Cylinder (test case **8b_QTF_Cylinder**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 .. _`fig:QTFM_diag_Cylinder_pitch`:
 .. figure:: figures/Cylinder/QTFpitch_diag.svg
    :align: center
 
-   Comparison of the pitch off-diagonal difference frequency QTF for the Cylinder (test case **8b_QTF_Cylinder**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the pitch off-diagonal difference frequency QTF for the Cylinder (test case **8b_QTF_Cylinder**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 *************************
 9_QTF_OC4_Semisubmersible
@@ -209,37 +209,37 @@ Full body mesh with lid panels, CoG :math:`(0,0,0)`, water depth 200 m, wave dir
 .. figure:: figures/OC4/QTFM_Surge_beta030.svg
    :align: center
 
-   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, surge difference frequency QTF magnitude (without the free-surface integrals) for the floating OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, surge difference frequency QTF magnitude (without the free-surface integrals) for the floating OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_OC4_heave`:
 .. figure:: figures/OC4/QTFM_Heave_beta030.svg
    :align: center
 
-   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, heave difference frequency QTF magnitude (without the free-surface integrals) for the floating OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, heave difference frequency QTF magnitude (without the free-surface integrals) for the floating OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_OC4_pitch`:
 .. figure:: figures/OC4/QTFM_Pitch_beta030.svg
    :align: center
 
-   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, pitch difference frequency QTF magnitude (without the free-surface integrals) for the floating OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, pitch difference frequency QTF magnitude (without the free-surface integrals) for the floating OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_diag_OC4_surge`:
 .. figure:: figures/OC4/QTFM_Surge_beta030_diag.svg
    :align: center
 
-   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, surge difference frequency QTF for the OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, surge difference frequency QTF for the OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 .. _`fig:QTFM_diag_OC4_heave`:
 .. figure:: figures/OC4/QTFM_Heave_beta030_diag.svg
    :align: center
 
-   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, heave difference frequency QTF for the OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, heave difference frequency QTF for the OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 .. _`fig:QTFM_diag_OC4_pitch`:
 .. figure:: figures/OC4/QTFM_Pitch_beta030_diag.svg
    :align: center
 
-   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, pitch difference frequency QTF for the OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, pitch difference frequency QTF for the OC4-semisubmersible platform (test case **9_QTF_OC4_Semisubmersible**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 ****************
 10a_QTF_SOFTWIND
@@ -263,37 +263,37 @@ Half symmetric body mesh with lid panels, CoG :math:`(0,0,-71.56)`, water depth 
 .. figure:: figures/Softwind/QTFM_Surge_beta030.svg
    :align: center
 
-   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, surge difference frequency QTF magnitude (without the free-surface integrals) for the floating SOFTWIND platform (test case **10a_QTF_SOFTWIND**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, surge difference frequency QTF magnitude (without the free-surface integrals) for the floating SOFTWIND platform (test case **10a_QTF_SOFTWIND**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_SOFTWIND_heave`:
 .. figure:: figures/Softwind/QTFM_Heave_beta030.svg
    :align: center
 
-   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, heave difference frequency QTF magnitude (without the free-surface integrals) for the floating SOFTWIND platform (test case **10a_QTF_SOFTWIND**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, heave difference frequency QTF magnitude (without the free-surface integrals) for the floating SOFTWIND platform (test case **10a_QTF_SOFTWIND**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_SOFTWIND_pitch`:
 .. figure:: figures/Softwind/QTFM_Pitch_beta030.svg
    :align: center
 
-   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, pitch difference frequency QTF magnitude (without the free-surface integrals) for the floating SOFTWIND platform (test case **10a_QTF_SOFTWIND**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, pitch difference frequency QTF magnitude (without the free-surface integrals) for the floating SOFTWIND platform (test case **10a_QTF_SOFTWIND**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_diag_softwind_surge`:
 .. figure:: figures/Softwind/QTFM_Surge_beta030_diag.svg
    :align: center
 
-   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, surge difference frequency QTF for the SOFTWIND platform (test case **10a_QTF_SOFTWIND**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, surge difference frequency QTF for the SOFTWIND platform (test case **10a_QTF_SOFTWIND**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 .. _`fig:QTFM_diag_softwind_heave`:
 .. figure:: figures/Softwind/QTFM_Heave_beta030_diag.svg
    :align: center
 
-   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, heave difference frequency QTF for the SOFTWIND platform (test case **10a_QTF_SOFTWIND**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, heave difference frequency QTF for the SOFTWIND platform (test case **10a_QTF_SOFTWIND**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 .. _`fig:QTFM_diag_softwind_pitch`:
 .. figure:: figures/Softwind/QTFM_Pitch_beta030_diag.svg
    :align: center
 
-   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, pitch difference frequency QTF for the SOFTWIND platform (test case **10a_QTF_SOFTWIND**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal bi-directional, :math:`(\beta_1,\beta_2)=(0^{\circ},30^{\circ})`, pitch difference frequency QTF for the SOFTWIND platform (test case **10a_QTF_SOFTWIND**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 *******************
 10b_QTF_SOFTWIND_FS
@@ -305,37 +305,37 @@ Half symmetric body mesh without lid panels, half symmetric free-surface mesh, C
 .. figure:: figures/Softwind/QTFP_Surge_beta00.svg
    :align: center
 
-   Density plots of the normalized surge sum-frequency full QTF magnitude (including the free-surface integrals) for the floating SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference in the right column.
+   Density plots of the normalized surge sum-frequency full QTF magnitude (including the free-surface integrals) for the floating SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference in the right column.
 
 .. _`fig:QTFP_SOFTWIND_heave`:
 .. figure:: figures/Softwind/QTFP_Heave_beta00.svg
    :align: center
 
-   Density plots of the normalized heave sum-frequency full QTF magnitude (including the free-surface integrals) for the floating SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference in the right column.
+   Density plots of the normalized heave sum-frequency full QTF magnitude (including the free-surface integrals) for the floating SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference in the right column.
 
 .. _`fig:QTFP_SOFTWIND_pitch`:
 .. figure:: figures/Softwind/QTFP_Pitch_beta00.svg
    :align: center
 
-   Density plots of the normalized pitch sum-frequency full QTF magnitude (including the free-surface integrals) for the floating SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference in the right column.
+   Density plots of the normalized pitch sum-frequency full QTF magnitude (including the free-surface integrals) for the floating SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference in the right column.
 
 .. _`fig:QTFP_SOFTWIND_DIAG_surge`:
 .. figure:: figures/Softwind/QTFP_Surge_beta00_diag.svg
    :align: center
 
-   Comparison of the off-diagonal surge sum-frequency full QTF for SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal surge sum-frequency full QTF for SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 .. _`fig:QTFP_SOFTWIND_DIAG_heave`:
 .. figure:: figures/Softwind/QTFP_Heave_beta00_diag.svg
    :align: center
 
-   Comparison of the off-diagonal heave sum-frequency full QTF for SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal heave sum-frequency full QTF for SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 .. _`fig:QTFP_SOFTWIND_DIAG_pitch`:
 .. figure:: figures/Softwind/QTFP_Pitch_beta00_diag.svg
    :align: center
 
-   Comparison of the off-diagonal pitch sum-frequency full QTF for SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal pitch sum-frequency full QTF for SOFTWIND platform (test case **10b_QTF_SOFTWIND_FS**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 *****************
 11_QTF_OC3_Hywind
@@ -353,36 +353,36 @@ Full body mesh with lid panels, CoG :math:`(0,0,0)`, water depth 320 m, wave dir
 .. figure:: figures/OC3_HYWIND/QTFM_Surge.svg
    :align: center
 
-   Density plots of the normalized surge difference frequency QTF magnitude (without the free-surface integrals) for the floating OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized surge difference frequency QTF magnitude (without the free-surface integrals) for the floating OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_OC3_HYWIND_heave`:
 .. figure:: figures/OC3_HYWIND/QTFM_Heave.svg
    :align: center
 
-   Density plots of the normalized heave difference frequency QTF magnitude (without the free-surface integrals) for the floating OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized heave difference frequency QTF magnitude (without the free-surface integrals) for the floating OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_OC3_HYWIND_pitch`:
 .. figure:: figures/OC3_HYWIND/QTFM_Pitch.svg
    :align: center
 
-   Density plots of the normalized pitch difference frequency QTF magnitude (without the free-surface integrals) for the floating OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**). HYDROSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
+   Density plots of the normalized pitch difference frequency QTF magnitude (without the free-surface integrals) for the floating OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**). HydroSTAR results are on the left column, NEMOH results are on the middle column and the difference on the right column.
 
 .. _`fig:QTFM_diag_OC3_HYWIND_surge`:
 .. figure:: figures/OC3_HYWIND/QTFM_Surge_diag.svg
    :align: center
 
-   Comparison of the off-diagonal surge difference frequency QTF for the OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal surge difference frequency QTF for the OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 .. _`fig:QTFM_diag_OC3_HYWIND_heave`:
 .. figure:: figures/OC3_HYWIND/QTFM_Heave_diag.svg
    :align: center
 
-   Comparison of the off-diagonal heave difference frequency QTF for the OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal heave difference frequency QTF for the OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
 .. _`fig:QTFM_diag_OC3_HYWIND_pitch`:
 .. figure:: figures/OC3_HYWIND/QTFM_Pitch_diag.svg
    :align: center
 
-   Comparison of the off-diagonal pitch difference frequency QTF for the OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**) between HYDROSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
+   Comparison of the off-diagonal pitch difference frequency QTF for the OC3-HYWIND platform (test case **11_QTF_OC3_Hywind**) between HydroSTAR, real part (blue, solid-line), imaginary part (blue, dashed-dot line) and NEMOH, real part (red, dashed-line), imaginary part (red, dotted-line).
 
-Full description of the QTF test-cases results is reported in :cite:t:`Kurnia22_JH,Kurnia22`. Note that the QTF comparisons between NEMOH and HYDROSTAR for the bidirectional case are in good agreement only if the direction is switched, in NEMOH :math:`\beta=(\beta_1,\beta_2)` and in Hydrostar :math:`\beta=(\beta_2,\beta_1)`; further investigation regarding this is needed. The imaginary part of QTFs have also a difference sign between NEMOH and HYDROSTAR that may be due to different conventions of the incident potential.
+Full description of the QTF test-cases results is reported in :cite:t:`Kurnia22_JH,Kurnia22`. Note that the QTF comparisons between NEMOH and HydroSTAR for the bidirectional case are in good agreement only if the direction is switched, in NEMOH :math:`\beta=(\beta_1,\beta_2)` and in HydroSTAR :math:`\beta=(\beta_2,\beta_1)`; further investigation regarding this is needed. The imaginary part of QTFs have also a difference sign between NEMOH and HydroSTAR that may be due to different conventions of the incident potential.

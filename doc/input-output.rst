@@ -268,7 +268,7 @@ The hydrostatic terms of the quadratic first-order motion :math:`-[\boldsymbol K
       \tilde{\boldsymbol\xi}^{(2)}=[0,0,z_G(\theta_1^{(1)2}+\theta_2^{(1)2})/2,\theta_2^{(1)}\theta_3^{(1)}/2,-\theta_3^{(1)}\theta_1^{(1)}/2,0]^T.
       \end{aligned}
 
-with :math:`z_G` the vertical component of CoG. Note that this term is optional and needed only in ``QTFsolver``. This term is not always included in other software, *e.g.* HYDROSTAR :cite:p:`HYDROSTAR` does not included it.
+with :math:`z_G` the vertical component of CoG. Note that this term is optional and needed only in ``QTFsolver``. This term is not always included in other software, *e.g.* HydroSTAR :cite:p:`HYDROSTAR` does not included it.
 
 ``QTFpostproc`` computes the total QTF by summing all the terms specified in ``Nemoh.cal``, provided the required terms were computed.
 

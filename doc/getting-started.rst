@@ -291,6 +291,6 @@ The following directories, containing a set of Matlab functions, are provided in
 
 -  ``NemohWrapper``: This is for running NEMOH executables in MATLAB environment.
 
--  ``GMSHconverter``: There are two codes, first, for converting body mesh file output from GMSH to NEMOH, DIODORE and HYDROSTAR formats and second, for converting free-surface mesh file output from GMSH to NEMOH and HYDROSTAR formats.
+-  ``GMSHconverter``: There are two codes, first, for converting body mesh file output from GMSH to NEMOH, DIODORE and HydroSTAR formats and second, for converting free-surface mesh file output from GMSH to NEMOH and HydroSTAR formats.
 
--  ``postproc_testcases``: There are two main codes for plotting results from NEMOH and HYDROSTAR. First, for plotting hydrodynamic coefficients results and second for plotting QTF results. This code can be executed after all data in one specific test cases are obtained.
+-  ``postproc_testcases``: There are two main codes for plotting results from NEMOH and HydroSTAR. First, for plotting hydrodynamic coefficients results and second for plotting QTF results. This code can be executed after all data in one specific test cases are obtained.
