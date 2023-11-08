@@ -253,12 +253,6 @@ Half symmetric body mesh with lid panels, CoG :math:`(0,0,-71.56)`, water depth 
 
    Body boundary mesh for the SOFTWIND platform, used in test cases **10a_QTF_SOFTWIND** and  **10b_QTF_SOFTWIND_FS**
 
-.. _`fig:meshesSoftwind_FS`:
-.. figure:: figures/Softwind/FSmesh.svg
-   :align: center
-
-   Free surface mesh for the SOFTWIND platform, used in test case **10b_QTF_SOFTWIND_FS**
-
 .. _`fig:QTFM_SOFTWIND_surge`:
 .. figure:: figures/Softwind/QTFM_Surge_beta030.svg
    :align: center
@@ -299,7 +293,15 @@ Half symmetric body mesh with lid panels, CoG :math:`(0,0,-71.56)`, water depth 
 10b_QTF_SOFTWIND_FS
 *******************
 
-Half symmetric body mesh without lid panels, half symmetric free-surface mesh, CoG :math:`(0,0,-71.56)`, water depth 200 m, wave direction :math:`0^{\circ}`, the sum-frequency total QTF DUOK+HASBO+HASFS+ASYMP. The results are shown in the density plot, :numref:`fig:QTFP_SOFTWIND_surge`, :numref:`fig:QTFP_SOFTWIND_heave` and :numref:`fig:QTFP_SOFTWIND_pitch` and in the off-diagonal line plot, :numref:`fig:QTFP_SOFTWIND_DIAG_surge`, :numref:`fig:QTFP_SOFTWIND_DIAG_heave` and :numref:`fig:QTFP_SOFTWIND_DIAG_pitch`. The mesh used was obtained using GMSH :cite:p:`GMSH` and is shown in :numref:`fig:meshesSoftwind_body` and :numref:`fig:meshesSoftwind_FS`.
+Half symmetric body mesh without lid panels, half symmetric free-surface mesh, CoG :math:`(0,0,-71.56)`, water depth 200 m, wave direction :math:`0^{\circ}`, the sum-frequency total QTF DUOK+HASBO+HASFS+ASYMP.
+The results are shown in the density plot, :numref:`fig:QTFP_SOFTWIND_surge`, :numref:`fig:QTFP_SOFTWIND_heave` and :numref:`fig:QTFP_SOFTWIND_pitch` and in the off-diagonal line plot, :numref:`fig:QTFP_SOFTWIND_DIAG_surge`, :numref:`fig:QTFP_SOFTWIND_DIAG_heave` and :numref:`fig:QTFP_SOFTWIND_DIAG_pitch`.
+The mesh used was obtained using GMSH :cite:p:`GMSH` and is shown in :numref:`fig:meshesSoftwind_body` (body mesh) and :numref:`fig:meshesSoftwind_FS` (free surface mesh).
+
+.. _`fig:meshesSoftwind_FS`:
+.. figure:: figures/Softwind/FSmesh.svg
+   :align: center
+
+   Free surface mesh for the SOFTWIND platform, used in test case **10b_QTF_SOFTWIND_FS**
 
 .. _`fig:QTFP_SOFTWIND_surge`:
 .. figure:: figures/Softwind/QTFP_Surge_beta00.svg
