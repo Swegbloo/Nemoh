@@ -2,14 +2,16 @@ NEMOH is a Boundary Element Methods (BEM) code dedicated to the computation of f
 
 Copyright © 2022 Ecole Centrale de Nantes
 
-This product has been developed at [Ecole Centrale de Nantes](http://www.ec-nantes.fr) by
+This program has been developed at [Ecole Centrale de Nantes](http://www.ec-nantes.fr) by
 G. Delhommeau, A. Babarit, J. Singh, P. Guével, J.C. Daubisse, R. Kurnia.
 
 ## Pre-built binaries and documentation
 
-Pre-built binaries (executables) of all the Nemoh programs for Linux and Windows (x64) can be found in the `Releases` section of the project for each version (starting from v3.0.0), along with a PDF documentation.
+The full documentation is available [here](https://lheea.gitlab.io/Nemoh). Please do not hesitate to report any errors or suggest improvements!
 
-Alternatively, you can compile Nemoh by yourself using the following instructions.
+Pre-built binaries (executables) of all the Nemoh programs for Linux and Windows (x64) can be found in the `Releases` section of the project for each version (starting from v3.0.0).
+
+Alternatively, you can compile Nemoh by yourself using the following instructions (of by following [the documentation](https://lheea.gitlab.io/Nemoh)).
 
 ## Compilation
 
