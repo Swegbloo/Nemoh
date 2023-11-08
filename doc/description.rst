@@ -32,10 +32,10 @@ Symbols
    :math:`\beta`     [rad]              Wave propagation direction
    :math:`t`         [s]                Time
    :math:`p`         [Pa]               Pressure
-   :math:`\phi`      [m:sup:`2`/s]      Velocity potential
+   :math:`\phi`      [m\ :sup:`2`/s]    Velocity potential
    :math:`\vec{V}`   [m/s]              Velocity, :math:`\vec{V} = \vec{\nabla}\phi`
-   :math:`g`         [m.s:sup:`-2`]     Gravitational acceleration
-   :math:`\rho`      [kg/m:sup:`3`]     Water density
+   :math:`g`         [m.s\ :sup:`-2`]   Gravitational acceleration
+   :math:`\rho`      [kg/m\ :sup:`3`]   Water density
    :math:`a`         [m]                Wave amplitude
    :math:`\eta`      [m]                Free surface elevation
    ================= ================== ====================================================================================
