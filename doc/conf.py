@@ -22,10 +22,10 @@ copyright = '2023, Ecole Centrale de Nantes'
 author = 'G. Delhommeau, A. Babarit, J. Singh, P. Guével, J.C. Daubisse, R. Kurnia'
 
 # The short X.Y version
-version = '3.0.1'
+version = 'latest'
 
 # The full version, including alpha/beta/rc tags
-release = '3.0.1'
+release = 'latest'
 
 
 # -- General configuration ---------------------------------------------------
