@@ -117,7 +117,7 @@ INTEGER,parameter :: ID_DEBUG=0 ! for debugging, each QTFs terms will be saved
         WRITE(*,*) 'QTF Solver preparation...'
         CALL ReadTID(ID)
         CALL ReadTMesh(Mesh,TRIM(ID%ID)//'/mesh/')
-        CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
+        CALL READ_TNEMOHCAL(ID,InpNEMOHCAL)
         !
         QTFinputNem  =InpNEMOHCAL%qtfinput
         Env          =InpNEMOHCAL%Env

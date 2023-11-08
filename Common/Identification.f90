@@ -27,6 +27,12 @@ MODULE MIdentification
     INTEGER :: lID
   END TYPE TID
 
+#ifdef _WIN32
+  CHARACTER :: FILESEP = '\'
+#else
+  CHARACTER :: FILESEP = '/'
+#endif
+
 CONTAINS
 
   SUBROUTINE ReadTID(ID)

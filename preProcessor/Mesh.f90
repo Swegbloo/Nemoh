@@ -256,7 +256,7 @@ CONTAINS
 
 !       Export mesh
         INQUIRE (DIRECTORY=ID%ID(1:ID%lID)//'/mesh', EXIST=ex)
-        IF (.NOT.ex) M=SYSTEM('mkdir '//ID%ID(1:ID%lID)//'/mesh')
+        IF (.NOT.ex) M=SYSTEM('mkdir '//ID%ID(1:ID%lID)//FILESEP//'mesh')
         OPEN(10,FILE=TRIM(ID%ID)//'/mesh/L12.dat')
         WRITE(10,'(I3,X,I3)') 2,Mesh%Isym
         DO i=1,Mesh%Npoints
@@ -292,7 +292,7 @@ CONTAINS
 	    END DO
 	    CLOSE(10)
             INQUIRE (DIRECTORY=TRIM(ID%ID)//'/results', EXIST=ex)
-            IF (.NOT.ex) M=SYSTEM('mkdir '//TRIM(ID%ID)//'/results')
+            IF (.NOT.ex) M=SYSTEM('mkdir '//TRIM(ID%ID)//FILESEP//'results')
         END SUBROUTINE ReadTMesh
 !       ---
         SUBROUTINE DeleteTMesh(Mesh)

@@ -82,7 +82,7 @@
 !
     CALL ReadTID(ID)
     CALL ReadTMesh(Mesh,ID)
-    CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
+    CALL READ_TNEMOHCAL(ID,InpNEMOHCAL)
 !   ----------- passing inputs ------------------------------------------
     Environment =InpNEMOHCAL%Env
     Nradiation  =InpNEMOHCAL%Nradtot

@@ -23,6 +23,7 @@
         MODULE MNemohCal
 
           USE Constants
+          USE MIdentification
           USE MEnvironment, only: TEnvironment
           IMPLICIT NONE
 
@@ -106,16 +107,16 @@
 
         CONTAINS
 
-         SUBROUTINE READ_TNEMOHCAL(wd,InpNEMOHCAL)
+         SUBROUTINE READ_TNEMOHCAL(ID,InpNEMOHCAL)
 
-          CHARACTER(LEN=*),     INTENT(IN)      :: wd
+          TYPE(TID),            INTENT(IN)      :: ID
           TYPE(TNemCal),        INTENT(OUT)     :: InpNEMOHCAL
 
           !Local var
           INTEGER ufile,I,J,K
           LOGICAL :: exist_dir
 
-          OPEN(NEWUNIT=ufile ,FILE=TRIM(wd)//'/Nemoh.cal')
+          OPEN(NEWUNIT=ufile, FILE=TRIM(ID%ID)//'/Nemoh.cal')
            READ(ufile,*) !--- Environment ----------------------------!
            READ(ufile,*) InpNEMOHCAL%Env%RHO
            READ(ufile,*) InpNEMOHCAL%Env%G
@@ -213,12 +214,12 @@
           CLOSE(ufile)
 
           IF(InpNEMOHCAL%OptOUTPUT%Switch_SourceDistr==1) THEN
-            !INQUIRE (DIRECTORY=TRIM(wd)//'/results/sources',           &
+            !INQUIRE (DIRECTORY=TRIM(ID%ID)//'/results/sources',           &
             !           EXIST=exist_dir) !this is Intel-specific
-            INQUIRE (FILE=TRIM(wd)//'/results/sources/.',           &
+            INQUIRE (FILE=TRIM(ID%ID)//'/results/sources/.',           &
                        EXIST=exist_dir)
-            IF (.NOT.exist_dir) CALL SYSTEM('mkdir '//TRIM(wd)//       &
-                                                    '/results/sources')
+            IF (.NOT.exist_dir) CALL SYSTEM('mkdir '//TRIM(ID%ID)//       &
+                                    FILESEP//'results'//FILESEP//'sources')
           END IF
          END SUBROUTINE
 

@@ -194,7 +194,7 @@ PROGRAM Mesh
 
   !INQUIRE (DIRECTORY=ID%ID(1:ID%lID)//'/mesh', EXIST=ex) !this is Intel-specific
   INQUIRE (FILE=ID%ID(1:ID%lID)//'/mesh/.', EXIST=ex)
-  IF (.NOT.ex) Msys=SYSTEM('mkdir '//ID%ID(1:ID%lID)//'/mesh')
+  IF (.NOT.ex) Msys=SYSTEM('mkdir '//ID%ID(1:ID%lID)//FILESEP//'mesh')
 
   OPEN(10,FILE=TRIM(ID%ID)//'/mesh/Hydrostatics.dat')
   WRITE(10,'(A,F7.3,A,F7.3)') ' XF = ',XF+xG,' - XG = ',xG
