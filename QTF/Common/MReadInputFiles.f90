@@ -194,7 +194,6 @@ CONTAINS
            CALL exist_file(trim(wd)//'/Motion/RAO.dat')
            OPEN(NEWUNIT=u1,FILE=trim(wd)//'/Motion/RAO.dat',ACTION='READ')!RAO
            READ(u1,*)
-           READ(u1,*)
 
            DO K=1,Nbeta
               READ(u1,*)

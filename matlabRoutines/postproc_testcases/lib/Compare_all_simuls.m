@@ -2,7 +2,7 @@ clear all;close all
 [pathstr,~,~] = fileparts(mfilename('fullpath'));
 cd (pathstr);
 addpath(genpath(pathstr))
-    
+
 axesWT=0; %0=omega [rad/s], 1=frequency [1/s], 2=period [s], 3=w^2/g
 IDDOF=5; % ID dof 1,3,5 for surge, heave, pitch
 IDDIOD=0; % if to be compare with diodore 1
@@ -27,40 +27,40 @@ figure('unit','normalized','Position',[0.3 0.1 0.2 0.2]);axRAOP=axes;
 end
 figure('unit','normalized','Position',[0.3 0.1 0.2 0.5])
 for II=1:Ndata_file
-   
+
     if IDHYDROSTAR==1
     NHeader=22;
     F1datH=fun_readHydrostarOutput(['./',hydrostarDir,'/fxf1st.rao'],NHeader);
     F3datH=fun_readHydrostarOutput(['./',hydrostarDir,'/fzf1st.rao'],NHeader);
     F5datH=fun_readHydrostarOutput(['./',hydrostarDir,'/myf1st.rao'],NHeader);
-    
+
     A11datH=fun_readHydrostarOutput(['./',hydrostarDir,'/AddedMass_11.dat'],NHeader);
     A33datH=fun_readHydrostarOutput(['./',hydrostarDir,'/AddedMass_33.dat'],NHeader);
     A55datH=fun_readHydrostarOutput(['./',hydrostarDir,'/AddedMass_55.dat'],NHeader);
-    
+
     B11datH=fun_readHydrostarOutput(['./',hydrostarDir,'/Damping_11.dat'],NHeader);
     B33datH=fun_readHydrostarOutput(['./',hydrostarDir,'/Damping_33.dat'],NHeader);
     B55datH=fun_readHydrostarOutput(['./',hydrostarDir,'/Damping_55.dat'],NHeader);
-    
+
 %     ExctFdat=load('./diodore_results/excitation_forces.txt','-ascii');
 %     ExctFphasedat=load('./diodore_results/excitation_forces_phase.txt','-ascii');
-    
+
 %     Aj1dat=load('./diodore_results/addedmass_line1.txt','-ascii');
 %     Aj3dat=load('./diodore_results/addedmass_line3.txt','-ascii');
 %     Aj5dat=load('./diodore_results/addedmass_line5.txt','-ascii');
 %     Bj1dat=load('./diodore_results/damping_line1.txt','-ascii');
 %     Bj3dat=load('./diodore_results/damping_line3.txt','-ascii');
 %     Bj5dat=load('./diodore_results/damping_line5.txt','-ascii');
-%     
+%
 %     F1datD=ExctFdat(:,2);F3datD=ExctFdat(:,4);F5datD=ExctFdat(:,6);
 %     A11datD=Aj1dat(:,2);A33datD=Aj3dat(:,4);A55datD=Aj5dat(:,6);
 %     B11datD=Bj1dat(:,2);B33datD=Bj3dat(:,4);B55datD=Bj5dat(:,6);
     end
-    
+
     dirfile=(data_file{II});
     cd(dirfile);
     rep='./';
-   
+
     fid=fopen([rep,filesep,'Nemoh.cal'],'r');
     for i=1:6
         ligne=fgetl(fid);
@@ -152,7 +152,7 @@ for II=1:Ndata_file
         F5datH(:,3)=wrapToPi(F5datH(:,3))./pi;
         end
     end
-    
+
     if axesWT==0
         axw=w;
         if IDHYDROSTAR==1
@@ -196,10 +196,10 @@ for II=1:Ndata_file
     b11=squeeze(squeeze(B(1,1,:)));b13=squeeze(squeeze(B(1,3,:)));b15=squeeze(squeeze(B(1,5,:)));
     b31=squeeze(squeeze(B(3,1,:)));b33=squeeze(squeeze(B(3,3,:)));b35=squeeze(squeeze(B(3,5,:)));
     b51=squeeze(squeeze(B(5,1,:)));b53=squeeze(squeeze(B(5,3,:)));b55=squeeze(squeeze(B(5,5,:)));
-    
+
     if IDDIOD==1
-        
-    else 
+
+    else
         subplot(4,1,1)
         if II==1 && IDHYDROSTAR==1
             if IDDOF==1
@@ -230,7 +230,7 @@ for II=1:Ndata_file
         end
         %xlabel(xlab)
         grid ON
-        
+
         plot_properties;
         subplot(4,1,2)
         if II==1 && IDHYDROSTAR==1
@@ -254,7 +254,7 @@ for II=1:Ndata_file
             elseif IDDOF==5
                 plot(axw,b55,lintype{II})
                 ylabel('b_{55}' )
-             end  
+             end
         end
         hold on;
         if Idlimitaxes==1
@@ -286,7 +286,7 @@ for II=1:Ndata_file
         elseif IDDOF==5
             plot(axw,Famp(:,5),lintype{II})
             ylabel('|F_{5}|' )
-        end      
+        end
         end
         hold on;
         xlabel(xlab)
@@ -294,10 +294,10 @@ for II=1:Ndata_file
             xlim([xlimval]);
         end
         %xlabel('T (s)')
-        
+
         plot_properties;
         grid ON
-        
+
         subplot(4,1,4)
         if II==1 && IDHYDROSTAR==1
         if IDDOF==1
@@ -320,7 +320,7 @@ for II=1:Ndata_file
         elseif IDDOF==5
             plot(axw,Fphi(:,5),lintype{II})
             ylabel('Phase F_{5}' )
-        end      
+        end
         end
         hold on;
         xlabel(xlab)
@@ -328,19 +328,17 @@ for II=1:Ndata_file
             xlim([xlimval]);
         end
         %xlabel('T (s)')
-        
+
         plot_properties;
         grid ON
     end
    if IDRAO==1
         RAOAmpl=zeros(nw,6);
         RAOPhase=zeros(nw,6);
-        
+
         fid=fopen([rep,filesep,'Motion',filesep,'RAO.dat'],'r');
-        
-        for ii=1:2
-            ligne=fgetl(fid);
-        end
+
+        ligne=fgetl(fid);
         %for ibeta=1:nbeta
             ligne=fgetl(fid);
             for iw=1:nw
@@ -351,17 +349,17 @@ for II=1:Ndata_file
             end
         %end
         status=fclose(fid);
-        
-       
-        
+
+
+
         if IDHYDROSTAR==1
         RAOH_surge=fun_readHydrostarOutput(['./../',hydrostarDir,'/surge.rao'],NHeader);
         RAOH_heave=fun_readHydrostarOutput(['./../',hydrostarDir,'/heave.rao'],NHeader);
         RAOH_pitch=fun_readHydrostarOutput(['./../',hydrostarDir,'/pitch.rao'],NHeader);
         end
-        
-      
-       
+
+
+
         if II==1 && IDHYDROSTAR==1
             if IDDOF==1
                 plot(axRAO,axwH,RAOH_surge(:,2),HySmb,axw,RAOAmpl(:,1),lintype{II})
@@ -402,14 +400,14 @@ for II=1:Ndata_file
            xlabel(axRAO,xlab)
              plot_properties;
               hold(axRAO,'on');
-              
+
              % xlim(axRAOP,[0,2])
            xlabel(axRAOP,xlab)
              plot_properties;
               hold(axRAOP,'on');
-            
+
 
     end
-  
+
     cd ..
 end

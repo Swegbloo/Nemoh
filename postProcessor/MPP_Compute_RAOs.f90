@@ -95,13 +95,13 @@ CONTAINS
       STOP
     ENDIF
     OPEN(NEWUNIT=u, FILE=TRIM(dirname)//TRIM(filename),ACTION='WRITE')
-    WRITE(u,'(13(A,X))') FreqVar_text, '|X| (m/m)','|Y| (m/m)',' |Z| (m/m)',  &
-                '|phi| (deg)',' |theta| (deg)',' |psi| (deg)', &
-                 'ang(x) (deg)',' ang(y) (deg)',' ang(z) (deg)', &
-                 'ang(phi) (deg)',' ang(theta) (deg)',' ang(psi) (deg)'
-    WRITE(u,*) 'Number of column (Nvariables*Nbody)=',Nintegration
+    ! TODO: fix names of variables to match number of columns
+    WRITE(u,'(13(A,X))') FreqVar_text, '"|X| (m/m)"','"|Y| (m/m)"','"|Z| (m/m)"',  &
+                '"|phi| (deg)"','"|theta| (deg)"','"|psi| (deg)"', &
+                 '"ang(x) (deg)"','"ang(y) (deg)"','"ang(z) (deg)"', &
+                 '"ang(phi) (deg)"','"ang(theta) (deg)"','"ang(psi) (deg)"'
     DO Ibeta=1,Nbeta
-    WRITE(u,'((A,X),F10.3,2(A,X),I4)') 'beta=',beta(Ibeta)*180/PI,'(deg),',FreqVar_text2,Nw
+    WRITE(u,'((A,X),F10.3,(A,X),I4,(A,X))') 'ZONE T="RAO - beta=',beta(Ibeta)*180/PI,' (deg)", I=', Nw, ', F=POINT'
         DO Iw=1,Nw
              DO Iinteg=1,Nintegration
                 wRAOS(Iinteg)=ABS(RAOs(Iinteg,Iw,Ibeta))

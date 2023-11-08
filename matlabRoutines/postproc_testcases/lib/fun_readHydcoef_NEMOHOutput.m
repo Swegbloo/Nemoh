@@ -42,7 +42,7 @@ function [ww,Fdat,AmatNem,BmatNem,RAONem]=fun_readHydcoef_NEMOHOutput(rep,IDF,ID
     betamax=ligne(3);
     fclose(fid);
     beta=linspace(betamin,betamax,Nbeta);
-    
+
     Fdat=zeros(nw,2*Nforce*nBodies,Nbeta);
     ww=zeros(nw,1);
     if (IDF==1)
@@ -67,7 +67,7 @@ function [ww,Fdat,AmatNem,BmatNem,RAONem]=fun_readHydcoef_NEMOHOutput(rep,IDF,ID
     end
     status=fclose(fid);
     end
-    
+
     AmatNem=zeros(nw,nBodies*Ndof,nBodies*Ndof);
     BmatNem=zeros(nw,nBodies*Ndof,nBodies*Ndof);
     if (IDABMAT==1)
@@ -76,7 +76,7 @@ function [ww,Fdat,AmatNem,BmatNem,RAONem]=fun_readHydcoef_NEMOHOutput(rep,IDF,ID
     for i=1:Ndof*nBodies
         ligne=fgetl(fid);
     end
-   
+
     for i=1:nBodies*Ndof
         ligne=fgetl(fid);
         for k=1:nw
@@ -91,16 +91,14 @@ function [ww,Fdat,AmatNem,BmatNem,RAONem]=fun_readHydcoef_NEMOHOutput(rep,IDF,ID
     end
     status=fclose(fid);
     end
-    
+
 %     % Expression des efforts d excitation de houle sous la forme Famp*exp(i*Fphi)
 %     Fe=Famp.*(cos(Fphi)+1i*sin(Fphi));
 RAONem=zeros(nw,2*Ndof*nBodies,Nbeta);
 if IDRAO==1
         fid=fopen([rep,filesep,'Motion',filesep,'RAO.dat'],'r');
-        
-        for ii=1:2
-            ligne=fgetl(fid);
-        end
+
+        ligne=fgetl(fid);
         for ibeta=1:Nbeta
             ligne=fgetl(fid);
             for iw=1:nw
