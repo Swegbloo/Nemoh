@@ -31,18 +31,6 @@ build-windows:
       - build_windows/
     expire_in: 1 week
 
-build-doc:
-  stage: build
-  image: blang/latex:ubuntu
-  script:
-    - cd Documentation
-    - mkdir build
-    - latexmk -jobname=build/Nemoh -pdf Nemoh_Manual.tex
-  artifacts:
-    paths:
-      - Documentation/build/
-    expire_in: 1 week
-
 test-nemoh1:
   stage: test
   rules:
@@ -93,3 +81,16 @@ release:
         - name: documentation
           url: $NEMOH_DOC_URL
           link_type: other
+
+pages:
+  stage: deploy
+  script:
+    - cd doc
+    - make html | tee sphinx.log
+  artifacts:
+    paths:
+      - doc/_build/html
+      - doc/sphinx.log
+  publish: doc/_build/html
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH

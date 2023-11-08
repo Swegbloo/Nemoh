@@ -158,6 +158,7 @@ PROGRAM Mesh
   END DO
   CALL HYDRO(X,Y,Z,NP,FACETTE,NF,DEPLACEMENT,XF,YF,ZF,SF,KH,Xm,Ym,Zm,NPm,FACETTEm,NFm,RHO,G)
   IF (Tcol.GT.0) THEN
+    ! TODO: Document what Tcol does
     CALL calCol(NFm,Xm,Ym,Zm,Facettem,Tcol,nFacemx)
     END IF
   nFacem=NFm
