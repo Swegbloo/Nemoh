@@ -34,7 +34,7 @@ Symbols
    :math:`p`         [Pa]               Pressure
    :math:`\phi`      [m\ :sup:`2`/s]    Velocity potential
    :math:`\vec{V}`   [m/s]              Velocity, :math:`\vec{V} = \vec{\nabla}\phi`
-   :math:`g`         [m.s\ :sup:`-2`]   Gravitational acceleration
+   :math:`g`         [m/s\ :sup:`2`]    Gravitational acceleration
    :math:`\rho`      [kg/m\ :sup:`3`]   Water density
    :math:`a`         [m]                Wave amplitude
    :math:`\eta`      [m]                Free surface elevation
@@ -173,7 +173,7 @@ Nemoh1, the first-order solver, is based on the following modelling principles:
    .. math::
 
       \begin{aligned}
-      \boldsymbol F_{exc}^{(1)}&=\rho \iint_{S_{B}} -i\omega\left[ \Phi_I^{(1)}+ \Phi_D^{(1)}\right]\boldsymbol\nu dS.
+      \boldsymbol F_{exc}^{(1)}&=\rho \iint_{S_{B}} -i\omega\left[ \Phi_I^{(1)}+ \Phi_D^{(1)}\right]\boldsymbol\nu dS
       \end{aligned}
 
    The added mass matrix and damping coefficient matrix components are computed as
@@ -181,8 +181,8 @@ Nemoh1, the first-order solver, is based on the following modelling principles:
    .. math::
 
       \begin{aligned}
-      M^a_{ij}= -\rho \iint_{S_{B}} \nu_{i} Re \left\lbrace\psi_{R_j} \right\rbrace dS\\
-      B_{ij}= -\rho \omega \iint_{S_{B}} \nu_{i} Im \left\lbrace\psi_{R_j} \right\rbrace dS.
+      M^a_{ij}= -\rho \iint_{S_{B}} \nu_{i} Re \left\lbrace\psi_{R_j} \right\rbrace dS \\
+      B_{ij}= -\rho \omega \iint_{S_{B}} \nu_{i} Im \left\lbrace\psi_{R_j} \right\rbrace dS
       \end{aligned}
 
 -  In post-processing, the radiation damping impulse response matrix function (:math:`\boldsymbol{IRF}(t)`), the infinite frequency added mass matrix (:math:`[\boldsymbol M^a](\infty)`), and the excitation force impulse response vector function (:math:`\boldsymbol{IRF}_{ex}(t)`) are provided. They are computed as,
@@ -190,9 +190,9 @@ Nemoh1, the first-order solver, is based on the following modelling principles:
    .. math::
 
       \begin{aligned}
-      \boldsymbol{IRF}(t)&\approx\frac{2}{\pi}\int_0^{\omega_{max}}[\boldsymbol B](\omega)\cos(\omega t)d\omega, \\
-      [\boldsymbol M^a](\infty)&\approx  \frac{1}{N_{\omega}}\sum_{i=1}^{N_{\omega}}[\boldsymbol M^a](\omega_i)+\frac{1}{\omega_i}\int_0^{t_{max}}\boldsymbol{IRF}(t)\sin(\omega_i t)dt\\
-      \boldsymbol{IRF}_{exc}(t)&\approx\frac{1}{2\pi}\int_{-\omega_{max}}^{\omega_{max}}\boldsymbol F_{exc}(\omega)e^{-i\omega t}d\omega.
+      \boldsymbol{IRF}(t)&\approx\frac{2}{\pi}\int_0^{\omega_{max}}[\boldsymbol B](\omega)\cos(\omega t)d\omega \\
+      [\boldsymbol M^a](\infty)&\approx  \frac{1}{N_{\omega}}\sum_{i=1}^{N_{\omega}}[\boldsymbol M^a](\omega_i)+\frac{1}{\omega_i}\int_0^{t_{max}}\boldsymbol{IRF}(t)\sin(\omega_i t)dt \\
+      \boldsymbol{IRF}_{exc}(t)&\approx\frac{1}{2\pi}\int_{-\omega_{max}}^{\omega_{max}}\boldsymbol F_{exc}(\omega)e^{-i\omega t}d\omega
       \end{aligned}
 
    where :math:`\boldsymbol F_{exc}(-\omega)=\boldsymbol F^*_{exc}(\omega)`. Note that :math:`\omega_{max}` is a user-specified input, for better accuracy of :math:`\boldsymbol{IRF}(t)` make sure that :math:`[\boldsymbol B ](\omega_{max})` has reached an asymptotic value.
@@ -209,14 +209,13 @@ Nemoh1, the first-order solver, is based on the following modelling principles:
    where :math:`[\boldsymbol B_{add}]` and :math:`[\boldsymbol K_M]` are user-specified additional damping and stiffness matrices.
 
 
-Nemoh2, the second-order QTF module, is based on the following principles
+Nemoh2, the second-order QTF module, is based on the following principles:
 
 -  The second-order loads are composed of the quadratic part and the potential part, the detailed formulation is given in :cite:t:`Kurnia22_JH,Kurnia22`.
 
 -  The quadratic part is based on the near-field method :cite:p:`CHEN88`.
 
--  The potential part is based on the
-   indirect method :cite:p:`CHEN88,MOLIN79`.
+-  The potential part is based on the indirect method :cite:p:`CHEN88,MOLIN79`.
 
 Numerical Methods
 =================
