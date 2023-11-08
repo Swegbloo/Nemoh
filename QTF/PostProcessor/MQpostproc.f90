@@ -88,7 +88,7 @@ CONTAINS
             !open output file
             OPEN(NEWUNIT=uo_m, FILE=TRIM(wd)//'/results/QTF/OUT_QTF'//str_MP(ID_MP)//'_N.dat',&
                      ACTION='WRITE')
-            WRITE(uo_m,'(9(A,X))') FreqVar1_text, FreqVar2_text,'beta1 [deg]','beta2[deg]','DOF',&
+            WRITE(uo_m,'(9(A,X))') FreqVar1_text, FreqVar2_text,'beta1[deg]','beta2[deg]','DOF',&
                     'MOD(QTF)/rho/g','PHASE(QTF)[deg]','Re(QTF)/rho/g','Im(QTF)/rho/g'
 
               DO IintegS=1,Ninteg

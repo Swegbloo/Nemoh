@@ -72,7 +72,7 @@ CONTAINS
         CHARACTER(LEN=*) ::filename
         INTEGER ::u
         OPEN(NEWUNIT=u,FILE=filename, ACTION='WRITE')
-        WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1 [rad]','beta2[rad]',&
+        WRITE(u,'(7(A,X))') 'w1[rad/s]','w2[rad/s]','beta1[rad]','beta2[rad]',&
                                   'DOF','Re(QTF)','Im(QTF)'
         CLOSE(u)
        END SUBROUTINE
