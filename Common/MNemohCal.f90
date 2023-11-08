@@ -219,7 +219,7 @@
             INQUIRE (FILE=TRIM(ID%ID)//'/results/sources/.',           &
                        EXIST=exist_dir)
             IF (.NOT.exist_dir) CALL SYSTEM('mkdir '//TRIM(ID%ID)//       &
-                                                    '/results/sources')
+                                    FILESEP//'results'//FILESEP//'sources')
           END IF
          END SUBROUTINE
 

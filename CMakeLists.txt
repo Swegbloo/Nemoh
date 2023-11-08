@@ -18,6 +18,9 @@ if(NOT DEFINED CMAKE_BUILD_TYPE)
     set (CMAKE_BUILD_TYPE "Release")
 endif()
 
+# TODO: remove the following block, which breaks normal use of compiler options
+# Files that need pre-processing should have a capitalized extension (e.g. .F90 in place of .f90)
+
 if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel")
     set(CMAKE_Fortran_FLAGS "-cpp")
     # Other flags that may be useful: -r8 (force double-precision on all real numbers)
@@ -26,6 +29,11 @@ elseif("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
     set(CMAKE_Fortran_FLAGS "-cpp -DGNUFORT -ffree-line-length-none -static-libgfortran")
     # Other flags that may be useful: -fdefault-real-8 (force double-precision on all real numbers)
     add_definitions(-D_GNU_FORTRAN_COMPILE_RULE_)
+endif()
+
+# This is required to get _WIN32 defined because the previous block breaks the default behaviour
+if(WIN32)
+    add_compile_definitions(_WIN32)
 endif()
 
 set(COMMON_SRC_DIR ${PROJECT_SOURCE_DIR}/Common)
