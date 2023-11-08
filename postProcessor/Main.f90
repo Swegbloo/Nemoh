@@ -64,7 +64,7 @@
     WRITE(*,'(A,$)') '.'
 
 !   Read Nemoh.call
-    CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
+    CALL READ_TNEMOHCAL(ID,InpNEMOHCAL)
 !   Read environment
     Environment =InpNEMOHCAL%Env
 !   Read results

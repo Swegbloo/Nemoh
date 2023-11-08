@@ -74,7 +74,7 @@ IMPLICIT NONE
 !
         CALL ReadTID(ID)
         CALL ReadTMesh(Mesh,TRIM(ID%ID)//'/mesh/')
-        CALL READ_TNEMOHCAL(TRIM(ID%ID),InpNEMOHCAL)
+        CALL READ_TNEMOHCAL(ID,InpNEMOHCAL)
         CALL Read_Mechanical_Coefs(TRIM(ID%ID),InpNEMOHCAL%Nbodies,MechCoef)
 !
         Nw          =InpNEMOHCAL%waveinput%NFreq
