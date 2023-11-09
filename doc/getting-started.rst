@@ -142,7 +142,7 @@ For all future terminal sessions
 
    .. code:: bash
 
-      echo "export PATH=$PATH:<nemoh-programs-path>" >> ~/.bashrc
+      echo 'export PATH=$PATH:<nemoh-programs-path>' >> ~/.bashrc
 
 #. Restart the terminal
 
