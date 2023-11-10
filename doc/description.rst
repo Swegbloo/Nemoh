@@ -44,7 +44,9 @@ Symbols
 Frames
 ^^^^^^
 
-As sketched in :numref:`fig:sketch`, we consider fluid domain in the Cartesian coordinate :math:`\boldsymbol x=(\mathbf{x},z)` with :math:`\mathbf{x}=(x,y)` the horizontal coordinates perpendicular to the :math:`z` axis in the opposite direction of gravity :math:`\boldsymbol g`. Free-surface boundary :math:`S_F` is defined by the free surface elevation at time :math:`t`, denoted as :math:`\eta(\mathbf{x},t)` with respect to the mean water level at :math:`z=0`. The fluid velocity potential is denoted as :math:`\Phi(\boldsymbol x,t)` with :math:`\boldsymbol x` in fluid domain :math:`V_{\Omega}`.
+As sketched in :numref:`fig:sketch`, we consider the fluid domain in the Cartesian coordinates :math:`\mathbf{x}=(x,y,z)`, with the vertical axis :math:`z` positive upwards.
+The free surface boundary :math:`S_F` is defined by the free surface elevation at time :math:`t`, denoted as :math:`\eta(\mathbf{x},t)` with respect to the mean water level at :math:`z=0`.
+The fluid velocity potential is denoted as :math:`\Phi(\mathbf{x},t)`, with :math:`\mathbf{x}` in fluid domain :math:`V_{\Omega}`.
 
 .. figure:: figures/Sketch.png
    :align: center
@@ -52,9 +54,13 @@ As sketched in :numref:`fig:sketch`, we consider fluid domain in the Cartesian c
 
    Sketch definition of the system
 
-The floating body has 6 degrees of freedom (DoF), :math:`\boldsymbol\xi=(\boldsymbol{X},\boldsymbol{\theta})` where the positions, :math:`\boldsymbol{X}=(X,Y,Z)` and the orientations, :math:`\boldsymbol{\theta}=(\theta_1,\theta_2,\theta_3)` are determined at the center of gravity (COG). Displacements of points at the hull are specified by a body of vector :math:`\boldsymbol r` with respect to the COG as :math:`\boldsymbol{\mathcal{X}}=\boldsymbol{X}+R(\boldsymbol{r})`. :math:`R` is a rotation operator where :math:`R(\boldsymbol r)\approx \boldsymbol\theta \times \boldsymbol r`. The velocity of the points at the hull is expressed as :math:`\dot{\boldsymbol{\mathcal{X}}}`.
+The floating body has 6 degrees of freedom (DoF), :math:`\boldsymbol\xi=(\boldsymbol{X},\boldsymbol{\theta})` where the positions, :math:`\boldsymbol{X}=(X,Y,Z)` and the orientations, :math:`\boldsymbol{\theta}=(\theta_1,\theta_2,\theta_3)` are determined at the center of gravity (CoG).
+Displacements of points on the hull are specified by a vector :math:`\boldsymbol r` with respect to the CoG as :math:`\boldsymbol{\mathcal{X}}=\boldsymbol{X}+R(\boldsymbol{r})`. :math:`R` is a rotation operator where :math:`R(\boldsymbol r)\approx \boldsymbol\theta \times \boldsymbol r`.
+The velocity on the hull is expressed as :math:`\dot{\boldsymbol{\mathcal{X}}}`.
 
-On the body hull :math:`S_B`, the wetted part is defined as a function :math:`z=\zeta(\mathbf{x},t)`. The normalized normal vector is defined as directed toward the fluid domain, :math:`\boldsymbol n=-\boldsymbol N/|\boldsymbol N|` with :math:`\boldsymbol N=\left(-\nabla_2\zeta,1 \right)` where :math:`\nabla_2` is the two-dimensional gradient in :math:`\mathbf{x}`. Then the six-dimensional generalized normal vector is defined as :math:`\boldsymbol\nu=(\boldsymbol n,\boldsymbol r \times \boldsymbol n)^T`, with :math:`( )^T` the matrix transpose operator.
+On the body hull :math:`S_B`, the wetted part is defined as a function :math:`z=\zeta(\mathbf{x},t)`.
+The normalized normal vector is defined as directed toward the fluid domain, :math:`\boldsymbol n=-\boldsymbol N/|\boldsymbol N|` with :math:`\boldsymbol N=\left(-\nabla_2\zeta,1 \right)` where :math:`\nabla_2` is the two-dimensional gradient in :math:`\mathbf{x}`.
+The six-dimensional generalized normal vector is then defined as :math:`\boldsymbol\nu=(\boldsymbol n,\boldsymbol r \times \boldsymbol n)^T`, with :math:`( )^T` the matrix transpose operator.
 
 
 Expression of physical quantities
