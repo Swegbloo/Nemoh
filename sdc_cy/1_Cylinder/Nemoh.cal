@@ -6,25 +6,15 @@
 --- Description of floating bodies -----------------------------------------------------------------------------------------------
 1						! Number of bodies
 --- Body 1 -----------------------------------------------------------------------------------------------------------------------
-Cylinder.dat			! Name of mesh file
-264	231					! Number of points and number of panels 	
-6						! Number of degrees of freedom
-1 1. 0.	0. 0. 0. 0.		! Surge
-1 0. 1.	0. 0. 0. 0.		! Sway
+Cylinder_4x_S2x.dat			! Name of mesh file
+1632	1551					! Number of points and number of panels 	
+1						! Number of degrees of freedom
 1 0. 0. 1. 0. 0. 0.		! Heave
-2 1. 0. 0. 0. 0. -7.5	! Roll about CdG
-2 0. 1. 0. 0. 0. -7.5	! Pitch about CdG
-2 0. 0. 1. 0. 0. -7.5	! Yaw about CdG
-6						! Number of resulting generalised forces
-1 1. 0.	0. 0. 0. 0.		! Force in x direction
-1 0. 1.	0. 0. 0. 0.		! Force in y direction
+1						! Number of resulting generalised forces
 1 0. 0. 1. 0. 0. 0.		! Force in z direction
-2 1. 0. 0. 0. 0. -7.5	! Moment force in x direction about CdG
-2 0. 1. 0. 0. 0. -7.5	! Moment force in y direction about CdG
-2 0. 0. 1. 0. 0. -7.5	! Moment force in z direction about CdG
 0						! Number of lines of additional information 
 --- Load cases to be solved -------------------------------------------------------------------------------------------------------
-1 50 0.1	2.0			! Freq type 1,2,3=[rad/s,Hz,s], Number of wave frequencies/periods, Min, and Max
+1 50 2.283	8.859			! Freq type 1,2,3=[rad/s,Hz,s], Number of wave frequencies/periods, Min, and Max
 1	0.	0.				! Number of wave directions, Min and Max (degrees)
 --- Post processing ---------------------------------------------------------------------------------------------------------------
 1	0.1	10.				! IRF calculation (0 for no calculation), time step and duration
