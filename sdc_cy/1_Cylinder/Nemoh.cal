@@ -6,12 +6,16 @@
 --- Description of floating bodies -----------------------------------------------------------------------------------------------
 1						! Number of bodies
 --- Body 1 -----------------------------------------------------------------------------------------------------------------------
-Cylinder_4x_S2x.dat			! Name of mesh file
-1632	1551					! Number of points and number of panels 	
-1						! Number of degrees of freedom
+Cylinder.dat			! Name of mesh file
+264	231					! Number of points and number of panels 	
+3						! Number of degrees of freedom
+1 1. 0. 0. 0. 0. 0.		! Surge
 1 0. 0. 1. 0. 0. 0.		! Heave
-1						! Number of resulting generalised forces
-1 0. 0. 1. 0. 0. 0.		! Force in z direction
+2 0. 1. 0. 0. 0. 0.		! Pitch
+3						! Number of resulting generalised forces
+1 1. 0. 0. 0. 0. 0.		! x force
+1 0. 0. 1. 0. 0. 0.		! z force
+2 0. 1. 0. 0. 0. 0.		! y moment direction abt free surface
 0						! Number of lines of additional information 
 --- Load cases to be solved -------------------------------------------------------------------------------------------------------
 1 50 2.283	8.859			! Freq type 1,2,3=[rad/s,Hz,s], Number of wave frequencies/periods, Min, and Max
