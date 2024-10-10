@@ -1,6 +1,6 @@
 clc
 clear all
-close all
+
 nfreq = 50;
 w = linspace(2.73, 8.86, nfreq);
 dir = 0;

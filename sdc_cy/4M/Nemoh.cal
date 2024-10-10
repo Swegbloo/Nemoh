@@ -9,45 +9,27 @@
 Cylinder_8x.dat			! Name of mesh file
 2112	1995			! Number of points and number of panels 	
 0				! Number of degrees of freedom
-6				! Number of resulting generalised forces
-1 1. 0. 0. 0. 0. 0.		! surge
-1 0. 1. 0. 0. 0. 0.		! sway
-1 0. 0. 1. 0. 0. 0.		! heave
-2 1. 0. 0. 0. 0. -0.5		! roll
-2 0. 1. 0. 0. 0. -0.5		! pitch
-2 0. 0. 1. 0. 0. -0.5		! yaw
+0				! Number of resulting generalised forces
 0				! Number of lines of additional information
 --- Body 2 -----------------------------------------------------------------------------------------------------------------------
-45D_315D.dat				! Name of mesh file
+45D_315D.dat			! Name of mesh file
 4224	3990			! Number of points and number of panels 	
 0				! Number of degrees of freedom
-6				! Number of resulting generalised forces
-1 1. 0. 0. 0. 0. 0.		! surge
-1 0. 1. 0. 0. 0. 0.		! sway
-1 0. 0. 1. 0. 0. 0.		! heave
-2 1. 0. 0. 0. 0. -0.5		! roll
-2 0. 1. 0. 0. 0. -0.5		! pitch
-2 0. 0. 1. 0. 0. -0.5		! yaw
+0				! Number of resulting generalised forces
 0				! Number of lines of additional information
 --- Body 3 -----------------------------------------------------------------------------------------------------------------------
 135D_225D.dat			! Name of mesh file
 4224	3990			! Number of points and number of panels 	
 0				! Number of degrees of freedom
-6				! Number of resulting generalised forces
-1 1. 0. 0. 0. 0. 0.		! surge
-1 0. 1. 0. 0. 0. 0.		! sway
-1 0. 0. 1. 0. 0. 0.		! heave
-2 1. 0. 0. 0. 0. -0.5		! roll
-2 0. 1. 0. 0. 0. -0.5		! pitch
-2 0. 0. 1. 0. 0. -0.5		! yaw
+0				! Number of resulting generalised forces
 0				! Number of lines of additional information
 --- Load cases to be solved -------------------------------------------------------------------------------------------------------
-1 20 0.990454441 4.429446918 	! Freq type 1,2,3=[rad/s,Hz,s], Number of wave frequencies/periods, Min, and Max
-3	0.	45.		! Number of wave directions, Min and Max (degrees)
+1 5 3.284965753 3.836013556	! Freq type 1,2,3=[rad/s,Hz,s], Number of wave frequencies/periods, Min, and Max
+1	0	0		! Number of wave directions, Min and Max (degrees)
 --- Post processing ---------------------------------------------------------------------------------------------------------------
-1	0.1	10.		! IRF calculation (0 for no calculation), time step and duration
-1				! Show pressure
-1 	0.	0.		! Kochin function 		! Number of directions of calculation (0 for no calculations), Min and Max (degrees)
+0	0.1	10.		! IRF calculation (0 for no calculation), time step and duration
+0				! Show pressure
+16 	0.	337.5		! Kochin function 		! Number of directions of calculation (0 for no calculations), Min and Max (degrees)
 0	10	100.	100.	! Free surface elevation 	! Number of points in x direction (0 for no calcutions) and y direction and dimensions of domain in x and y direction	
 0				! Response Amplitude Operator (RAO), 0 no calculation, 1 calculated
 1				! output freq type, 1,2,3=[rad/s,Hz,s]
