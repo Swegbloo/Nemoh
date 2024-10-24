@@ -1,3 +1,6 @@
 VARIABLES="w (rad/s)"  
-Zone t="Diffraction force - beta =   0.000 deg",I=     1,F=POINT
-  0.3132092E+01
+Zone t="Diffraction force - beta =   0.000 deg",I=     4,F=POINT
+  0.1400714E+01
+  0.1867619E+01
+  0.2334524E+01
+  0.2801428E+01
