@@ -1,0 +1,5 @@
+VARIABLES="Frequency (rad/s)" "|Fx| (N/m)" "|Fy| (N/m)" "|Fz| (N/m)" "|Cx| (N)" "|Cy| (N)" "|Cz| (N)" "ang(Fx) (°)" "ang(Fy) (°)" "ang(Fz) (°)" "ang(Cx) (°)" "ang(Cy) (°)" "ang(Cz) (°)"
+Zone t="Corps  1"
+Zone t="Excitation force - beta =   0.000 deg",I=     2,F=POINT
+ 0.9905
+ 4.4294

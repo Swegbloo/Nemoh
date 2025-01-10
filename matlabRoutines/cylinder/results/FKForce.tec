@@ -1,0 +1,4 @@
+VARIABLES="w (rad/s)"
+Zone t="FKforce - beta =   0.000",I=     2,F=POINT
+  0.9904544E+00
+  0.4429447E+01
