@@ -38,11 +38,12 @@ clear all
 % addpath(genpath(basePath));
 
 
-% Dynamically add all subfolders to the MATLAB path
-mainFolderPath = 'C:\Users\swago\OneDrive\Documents\GitHub\Nemoh\matlabRoutines';
-addpath(genpath(mainFolderPath));
+% Path to the main directory you want to include
+basePath = fullfile('C:', 'Users', 'swago', 'OneDrive', 'Documents', 'GitHub', 'Nemoh', 'matlabRoutines');
 
-cd('C:\Users\swago\OneDrive\Documents\GitHub\Nemoh\matlabRoutines');
+% Add the base folder and all its subfolders to the MATLAB path
+addpath(genpath(basePath));
+
 
 testcase = 4;
 ID_PLOT_RESULTS = 1;
