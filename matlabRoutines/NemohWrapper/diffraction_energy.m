@@ -28,18 +28,34 @@
 %
 % User has to specify the output folder in outputdir input below
 %--------------------------------------------------------------------------------------
-clc
-clear all
-close all
+function diff_energy = diffraction_energy(x, w)
 
-[pathstr,~,~] = fileparts(mfilename('fullpath'));
-addpath(genpath(pathstr)); % Include the subfolders in the Matlab PATH
+% x is a vector containing [height, draft, radius]
+height = x(1);
+draft = x(2);
+radius_in = x(3);
+radius_out = x(4);
 
-testcase = 1;
+% % Define the base path
+% basePath = 'C:\Users\swago\OneDrive\Documents\GitHub\Nemoh\matlabRoutines';
+% 
+% % Add the base path and all its subfolders to the MATLAB path
+% addpath(genpath(basePath));
+
+
+% Dynamically add all subfolders to the MATLAB path
+mainFolderPath = 'C:\Users\swago\OneDrive\Documents\GitHub\Nemoh\matlabRoutines';
+addpath(genpath(mainFolderPath));
+
+cd('C:\Users\swago\OneDrive\Documents\GitHub\Nemoh\matlabRoutines');
+
+testcase = 4;
 ID_PLOT_RESULTS = 1;
-ID_QTF = 0; % Flag to activate QTF computation (0 or 1)
+ID_QTF = 0; % Flag to
+%activate QTF computation (0 or 1)
 
-outputdir = ['.' filesep '..' filesep '..' filesep 'output'];   % Update this output files location
+outputdir = ['.' filesep];
+% Update this output files location
 
 % Check that Nemoh is available
 assert(FindingNemoh(ID_QTF, true))
@@ -164,104 +180,175 @@ switch testcase
         QTFInput=[ID_QTF,2];     %[Switch,Contrib]
         
         axiMesh(r,z,n,nang,npanelt,xyzCoG,depth,w,wavedir,QTFInput,projdir);% Call the function axiMesh.m
+
+    case 4
+         %============ MESH WITH axiMesh.m==================%
+         %Cylinder
+        projdir=[outputdir,filesep,'cylinder'];
+        ID_HydrosCal=1; % A switch,1 computes hydrostatics, inertia, kH.
+        % if RAO will be computed, see input in
+        % Nemoh.cal, set ID_Hydroscal=1
         
+        QTFInput=[ID_QTF,2]; 
+
+        % Verify if Nemoh.cal exists
+    if ~isfile([projdir, filesep, 'Nemoh.cal'])
+        error('Nemoh.cal was not generated in the directory: %s', projdir);
+    end
 end
+    
+    
 disp('Meshing done!')
 disp('Check and adjust the produced Nemoh.cal in the project directory!')
 disp('Press enter for the NEMOH computation')
-pause;
+%pause;
 %-------Launch Calculation------------
-[Idw,w,A,B,Fe]=Nemoh(projdir,ID_HydrosCal,ID_QTF); % Call the function Nemoh.m
+%[Idw,w,A,B,Fe]=Nemoh(projdir,ID_HydrosCal,ID_QTF); % Call the function Nemoh.m
 
+%% meshing
+generate_cylinder_mesh(height, draft, radius_in, radius_out); % mesh making and directly edit geometry file
+
+%% solving for diffraction energy
+[nw] = Nemoh(projdir,ID_HydrosCal,ID_QTF); % Call the function Nemoh.m
+koch = zeros(1,nw);
+diff_energy = zeros(nw,1);
 %% --- Computes QTFs --------------------
 if ID_QTF==1, NemohQTF(projdir);end % Call the function NemohQTF.m
 
 %% ---------------------------------------
-if ID_PLOT_RESULTS==1 %Plot NEMOH1
-    if Idw==1
-        xlab='\omega [rad/s]';
-    elseif Idw==2
-        xlab='f [Hz]';
-    elseif Idw==3
-        xlab='T [s]';
-    end
+% if ID_PLOT_RESULTS==1 %Plot NEMOH1
+%     if Idw==1
+%         xlab='\omega [rad/s]';
+%     elseif Idw==2
+%         xlab='f [Hz]';
+%     elseif Idw==3
+%         xlab='T [s]';
+%     end
+% 
+%     figure
+%     subplot(3,2,1)
+%     a(1,:)=A(1,1,:);
+%     b(1,:)=B(1,1,:);
+%     plot(w,a,'b-+',w,b,'r-+')
+%     grid ON
+%     ylabel('Coeffs' )
+%     legend('Added mass (A)','Damping (B)')
+%     title('Surge')
+%     plot_properties;
+% 
+%     subplot(3,2,2)
+%     plot(w,abs(Fe(:,1)),'g-+')
+%     grid ON
+%     ylabel('F (N)' )
+%     title('Surge')
+%     plot_properties;
+% 
+%     subplot(3,2,3)
+%     a(1,:)=A(3,3,:);
+%     b(1,:)=B(3,3,:);
+%     plot(w,a,'b-+',w,b,'r-+')
+%     grid ON
+%     ylabel('Coeffs' )
+%     legend('Added mass (A)','Damping (B)')
+%     title('Heave')
+%     plot_properties;
+% 
+%     subplot(3,2,4)
+%     plot(w,abs(Fe(:,3)),'g-+')
+%     grid ON
+%     ylabel('F(N)' )
+%     title('Heave')
+%     plot_properties;
+% 
+%     subplot(3,2,5)
+%     a(1,:)=A(5,5,:);
+%     b(1,:)=B(5,5,:);
+%     plot(w,a,'b-+',w,b,'r-+')
+%     xlabel(xlab)
+%     ylabel('Coeffs' )
+%     grid ON
+%     legend('Added mass (A)','Damping (B)')
+%     title('Pitch')
+%     plot_properties;
+% 
+%     subplot(3,2,6)
+%     plot(w,abs(Fe(:,5)),'g-+')
+%     xlabel(xlab)
+%     grid ON
+%     ylabel('F(N)' )
+%     title('Pitch')
+%     plot_properties;
+% 
+%     if ID_QTF==1
+%         qtftype='M';
+%         Idwvar=0;%0=w rad/s,1=f 1/s,2=T s; %freq type
+%         SwitchBiDir=0;
+%         betaID=[0 0]; %[beta1 beta2]
+%         shiftdw1=-1;
+%         ShowLegend=1;
+%         Idaxisij=0;
+%         NWdatNEM=length(w);%specify number of freq as in the QTF output
+%         DOFdatNem=[1 1 1 1 1 1];% the QTF data availability in each mode, 1 means data exist
+%         % if for index 1 to 6, all the values are 1, it
+%         % means data available for all DOF
+%         DOFsurge=1;DOFheave=3;DOFpitch=5;
+%         NbetaData=1;
+% 
+%         Id_fixed_CB_Axis=0; %switch to fixed colorbar limit, 
+%                             % if 1 the minmaxQ values have to be specified
+%         minmaxQR_surge=[-20 20]; minmaxQI_surge=[-20 20];minmaxQMod_surge=[0 20];
+%         minmaxQR_heave=[-10 10]; minmaxQI_heave=[-10 10];minmaxQMod_heave=[0 10];
+%         minmaxQR_pitch=[-50 50];minmaxQI_pitch=[-50 50];minmaxQMod_pitch=[0 50];
+% 
+%         plot_QTF_NEMOH;
+%     end
+% end
+%fid = fopen([projdir, filesep, 'results', filesep, 'Kochin.00001.dat'], 'r');
+
+%% extract energies
+
+% Define the range of numbers for the files
+startNum = 1; % Start from 1 (for Kochin.00001.dat)
+endNum = nw;   % 'n' is the total number of files (<100)
+
+% Loop through each file
+for i = startNum:endNum
+    % Construct the file name dynamically
+    fileName = sprintf('Kochin.%05d.dat', i); % '%05d' ensures zero padding to 5 digits
+    filePath = [projdir, filesep, 'results', filesep, fileName]; % Full path
+
+    % Open the file
+    fid = fopen(filePath, 'r');
     
-    figure
-    subplot(3,2,1)
-    a(1,:)=A(1,1,:);
-    b(1,:)=B(1,1,:);
-    plot(w,a,'b-+',w,b,'r-+')
-    grid ON
-    ylabel('Coeffs' )
-    legend('Added mass (A)','Damping (B)')
-    title('Surge')
-    plot_properties;
+    % % Check if the file was opened successfully
+    % if fid == -1
+    %     fprintf('Could not open %s. Skipping...\n', fileName);
+    %     continue; % Skip to the next file
+    % end
+
+    % Process the file (example: read the first line)
+    ligne = fgetl(fid);
+    %disp(['First line of ', fileName, ': ', ligne]);
+
+    % Close the file
+    fclose(fid);
+    % Open file and read line if from file
+    % fid = fopen('yourfile.dat', 'r'); % Uncomment if reading from file
+    % ligne = fgetl(fid);               % Read line from file
     
-    subplot(3,2,2)
-    plot(w,abs(Fe(:,1)),'g-+')
-    grid ON
-    ylabel('F (N)' )
-    title('Surge')
-    plot_properties;
+    % Split the line into numbers using sscanf
+    numbers = sscanf(ligne, '%f'); % Parse the line into an array of floats
     
-    subplot(3,2,3)
-    a(1,:)=A(3,3,:);
-    b(1,:)=B(3,3,:);
-    plot(w,a,'b-+',w,b,'r-+')
-    grid ON
-    ylabel('Coeffs' )
-    legend('Added mass (A)','Damping (B)')
-    title('Heave')
-    plot_properties;
+    % Extract the third number
+    koch(1,i) = numbers(3);
     
-    subplot(3,2,4)
-    plot(w,abs(Fe(:,3)),'g-+')
-    grid ON
-    ylabel('F(N)' )
-    title('Heave')
-    plot_properties;
+    % Display the result
+    %disp(['The third number is: ', num2str(thirdNumber)]);
     
-    subplot(3,2,5)
-    a(1,:)=A(5,5,:);
-    b(1,:)=B(5,5,:);
-    plot(w,a,'b-+',w,b,'r-+')
-    xlabel(xlab)
-    ylabel('Coeffs' )
-    grid ON
-    legend('Added mass (A)','Damping (B)')
-    title('Pitch')
-    plot_properties;
+    % fclose(fid); % Close the file when done
     
-    subplot(3,2,6)
-    plot(w,abs(Fe(:,5)),'g-+')
-    xlabel(xlab)
-    grid ON
-    ylabel('F(N)' )
-    title('Pitch')
-    plot_properties;
-    
-    if ID_QTF==1
-        qtftype='M';
-        Idwvar=0;%0=w rad/s,1=f 1/s,2=T s; %freq type
-        SwitchBiDir=0;
-        betaID=[0 0]; %[beta1 beta2]
-        shiftdw1=-1;
-        ShowLegend=1;
-        Idaxisij=0;
-        NWdatNEM=length(w);%specify number of freq as in the QTF output
-        DOFdatNem=[1 1 1 1 1 1];% the QTF data availability in each mode, 1 means data exist
-        % if for index 1 to 6, all the values are 1, it
-        % means data available for all DOF
-        DOFsurge=1;DOFheave=3;DOFpitch=5;
-        NbetaData=1;
-        
-        Id_fixed_CB_Axis=0; %switch to fixed colorbar limit, 
-                            % if 1 the minmaxQ values have to be specified
-        minmaxQR_surge=[-20 20]; minmaxQI_surge=[-20 20];minmaxQMod_surge=[0 20];
-        minmaxQR_heave=[-10 10]; minmaxQI_heave=[-10 10];minmaxQMod_heave=[0 10];
-        minmaxQR_pitch=[-50 50];minmaxQI_pitch=[-50 50];minmaxQMod_pitch=[0 50];
-        
-        plot_QTF_NEMOH;
-    end
+    % [minE,k_0] = praxis(0.01,2,3,0,1,@);
+    diff_energy(i,1) = -cos(koch(1,i))*2;
 end
+
 

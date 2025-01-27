@@ -36,7 +36,7 @@
 % - Fe : Matrix (6xnBodies)xlength(w) of exciation forces (complex
 % values)
 %
-function [nw] = Nemoh(projdir, ID_HydrosCal, ID_QTF)
+function [nw] = Nemoh(projdir, ID_HydrosCal, ID_QTF, wave_n)
 % function [Idw,w,A,B,Fe]=Nemoh(projdir,ID_HydrosCal,ID_QTF)
 system(['mkdir ',projdir]);
 system(['mkdir ',projdir,filesep,'mesh']);
@@ -85,9 +85,17 @@ for i=1:nBodies
 end
 ligne=fgetl(fid);
 ligne=fgetl(fid);
-ligne=fscanf(fid,'%g',2);
+ligne=fscanf(fid,'%g',4);
 Idw=ligne(1);
 nw=ligne(2);
+w = zeros(nw,1);
+% w1 = ligne(3);
+% w2 = ligne(4);
+w1 = sqrt(9.81*wave_n);
+w2 = w1;
+for j=1:nw
+    w(j,1) = w1+(w2-w1)*(j-1)/(nw-1);
+end
 %disp(nw);
 % fclose(fid);
 % fid=fopen([projdir,filesep,'results',filesep,'ExcitationForce.tec'],'r');

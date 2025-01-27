@@ -12,7 +12,7 @@ Cylinder_8x.dat			! Name of mesh file
 0				! Number of resulting generalised forces
 0				! Number of lines of additional information
 --- Load cases to be solved -------------------------------------------------------------------------------------------------------
-1 2 0.990454441 4.429446918 	! Freq type 1,2,3=[rad/s,Hz,s], Number of wave frequencies/periods, Min, and Max
+1 1 3.132091953 3.132091953	! Freq type 1,2,3=[rad/s,Hz,s], Number of wave frequencies/periods, Min, and Max
 1	0.	0.		! Number of wave directions, Min and Max (degrees)
 --- Post processing ---------------------------------------------------------------------------------------------------------------
 0	0.1	10.		! IRF calculation (0 for no calculation), time step and duration
