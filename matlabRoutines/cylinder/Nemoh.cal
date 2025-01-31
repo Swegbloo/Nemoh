@@ -6,7 +6,7 @@
 --- Description of floating bodies -----------------------------------------------------------------------------------------------
 1				! Number of bodies
 --- Body 1 -----------------------------------------------------------------------------------------------------------------------
-Cylinder_8x.dat			! Name of mesh file
+filename.txt			! Name of mesh file
 2112	1995			! Number of points and number of panels 	
 0				! Number of degrees of freedom
 0				! Number of resulting generalised forces

@@ -28,13 +28,12 @@
 %
 % User has to specify the output folder in outputdir input below
 %--------------------------------------------------------------------------------------
-function diff_energy = diffraction_energy(x, w)
+function diff_energy = diffraction_energy(x, w, M)
 
 % x is a vector containing [height, draft, radius]
-height = x(1);
-draft = x(2);
-radius_in = x(3);
-radius_out = x(4);
+draft = x(1);
+radius_in = x(2);
+radius_out = x(3);
 
 % % Define the base path
 % basePath = 'C:\Users\swago\OneDrive\Documents\GitHub\Nemoh\matlabRoutines';
@@ -196,6 +195,9 @@ switch testcase
         error('Nemoh.cal was not generated in the directory: %s', projdir);
     end
 end
+
+%% meshing
+generate_cylinder_mesh(draft, radius_in, radius_out, M); % mesh making and directly edit geometry file
     
     
 disp('Meshing done!')
@@ -205,11 +207,9 @@ disp('Press enter for the NEMOH computation')
 %-------Launch Calculation------------
 %[Idw,w,A,B,Fe]=Nemoh(projdir,ID_HydrosCal,ID_QTF); % Call the function Nemoh.m
 
-%% meshing
-generate_cylinder_mesh(height, draft, radius_in, radius_out); % mesh making and directly edit geometry file
 
 %% solving for diffraction energy
-[nw] = Nemoh(projdir,ID_HydrosCal,ID_QTF); % Call the function Nemoh.m
+[nw] = Nemoh(projdir,ID_HydrosCal,ID_QTF,w); % Call the function Nemoh.m
 koch = zeros(1,nw);
 diff_energy = zeros(nw,1);
 %% --- Computes QTFs --------------------

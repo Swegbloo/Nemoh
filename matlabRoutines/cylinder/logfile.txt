@@ -2,6 +2,6 @@
   EPS min z                 :    1.00000005E-03
   Linear Solver: LU DECOMPOSITION
   STARTING TIME:
-   Date:           27 -           1 -        2025
-   Time:            4 :          54 :          44
-  Computation time   60.1093750      [s]
+   Date:           31 -           1 -        2025
+   Time:           12 :          17 :           5
+  Computation time   25.8437500      [s]
