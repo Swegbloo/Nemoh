@@ -1,15 +1,17 @@
 function generate_cylinder_mesh(draft, radius_in, radius_out, M)
     % Create or update the outer cylinder files
-
+cd('C:\Users\swago\OneDrive\Documents\GitHub\Nemoh\matlabRoutines\cylinder');
 
     for i = 1:M
         angle = (i-0.5) * (360 / M);
         %new_filename = sprintf('%dD', angle);
 
-        % Read the input file
-        filename = 'Cylinder_8x.dat';
-        data = readmatrix(filename, 'FileType', 'text', 'Delimiter', '\t');
-        
+        % % Read the input file
+        % filename = 'Cylinder_8x.dat';
+        % data = readmatrix(filename, 'FileType', 'text', 'Delimiter', '\t');
+        data = readmatrix('Cylinder_8x.dat', 'FileType', 'text', 'Delimiter', '\t');
+
+
         % Get the number of rows and columns
         [rows, cols] = size(data);
         
@@ -38,32 +40,60 @@ function generate_cylinder_mesh(draft, radius_in, radius_out, M)
         end
         
         % Save the modified data to a new file
-        new_filename = sprintf('%dD', angle); % Replace with desired output filename
+        %new_filename = sprintf('%dD', angle); 
+        new_filename = sprintf('%dD.dat', angle);% Replace with desired output filename
         writematrix(data, new_filename, 'Delimiter', 'tab');
-        % Read the data from the file
-        data = readmatrix('filename.txt', 'Delimiter', '\t');
-        
-        % Replace NaN values in 3rd and 4th columns of 1st row with empty strings
-        data(1, 3:4) = {''};
-        
-        % Open the file for writing
-        fid = fopen('filename.txt', 'w');
-        
-        % Write the data back to the file
-        for i = 1:size(data, 1)
-            for j = 1:size(data, 2)
-                if isempty(data{i,j})
-                    fprintf(fid, '\t');
-                else
-                    fprintf(fid, '%.8f\t', data{i,j});
-                end
-            end
-            fprintf(fid, '\n');
+
+
+if ~isfile(new_filename)
+    error('File was not created successfully.');
+end
+
+        % Open the original file for reading
+        fid = fopen(new_filename, 'r');
+        if fid == -1
+            error('File not found or cannot be opened.');
         end
-        
-        % Close the file
+        data = textscan(fid, '%s', 'Delimiter', '\n', 'Whitespace', '');
         fclose(fid);
         
+        % Replace 'NaN' with empty strings while preserving format
+        data = strrep(data{1}, 'NaN', '');
+        
+        % Change the file extension to .dat
+        [filepath, name, ~] = fileparts(new_filename);
+        new_filename_1 = fullfile(filepath, [name, '.dat']);
+        
+        % Write the modified content to a new .dat file
+        fid = fopen(new_filename_1, 'w');
+        fprintf(fid, '%s\n', data{:});
+        fclose(fid);
+        
+        disp(['File saved as: ', new_filename_1]);
+
+        % Replace NaN values in 3rd and 4th columns of 1st row with empty strings
+        %data(1, 3:4) = {''};
+        
+        % % Open the file for writing
+        % fid = fopen(new_filename, 'w');
+        % 
+        % % Write the data back to the file
+        % for i = 1:size(data, 1)
+        %     for j = 1:size(data, 2)
+        %         if isempty(data{i,j})
+        %             fprintf(fid, '\t');
+        %         else
+        %             fprintf(fid, '%.8f\t', data{i,j});
+        %         end
+        %     end
+        %     fprintf(fid, '\n');
+        % end
+        % 
+        % % Close the file
+        % fclose(fid);
+
+
+
     %     fid = fopen(filename, 'w');
     %     fprintf(fid, '2 0\n');
     %     fprintf(fid, '1\n');
