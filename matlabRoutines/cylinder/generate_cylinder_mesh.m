@@ -120,3 +120,5 @@ end
 
     % Remove any excess cylinder files
     end
+    cd('C:\Users\swago\OneDrive\Documents\GitHub\Nemoh\matlabRoutines');
+end

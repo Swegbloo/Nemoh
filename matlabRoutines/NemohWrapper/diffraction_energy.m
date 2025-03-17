@@ -30,6 +30,7 @@
 %--------------------------------------------------------------------------------------
 function diff_energy = diffraction_energy(x, w, M)
 
+
 % x is a vector containing [height, draft, radius]
 draft = x(1);
 radius_in = x(2);
