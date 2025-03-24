@@ -21,22 +21,21 @@ cd('C:\Users\swago\OneDrive\Documents\GitHub\Nemoh\matlabRoutines\cylinder');
         y_0 = radius_out*sin(angle); % Example value, replace with actual value
         d_0 = draft; % Example value, replace with actual value
         
+        fprintf('r_0: %.4f\n', r_0);
+        fprintf('x_0: %.4f\n', x_0);
+        fprintf('y_0: %.4f\n', y_0);
+        fprintf('d_0: %.4f\n', d_0);
+
         % Process the data
         for j = 2:rows
             % Find the first zero in the row
-            zero_index = find(data(j,:) == 0, 1);
-            if isempty(zero_index)
-                zero_index = cols + 1;
-            end
-            
+            if (data(j,:) == [0 0 0 0])
+                break;
+            end   
             % Perform operations on non-zero elements
-            if zero_index > 2
-                data(j, 2) = r_0 * data(j, 2) + x_0;
-            end
-            if zero_index > 3
-                data(j, 3) = r_0 * data(j, 3) + y_0;
+                data(j, 2) = r_0 * data(j, 2)*2 + x_0;
+                data(j, 3) = r_0 * data(j, 3)*2 + y_0;
                 data(j, 4) = d_0 * data(j, 4);
-            end
         end
         
         % Save the modified data to a new file

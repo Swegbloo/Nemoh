@@ -36,7 +36,7 @@
 % - Fe : Matrix (6xnBodies)xlength(w) of exciation forces (complex
 % values)
 %
-function [nw] = Nemoh(projdir, ID_HydrosCal, ID_QTF, wave_n)
+function [w] = Nemoh(projdir, ID_HydrosCal, ID_QTF, wave_n)
 % function [Idw,w,A,B,Fe]=Nemoh(projdir,ID_HydrosCal,ID_QTF)
 system(['mkdir ',projdir]);
 system(['mkdir ',projdir,filesep,'mesh']);
@@ -48,18 +48,6 @@ if ID_QTF==1
     system(['mkdir ',projdir,filesep,'Motion']);
     system(['mkdir ',projdir,filesep,'results',filesep,'sources']);
 end
-
-% Calcul des coefficients hydrodynamiques
-fprintf('\n------ Starting NEMOH ----------- \n');
-system(['preProc ',projdir]);
-if ID_HydrosCal==1
-    fprintf('------ computes Hydrostatic ------------- \n');
-    system(['hydrosCal ',projdir]);
-end
-fprintf('------ Solving BVPs ------------- \n');
-system(['solver ',projdir]);
-fprintf('------ Postprocessing results --- \n');
-system(['postProc ',projdir]);
 %% Lecture des resultats CA CM Fe
 clear Periode A B Famp Fphi Fe;
 
@@ -94,8 +82,24 @@ w = zeros(nw,1);
 w1 = sqrt(9.81*wave_n);
 w2 = w1;
 for j=1:nw
-    w(j,1) = w1+(w2-w1)*(j-1)/(nw-1);
+    if j>1
+        w(j,1) = w1+(w2-w1)*(j-1)/(nw-1);
+    else
+        w = w1;
+    end
 end
+%% Calcul des coefficients hydrodynamiques
+fprintf('\n------ Starting NEMOH ----------- \n');
+system(['preProc ',projdir]);
+% if ID_HydrosCal==1
+%     fprintf('------ computes Hydrostatic ------------- \n');
+%     system(['hydrosCal ',projdir]);
+% end
+fprintf('------ Solving BVPs ------------- \n');
+system(['solver ',projdir]);
+fprintf('------ Postprocessing results --- \n');
+system(['postProc ',projdir]);
+
 %disp(nw);
 % fclose(fid);
 % fid=fopen([projdir,filesep,'results',filesep,'ExcitationForce.tec'],'r');

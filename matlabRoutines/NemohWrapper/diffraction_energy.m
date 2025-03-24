@@ -211,7 +211,8 @@ disp('Press enter for the NEMOH computation')
 
 %% solving for diffraction energy
 [nw] = Nemoh(projdir,ID_HydrosCal,ID_QTF,w); % Call the function Nemoh.m
-koch = zeros(1,nw);
+kochmag = zeros(1,nw);
+kochang = zeros(1,nw);
 diff_energy = zeros(nw,1);
 %% --- Computes QTFs --------------------
 if ID_QTF==1, NemohQTF(projdir);end % Call the function NemohQTF.m
@@ -340,8 +341,11 @@ for i = startNum:endNum
     % Split the line into numbers using sscanf
     numbers = sscanf(ligne, '%f'); % Parse the line into an array of floats
     
+    % Extract the second number
+    kochmag(1,i) = numbers(2);
+
     % Extract the third number
-    koch(1,i) = numbers(3);
+    kochang(1,i) = numbers(3);
     
     % Display the result
     %disp(['The third number is: ', num2str(thirdNumber)]);
@@ -349,7 +353,7 @@ for i = startNum:endNum
     % fclose(fid); % Close the file when done
     
     % [minE,k_0] = praxis(0.01,2,3,0,1,@);
-    diff_energy(i,1) = -cos(koch(1,i))*2;
+    diff_energy(i,1) = -cos(kochang(1,i))*2*kochmag(1,i);
 end
 
 

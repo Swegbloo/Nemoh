@@ -12,12 +12,12 @@ Cylinder_8x.dat			! Name of mesh file
 0				! Number of resulting generalised forces
 0				! Number of lines of additional information
 --- Load cases to be solved -------------------------------------------------------------------------------------------------------
-1 20 0.990454441 4.429446918	! Freq type 1,2,3=[rad/s,Hz,s], Number of wave frequencies/periods, Min, and Max
+1 1 0.990454441 0.990454441	! Freq type 1,2,3=[rad/s,Hz,s], Number of wave frequencies/periods, Min, and Max
 1	0	0		! Number of wave directions, Min and Max (degrees)
 --- Post processing ---------------------------------------------------------------------------------------------------------------
 0	0.1	10.		! IRF calculation (0 for no calculation), time step and duration
 0				! Show pressure
-16 	0.	337.5		! Kochin function 		! Number of directions of calculation (0 for no calculations), Min and Max (degrees)
+1 	0.	0.		! Kochin function 		! Number of directions of calculation (0 for no calculations), Min and Max (degrees)
 0	10	100.	100.	! Free surface elevation 	! Number of points in x direction (0 for no calcutions) and y direction and dimensions of domain in x and y direction	
 0				! Response Amplitude Operator (RAO), 0 no calculation, 1 calculated
 1				! output freq type, 1,2,3=[rad/s,Hz,s]
